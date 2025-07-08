@@ -5,16 +5,21 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "code-analyser"
 version = "0.1.0"
-description = "Pluggable AST metrics extractor for Python code analysis"
+description = "Pluggable AST and Bandit metrics extractor for Python code analysis"
 authors = [
     { name = "Samuel Harrison", email = "sh18784@essex.ac.uk" }
 ]
 readme = "README.md"
 requires-python = ">=3.8"
-dependencies = []
+
+dependencies = [
+    "matplotlib>=3.5",
+    "bandit>=1.7.5",
+    "tk",  # may be system-installed for GUI
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [project.scripts]
-ast-metrics = "metrics.main:main"
+code-analyser = "metrics.main:main"
