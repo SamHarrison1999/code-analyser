@@ -1,18 +1,38 @@
 @echo off
-SETLOCAL
+SETLOCAL ENABLEDELAYEDEXPANSION
 
-REM Get input argument (file to analyse)
+REM === Setup ===
 SET "InputFile=%~1"
 IF "%InputFile%"=="" SET "InputFile=example.py"
 
+REM Ensure we're in the root directory (adjust if needed)
+CD /D "%~dp0"
+
 echo Installing 'code-analyser' in editable mode...
-pip install -e .
+pip install -e . >nul 2>&1
+IF ERRORLEVEL 1 (
+    echo Failed to install package in editable mode.
+    EXIT /B 1
+)
 
-REM Set the script path (adjust Python version as needed)
-SET "SCRIPT_PATH=%APPDATA%\Python\Python313\Scripts"
+REM Dynamically get Python Scripts path (works for virtual env or global)
+FOR /F "delims=" %%I IN ('python -c "import sysconfig; print(sysconfig.get_path('scripts'))"') DO SET "SCRIPT_PATH=%%I"
 
-echo Running ast-metrics on %InputFile%...
-"%SCRIPT_PATH%\ast-metrics.exe" --file "%InputFile%" --out metrics.json --verbose
+SET "EXE_PATH=%SCRIPT_PATH%\ast-metrics.exe"
 
-echo Opening metrics.json in Notepad...
-notepad metrics.json
+echo Running analysis on %InputFile%...
+IF EXIST "%EXE_PATH%" (
+    "%EXE_PATH%" --file "%InputFile%" --out metrics.json --verbose
+) ELSE (
+    echo ast-metrics.exe not found. Falling back to python -m metrics.main...
+    python -m metrics.main --file "%InputFile%" --out metrics.json --verbose
+)
+
+IF EXIST metrics.json (
+    echo Opening metrics.json in Notepad...
+    notepad metrics.json
+) ELSE (
+    echo ERROR: metrics.json not created.
+)
+
+ENDLOCAL
