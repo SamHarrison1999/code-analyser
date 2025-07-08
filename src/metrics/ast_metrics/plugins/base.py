@@ -7,16 +7,19 @@ from abc import ABC, abstractmethod
 class ASTMetricPlugin(ABC):
     """
     Abstract base class for AST metric plugins.
-    Each plugin must define a unique metric name and implement a `visit` method.
+
+    Each plugin must define:
+    - a unique name for the metric (used as dictionary key)
+    - a `visit()` method that computes the metric from the AST
     """
 
     @abstractmethod
     def name(self) -> str:
         """
         Returns:
-            str: The name of the metric this plugin computes.
+            str: Unique metric name this plugin computes.
         """
-        pass
+        raise NotImplementedError("Plugin must define a metric name.")
 
     @abstractmethod
     def visit(self, tree: ast.AST, code: str) -> int:
@@ -25,9 +28,9 @@ class ASTMetricPlugin(ABC):
 
         Args:
             tree (ast.AST): The parsed abstract syntax tree.
-            code (str): The raw source code as a string.
+            code (str): The original source code string.
 
         Returns:
-            int: The computed metric value.
+            int: The computed value for this metric.
         """
-        pass
+        raise NotImplementedError("Plugin must implement visit().")
