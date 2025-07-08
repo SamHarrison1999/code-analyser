@@ -3,11 +3,28 @@
 from typing import List
 from metrics.ast_metrics.extractor import ASTMetricExtractor
 
+# Fixed order of metric names for ML or CSV pipelines
+_METRIC_ORDER = [
+    "functions",
+    "classes",
+    "function_docstrings",
+    "class_docstrings",
+    "module_docstring",
+    "todo_comments",
+    "assert_statements",
+    "exceptions",
+    "loops_conditionals",
+    "nested_functions",
+    "global_variables",
+    "chained_methods",
+    "lambda_functions",
+    "magic_methods",
+]
 
 def gather_ast_metrics(file_path: str) -> List[int]:
     """
     Extracts AST metrics from a Python file and returns them
-    as a list in a fixed order, ready for machine learning consumption.
+    as a list in a fixed order, ready for machine learning or export.
 
     Args:
         file_path (str): Path to the Python source file.
@@ -17,20 +34,5 @@ def gather_ast_metrics(file_path: str) -> List[int]:
     """
     metrics = ASTMetricExtractor(file_path).extract()
 
-    # Return metrics in a consistent order
-    return [
-        metrics["functions"],
-        metrics["classes"],
-        metrics["function_docstrings"],
-        metrics["class_docstrings"],
-        metrics["module_docstring"],
-        metrics["todo_comments"],
-        metrics["assert_statements"],
-        metrics["exceptions"],
-        metrics["loops_conditionals"],
-        metrics["nested_functions"],
-        metrics["global_variables"],
-        metrics["chained_methods"],
-        metrics["lambda_functions"],
-        metrics["magic_methods"],
-    ]
+    # Return metrics in a consistent order with safe fallback
+    return [metrics.get(key, 0) for key in _METRIC_ORDER]

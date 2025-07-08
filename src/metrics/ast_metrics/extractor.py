@@ -3,31 +3,31 @@
 import ast
 import logging
 from typing import Dict, List
-from metrics.ast_metrics.plugins.default_plugins import (
-    ModuleDocstringPlugin,
-    TodoCommentPlugin,
-    NestedFunctionPlugin,
-)
-from metrics.ast_metrics.plugins.base import ASTMetricPlugin
+
+from metrics.ast_metrics.plugins import ASTMetricPlugin, load_plugins
 
 
 class ASTMetricExtractor:
     """
     Extracts AST-based static metrics from a Python source file.
-    Combines plugin-based metric extraction and core AST pattern recognition.
+
+    This extractor loads pluggable AST metric plugins and combines them with
+    additional AST node pattern analysis (e.g. function and class counting).
     """
 
     def __init__(self, file_path: str, plugins: List[ASTMetricPlugin] = None) -> None:
         self.file_path = file_path
-        self.plugins = plugins if plugins else self._default_plugins()
+        self.plugins = plugins if plugins else load_plugins()
         self.metrics = self._init_metrics()
         self.code = ""
         self.tree = None
 
     def extract(self) -> Dict[str, int]:
         """
-        Executes the full extraction process.
-        Returns a dictionary of all metric values.
+        Executes the full AST parsing and metric extraction process.
+
+        Returns:
+            dict[str, int]: A dictionary of metric names and their values.
         """
         if not self._read_file() or not self._parse_ast():
             return self.metrics
@@ -41,7 +41,7 @@ class ASTMetricExtractor:
                 self.code = f.read()
             return True
         except Exception as e:
-            logging.error(f"Failed to read file {self.file_path}: {e}")
+            logging.error(f"[ASTExtractor] Failed to read file '{self.file_path}': {e}")
             return False
 
     def _parse_ast(self) -> bool:
@@ -49,21 +49,25 @@ class ASTMetricExtractor:
             self.tree = ast.parse(self.code)
             return True
         except Exception as e:
-            logging.error(f"AST parse failed: {e}")
+            logging.error(f"[ASTExtractor] AST parse failed: {e}")
             return False
 
-    def _apply_plugins(self):
+    def _apply_plugins(self) -> None:
         for plugin in self.plugins:
             try:
                 self.metrics[plugin.name()] = plugin.visit(self.tree, self.code)
             except Exception as e:
-                logging.warning(f"Plugin {plugin.name()} failed: {e}")
+                logging.warning(f"[ASTExtractor] Plugin '{plugin.name()}' failed: {e}")
 
-    def _walk_ast(self):
+    def _walk_ast(self) -> None:
         for node in ast.walk(self.tree):
             self._handle_node(node)
 
-    def _handle_node(self, node: ast.AST):
+    def _handle_node(self, node: ast.AST) -> None:
+        """
+        Collects non-plugin metrics from raw AST traversal.
+        These supplement the plugin results.
+        """
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             self.metrics["functions"] += 1
             if ast.get_docstring(node):
@@ -91,6 +95,10 @@ class ASTMetricExtractor:
             self.metrics["chained_methods"] += 1
 
     def _init_metrics(self) -> Dict[str, int]:
+        """
+        Initializes the base metric dictionary with zeroed counters.
+        This includes both plugin-populated and core metrics.
+        """
         return {
             "functions": 0,
             "classes": 0,
@@ -107,10 +115,3 @@ class ASTMetricExtractor:
             "magic_methods": 0,
             "lambda_functions": 0,
         }
-
-    def _default_plugins(self) -> List[ASTMetricPlugin]:
-        return [
-            ModuleDocstringPlugin(),
-            TodoCommentPlugin(),
-            NestedFunctionPlugin(),
-        ]
