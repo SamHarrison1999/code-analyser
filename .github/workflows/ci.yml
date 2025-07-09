@@ -21,17 +21,29 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: 📦 Install system + Python dependencies
+      - name: 📦 Install system and Python dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-tk
+          sudo apt-get install -y python3-tk cloc 
           pip install -e .
-          pip install pytest matplotlib bandit
+          pip install pytest matplotlib bandit flake8 lizard
 
       - name: 🧪 Run full test suite
         run: |
           pytest tests/
 
-      - name: 🔐 Test CLI Fail Threshold
+      - name: 🔐 Run fail-threshold test
         run: |
           pytest tests/test_fail_threshold.py
+
+      - name: ⚠️ Run fail-if-nonzero test
+        run: |
+          pytest tests/test_fail_if_nonzero.py
+
+      - name: 📤 Run CLI output test
+        run: |
+          pytest tests/test_cli_output.py
+
+      - name: 📝 Run summary output test
+        run: |
+          pytest tests/test_summary_output_txt.py
