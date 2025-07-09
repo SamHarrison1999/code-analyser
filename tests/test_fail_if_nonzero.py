@@ -1,3 +1,5 @@
+# File: tests/test_fail_if_nonzero.py
+
 import subprocess
 import sys
 from pathlib import Path
@@ -5,7 +7,7 @@ from pathlib import Path
 
 def test_fail_if_nonzero_triggers_exit():
     """
-    Runs the CLI with --fail-if-nonzero on a file with non-zero metrics.
+    Runs the CLI with --fail-threshold 0 on a file with non-zero metrics.
     Expects exit code 1 if any metric is > 0.
     """
     test_file = Path("example.py")
@@ -16,8 +18,7 @@ def test_fail_if_nonzero_triggers_exit():
             sys.executable,
             "-m", "metrics.main",
             "--file", str(test_file),
-            "--all",
-            "--fail-if-nonzero"
+            "--fail-threshold", "0"
         ],
         capture_output=True,
         text=True

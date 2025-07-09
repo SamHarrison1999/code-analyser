@@ -18,7 +18,6 @@ def test_fail_threshold_triggers_exit():
             sys.executable,
             "-m", "metrics.main",
             "--file", str(test_file),
-            "--all",
             "--fail-threshold", "0"
         ],
         capture_output=True,
