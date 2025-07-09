@@ -6,6 +6,7 @@ Exposes core extractors and gatherers for:
 - Bandit (security) metrics
 - Cloc (lines/comments) metrics
 - Flake8 (style/lint) metrics
+- Lizard (complexity/maintainability) metrics
 - Unified metric aggregation
 """
 
@@ -13,6 +14,7 @@ from metrics.ast_metrics.extractor import ASTMetricExtractor
 from metrics.bandit_metrics.extractor import BanditExtractor
 from metrics.cloc_metrics.extractor import ClocExtractor
 from metrics.flake8_metrics.extractor import Flake8Extractor
+from metrics.lizard_metrics.extractor import get_lizard_extractor
 
 from metrics.ast_metrics.gather import gather_ast_metrics
 from metrics.bandit_metrics.gather import gather_bandit_metrics
@@ -26,6 +28,7 @@ __all__ = [
     "BanditExtractor",
     "ClocExtractor",
     "Flake8Extractor",
+    "get_lizard_extractor",
     "gather_ast_metrics",
     "gather_bandit_metrics",
     "gather_cloc_metrics",

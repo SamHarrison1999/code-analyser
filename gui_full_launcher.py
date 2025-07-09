@@ -7,6 +7,7 @@ import csv
 from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import logging
 
 # ✅ Fix for PyInstaller: dynamically resolve the src path
 if hasattr(sys, "_MEIPASS"):
@@ -77,6 +78,7 @@ def run_metric_extraction(file_path, show_result=True):
 
         cmd = [python_exec, str(script_path), "--file", file_path, "--out", str(out_file), "--format", "json"]
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        logging.info(result.stdout)
 
         if not out_file.exists():
             raise FileNotFoundError("metrics.json not created")
@@ -102,7 +104,8 @@ def update_tree(data: dict):
     for file, metrics in data.items():
         for k, v in metrics.items():
             if filter_var.get().lower() in k.lower() or filter_var.get().lower() in Path(file).name.lower():
-                tree.insert("", "end", values=(Path(file).name, k, v))
+                rounded_value = round(v, 2) if isinstance(v, float) else v
+                tree.insert("", "end", values=(Path(file).name, k, rounded_value))
 
 
 def update_footer_summary():
@@ -127,7 +130,10 @@ def export_to_csv():
         writer = csv.writer(f)
         writer.writerow(["File"] + metrics_set)
         for file, metrics in results.items():
-            row = [file] + [metrics.get(k, 0) for k in metrics_set]
+            row = [file] + [
+                round(metrics.get(k, 0), 2) if isinstance(metrics.get(k, 0), float) else metrics.get(k, 0)
+                for k in metrics_set
+            ]
             writer.writerow(row)
         writer.writerow([])
         writer.writerow(["Summary"])
@@ -166,7 +172,7 @@ def show_chart():
     file_name = values[0]
     metrics = {k: v for f, data in results.items() if Path(f).name == file_name for k, v in data.items()}
     keys = [k for k in metrics if include_metric(k)]
-    vals = [metrics[k] for k in keys]
+    vals = [round(metrics[k], 2) for k in keys]
     draw_chart(keys, vals, f"Metrics for {file_name}", f"chart_{file_name.replace('.py', '')}.png")
 
 
@@ -180,17 +186,26 @@ def show_directory_summary_chart():
             if include_metric(k):
                 combined[k] = combined.get(k, 0) + v
     keys = list(combined.keys())
-    vals = [combined[k] for k in keys]
+    vals = [round(metrics[k], 2) for k in keys]
     draw_chart(keys, vals, "Directory-wide Metric Summary", "summary_chart.png")
 
 
 def include_metric(metric):
     scope = metric_scope.get()
     if scope == "ast":
-        return not metric.startswith("number_of_")
+        return not metric.startswith("number_of_")  # AST-style metrics
     elif scope == "bandit":
-        return "security" in metric
+        return "security" in metric or "vulnerability" in metric
+    elif scope == "flake8":
+        return "styling" in metric or "line_length" in metric
+    elif scope == "cloc":
+        return "line" in metric or "comment" in metric
+    elif scope == "lizard":
+        return any(key in metric for key in [
+            "complexity", "token", "parameter", "maintainability"
+        ])
     return True
+
 
 
 def apply_filter(*args):
@@ -227,9 +242,9 @@ def launch_gui():
     tk.Radiobutton(option_frame, text="Pie", variable=chart_type, value="pie").pack(side=tk.LEFT)
 
     tk.Label(option_frame, text="Metric Scope:").pack(side=tk.LEFT, padx=(20, 5))
-    tk.Radiobutton(option_frame, text="AST", variable=metric_scope, value="ast").pack(side=tk.LEFT)
-    tk.Radiobutton(option_frame, text="Bandit", variable=metric_scope, value="bandit").pack(side=tk.LEFT)
-    tk.Radiobutton(option_frame, text="All", variable=metric_scope, value="all").pack(side=tk.LEFT)
+    for label, value in [("AST", "ast"), ("Bandit", "bandit"), ("Flake8", "flake8"), ("Cloc", "cloc"),
+                         ("Lizard", "lizard"), ("All", "all")]:
+        tk.Radiobutton(option_frame, text=label, variable=metric_scope, value=value).pack(side=tk.LEFT)
 
     filter_frame = tk.Frame(root)
     filter_frame.pack(fill=tk.X, padx=10, pady=5)

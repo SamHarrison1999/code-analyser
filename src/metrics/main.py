@@ -84,6 +84,10 @@ def analyse_file(
             metric_keys = [k for k in result_dict if "styling" in k or "line_length" in k]
         elif fail_on == "cloc":
             metric_keys = [k for k in result_dict if "line" in k or "comment" in k]
+        elif fail_on == "lizard":
+            metric_keys = [k for k in result_dict if any(p in k for p in [
+                "complexity", "token", "parameter", "maintainability"
+            ])]
         else:
             metric_keys = result_dict.keys()
 
@@ -107,7 +111,7 @@ def format_summary_table(metrics: dict) -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="🔍 Code Analyser - AST, Bandit, Cloc, Flake8 plugin-based metric extractor"
+        description="🔍 Code Analyser - AST, Bandit, Cloc, Flake8, Lizard plugin-based metric extractor"
     )
     parser.add_argument("--file", "-f", type=str, help="Analyse a single Python file")
     parser.add_argument("--dir", "-d", type=str, help="Recursively analyse a directory of Python files")
@@ -119,8 +123,14 @@ def main():
     parser.add_argument("--summary", action="store_true", help="Print metric summary to terminal")
     parser.add_argument("--metrics-summary-table", action="store_true", help="Alias for --summary")
     parser.add_argument("--save-summary-txt", type=str, help="Save summary as markdown table")
-    parser.add_argument("--fail-threshold", type=int, help="Exit 1 if metric sum exceeds this threshold")
-    parser.add_argument("--fail-on", choices=["all", "ast", "bandit", "flake8", "cloc"], default="all", help="Restrict threshold to a metric type")
+    parser.add_argument(
+        "--fail-threshold", type=int,
+        help="Exit 1 if metric sum exceeds this threshold"
+    )
+    parser.add_argument(
+        "--fail-on", choices=["all", "ast", "bandit", "flake8", "cloc", "lizard"], default="all",
+        help="Restrict threshold to a metric group"
+    )
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable debug logging")
 
     args = parser.parse_args()
