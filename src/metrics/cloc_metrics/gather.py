@@ -18,8 +18,13 @@ def gather_cloc_metrics(file_path: str) -> list:
     Returns:
         list: Ordered metric values.
     """
-    extractor = ClocExtractor(file_path)
-    metrics = extractor.extract()
+    # 🧠 ML Signal: Aggregated, ordered metric values support vectorized training data
+    try:
+        extractor = ClocExtractor(file_path)
+        metrics = extractor.extract()
+    except Exception:
+        # ⚠️ SAST Risk: Do not let CLOC failures crash GUI/CLI analysis
+        metrics = {}
 
     return [
         metrics.get("number_of_comments", 0),
@@ -36,6 +41,7 @@ def get_cloc_metric_names() -> list:
     Returns:
         list: Ordered metric names.
     """
+    # ✅ Best Practice: Keep ordering stable and documented
     return [
         "number_of_comments",
         "number_of_lines",

@@ -11,6 +11,7 @@ from .total_lines import TotalLinesPlugin
 from .source_lines import SourceLinesPlugin
 from .comment_density import CommentDensityPlugin
 
+
 def load_plugins():
     """
     Loads all available CLOC metric plugins.
