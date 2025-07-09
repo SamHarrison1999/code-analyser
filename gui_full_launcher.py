@@ -1,18 +1,16 @@
 # File: gui_full_launcher.py
 
 import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
-
 import subprocess
+import json
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
-import json
-import os
 import csv
-from metrics.bandit_metrics.extractor import gather_bandit_metrics
+from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
 plt.style.use("seaborn-v0_8")
 
@@ -39,9 +37,8 @@ splash.after(1500, start_main_gui)
 
 def run_file_analysis():
     file_path = filedialog.askopenfilename(filetypes=[("Python files", "*.py")])
-    if not file_path:
-        return
-    run_ast_metrics(file_path)
+    if file_path:
+        run_metric_extraction(file_path)
 
 
 def run_directory_analysis():
@@ -55,13 +52,13 @@ def run_directory_analysis():
         return
 
     for file in py_files:
-        run_ast_metrics(str(file), show_result=False)
+        run_metric_extraction(str(file), show_result=False)
 
     update_tree(results)
     update_footer_summary()
 
 
-def run_ast_metrics(file_path, show_result=True):
+def run_metric_extraction(file_path, show_result=True):
     out_file = "metrics.json"
     try:
         script_path = Path(__file__).resolve().parent / "src" / "metrics" / "main.py"
@@ -69,10 +66,9 @@ def run_ast_metrics(file_path, show_result=True):
             sys.executable,
             str(script_path),
             "--file", file_path,
-            "--out", out_file
+            "--out", out_file,
+            "--format", "json"
         ]
-        if include_bandit.get():
-            cmd.append("--bandit")
 
         subprocess.run(cmd, capture_output=True, text=True, check=True)
 
@@ -81,16 +77,6 @@ def run_ast_metrics(file_path, show_result=True):
 
         with open(out_file, "r", encoding="utf-8") as f:
             data = json.load(f)
-
-        if include_bandit.get():
-            bandit_vals = gather_bandit_metrics(file_path)
-            bandit_keys = [
-                "number_of_undefined_security_vulnerabilities",
-                "number_of_low_security_vulnerabilities",
-                "number_of_medium_security_vulnerabilities",
-                "number_of_high_security_vulnerabilities"
-            ]
-            data.update(dict(zip(bandit_keys, bandit_vals)))
 
         results[file_path] = data
         if show_result:

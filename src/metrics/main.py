@@ -1,18 +1,10 @@
-# File: src/metrics/main.py
-
 import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
-
 import argparse
 import json
 import logging
 from pathlib import Path
 
-from metrics.ast_metrics.extractor import ASTMetricExtractor
-from metrics.bandit_metrics.extractor import BanditExtractor
 from metrics.gather import gather_all_metrics, get_all_metric_names
-
 
 
 def analyse_file(
@@ -35,18 +27,8 @@ def analyse_file(
         return 1
 
     # ─── Extract Metrics ───────────────────────────────────────────────
-    if raw:
-        if include_bandit:
-            results = gather_all_metrics(str(file_path))
-        else:
-            results = gather_ast_metrics(str(file_path))
-        result_dict = dict(zip(get_all_metric_names(), results))
-    else:
-        extractor = ASTMetricExtractor(str(file_path))
-        result_dict = extractor.extract()
-        if include_bandit:
-            bandit_data = BanditExtractor(str(file_path)).extract()
-            result_dict.update(bandit_data)
+    values = gather_all_metrics(str(file_path))
+    result_dict = dict(zip(get_all_metric_names(), values))
 
     # ─── Write Outputs ─────────────────────────────────────────────────
     if format in ("json", "both"):
@@ -121,7 +103,7 @@ def main():
     parser.add_argument("--out", type=str, help="Base path for output files")
     parser.add_argument("--json-out", type=str, help="Optional path for JSON output")
     parser.add_argument("--csv-out", type=str, help="Optional path for CSV output")
-    parser.add_argument("--bandit", action="store_true", help="Include Bandit metrics")
+    parser.add_argument("--bandit", action="store_true", help="(legacy, no effect) Bandit always included now")
     parser.add_argument("--summary", action="store_true", help="Print metric summary to stdout")
     parser.add_argument("--metrics-summary-table", action="store_true", help="Alias for --summary")
     parser.add_argument("--save-summary-txt", type=str, help="Save summary table to text file")
@@ -142,7 +124,6 @@ def main():
             raw=args.raw,
             out_path=Path(args.out) if args.out else None,
             format=args.format,
-            include_bandit=args.bandit,
             json_out=Path(args.json_out) if args.json_out else None,
             csv_out=Path(args.csv_out) if args.csv_out else None,
             fail_threshold=args.fail_threshold,
@@ -151,12 +132,16 @@ def main():
             save_summary_txt=Path(args.save_summary_txt) if args.save_summary_txt else None,
             markdown_summary=args.metrics_summary_table,
         )
-        exit(code)
+        sys.exit(code)
 
     elif args.dir:
+        failed = 0
         for py_file in Path(args.dir).rglob("*.py"):
             logging.info(f"\n{'=' * 60}\n📄 {py_file}")
-            analyse_file(Path(py_file), raw=args.raw, format=args.format, include_bandit=args.bandit)
+            result = analyse_file(Path(py_file), raw=args.raw, format=args.format)
+            if result != 0:
+                failed += 1
+        sys.exit(failed)
 
     else:
         parser.print_help()

@@ -1,39 +1,50 @@
 """
-Aggregates metrics from various extractors into a single unified list.
+Aggregates metrics from AST, Bandit, and CLOC extractors into a single unified list.
+Used for CLI, GUI, and ML metric pipelines.
 """
 
 from metrics.ast_metrics.extractor import ASTMetricExtractor
 from metrics.bandit_metrics.extractor import BanditExtractor
+from metrics.cloc_metrics.extractor import ClocExtractor
 import tempfile
 
 
-def gather_all_metrics(file_path: str) -> list[int]:
+def gather_all_metrics(file_path: str) -> list[int | float]:
     """
-    Gathers all metric values from AST and Bandit extractors for a given file.
+    Gathers all metric values from AST, Bandit, and CLOC extractors.
+
+    Args:
+        file_path (str): Path to the Python file to analyse.
+
     Returns:
-        A list of integers representing the combined metrics.
+        list[int | float]: Combined metric values in consistent order.
     """
     ast_metrics = ASTMetricExtractor(file_path).extract()
     bandit_metrics = BanditExtractor(file_path).extract()
+    cloc_metrics = ClocExtractor(file_path).extract()
 
-    # ✅ Best Practice: Maintain ordering between values and declared names
-    # 🧠 ML Signal: Order drift in feature columns is a common cause of prediction error
-    return list(ast_metrics.values()) + list(bandit_metrics.values())
+    # ✅ Best Practice: Combine all metrics in extractor order
+    return (
+        list(ast_metrics.values())
+        + list(bandit_metrics.values())
+        + list(cloc_metrics.values())
+    )
 
 
 def get_all_metric_names() -> list[str]:
     """
-    Returns the list of metric names in the order used by gather_all_metrics.
-    This ensures alignment between feature names and values.
-    """
-    # ✅ Best Practice: Use real file contents to guarantee extractor behaviour
-    # ⚠️ SAST Risk: Calling extract() on dummy input may cause silent errors or misalignment
-    # 🧠 ML Signal: Tracking extractor schema from real input ensures stable training labels
+    Returns all metric names in the order used by gather_all_metrics().
 
+    Returns:
+        list[str]: Metric names in same order as extracted values.
+    """
     with tempfile.NamedTemporaryFile("w+", suffix=".py") as f:
         f.write("def foo(): pass")
         f.flush()
+
         ast_keys = list(ASTMetricExtractor(f.name).extract().keys())
         bandit_keys = list(BanditExtractor(f.name).extract().keys())
+        cloc_keys = list(ClocExtractor(f.name).extract().keys())
 
-    return ast_keys + bandit_keys
+    # ✅ Matches order used in gather_all_metrics()
+    return ast_keys + bandit_keys + cloc_keys

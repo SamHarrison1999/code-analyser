@@ -3,31 +3,24 @@
 """
 metrics package
 
-This package provides static analysis tooling for Python source code,
-including plugin-based extraction of:
+Provides pluggable metric extractors for static code analysis, including:
+- AST-based metrics
+- Bandit security metrics
+- CLOC line-based metrics
 
-- AST structural metrics (functions, classes, docstrings, etc.)
-- Bandit security metrics (severity levels, CWE grouping)
-
-These metrics support:
-- Machine learning pipelines
-- Code quality evaluation
-- Static code analysis and audit reporting
+This package is designed to support CLI tools, GUIs, and ML pipelines.
 """
 
-from .ast_metrics.extractor import ASTMetricExtractor
-from .ast_metrics.gather import gather_ast_metrics
-from .bandit_metrics.extractor import gather_bandit_metrics
-from .gather import gather_all_metrics, get_all_metric_names
+from metrics.ast_metrics.extractor import ASTMetricExtractor
+from metrics.bandit_metrics.extractor import BanditExtractor
+from metrics.cloc_metrics.extractor import ClocExtractor
 
-# Package version
-__version__ = "0.1.0"
+from metrics.gather import gather_all_metrics, get_all_metric_names
 
-# Public API
 __all__ = [
     "ASTMetricExtractor",
-    "gather_ast_metrics",
-    "gather_bandit_metrics",
+    "BanditExtractor",
+    "ClocExtractor",
     "gather_all_metrics",
-    "get_all_metric_names",
+    "get_all_metric_names"
 ]
