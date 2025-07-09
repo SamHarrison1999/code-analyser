@@ -1,7 +1,5 @@
 from metrics.cloc_metrics.plugins.base import BaseClocMetricPlugin
 
-print("✅ Loaded CommentCountPlugin")
-
 class CommentCountPlugin(BaseClocMetricPlugin):
     def name(self) -> str:
         return "number_of_comments"
