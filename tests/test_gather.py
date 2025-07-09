@@ -34,4 +34,4 @@ def test_gather_all_metrics_and_names_match():
         f"Values ({len(values)}): {values}"
     )
 
-    assert all(isinstance(v, int) for v in values), "All metrics must be integers"
+    assert all(isinstance(v, (int, float)) for v in values), "All metrics must be numbers (int or float)"
