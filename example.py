@@ -37,9 +37,14 @@ def exception_handling():
     except AssertionError as e:
         print("Assertion failed:", e)
 
+def add(a, b):
+    return a + b
+
+
 
 if __name__ == "__main__":
     obj = Example(" Hello World ")
     print(obj.chained_call())
     print(outer_function(3))
+    print(add(1,2))
     exception_handling()
