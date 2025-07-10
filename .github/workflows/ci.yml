@@ -1,4 +1,4 @@
-name: CI
+name: 🧪 CI Pipeline
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: 🔍 Run Tests and Static Checks
     runs-on: ubuntu-latest
     env:
       PYTHONPATH: src
@@ -24,7 +25,7 @@ jobs:
       - name: 📦 Install system and Python dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-tk cloc 
+          sudo apt-get install -y python3-tk cloc
           pip install -e .
           pip install pytest matplotlib bandit flake8 lizard mplcursors pydocstyle
 
