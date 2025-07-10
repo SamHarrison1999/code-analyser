@@ -7,6 +7,7 @@ Exposes core extractors and gatherers for:
 - Cloc (lines/comments) metrics
 - Flake8 (style/lint) metrics
 - Lizard (complexity/maintainability) metrics
+- Pydocstyle (docstring compliance) metrics
 - Unified metric aggregation
 """
 
@@ -15,11 +16,13 @@ from metrics.bandit_metrics.extractor import BanditExtractor
 from metrics.cloc_metrics.extractor import ClocExtractor
 from metrics.flake8_metrics.extractor import Flake8Extractor
 from metrics.lizard_metrics.extractor import get_lizard_extractor
+from metrics.pydocstyle_metrics.extractor import PydocstyleExtractor
 
 from metrics.ast_metrics.gather import gather_ast_metrics
 from metrics.bandit_metrics.gather import gather_bandit_metrics
 from metrics.cloc_metrics.gather import gather_cloc_metrics
 from metrics.flake8_metrics.gather import gather_flake8_metrics
+from metrics.pydocstyle_metrics.gather import gather_pydocstyle_metrics
 
 from metrics.gather import gather_all_metrics, get_all_metric_names
 
@@ -29,10 +32,12 @@ __all__ = [
     "ClocExtractor",
     "Flake8Extractor",
     "get_lizard_extractor",
+    "PydocstyleExtractor",
     "gather_ast_metrics",
     "gather_bandit_metrics",
     "gather_cloc_metrics",
     "gather_flake8_metrics",
+    "gather_pydocstyle_metrics",
     "gather_all_metrics",
     "get_all_metric_names",
 ]

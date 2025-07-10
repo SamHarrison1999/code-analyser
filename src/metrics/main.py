@@ -3,6 +3,7 @@ import argparse
 import json
 import logging
 from pathlib import Path
+from datetime import datetime  # ✅ Timestamp for JSON
 
 from metrics.gather import gather_all_metrics, get_all_metric_names
 
@@ -25,7 +26,6 @@ def analyse_file(
         logging.error(f"❌ File not found: {file_path}")
         return 1
 
-    # 🧠 ML Signal: Core metric extraction logic
     try:
         values = gather_all_metrics(str(file_path))
         metric_names = get_all_metric_names()
@@ -38,18 +38,23 @@ def analyse_file(
         print(values)
         return 0
 
-    # ✅ Best Practice: Export JSON
+    # ✅ JSON output wrapped with metadata
+    wrapped_json = {
+        "file": str(file_path),
+        "timestamp": datetime.utcnow().isoformat(),
+        "metrics": result_dict
+    }
+
     if format in ("json", "both"):
         json_path = json_out or out_path or Path("metrics.json")
         try:
             json_path.parent.mkdir(parents=True, exist_ok=True)
             with open(json_path, "w", encoding="utf-8") as f:
-                json.dump(result_dict, f, indent=2)
+                json.dump(wrapped_json, f, indent=2)
             logging.info(f"📄 JSON saved: {json_path}")
         except Exception as e:
             logging.error(f"❌ Failed to write JSON: {e}")
 
-    # ✅ Best Practice: Export CSV
     if format in ("csv", "both"):
         csv_path = csv_out or (Path(out_path or "metrics.csv").with_suffix(".csv"))
         try:
@@ -61,7 +66,6 @@ def analyse_file(
         except Exception as e:
             logging.error(f"❌ Failed to write CSV: {e}")
 
-    # ✅ Markdown-compatible summary output
     if show_summary or markdown_summary or save_summary_txt:
         summary = format_summary_table(result_dict)
         if show_summary or markdown_summary:
@@ -74,7 +78,6 @@ def analyse_file(
             except Exception as e:
                 logging.error(f"❌ Failed to save summary: {e}")
 
-    # ⚠️ SAST Risk: Validate fail-on logic for scoring thresholds
     if fail_threshold is not None:
         if fail_on == "ast":
             metric_keys = [k for k in result_dict if not k.startswith("number_of_")]
@@ -111,7 +114,7 @@ def format_summary_table(metrics: dict) -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="🔍 Code Analyser - AST, Bandit, Cloc, Flake8, Lizard plugin-based metric extractor"
+        description="🔍 Code Analyser - AST, Bandit, Cloc, Flake8, Lizard, Pydocstyle plugin-based metric extractor"
     )
     parser.add_argument("--file", "-f", type=str, help="Analyse a single Python file")
     parser.add_argument("--dir", "-d", type=str, help="Recursively analyse a directory of Python files")

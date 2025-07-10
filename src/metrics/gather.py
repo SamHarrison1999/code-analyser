@@ -8,6 +8,7 @@ from metrics.bandit_metrics.extractor import BanditExtractor
 from metrics.cloc_metrics.extractor import ClocExtractor
 from metrics.flake8_metrics.extractor import Flake8Extractor
 from metrics.lizard_metrics.extractor import get_lizard_extractor
+from metrics.pydocstyle_metrics.extractor import PydocstyleExtractor
 
 import tempfile
 from typing import List, Union
@@ -15,7 +16,7 @@ from typing import List, Union
 
 def gather_all_metrics(file_path: str) -> List[Union[int, float]]:
     """
-    Gathers all metric values from AST, Bandit, Cloc, Flake8, and Lizard extractors.
+    Gathers all metric values from AST, Bandit, Cloc, Flake8, Lizard, and Pydocstyle extractors.
 
     Args:
         file_path (str): Path to the Python file to analyze.
@@ -28,6 +29,7 @@ def gather_all_metrics(file_path: str) -> List[Union[int, float]]:
     cloc_metrics = ClocExtractor(file_path).extract()
     flake8_metrics = Flake8Extractor(file_path).extract()
     lizard_metrics = get_lizard_extractor()(file_path)
+    pydocstyle_metrics = PydocstyleExtractor(file_path).extract()
 
     lizard_values = [m["value"] for m in lizard_metrics if m.get("success")]
 
@@ -36,7 +38,8 @@ def gather_all_metrics(file_path: str) -> List[Union[int, float]]:
         list(bandit_metrics.values()) +
         list(cloc_metrics.values()) +
         list(flake8_metrics.values()) +
-        lizard_values
+        lizard_values +
+        list(pydocstyle_metrics.values())
     )
 
 
@@ -60,5 +63,6 @@ def get_all_metric_names() -> List[str]:
             for m in get_lizard_extractor()(f.name)
             if m.get("success")
         ]
+        pydocstyle_keys = list(PydocstyleExtractor(f.name).extract().keys())
 
-    return ast_keys + bandit_keys + cloc_keys + flake8_keys + lizard_keys
+    return ast_keys + bandit_keys + cloc_keys + flake8_keys + lizard_keys + pydocstyle_keys

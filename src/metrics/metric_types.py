@@ -1,5 +1,8 @@
+# File: src/metrics/metric_types.py
+
 from pathlib import Path
-from typing import Callable, Literal, TypedDict
+from typing import Callable, Literal, TypedDict, Union, Dict, List
+from abc import ABC, abstractmethod
 
 
 class MetricResult(TypedDict):
@@ -10,12 +13,32 @@ class MetricResult(TypedDict):
     error: str | None
 
 
-# A MetricExtractor is a callable that takes a Path and returns a list of metric result dicts
-MetricExtractor = Callable[[Path], list[MetricResult]]
+# Function-style metric extractor (used for plugin systems)
+MetricExtractor = Callable[[Path], List[MetricResult]]
 
 
-# Core definition for any registered plugin
-MetricPlugin = dict[str, object]  # should match the following structure:
+# Base class for OO-style metric extractors (e.g. PydocstyleExtractor, BanditExtractor)
+class MetricExtractorBase(ABC):
+    """
+    Abstract base class for class-based metric extractors.
+    """
+
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+
+    @abstractmethod
+    def extract(self) -> Dict[str, Union[int, float]]:
+        """
+        Extract metrics for the file.
+
+        Returns:
+            dict[str, int | float]: Metric name-value pairs.
+        """
+        pass
+
+
+# Optional: Plugin schema for ML registration / cataloguing
+MetricPlugin = dict[str, object]
 """
 MetricPlugin = TypedDict("MetricPlugin", {
     "name": str,
