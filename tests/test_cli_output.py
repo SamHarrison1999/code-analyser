@@ -45,7 +45,7 @@ def test_cli_generates_json_and_csv(tmp_path):
     with open(json_out, encoding="utf-8") as jf:
         data = json.load(jf)
         assert isinstance(data, dict), "JSON output should be a dictionary"
-        assert any(val > 0 for val in data.values()), "Expected non-zero metrics"
+        assert any(isinstance(val, (int, float)) and val > 0 for val in data.values()), "Expected non-zero numeric metrics"
 
     assert csv_out.exists(), "CSV output file not created"
     with open(csv_out, newline='', encoding="utf-8") as cf:
