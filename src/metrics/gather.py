@@ -1,64 +1,63 @@
 import tempfile
-from typing import List, Union
+from typing import List, Union, Callable
 
-from metrics.ast_metrics.extractor import ASTMetricExtractor
-from metrics.bandit_metrics.extractor import BanditExtractor
-from metrics.cloc_metrics.extractor import ClocExtractor
-from metrics.flake8_metrics.extractor import Flake8Extractor
-from metrics.lizard_metrics.extractor import extract_lizard_metrics
-from metrics.pydocstyle_metrics.extractor import PydocstyleExtractor
-from metrics.pyflakes_metrics.extractor import extract_pyflakes_metrics
-from metrics.pylint_metrics.gather import gather_pylint_metrics
-
-
-def safe_number(val):
-    if isinstance(val, (int, float)):
-        return val
-    try:
-        return float(val)
-    except Exception:
-        return 0
+from metrics.ast_metrics.gather import gather_ast_metrics, get_ast_metric_names
+from metrics.bandit_metrics.gather import gather_bandit_metrics, get_bandit_metric_names
+from metrics.cloc_metrics.gather import gather_cloc_metrics, get_cloc_metric_names
+from metrics.flake8_metrics.gather import gather_flake8_metrics, get_flake8_metric_names
+from metrics.lizard_metrics.gather import gather_lizard_metrics, get_lizard_metric_names
+from metrics.pydocstyle_metrics.gather import gather_pydocstyle_metrics, get_pydocstyle_metric_names
+from metrics.pyflakes_metrics.gather import gather_pyflakes_metrics, get_pyflakes_metric_names
+from metrics.pylint_metrics.gather import gather_pylint_metrics, get_pylint_metric_names
+from metrics.radon_metrics.gather import gather_radon_metrics, get_radon_metric_names
 
 
-def gather_all_metrics(file_path: str) -> List[Union[int, float]]:
+def get_metric_names_from_gatherer(
+    gather_func: Callable[[str], Union[dict, list]],
+    get_names_func: Callable[[], List[str]],
+    file_path: str
+) -> List[str]:
     """
-    Gathers all metric values and normalizes to numeric values.
+    Determine metric names from a gatherer function's output.
+
+    Args:
+        gather_func (Callable): Function that extracts metrics and returns dict or list.
+        get_names_func (Callable): Function returning list of metric names if gather_func returns a list.
+        file_path (str): Path to file to pass to gather_func.
+
+    Returns:
+        List[str]: Ordered list of metric names.
     """
-    ast = ASTMetricExtractor(file_path).extract()
-    bandit = BanditExtractor(file_path).extract()
-    cloc = ClocExtractor(file_path).extract()
-    flake8 = Flake8Extractor(file_path).extract()
-    lizard = extract_lizard_metrics(file_path)
-    pydocstyle = PydocstyleExtractor(file_path).extract()
-    pyflakes = extract_pyflakes_metrics(file_path)
-    pylint = gather_pylint_metrics(file_path)
-
-    all_metrics = []
-    for metric_set in [ast, bandit, cloc, flake8, lizard, pydocstyle, pyflakes, pylint]:
-        all_metrics.extend(safe_number(v) for v in metric_set.values())
-
-    return all_metrics
+    result = gather_func(file_path)
+    if isinstance(result, dict):
+        return list(result.keys())
+    elif isinstance(result, list):
+        return get_names_func()
+    return []
 
 
 def get_all_metric_names() -> List[str]:
     """
-    Returns the names of all metrics in the same order as gather_all_metrics.
+    Aggregate and return all metric names from all metric gatherers
+    in a consistent, ordered manner for CSV export or ML input features.
 
     Returns:
-        list[str]: List of all metric names.
+        List[str]: Combined ordered list of all metric names.
     """
     with tempfile.NamedTemporaryFile("w+", suffix=".py") as f:
-        f.write("def foo(): pass")
+        f.write("def foo(): pass\n")
         f.flush()
+        file_path = f.name
 
-        ast_keys = list(ASTMetricExtractor(f.name).extract().keys())
-        bandit_keys = list(BanditExtractor(f.name).extract().keys())
-        cloc_keys = list(ClocExtractor(f.name).extract().keys())
-        flake8_keys = list(Flake8Extractor(f.name).extract().keys())
-        lizard_keys = list(extract_lizard_metrics(f.name).keys())
-        pydocstyle_keys = list(PydocstyleExtractor(f.name).extract().keys())
-        pyflakes_keys = list(extract_pyflakes_metrics(f.name).keys())
-        pylint_keys = list(gather_pylint_metrics(f.name).keys())
+        ast_keys = get_metric_names_from_gatherer(gather_ast_metrics, get_ast_metric_names, file_path)
+        bandit_keys = get_metric_names_from_gatherer(gather_bandit_metrics, get_bandit_metric_names, file_path)
+        cloc_keys = get_metric_names_from_gatherer(gather_cloc_metrics, get_cloc_metric_names, file_path)
+        flake8_keys = get_metric_names_from_gatherer(gather_flake8_metrics, get_flake8_metric_names, file_path)
+        lizard_keys = get_metric_names_from_gatherer(gather_lizard_metrics, get_lizard_metric_names, file_path)
+        pydocstyle_keys = get_metric_names_from_gatherer(gather_pydocstyle_metrics, get_pydocstyle_metric_names, file_path)
+        pyflakes_keys = get_metric_names_from_gatherer(gather_pyflakes_metrics, get_pyflakes_metric_names, file_path)
+        pylint_keys = get_metric_names_from_gatherer(gather_pylint_metrics, get_pylint_metric_names, file_path)
+        radon_keys = get_metric_names_from_gatherer(gather_radon_metrics, get_radon_metric_names, file_path)
 
     return (
         ast_keys +
@@ -68,5 +67,47 @@ def get_all_metric_names() -> List[str]:
         lizard_keys +
         pydocstyle_keys +
         pyflakes_keys +
-        pylint_keys
+        pylint_keys +
+        radon_keys
     )
+
+
+def gather_all_metrics(file_path: str) -> List[Union[int, float]]:
+    """
+    Gathers all metrics from all gatherers into a single ordered list.
+
+    Args:
+        file_path (str): Path to the Python source file.
+
+    Returns:
+        List[int | float]: Combined list of metric values in consistent order.
+    """
+    ast_values = gather_ast_metrics(file_path)
+    bandit_values = gather_bandit_metrics(file_path)
+    cloc_values = gather_cloc_metrics(file_path)
+    flake8_values = gather_flake8_metrics(file_path)
+    lizard_values = gather_lizard_metrics(file_path)
+    pydocstyle_values = gather_pydocstyle_metrics(file_path)
+    pyflakes_values = gather_pyflakes_metrics(file_path)
+    pylint_dict = gather_pylint_metrics(file_path)
+    pylint_values = list(pylint_dict.values()) if isinstance(pylint_dict, dict) else []
+    radon_values = gather_radon_metrics(file_path)
+
+    return (
+        ast_values +
+        bandit_values +
+        cloc_values +
+        flake8_values +
+        lizard_values +
+        pydocstyle_values +
+        pyflakes_values +
+        pylint_values +
+        radon_values
+    )
+
+
+__all__ = [
+    "get_metric_names_from_gatherer",
+    "get_all_metric_names",
+    "gather_all_metrics",
+]

@@ -11,6 +11,7 @@ Exposes core extractors and metric gatherers for:
 - Pyflakes (syntax + import warnings)
 - Pylint (multi-category quality issues)
 - Pylint Plugins (extendable metric rules)
+- Radon (code complexity and Halstead metrics)
 - Unified metric aggregation (gather_all_metrics)
 """
 
@@ -22,6 +23,7 @@ from metrics.lizard_metrics.extractor import LizardExtractor, extract_lizard_met
 from metrics.pydocstyle_metrics.extractor import PydocstyleExtractor
 from metrics.pyflakes_metrics.extractor import PyflakesExtractor, extract_pyflakes_metrics
 from metrics.pylint_metrics.extractor import PylintMetricExtractor
+from metrics.radon_metrics.extractor import run_radon
 from metrics.pylint_metrics.plugins.default_plugins import load_plugins
 
 from metrics.ast_metrics.gather import gather_ast_metrics
@@ -32,6 +34,9 @@ from metrics.lizard_metrics.gather import gather_lizard_metrics
 from metrics.pydocstyle_metrics.gather import gather_pydocstyle_metrics
 from metrics.pyflakes_metrics.gather import gather_pyflakes_metrics
 from metrics.pylint_metrics.gather import gather_pylint_metrics
+# ✅ Minimal and safe (let gui_logic or gather.py handle direct imports)
+from .radon_metrics import gather
+
 
 from metrics.gather import gather_all_metrics, get_all_metric_names
 
@@ -60,6 +65,8 @@ __all__ = [
     "gather_pydocstyle_metrics",
     "gather_pyflakes_metrics",
     "gather_pylint_metrics",
+    "gather_radon_metrics",
+    "run_radon",
     "gather_all_metrics",
     "get_all_metric_names",
 ]

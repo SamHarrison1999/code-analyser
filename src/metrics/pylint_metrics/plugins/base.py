@@ -14,16 +14,16 @@ class PylintMetricPlugin(ABC):
     Plugins operate on parsed Pylint diagnostics and compute a single metric.
     """
 
-    @classmethod
+    @staticmethod
     @abstractmethod
-    def name(cls) -> str:
+    def name() -> str:
         """
         Return the unique name of the metric this plugin provides.
 
         Returns:
             str: Identifier name used to label the metric.
         """
-        pass
+        raise NotImplementedError("Plugin must implement the name() method.")
 
     @abstractmethod
     def extract(self, pylint_output: List[Dict[str, Any]], file_path: str) -> Any:
@@ -37,4 +37,4 @@ class PylintMetricPlugin(ABC):
         Returns:
             Any: The computed metric value (e.g., int, float, or str).
         """
-        pass
+        raise NotImplementedError("Plugin must implement the extract() method.")

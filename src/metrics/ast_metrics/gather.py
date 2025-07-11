@@ -38,5 +38,10 @@ def gather_ast_metrics(file_path: str) -> List[int]:
         list[int]: AST metrics in the fixed order defined by _METRIC_ORDER.
     """
     metrics = ASTMetricExtractor(file_path).extract()
-
     return [int(metrics.get(key, 0)) for key in _METRIC_ORDER]
+
+def get_ast_metric_names() -> List[str]:
+    """
+    Returns the list of AST metric names in the order returned by gather_ast_metrics.
+    """
+    return _METRIC_ORDER

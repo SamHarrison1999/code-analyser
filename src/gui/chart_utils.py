@@ -1,42 +1,115 @@
 import tkinter as tk
+from typing import List
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import mplcursors
+import logging
+import sys
+from tkinter import messagebox
 
-from gui import shared_state
-
-# 🧠 Cache last chart data to support redraw on window resize
+# Cache last chart data
 _last_keys = []
 _last_vals = []
 _last_title = ""
 _last_filename = ""
 
-def include_metric(metric: str) -> bool:
-    """Filter metrics based on selected analysis scope."""
-    scope = shared_state.metric_scope.get()
+_cached_scope_names = {}
+
+# Strict Radon metric list (prevent pydocstyle/pylint bleed-through)
+KNOWN_RADON_METRICS = {
+    "number_of_logical_lines",
+    "number_of_blank_lines",
+    "number_of_doc_strings",
+    "average_halstead_volume",
+    "average_halstead_difficulty",
+    "average_halstead_effort"
+}
+
+def include_metric(metric: str, valid_names: List[str] = None) -> bool:
+    """Determine if a given metric should be included based on selected analysis scope."""
+    from gui import shared_state
+    scope = shared_state.metric_scope.get().lower()
     metric = metric.lower()
+    is_frozen = getattr(sys, 'frozen', False)
 
     if scope == "ast":
-        return not metric.startswith("number_of_") and "docstring" not in metric
+        return metric in {
+            "module_docstring", "todo_comments", "nested_functions", "lambda_functions",
+            "magic_methods", "assert_statements", "class_docstrings", "functions",
+            "classes", "function_docstrings", "exceptions", "loops_conditionals",
+            "global_variables", "chained_methods"
+        }
     elif scope == "bandit":
-        return "security" in metric or "vulnerability" in metric
-    elif scope == "flake8":
-        return "styling" in metric or "line_length" in metric
+        return "security" in metric or "vulnerability" in metric or "cwe" in metric
     elif scope == "cloc":
         return "line" in metric or "comment" in metric
-    elif scope == "lizard":
-        return any(k in metric for k in ["complexity", "token", "parameter", "maintainability"])
+    elif scope == "flake8":
+        return "style" in metric or "whitespace" in metric or "indent" in metric or "line_length" in metric
     elif scope == "pydocstyle":
-        return any(k in metric for k in ["docstring", "pydocstyle", "compliance"])
+        return "docstring" in metric or "pydocstyle" in metric or "compliance" in metric
     elif scope == "pyflakes":
-        return any(k in metric for k in ["undefined", "redefined", "syntax", "import"])
+        return "undefined" in metric or "syntax" in metric or "import" in metric
     elif scope == "pylint":
-        return metric.startswith("pylint_")
+        return metric in {"convention", "refactor", "warning", "error", "fatal"}
+    elif scope == "radon":
+        return metric in KNOWN_RADON_METRICS
+    elif scope == "lizard":
+        return any(k in metric for k in ["cyclomatic", "token", "parameter", "function_count"])
+    return True  # fallback for "all"
 
-    return True
+def filter_metrics_by_scope(metrics: dict) -> dict:
+    """Filter metrics based on the selected analysis scope from shared_state.
 
-def draw_chart(keys: list[str], vals: list[float], title: str, filename: str) -> None:
-    """Render either bar or pie chart for given metric values."""
+    Args:
+        metrics (dict): Dictionary of metric names and their values.
+
+    Returns:
+        dict: Filtered dictionary containing only metrics relevant to the current scope.
+    """
+    from gui import shared_state
+    scope = shared_state.metric_scope.get().lower()
+
+    # Define allowed metric keys explicitly for strict scopes
+    if scope == "pylint":
+        # ✅ Only show these specific Pylint categories
+        allowed = {"convention", "refactor", "warning", "error", "fatal"}
+    elif scope == "radon":
+        # ✅ Strict Radon metrics as returned by the Radon gatherer
+        allowed = {
+            "number_of_logical_lines", "number_of_blank_lines", "number_of_doc_strings",
+            "average_halstead_volume", "average_halstead_difficulty", "average_halstead_effort"
+        }
+    else:
+        # ✅ For other scopes, defer to include_metric() logic
+        allowed = None
+
+    filtered = {}
+    for k, v in metrics.items():
+        # ⚠️ Skip non-numeric values (e.g. strings like 'N/A')
+        if not isinstance(v, (int, float, str)):
+            continue
+
+        # ⚠️ Skip non-numeric strings
+        val_str = str(v).replace(".", "", 1)
+        if not val_str.isdigit():
+            continue
+
+        if allowed is not None:
+            # ✅ If strict scope list is defined, use it
+            if k in allowed:
+                filtered[k] = v
+        else:
+            # ✅ Fallback: use dynamic filter
+            if include_metric(k):
+                filtered[k] = v
+
+    return filtered
+
+
+
+def draw_chart(keys: List[str], vals: List[float], title: str, filename: str) -> None:
+    from gui import shared_state
+
     global _last_keys, _last_vals, _last_title, _last_filename
     _last_keys = keys
     _last_vals = vals
@@ -47,18 +120,25 @@ def draw_chart(keys: list[str], vals: list[float], title: str, filename: str) ->
     chart_type = shared_state.chart_type.get() if shared_state.chart_type else "bar"
 
     if not chart_frame:
-        print("⚠️ chart_frame not initialised. Cannot draw chart.")
+        logging.warning("⚠️ chart_frame not initialised. Cannot draw chart.")
+        return
+
+    if not keys or not vals:
+        logging.warning(f"⚠️ No metrics passed to draw_chart for scope: {shared_state.metric_scope.get()}")
+        messagebox.showinfo("No Metrics", f"No metrics found for scope: {shared_state.metric_scope.get()}\n\n"
+                                          f"Available metric keys:\n" +
+                                          "\n".join(sorted(shared_state.results.get(shared_state.current_file_path, {}).keys())))
         return
 
     print(f"🧮 Drawing chart with {len(keys)} metrics. Type: {chart_type}. Title: {title}")
+    logging.debug(f"[Chart] Drawing chart: {title} with metrics: {keys}")
 
-    # Clear previous chart widgets
     for widget in chart_frame.winfo_children():
         widget.destroy()
 
     chart_frame.update_idletasks()
     pixel_width = max(chart_frame.winfo_width(), 800)
-    inch_width = pixel_width / 100  # Matplotlib default DPI
+    inch_width = pixel_width / 100
 
     def prettify(label: str) -> str:
         return label.replace("metrics.", "").replace("_", " ").strip().capitalize()
@@ -69,22 +149,18 @@ def draw_chart(keys: list[str], vals: list[float], title: str, filename: str) ->
         height_per_metric = 0.4
         fig_height = max(4, len(pretty_keys) * height_per_metric)
         fig, ax = plt.subplots(figsize=(inch_width, fig_height))
-
         bars = ax.barh(pretty_keys, vals)
         ax.set_xlabel("Value")
         ax.set_ylabel("Metric")
         ax.tick_params(axis='y', labelsize=8)
         ax.set_title(title)
         ax.set_ylim(-0.6, len(pretty_keys) - 0.4)
-
         cursor = mplcursors.cursor(bars, hover=True)
         cursor.connect("add", lambda sel: sel.annotation.set_text(
             f"{pretty_keys[sel.index]}: {vals[sel.index]}"
         ))
-
         fig.tight_layout()
     else:
-        # 🥧 Pie chart with hover tooltip
         fig, ax = plt.subplots(figsize=(inch_width, inch_width))
         wedges, _ = ax.pie(vals, labels=None, startangle=90)
         ax.set_title(title)
@@ -112,10 +188,8 @@ def draw_chart(keys: list[str], vals: list[float], title: str, filename: str) ->
 
         fig.canvas.mpl_connect("motion_notify_event", format_tooltip)
 
-    # Save figure
     fig.savefig(filename)
 
-    # Embed figure in Tkinter Canvas with scrollbar
     canvas_container = tk.Canvas(chart_frame)
     scrollbar = tk.Scrollbar(chart_frame, orient="vertical", command=canvas_container.yview)
     canvas_container.configure(yscrollcommand=scrollbar.set)
@@ -134,6 +208,18 @@ def draw_chart(keys: list[str], vals: list[float], title: str, filename: str) ->
     shared_state.chart_canvas = chart_canvas
 
 def redraw_last_chart() -> None:
-    """Redraw the most recently displayed chart to fit resized window."""
+    from gui import shared_state
+    if not hasattr(shared_state, "chart_frame") or not shared_state.chart_frame:
+        logging.debug("⚠️ shared_state.chart_frame is missing; skipping redraw.")
+        return
+    if not shared_state.chart_frame.winfo_exists():
+        logging.debug("⚠️ Chart frame does not exist; skipping redraw.")
+        return
     if _last_keys and _last_vals and _last_filename:
-        draw_chart(_last_keys, _last_vals, _last_title, _last_filename)
+        try:
+            draw_chart(_last_keys, _last_vals, _last_title, _last_filename)
+        except Exception as e:
+            logging.error(f"❌ Failed to redraw chart: {type(e).__name__}: {e}")
+    elif not hasattr(shared_state, "_warned_empty_redraw"):
+        logging.debug("⚠️ No previous chart data to redraw.")
+        shared_state._warned_empty_redraw = True

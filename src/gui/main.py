@@ -1,34 +1,55 @@
 import sys
+import os
+import logging
 import tkinter as tk
 from tkinter import ttk
 from gui.gui_components import launch_gui
-import logging
 
-# Set up logging for debugging
-logging.basicConfig(level=logging.DEBUG, format="%(message)s")
+# === Setup debug log location ===
+if getattr(sys, 'frozen', False):
+    base_dir = os.path.dirname(sys.executable)
+else:
+    base_dir = os.getcwd()
+
+log_path = os.path.join(base_dir, "debug.log")
+
+# Ensure log directory exists
+try:
+    os.makedirs(os.path.dirname(log_path), exist_ok=True)
+except Exception as e:
+    print(f"⚠️ Could not ensure log directory exists: {e}")
+
+# === Configure root logger ===
+logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
+logging.basicConfig(
+    filename=log_path,
+    filemode='w',
+    encoding='utf-8',
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
+
+logging.debug("✅ Starting Code Analyser GUI")
+logging.debug(f"🔍 Debug log path: {log_path}")
+logging.debug(f"🧩 sys.argv: {sys.argv}")
+logging.debug(f"📦 Frozen (PyInstaller): {getattr(sys, 'frozen', False)}")
 
 
 def start_main_gui(splash: tk.Tk, progress: ttk.Progressbar) -> None:
-    """
-    Stop splash animation, close splash window, and launch the main GUI.
-
-    Args:
-        splash (tk.Tk): Splash screen window.
-        progress (ttk.Progressbar): Progress bar widget to stop.
-    """
-    progress.stop()
+    """Stop the splash animation and launch the main GUI."""
+    try:
+        progress.stop()
+    except Exception:
+        pass
     splash.destroy()
     launch_gui()
 
 
 def show_splash_and_start() -> None:
-    """
-    Display a splash screen with a progress indicator before launching the main GUI.
-    """
+    """Display a splash screen before launching the GUI."""
     splash = tk.Tk()
     splash.overrideredirect(True)
 
-    # Centre splash on screen (platform-agnostic)
     screen_width = splash.winfo_screenwidth()
     screen_height = splash.winfo_screenheight()
     splash_width, splash_height = 360, 120
@@ -49,7 +70,7 @@ def show_splash_and_start() -> None:
         style.theme_use('default')
         style.configure("TProgressbar", thickness=8)
     except Exception as e:
-        logging.debug(f"⚠️ Failed to set style: {e}")
+        logging.debug(f"⚠️ Failed to set progressbar style: {e}")
 
     progress = ttk.Progressbar(splash, mode='indeterminate', length=280)
     progress.pack(pady=10)
@@ -60,11 +81,10 @@ def show_splash_and_start() -> None:
 
 
 if __name__ == "__main__":
-    # ✅ Prevent recursive GUI spawn when subprocess executes `-m metrics.main`
+    # Prevent subprocess metric-only mode from launching GUI
     safe_args = [arg.replace("\\", "/") for arg in sys.argv]
     if (
-            "metrics.main" not in sys.argv and
-            not any(arg.endswith("metrics/main.py") for arg in safe_args)
+        "metrics.main" not in sys.argv and
+        not any(arg.endswith("metrics/main.py") for arg in safe_args)
     ):
         show_splash_and_start()
-

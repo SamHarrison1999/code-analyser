@@ -5,11 +5,12 @@ Provides a plugin-compatible interface to extract CLOC-based metrics
 as an ordered list of values for CSV or machine learning export.
 """
 
+from typing import List, Union
 from metrics.cloc_metrics.extractor import ClocExtractor
 from metrics.cloc_metrics.plugins import load_plugins
 
 
-def gather_cloc_metrics(file_path: str) -> list:
+def gather_cloc_metrics(file_path: str) -> List[Union[int, float]]:
     """
     Runs the ClocExtractor and returns metrics in a consistent order.
 
@@ -17,7 +18,7 @@ def gather_cloc_metrics(file_path: str) -> list:
         file_path (str): Path to the Python file to analyse.
 
     Returns:
-        list: Ordered metric values.
+        List[Union[int, float]]: Ordered metric values.
     """
     # 🧠 ML Signal: Aggregated, ordered metric values support vectorised training data
     try:
@@ -29,15 +30,18 @@ def gather_cloc_metrics(file_path: str) -> list:
 
     # Maintain exact plugin registration order
     plugin_order = [plugin.name() for plugin in load_plugins()]
-    return [metrics.get(name, 0.0 if "density" in name else 0) for name in plugin_order]
+    return [
+        metrics.get(name, 0.0 if "density" in name else 0)
+        for name in plugin_order
+    ]
 
 
-def get_cloc_metric_names() -> list:
+def get_cloc_metric_names() -> List[str]:
     """
     Returns the names of the CLOC metrics in the same order as gather_cloc_metrics.
 
     Returns:
-        list: Ordered metric names.
+        List[str]: Ordered metric names.
     """
     # ✅ Best Practice: Keep ordering stable and documented
     return [plugin.name() for plugin in load_plugins()]

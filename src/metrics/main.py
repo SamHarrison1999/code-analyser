@@ -47,16 +47,17 @@ def analyse_file(
     if format in ("json", "both"):
         json_path = json_out or out_path or Path("metrics.json")
         try:
+            json_path = json_path.with_suffix(".json")
             json_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(json_path, "w", encoding="utf-8") as f:
-                json.dump(wrapped_json, f, indent=2)
+            json_path.write_text(json.dumps(wrapped_json, indent=2), encoding="utf-8")
             logging.info(f"📄 JSON saved: {json_path}")
         except Exception as e:
             logging.error(f"❌ Failed to write JSON: {e}")
 
     if format in ("csv", "both"):
-        csv_path = csv_out or (Path(out_path or "metrics.csv").with_suffix(".csv"))
+        csv_path = csv_out or (out_path or Path("metrics.csv")).with_suffix(".csv")
         try:
+            csv_path.parent.mkdir(parents=True, exist_ok=True)
             with open(csv_path, "w", encoding="utf-8") as f:
                 f.write("File," + ",".join(metric_names) + "\n")
                 row = [result_dict.get(name, 0) for name in metric_names]
@@ -78,9 +79,7 @@ def analyse_file(
                 logging.error(f"❌ Failed to save summary: {e}")
 
     if fail_threshold is not None:
-        # Determine which metrics to consider for failure threshold
         if fail_on == "ast":
-            # Assuming AST metrics are first ~14 keys — adjust if needed
             ast_keys = get_all_metric_names()[:14]
             metric_keys = [k for k in result_dict if k in ast_keys]
         elif fail_on == "bandit":
@@ -98,7 +97,13 @@ def analyse_file(
         elif fail_on == "pyflakes":
             metric_keys = [k for k in result_dict if "undefined" in k or "syntax" in k]
         elif fail_on == "pylint":
-            metric_keys = [k for k in result_dict if k.startswith("pylint_") or k in ("missing_docstrings", "duplicate_code_blocks")]
+            from metrics.pylint_metrics.gather import get_pylint_metric_names
+            pylint_keys = set(get_pylint_metric_names())
+            metric_keys = [k for k in result_dict if k in pylint_keys]
+        elif fail_on == "radon":
+            metric_keys = [k for k in result_dict if any(sub in k for sub in [
+                "halstead", "logical_lines", "blank_lines", "doc_strings"
+            ])]
         else:
             metric_keys = list(result_dict.keys())
 
@@ -122,7 +127,7 @@ def format_summary_table(metrics: dict) -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="🔍 Code Analyser — AST, Bandit, Cloc, Flake8, Lizard, Pydocstyle, Pyflakes, Pylint plugin-based metric extractor"
+        description="🔍 Code Analyser — AST, Bandit, Cloc, Flake8, Lizard, Pydocstyle, Pyflakes, Pylint, Radon metric extractor"
     )
     parser.add_argument("--file", "-f", type=str, help="Analyse a single Python file")
     parser.add_argument("--dir", "-d", type=str, help="Recursively analyse a directory of Python files")
@@ -140,7 +145,7 @@ def main():
     )
     parser.add_argument(
         "--fail-on",
-        choices=["all", "ast", "bandit", "flake8", "cloc", "lizard", "pydocstyle", "pyflakes", "pylint"],
+        choices=["all", "ast", "bandit", "flake8", "cloc", "lizard", "pydocstyle", "pyflakes", "pylint", "radon"],
         default="all",
         help="Restrict threshold check to a specific metric group"
     )

@@ -1,36 +1,22 @@
-"""
-Shared GUI State Module
-
-This module defines globally shared variables for coordinating state between
-different GUI components (e.g., chart rendering, metric filters, and TreeViews).
-"""
-
-from typing import Optional
 import tkinter as tk
-from tkinter.ttk import Treeview
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import logging
 
-# 🔢 Collected metrics across all analysed files
-# Format: { file_path: {metric_name: value, ...}, ... }
-results: dict[str, dict] = {}
+def setup_shared_gui_state():
+    shared_state = type("SharedState", (), {})()
+    shared_state.metric_scope = tk.StringVar(value="all")
 
-# 🖼️ Currently rendered Matplotlib chart canvas (used for redraw/export)
-chart_canvas: Optional[FigureCanvasTkAgg] = None
+    # Trigger redraw when metric scope changes
+    def on_metric_scope_change(*args):
+        try:
+            from gui_components import show_chart
+            show_chart()
+        except Exception as e:
+            logging.warning(f"⚠️ Failed to trigger chart update on scope change: {type(e).__name__}: {e}")
+    shared_state.metric_scope.trace_add("write", on_metric_scope_change)
 
-# 📊 Frame widget where charts are drawn (set during GUI layout)
-chart_frame: Optional[tk.Frame] = None
-
-# 📋 TreeView widget displaying per-file metrics
-tree: Optional[Treeview] = None
-
-# 🔍 Search filter bound to Entry box to filter tree contents
-filter_var: Optional[tk.StringVar] = None
-
-# 📚 Metric scope selector (e.g. 'ast', 'flake8', 'pylint', 'all')
-metric_scope: Optional[tk.StringVar] = None
-
-# 📈 Chart type toggle (e.g. 'bar', 'pie')
-chart_type: Optional[tk.StringVar] = None
-
-# 📊 TreeView widget displaying totals and averages by metric
-summary_tree: Optional[Treeview] = None
+    shared_state.results = {}
+    shared_state.current_file_path = ""
+    shared_state.chart_frame = None
+    shared_state.chart_type = tk.StringVar(value="bar")
+    shared_state.chart_canvas = None
+    return shared_state

@@ -2,11 +2,12 @@
 Gathers Lizard metrics for unified interface and plugin integration.
 """
 
-from typing import Union
+from typing import Union, List
 from . import LizardExtractor
+import logging
 
 
-def gather_lizard_metrics(file_path: str) -> list[Union[int, float]]:
+def gather_lizard_metrics(file_path: str) -> List[Union[int, float]]:
     """
     Gathers Lizard metrics from the given file.
 
@@ -14,7 +15,7 @@ def gather_lizard_metrics(file_path: str) -> list[Union[int, float]]:
         file_path (str): Path to the source Python file.
 
     Returns:
-        list[Union[int, float]]: Ordered metrics:
+        List[Union[int, float]]: Ordered metrics:
             - average_cyclomatic_complexity
             - average_token_count
             - total_function_count
@@ -24,8 +25,9 @@ def gather_lizard_metrics(file_path: str) -> list[Union[int, float]]:
     # 🧠 ML Signal: Vector consistency supports stable model inputs
     try:
         results = LizardExtractor(file_path).extract()
-    except Exception:
-        # ⚠️ SAST Risk: Ensure metrics gatherer fails safely
+    except Exception as e:
+        # ⚠️ SAST Risk: Ensure metrics gatherer fails safely without crashing
+        logging.warning(f"[gather_lizard_metrics] Extraction failed for {file_path}: {e}")
         results = {}
 
     return [
@@ -37,12 +39,12 @@ def gather_lizard_metrics(file_path: str) -> list[Union[int, float]]:
     ]
 
 
-def get_lizard_metric_names() -> list[str]:
+def get_lizard_metric_names() -> List[str]:
     """
     Returns the metric names in the same order as gather_lizard_metrics.
 
     Returns:
-        list[str]: Ordered metric names.
+        List[str]: Ordered metric names.
     """
     # ✅ Best Practice: Stable naming ensures downstream CSV/ML compatibility
     return [

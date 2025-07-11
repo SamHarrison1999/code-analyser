@@ -5,11 +5,12 @@ Wraps the Flake8Extractor to produce an ordered list of metrics suitable
 for structured analysis, ML models, or tabular export.
 """
 
-from typing import Any
+from typing import List, Union
 from metrics.flake8_metrics.extractor import Flake8Extractor
+import logging
 
 
-def gather_flake8_metrics(file_path: str) -> list[Any]:
+def gather_flake8_metrics(file_path: str) -> List[Union[int, float]]:
     """
     Extracts Flake8 metrics in a defined order for CSV or ML model usage.
 
@@ -17,7 +18,7 @@ def gather_flake8_metrics(file_path: str) -> list[Any]:
         file_path (str): Path to the Python file being analysed.
 
     Returns:
-        list[Any]: Ordered list of extracted Flake8 metrics.
+        List[Union[int, float]]: Ordered list of extracted Flake8 metrics.
     """
     # 🧠 ML Signal: Structured and repeatable output helps maintain stable ML feature vectors
     try:
@@ -25,8 +26,7 @@ def gather_flake8_metrics(file_path: str) -> list[Any]:
         metrics = extractor.extract()
     except Exception as e:
         # ⚠️ SAST Risk: Ensure extractor failure does not break entire analysis flow
-        from logging import warning
-        warning(f"[gather_flake8_metrics] Flake8 extraction failed for {file_path}: {e}")
+        logging.warning(f"[gather_flake8_metrics] Flake8 extraction failed for {file_path}: {e}")
         metrics = {}
 
     return [
@@ -45,12 +45,12 @@ def gather_flake8_metrics(file_path: str) -> list[Any]:
     ]
 
 
-def get_flake8_metric_names() -> list[str]:
+def get_flake8_metric_names() -> List[str]:
     """
     Returns the ordered list of metric names matching gather_flake8_metrics output.
 
     Returns:
-        list[str]: Metric names corresponding to Flake8 metrics.
+        List[str]: Metric names corresponding to Flake8 metrics.
     """
     # ✅ Best Practice: Keep names stable and clearly mapped to extractor output
     return [
