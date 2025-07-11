@@ -1,9 +1,11 @@
+# File: src/metrics/main.py
+
 import sys
 import argparse
 import json
 import logging
 from pathlib import Path
-from datetime import datetime  # ✅ Timestamp for JSON
+from datetime import datetime
 
 from metrics.gather import gather_all_metrics, get_all_metric_names
 
@@ -38,7 +40,6 @@ def analyse_file(
         print(values)
         return 0
 
-    # ✅ JSON output wrapped with metadata
     wrapped_json = {
         "file": str(file_path),
         "timestamp": datetime.utcnow().isoformat(),
@@ -91,6 +92,8 @@ def analyse_file(
             metric_keys = [k for k in result_dict if any(p in k for p in [
                 "complexity", "token", "parameter", "maintainability"
             ])]
+        elif fail_on == "pyflakes":
+            metric_keys = [k for k in result_dict if "undefined" in k or "syntax" in k]
         else:
             metric_keys = result_dict.keys()
 
@@ -114,7 +117,7 @@ def format_summary_table(metrics: dict) -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="🔍 Code Analyser - AST, Bandit, Cloc, Flake8, Lizard, Pydocstyle plugin-based metric extractor"
+        description="🔍 Code Analyser — AST, Bandit, Cloc, Flake8, Lizard, Pydocstyle, Pyflakes plugin-based metric extractor"
     )
     parser.add_argument("--file", "-f", type=str, help="Analyse a single Python file")
     parser.add_argument("--dir", "-d", type=str, help="Recursively analyse a directory of Python files")
@@ -131,8 +134,8 @@ def main():
         help="Exit 1 if metric sum exceeds this threshold"
     )
     parser.add_argument(
-        "--fail-on", choices=["all", "ast", "bandit", "flake8", "cloc", "lizard"], default="all",
-        help="Restrict threshold to a metric group"
+        "--fail-on", choices=["all", "ast", "bandit", "flake8", "cloc", "lizard", "pyflakes"], default="all",
+        help="Restrict threshold check to a specific metric group"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable debug logging")
 
