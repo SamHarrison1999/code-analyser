@@ -1,5 +1,3 @@
-# File: metrics/gather.py
-
 """
 Aggregates metrics from various extractors into a single unified list.
 Used by CLI, GUI, and model export.
@@ -12,6 +10,7 @@ Included extractors:
 - Lizard (complexity/maintainability)
 - Pydocstyle (docstring compliance)
 - Pyflakes (undefined names, syntax errors)
+- Pylint (multi-rule linting/quality)
 """
 
 import tempfile
@@ -24,14 +23,16 @@ from metrics.flake8_metrics.extractor import Flake8Extractor
 from metrics.lizard_metrics.extractor import LizardExtractor, extract_lizard_metrics
 from metrics.pydocstyle_metrics.extractor import PydocstyleExtractor
 from metrics.pyflakes_metrics.extractor import extract_pyflakes_metrics
+from metrics.pylint_metrics.extractor import PylintMetricExtractor
 
 
 def gather_all_metrics(file_path: str) -> List[Union[int, float]]:
     """
-    Gathers all metric values from AST, Bandit, Cloc, Flake8, Lizard, Pydocstyle, and Pyflakes extractors.
+    Gathers all metric values from AST, Bandit, Cloc, Flake8, Lizard,
+    Pydocstyle, Pyflakes, and Pylint extractors.
 
     Args:
-        file_path (str): Path to the Python file to analyze.
+        file_path (str): Path to the Python file to analyse.
 
     Returns:
         list[int | float]: Unified list of all extracted metrics.
@@ -43,6 +44,20 @@ def gather_all_metrics(file_path: str) -> List[Union[int, float]]:
     lizard_metrics = extract_lizard_metrics(file_path)
     pydocstyle_metrics = PydocstyleExtractor(file_path).extract()
     pyflakes_metrics = extract_pyflakes_metrics(file_path)
+    pylint_metrics = PylintMetricExtractor(file_path).extract()
+
+    # Count message types from pylint output
+    pylint_counts = {
+        "convention": 0,
+        "refactor": 0,
+        "warning": 0,
+        "error": 0,
+        "fatal": 0,
+    }
+    for msg in pylint_metrics:
+        msg_type = msg.get("type")
+        if msg_type in pylint_counts:
+            pylint_counts[msg_type] += 1
 
     return (
         list(ast_metrics.values()) +
@@ -51,7 +66,8 @@ def gather_all_metrics(file_path: str) -> List[Union[int, float]]:
         list(flake8_metrics.values()) +
         list(lizard_metrics.values()) +
         list(pydocstyle_metrics.values()) +
-        list(pyflakes_metrics.values())
+        list(pyflakes_metrics.values()) +
+        list(pylint_counts.values())
     )
 
 
@@ -73,6 +89,7 @@ def get_all_metric_names() -> List[str]:
         lizard_keys = list(extract_lizard_metrics(f.name).keys())
         pydocstyle_keys = list(PydocstyleExtractor(f.name).extract().keys())
         pyflakes_keys = list(extract_pyflakes_metrics(f.name).keys())
+        pylint_keys = ["convention", "refactor", "warning", "error", "fatal"]
 
     return (
         ast_keys +
@@ -81,5 +98,6 @@ def get_all_metric_names() -> List[str]:
         flake8_keys +
         lizard_keys +
         pydocstyle_keys +
-        pyflakes_keys
+        pyflakes_keys +
+        pylint_keys
     )

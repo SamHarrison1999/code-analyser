@@ -14,21 +14,16 @@ def update_tree(data: dict):
         return
 
     tree.delete(*tree.get_children())
-    filter_text = filter_var.get().lower() if filter_var.get() else ""
+    filter_text = filter_var.get().lower().strip() if filter_var.get() else ""
 
     print(f"🔄 Refreshing tree view (filter: '{filter_text}')")
 
-    for file, top_level in data.items():
+    for file, metrics in data.items():
         base_name = Path(file).name
-        for key, value in top_level.items():
-            if key == "metrics" and isinstance(value, dict):
-                for metric_key, metric_val in value.items():
-                    if filter_text in metric_key.lower() or filter_text in base_name.lower():
-                        val = round(metric_val, 2) if isinstance(metric_val, (float, int)) else metric_val
-                        tree.insert("", "end", values=(base_name, metric_key, val))
-            else:
-                if filter_text in key.lower() or filter_text in base_name.lower():
-                    tree.insert("", "end", values=(base_name, key, value))
+        for metric_key, metric_val in metrics.items():
+            if filter_text in metric_key.lower() or filter_text in base_name.lower():
+                val = round(metric_val, 2) if isinstance(metric_val, (float, int)) else metric_val
+                tree.insert("", "end", values=(base_name, metric_key, val))
 
 
 def update_footer_summary():
@@ -46,7 +41,8 @@ def update_footer_summary():
         print("⚠️ No results available to summarise")
         return
 
-    all_keys = sorted({k for result in results.values() for k in result.get("metrics", {})})
+    # Collect all metric keys across all files
+    all_keys = sorted({k for metrics in results.values() for k in metrics})
 
     def safe_numeric(val):
         try:
@@ -55,7 +51,7 @@ def update_footer_summary():
             return 0.0
 
     totals = {
-        key: sum(safe_numeric(results[file].get("metrics", {}).get(key, 0)) for file in results)
+        key: sum(safe_numeric(results[file].get(key, 0)) for file in results)
         for key in all_keys
     }
 

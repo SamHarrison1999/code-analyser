@@ -1,18 +1,17 @@
-# src/gui/__init__.py
-
 """
 Code Analyser GUI Package
 
 This package provides a graphical interface for analysing Python source files
-using static metrics collected from AST, Bandit, Flake8, Cloc, Lizard, and other tools.
+using static metrics collected from AST, Bandit, Flake8, Cloc, Lizard,
+Pylint, Pydocstyle, and Pyflakes.
 
 Modules:
-- main.py: Launches the application with splash screen
+- main.py: Launches the application with splash screen and initialisation
 - gui_components.py: Builds and manages the main Tkinter layout
-- gui_logic.py: Handles data updates for trees and summaries
-- file_ops.py: Triggers metric extraction and export operations
+- gui_logic.py: Handles updates to the Treeview, charts, and summary footer
+- file_ops.py: Triggers metric extraction and handles CSV/image export
 - chart_utils.py: Generates and redraws charts with Matplotlib
-- shared_state.py: Holds shared state and Tkinter variables
+- shared_state.py: Stores shared Tkinter variables and visual state
 """
 
 __version__ = "1.0.0"

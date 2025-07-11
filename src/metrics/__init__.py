@@ -1,5 +1,3 @@
-# File: metrics/__init__.py
-
 """
 Top-level package initializer for the `metrics` module.
 
@@ -11,6 +9,7 @@ Exposes core extractors and gatherers for:
 - Lizard (complexity/maintainability) metrics
 - Pydocstyle (docstring compliance) metrics
 - Pyflakes (undefined names/syntax errors) metrics
+- Pylint (multi-rule linting/quality) metrics
 - Unified metric aggregation
 """
 
@@ -21,6 +20,7 @@ from metrics.flake8_metrics.extractor import Flake8Extractor
 from metrics.lizard_metrics.extractor import LizardExtractor, extract_lizard_metrics
 from metrics.pydocstyle_metrics.extractor import PydocstyleExtractor
 from metrics.pyflakes_metrics.extractor import PyflakesExtractor, extract_pyflakes_metrics
+from metrics.pylint_metrics.extractor import PylintMetricExtractor
 
 from metrics.ast_metrics.gather import gather_ast_metrics
 from metrics.bandit_metrics.gather import gather_bandit_metrics
@@ -29,6 +29,7 @@ from metrics.flake8_metrics.gather import gather_flake8_metrics
 from metrics.lizard_metrics.gather import gather_lizard_metrics
 from metrics.pydocstyle_metrics.gather import gather_pydocstyle_metrics
 from metrics.pyflakes_metrics.gather import gather_pyflakes_metrics
+from metrics.pylint_metrics.gather import gather_pylint_metrics
 
 from metrics.gather import gather_all_metrics, get_all_metric_names
 
@@ -40,6 +41,7 @@ __all__ = [
     "LizardExtractor",
     "PydocstyleExtractor",
     "PyflakesExtractor",
+    "PylintMetricExtractor",
     "extract_lizard_metrics",
     "extract_pyflakes_metrics",
     "gather_ast_metrics",
@@ -49,6 +51,7 @@ __all__ = [
     "gather_lizard_metrics",
     "gather_pydocstyle_metrics",
     "gather_pyflakes_metrics",
+    "gather_pylint_metrics",
     "gather_all_metrics",
     "get_all_metric_names",
 ]

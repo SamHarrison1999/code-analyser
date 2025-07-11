@@ -4,26 +4,27 @@ from typing import Optional
 import tkinter as tk
 from tkinter.ttk import Treeview
 
-# 🔢 Collected metrics across all files
+# 🔢 Collected metrics across all analysed files
+# Format: { file_path: {metric_name: value, ...}, ... }
 results: dict[str, dict] = {}
 
-# 🖼️ Currently displayed Matplotlib chart canvas (for redraw/export)
-chart_canvas: Optional[object] = None
+# 🖼️ Currently rendered Matplotlib chart canvas (used for redraw/export)
+chart_canvas: Optional[object] = None  # Holds FigureCanvasTkAgg instance
 
-# 📊 Frame where charts are rendered (set during GUI init)
+# 📊 Frame where charts are drawn (created during GUI layout)
 chart_frame: Optional[tk.Frame] = None
 
-# 📋 TreeView widget for file-metric display
+# 📋 TreeView showing all metrics by file
 tree: Optional[Treeview] = None
 
-# 🔍 User filter input (set after root window is created)
+# 🔍 Text filter variable bound to search box
 filter_var: Optional[tk.StringVar] = None
 
-# 📚 What type of metric set to include (e.g. 'bandit', 'all') – dynamic via GUI
+# 📚 Metric scope radio toggle (e.g. 'ast', 'flake8', 'pylint', 'all')
 metric_scope: Optional[tk.StringVar] = None
 
-# 📈 Chart style preference (e.g. 'bar', 'pie') – dynamic via GUI
+# 📈 Chart type toggle (e.g. 'bar', 'pie')
 chart_type: Optional[tk.StringVar] = None
 
-# 📊 Summary statistics view widget (totals and averages)
+# 📊 TreeView used for summary totals/averages by metric
 summary_tree: Optional[Treeview] = None

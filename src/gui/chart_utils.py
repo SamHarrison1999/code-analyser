@@ -16,20 +16,24 @@ _last_filename = ""
 def include_metric(metric: str) -> bool:
     """Filter metrics based on selected analysis scope."""
     scope = shared_state.metric_scope.get()
+    metric = metric.lower()
+
     if scope == "ast":
         return not metric.startswith("number_of_") and "docstring" not in metric
     elif scope == "bandit":
         return "security" in metric or "vulnerability" in metric
     elif scope == "flake8":
-        return "styling" in metric or "line_length" in metric
+        return "flake8" in metric or "styling" in metric or "line_length" in metric
     elif scope == "cloc":
         return "line" in metric or "comment" in metric
     elif scope == "lizard":
         return any(key in metric for key in ["complexity", "token", "parameter", "maintainability"])
     elif scope == "pydocstyle":
-        return any(key in metric.lower() for key in ["docstring", "pydocstyle", "compliance"])
+        return any(key in metric for key in ["docstring", "pydocstyle", "compliance"])
     elif scope == "pyflakes":
-        return any(key in metric.lower() for key in ["undefined", "redefined", "syntax", "import"])
+        return any(key in metric for key in ["undefined", "redefined", "syntax", "import"])
+    elif scope == "pylint":
+        return metric in {"convention", "refactor", "warning", "error", "fatal"}
     return True
 
 

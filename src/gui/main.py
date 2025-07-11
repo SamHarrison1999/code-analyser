@@ -27,6 +27,10 @@ def show_splash_and_start():
         bg="white"
     ).pack(pady=10)
 
+    style = ttk.Style()
+    style.theme_use('default')
+    style.configure("TProgressbar", thickness=8)
+
     progress = ttk.Progressbar(splash, mode='indeterminate', length=280)
     progress.pack(pady=10)
     progress.start(10)
@@ -36,6 +40,10 @@ def show_splash_and_start():
 
 
 if __name__ == "__main__":
-    # ✅ Prevent recursive GUI spawning from subprocess calls (e.g. `-m metrics.main`)
-    if "metrics.main" not in sys.argv and not any(arg.endswith("metrics/main.py") for arg in sys.argv):
+    # ✅ Prevent recursive GUI spawn when subprocess calls `-m metrics.main`
+    if (
+        "metrics.main" not in sys.argv
+        and not any(arg.endswith("metrics/main.py") for arg in sys.argv)
+        and not any(arg.endswith("metrics\\main.py") for arg in sys.argv)  # Windows-safe
+    ):
         show_splash_and_start()

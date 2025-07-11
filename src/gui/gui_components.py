@@ -25,7 +25,6 @@ def launch_gui():
     top_frame = tk.Frame(root)
     top_frame.pack(pady=10)
 
-    # ✅ Fixed: Delay file dialog until click
     def prompt_and_extract_file():
         path = filedialog.askopenfilename()
         if path:
@@ -47,8 +46,15 @@ def launch_gui():
     tk.Label(option_frame, text="Metric Scope:").pack(side=tk.LEFT, padx=(20, 5))
 
     for label, value in [
-        ("AST", "ast"), ("Bandit", "bandit"), ("Flake8", "flake8"),
-        ("Cloc", "cloc"), ("Lizard", "lizard"), ("Pydocstyle", "pydocstyle"), ("All", "all")
+        ("AST", "ast"),
+        ("Bandit", "bandit"),
+        ("Flake8", "flake8"),
+        ("Cloc", "cloc"),
+        ("Lizard", "lizard"),
+        ("Pydocstyle", "pydocstyle"),
+        ("Pyflakes", "pyflakes"),
+        ("Pylint", "pylint"),
+        ("All", "all"),
     ]:
         tk.Radiobutton(option_frame, text=label, variable=shared_state.metric_scope, value=value).pack(side=tk.LEFT)
 

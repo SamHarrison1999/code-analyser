@@ -1,5 +1,3 @@
-# File: src/metrics/main.py
-
 import sys
 import argparse
 import json
@@ -81,11 +79,11 @@ def analyse_file(
 
     if fail_threshold is not None:
         if fail_on == "ast":
-            metric_keys = [k for k in result_dict if not k.startswith("number_of_")]
+            metric_keys = [k for k in result_dict if k in get_all_metric_names()[:14]]
         elif fail_on == "bandit":
-            metric_keys = [k for k in result_dict if k.startswith("number_of_") and "security" in k]
+            metric_keys = [k for k in result_dict if "bandit" in k or "security" in k]
         elif fail_on == "flake8":
-            metric_keys = [k for k in result_dict if "styling" in k or "line_length" in k]
+            metric_keys = [k for k in result_dict if "flake8" in k or "line_length" in k]
         elif fail_on == "cloc":
             metric_keys = [k for k in result_dict if "line" in k or "comment" in k]
         elif fail_on == "lizard":
@@ -94,6 +92,8 @@ def analyse_file(
             ])]
         elif fail_on == "pyflakes":
             metric_keys = [k for k in result_dict if "undefined" in k or "syntax" in k]
+        elif fail_on == "pylint":
+            metric_keys = [k for k in ["convention", "refactor", "warning", "error", "fatal"]]
         else:
             metric_keys = result_dict.keys()
 
@@ -117,7 +117,7 @@ def format_summary_table(metrics: dict) -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="🔍 Code Analyser — AST, Bandit, Cloc, Flake8, Lizard, Pydocstyle, Pyflakes plugin-based metric extractor"
+        description="🔍 Code Analyser — AST, Bandit, Cloc, Flake8, Lizard, Pydocstyle, Pyflakes, Pylint plugin-based metric extractor"
     )
     parser.add_argument("--file", "-f", type=str, help="Analyse a single Python file")
     parser.add_argument("--dir", "-d", type=str, help="Recursively analyse a directory of Python files")
@@ -134,7 +134,9 @@ def main():
         help="Exit 1 if metric sum exceeds this threshold"
     )
     parser.add_argument(
-        "--fail-on", choices=["all", "ast", "bandit", "flake8", "cloc", "lizard", "pyflakes"], default="all",
+        "--fail-on",
+        choices=["all", "ast", "bandit", "flake8", "cloc", "lizard", "pyflakes", "pylint"],
+        default="all",
         help="Restrict threshold check to a specific metric group"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable debug logging")

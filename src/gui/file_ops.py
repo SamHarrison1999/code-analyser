@@ -44,12 +44,15 @@ def run_metric_extraction(file_path, show_result=True):
             raise FileNotFoundError("metrics.json not created.")
 
         with open(out_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
+            parsed = json.load(f)
 
-        results[file_path] = data
+        if not isinstance(parsed, dict) or "metrics" not in parsed:
+            raise ValueError("Invalid metrics.json format. Expected top-level 'metrics' key.")
+
+        results[file_path] = parsed["metrics"]
 
         if show_result:
-            update_tree({file_path: data})
+            update_tree({file_path: parsed["metrics"]})
             update_footer_summary()
 
     except subprocess.CalledProcessError as e:
@@ -96,7 +99,7 @@ def export_to_csv():
     if not save_path:
         return
 
-    # Collect all unique top-level metric keys
+    # Collect all unique top-level metric keys across all results
     metric_keys = sorted({key for data in results.values() for key in data})
 
     with open(save_path, "w", newline='', encoding="utf-8") as f:

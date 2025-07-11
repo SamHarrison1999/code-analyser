@@ -14,11 +14,12 @@ requires-python = ">=3.8"
 
 dependencies = [
     "matplotlib>=3.5",
+    "mplcursors>=0.5",
     "bandit>=1.7.5",
     "flake8>=5.0.0",
     "lizard>=1.17.10",
+    "pylint>=3.1.0",
     "pydocstyle>=6.3.0",
-    "mplcursors>=0.5",
     "pyflakes>=3.2.0",
     "setuptools>=61.0"
 ]
@@ -26,14 +27,12 @@ dependencies = [
 [project.optional-dependencies]
 gui = [
     "matplotlib>=3.5",
-    "mplcursors>=0.5",
-    "tk"
+    "mplcursors>=0.5"
 ]
-
-[tool.setuptools.packages.find]
-where = ["src"]
 
 [project.scripts]
 code-analyser = "metrics.main:main"
 code-analyser-gui = "gui.main:show_splash_and_start"
 
+[tool.setuptools.packages.find]
+where = ["src"]
