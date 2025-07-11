@@ -1,33 +1,31 @@
-import logging
-from pathlib import Path
-from typing import Any
+# File: metrics/lizard_metrics/gather.py
 
-from . import run_lizard
+"""
+Gathers Lizard metrics for unified interface and plugin integration.
+"""
+
+from typing import Union
+from . import LizardExtractor
 
 
-def gather(file_path: Path) -> list[dict[str, Any]]:
+def gather_lizard_metrics(file_path: str) -> list[Union[int, float]]:
     """
-    Gathers code metrics using Lizard for the given file.
-
-    Parameters:
-        file_path (Path): The path to the file to analyse.
+    Gathers Lizard metrics from the given file.
 
     Returns:
-        list[dict[str, Any]]: A list of metric dictionaries, each containing:
-            - name (str): Metric name
-            - value (Any): Metric value
-            - units (str | None): Unit of measurement (if applicable)
-            - success (bool): Whether the metric was successfully computed
-            - error (str | None): Error message if any
+        list[Union[int, float]]: Ordered metrics:
+            - average_cyclomatic_complexity
+            - average_token_count
+            - total_function_count
+            - max_cyclomatic_complexity
+            - average_parameters
     """
-    try:
-        return run_lizard(str(file_path))
-    except Exception as e:
-        logging.error(f"Failed to gather Lizard metrics for {file_path}: {e}")
-        return [{
-            "name": "lizard_metrics_failure",
-            "value": None,
-            "units": None,
-            "success": False,
-            "error": str(e),
-        }]
+    results = LizardExtractor(file_path).extract()
+
+    return [
+        results.get("average_cyclomatic_complexity", 0.0),
+        results.get("average_token_count", 0.0),
+        results.get("total_function_count", 0),
+        results.get("max_cyclomatic_complexity", 0),
+        results.get("average_parameters", 0.0),
+    ]

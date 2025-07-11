@@ -1,59 +1,87 @@
-from typing import Sequence
-from pathlib import Path
+"""
+Default Lizard metric plugins.
 
-from ...metric_types import MetricPlugin
-from .base import BaseLizardPlugin
-import inspect
-import pkgutil
-import importlib
+Each plugin extracts one metric from the pre-parsed Lizard output.
+"""
 
-from ..parser import load_lizard_output  # helper to run lizard & get output
+from metrics.lizard_metrics.plugins.base import LizardPlugin
 
 
-def get_default_plugins() -> Sequence[MetricPlugin]:
+class AverageFunctionLengthPlugin(LizardPlugin):
+    @classmethod
+    def name(cls) -> str:
+        return "average_function_length"
+
+    def extract(self, lizard_metrics: list[dict], file_path: str) -> float:
+        """
+        Calculate the average function length across all entries.
+
+        Args:
+            lizard_metrics (list[dict]): Lizard metric entries.
+            file_path (str): Path to the analysed file.
+
+        Returns:
+            float: Average function length.
+        """
+        lengths = [m["value"] for m in lizard_metrics if m["name"] == "average_function_length"]
+        return round(sum(lengths) / len(lengths), 2) if lengths else 0.0
+
+
+class AverageCyclomaticComplexityPlugin(LizardPlugin):
+    @classmethod
+    def name(cls) -> str:
+        return "average_function_complexity"
+
+    def extract(self, lizard_metrics: list[dict], file_path: str) -> float:
+        """
+        Calculate the average cyclomatic complexity.
+
+        Args:
+            lizard_metrics (list[dict]): Lizard metric entries.
+            file_path (str): Path to the analysed file.
+
+        Returns:
+            float: Average cyclomatic complexity.
+        """
+        values = [m["value"] for m in lizard_metrics if m["name"] == "average_function_complexity"]
+        return round(sum(values) / len(values), 2) if values else 0.0
+
+
+class MaintainabilityIndexPlugin(LizardPlugin):
+    @classmethod
+    def name(cls) -> str:
+        return "maintainability_index"
+
+    def extract(self, lizard_metrics: list[dict], file_path: str) -> float:
+        """
+        Extract the maintainability index.
+
+        Args:
+            lizard_metrics (list[dict]): Lizard metric entries.
+            file_path (str): Path to the analysed file.
+
+        Returns:
+            float: Maintainability index if found, else 0.0
+        """
+        for m in lizard_metrics:
+            if m["name"] == "maintainability_index":
+                return float(m["value"])
+        return 0.0
+
+
+def load_plugins() -> list[LizardPlugin]:
     """
-    Discovers and returns MetricPlugin definitions from all LizardPlugin subclasses.
+    Loads all default Lizard metric plugins.
 
     Returns:
-        Sequence[MetricPlugin]: One plugin entry per metric plugin class.
+        list[LizardPlugin]: List of plugin instances.
     """
-    plugins: list[MetricPlugin] = []
+    return [
+        AverageFunctionLengthPlugin(),
+        AverageCyclomaticComplexityPlugin(),
+        MaintainabilityIndexPlugin(),
+    ]
 
-    # 🔍 Dynamically discover all plugin modules in this directory
-    plugin_pkg = __name__.rsplit(".", 1)[0]
-    for _, module_name, _ in pkgutil.iter_modules(__path__):
-        full_module = f"{plugin_pkg}.{module_name}"
-        module = importlib.import_module(full_module)
 
-        for _, obj in inspect.getmembers(module, inspect.isclass):
-            if issubclass(obj, BaseLizardPlugin) and obj is not BaseLizardPlugin:
-                plugin_instance = obj()
-
-                def make_extractor(plugin=obj) -> callable:
-                    def extractor(file_path: Path):
-                        lines = load_lizard_output(file_path)
-                        value = plugin().extract(lines, str(file_path))
-                        return [{
-                            "name": plugin.name(),
-                            "value": value,
-                            "units": None,
-                            "success": True,
-                            "error": None
-                        }]
-                    return extractor
-
-                plugins.append({
-                    "name": obj.name(),
-                    "type": "static_analysis",
-                    "extractor": make_extractor(),
-                    "domain": "code",
-                    "language": "python",
-                    "source": "lizard",
-                    "version": "1.17.10",  # or dynamically resolve later
-                    "format": "metrics",
-                    "tool": "lizard",
-                    "scope": "file",
-                    "outputs": [obj.name()],
-                })
-
-    return plugins
+# ✅ Exported list of plugin instances for unified access
+plugins = load_plugins()

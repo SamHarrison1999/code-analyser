@@ -1,7 +1,7 @@
 """
 Base class for Lizard metric plugins.
 
-Each plugin inspects the Lizard output and extracts one metric.
+Each plugin inspects preprocessed Lizard metric entries and extracts one metric.
 """
 
 from abc import ABC, abstractmethod
@@ -11,25 +11,26 @@ from typing import Any
 class LizardPlugin(ABC):
     """
     Abstract base class for Lizard metric plugins.
-    Plugins operate on parsed Lizard diagnostic lines.
+    Plugins operate on Lizard's pre-parsed metric entries.
     """
 
     @classmethod
     @abstractmethod
     def name(cls) -> str:
         """
-        Returns the unique name of the plugin metric.
+        Returns:
+            str: The unique name of the plugin metric.
         """
         pass
 
     @abstractmethod
-    def extract(self, lizard_output: list[str], file_path: str) -> Any:
+    def extract(self, lizard_metrics: list[dict], file_path: str) -> Any:
         """
         Computes a metric from Lizard output.
 
         Args:
-            lizard_output (list[str]): Raw lines of Lizard output.
-            file_path (str): Path to the source file being analysed.
+            lizard_metrics (list[dict]): List of Lizard metric entries with 'name' and 'value'.
+            file_path (str): Path to the analysed source file.
 
         Returns:
             Any: The computed metric (int, float, etc.).
