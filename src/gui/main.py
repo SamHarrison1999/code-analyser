@@ -1,9 +1,9 @@
-# gui/main.py
+# src/gui/main.py
 
+import sys
 import tkinter as tk
 from tkinter import ttk
 from gui.gui_components import launch_gui
-
 
 
 def start_main_gui(splash: tk.Tk, progress: ttk.Progressbar):
@@ -36,4 +36,6 @@ def show_splash_and_start():
 
 
 if __name__ == "__main__":
-    show_splash_and_start()
+    # ✅ Prevent recursive GUI spawning from subprocess calls (e.g. `-m metrics.main`)
+    if "metrics.main" not in sys.argv and not any(arg.endswith("metrics/main.py") for arg in sys.argv):
+        show_splash_and_start()

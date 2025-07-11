@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "code-analyser"
-version = "0.1.0"
-description = "Pluggable AST, Bandit, and static analysis metric extractor for Python code quality analysis"
+version = "1.0.0"
+description = "Pluggable AST, Bandit, and static analysis metric extractor for Python code quality analysis with optional GUI"
 authors = [
     { name = "Samuel Harrison", email = "sh18784@essex.ac.uk" }
 ]
@@ -20,13 +20,14 @@ dependencies = [
     "pydocstyle>=6.3.0",
     "mplcursors>=0.5",
     "pyflakes>=3.2.0",
-    "setuptools>=61.0",
+    "setuptools>=61.0"
 ]
 
 [project.optional-dependencies]
 gui = [
-    "mplcursors",
-    "matplotlib",
+    "matplotlib>=3.5",
+    "mplcursors>=0.5",
+    "tk"
 ]
 
 [tool.setuptools.packages.find]

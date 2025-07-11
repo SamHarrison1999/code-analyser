@@ -1,4 +1,4 @@
-# gui/gui_components.py
+# src/gui/gui_components.py
 
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
@@ -14,45 +14,52 @@ def launch_gui():
     root.title("🧠 Code Analyser GUI")
     root.geometry("1000x900")
 
-    # Initialise Tkinter variables after root is created
+    # Initialise shared tkinter variables
     shared_state.filter_var = tk.StringVar()
     shared_state.metric_scope = tk.StringVar(value="all")
     shared_state.chart_type = tk.StringVar(value="bar")
 
-    # Bind chart redraw on resize
     root.bind("<Configure>", lambda event: on_resize(event))
 
-    # Top control panel
+    # Control panel
     top_frame = tk.Frame(root)
     top_frame.pack(pady=10)
-    tk.Button(top_frame, text="📂 File", command=lambda: run_metric_extraction(filedialog.askopenfilename())).grid(row=0, column=0, padx=5)
+
+    # ✅ Fixed: Delay file dialog until click
+    def prompt_and_extract_file():
+        path = filedialog.askopenfilename()
+        if path:
+            run_metric_extraction(path)
+
+    tk.Button(top_frame, text="📂 File", command=prompt_and_extract_file).grid(row=0, column=0, padx=5)
     tk.Button(top_frame, text="📁 Folder", command=run_directory_analysis).grid(row=0, column=1, padx=5)
     tk.Button(top_frame, text="📊 File Chart", command=show_chart).grid(row=0, column=2, padx=5)
     tk.Button(top_frame, text="📊 Dir Chart", command=show_directory_summary_chart).grid(row=0, column=3, padx=5)
     tk.Button(top_frame, text="📄 Export CSV", command=export_to_csv).grid(row=0, column=4, padx=5)
     tk.Button(top_frame, text="Exit", command=root.destroy).grid(row=0, column=5, padx=5)
 
-    # Chart options
+    # Chart controls
     option_frame = tk.Frame(root)
     option_frame.pack(pady=5)
     tk.Label(option_frame, text="Chart Type:").pack(side=tk.LEFT)
     tk.Radiobutton(option_frame, text="Bar", variable=shared_state.chart_type, value="bar").pack(side=tk.LEFT)
     tk.Radiobutton(option_frame, text="Pie", variable=shared_state.chart_type, value="pie").pack(side=tk.LEFT)
     tk.Label(option_frame, text="Metric Scope:").pack(side=tk.LEFT, padx=(20, 5))
+
     for label, value in [
         ("AST", "ast"), ("Bandit", "bandit"), ("Flake8", "flake8"),
         ("Cloc", "cloc"), ("Lizard", "lizard"), ("Pydocstyle", "pydocstyle"), ("All", "all")
     ]:
         tk.Radiobutton(option_frame, text=label, variable=shared_state.metric_scope, value=value).pack(side=tk.LEFT)
 
-    # Filter input
+    # Filter bar
     filter_frame = tk.Frame(root)
     filter_frame.pack(fill=tk.X, padx=10, pady=5)
     shared_state.filter_var.trace_add("write", lambda *args: update_tree(shared_state.results))
     tk.Label(filter_frame, text="Filter: ").pack(side=tk.LEFT)
     tk.Entry(filter_frame, textvariable=shared_state.filter_var, width=40).pack(side=tk.LEFT, expand=True, fill=tk.X)
 
-    # Main notebook interface
+    # Main tab layout
     notebook = ttk.Notebook(root)
     notebook.pack(fill=tk.BOTH, expand=True)
 
@@ -94,6 +101,7 @@ def launch_gui():
     summary_scroll.config(command=shared_state.summary_tree.yview)
     notebook.add(summary_tab, text="📈 Summary")
 
+    # Initial population
     root.after(100, update_tree, shared_state.results)
     root.after(100, update_footer_summary)
     root.mainloop()
@@ -135,8 +143,7 @@ def show_chart():
         return flat
 
     flat_metrics = flatten_metrics(file_metrics)
-    keys = []
-    vals = []
+    keys, vals = [], []
 
     for k, v in flat_metrics.items():
         if include_metric(k):

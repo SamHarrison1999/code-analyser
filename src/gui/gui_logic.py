@@ -1,8 +1,7 @@
-# gui/gui_logic.py
+# src/gui/gui_logic.py
 
 from pathlib import Path
 from gui import shared_state
-
 
 
 def update_tree(data: dict):
@@ -10,22 +9,23 @@ def update_tree(data: dict):
     tree = shared_state.tree
     filter_var = shared_state.filter_var
 
-    if not tree or not filter_var:
+    if tree is None or filter_var is None:
         print("⚠️ Tree or filter_var not initialised")
         return
 
     tree.delete(*tree.get_children())
-    filter_text = filter_var.get().lower()
+    filter_text = filter_var.get().lower() if filter_var.get() else ""
 
-    print("🔄 Updating tree with data for filtering:", filter_text)
+    print(f"🔄 Refreshing tree view (filter: '{filter_text}')")
+
     for file, top_level in data.items():
         base_name = Path(file).name
         for key, value in top_level.items():
             if key == "metrics" and isinstance(value, dict):
                 for metric_key, metric_val in value.items():
                     if filter_text in metric_key.lower() or filter_text in base_name.lower():
-                        rounded_value = round(metric_val, 2) if isinstance(metric_val, (float, int)) else metric_val
-                        tree.insert("", "end", values=(base_name, metric_key, rounded_value))
+                        val = round(metric_val, 2) if isinstance(metric_val, (float, int)) else metric_val
+                        tree.insert("", "end", values=(base_name, metric_key, val))
             else:
                 if filter_text in key.lower() or filter_text in base_name.lower():
                     tree.insert("", "end", values=(base_name, key, value))
@@ -36,16 +36,17 @@ def update_footer_summary():
     summary_tree = shared_state.summary_tree
     results = shared_state.results
 
-    if not summary_tree:
+    if summary_tree is None:
         print("⚠️ Summary tree not initialised")
         return
 
+    summary_tree.delete(*summary_tree.get_children())
+
     if not results:
-        summary_tree.delete(*summary_tree.get_children())
         print("⚠️ No results available to summarise")
         return
 
-    all_keys = sorted({k for r in results.values() for k in r.get("metrics", {})})
+    all_keys = sorted({k for result in results.values() for k in result.get("metrics", {})})
 
     def safe_numeric(val):
         try:
@@ -54,19 +55,17 @@ def update_footer_summary():
             return 0.0
 
     totals = {
-        k: sum(safe_numeric(r.get("metrics", {}).get(k, 0)) for r in results.values())
-        for k in all_keys
+        key: sum(safe_numeric(results[file].get("metrics", {}).get(key, 0)) for file in results)
+        for key in all_keys
     }
 
     avgs = {
-        k: round(totals[k] / len(results), 2)
-        for k in all_keys
+        key: round(totals[key] / len(results), 2)
+        for key in all_keys
     }
 
     print(f"📊 Summary totals: {totals}")
     print(f"📊 Summary averages: {avgs}")
 
-    summary_tree.delete(*summary_tree.get_children())
-
-    for k in all_keys:
-        summary_tree.insert("", "end", values=(k, totals[k], avgs[k]))
+    for key in all_keys:
+        summary_tree.insert("", "end", values=(key, totals[key], avgs[key]))

@@ -1,6 +1,7 @@
-# gui/file_ops.py
+# src/gui/file_ops.py
 
 import subprocess
+import sys
 import json
 import csv
 from pathlib import Path
@@ -18,19 +19,26 @@ def run_metric_extraction(file_path, show_result=True):
 
     out_file = Path("metrics.json")
     try:
-        # Use correct script path depending on whether frozen or not
-        if hasattr(__import__('sys'), "_MEIPASS"):
-            script_path = Path(__import__('sys')._MEIPASS) / "src" / "metrics" / "main.py"
+        # ✅ Use module invocation in frozen mode to avoid relaunching GUI
+        if getattr(sys, 'frozen', False):
+            script_args = [
+                sys.executable,
+                "-m", "metrics.main",
+                "--file", file_path,
+                "--out", str(out_file),
+                "--format", "json"
+            ]
         else:
-            script_path = Path(__file__).resolve().parent.parent / "src" / "metrics" / "main.py"
+            script_path = Path(__file__).resolve().parents[1] / "metrics" / "main.py"
+            script_args = [
+                sys.executable,
+                str(script_path),
+                "--file", file_path,
+                "--out", str(out_file),
+                "--format", "json"
+            ]
 
-        cmd = [
-            "python", str(script_path),
-            "--file", file_path,
-            "--out", str(out_file),
-            "--format", "json"
-        ]
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        result = subprocess.run(script_args, capture_output=True, text=True, check=True)
 
         if not out_file.exists():
             raise FileNotFoundError("metrics.json not created.")

@@ -1,4 +1,4 @@
-# gui/chart_utils.py
+# src/gui/chart_utils.py
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -6,8 +6,7 @@ import mplcursors
 import tkinter as tk
 from gui import shared_state
 
-
-# Store last chart config for resize redrawing
+# 🧠 Cache last chart data to support redraw on window resize
 _last_keys = []
 _last_vals = []
 _last_title = ""
@@ -55,9 +54,9 @@ def draw_chart(keys, vals, title, filename):
     for widget in chart_frame.winfo_children():
         widget.destroy()
 
-    chart_frame.update_idletasks()  # Ensure dimensions are up-to-date
+    chart_frame.update_idletasks()  # Refresh dimensions
     pixel_width = max(chart_frame.winfo_width(), 800)
-    inch_width = pixel_width / 100  # DPI = 100
+    inch_width = pixel_width / 100  # Matplotlib default DPI
 
     def prettify(label):
         return label.replace("metrics.", "").replace("_", " ").strip().capitalize()
@@ -86,13 +85,13 @@ def draw_chart(keys, vals, title, filename):
         fig.tight_layout()
 
     else:
-        # Pie chart with dynamic square size
+        # 🥧 Pie chart with tooltips and square layout
         fig, ax = plt.subplots(figsize=(inch_width, inch_width))
         wedges, _ = ax.pie(vals, labels=None, startangle=90)
         ax.set_title(title)
-        ax.axis('equal')
+        ax.axis('equal')  # Keep chart circular
 
-        # Compact layout
+        # Compact margins
         fig.subplots_adjust(left=0.05, right=0.95, top=0.90, bottom=0.05)
 
         tooltip = ax.annotate(
@@ -115,10 +114,10 @@ def draw_chart(keys, vals, title, filename):
 
         fig.canvas.mpl_connect("motion_notify_event", format_tooltip)
 
-    # Save chart to file
+    # Save to file
     fig.savefig(filename)
 
-    # Embed chart in scrollable Tkinter canvas
+    # Embed into Tkinter canvas with scrollbar
     canvas_container = tk.Canvas(chart_frame)
     scrollbar = tk.Scrollbar(chart_frame, orient="vertical", command=canvas_container.yview)
     canvas_container.configure(yscrollcommand=scrollbar.set)
