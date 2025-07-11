@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "code-analyser"
 version = "0.1.0"
-description = "Pluggable AST and Bandit metrics extractor for Python code analysis"
+description = "Pluggable AST, Bandit, and static analysis metric extractor for Python code quality analysis"
 authors = [
     { name = "Samuel Harrison", email = "sh18784@essex.ac.uk" }
 ]
@@ -15,7 +15,18 @@ requires-python = ">=3.8"
 dependencies = [
     "matplotlib>=3.5",
     "bandit>=1.7.5",
-    "tk",  # may be system-installed for GUI
+    "flake8>=5.0.0",
+    "lizard>=1.17.10",
+    "pydocstyle>=6.3.0",
+    "mplcursors>=0.5",
+    "pyflakes>=3.2.0",
+    "setuptools>=61.0",
+]
+
+[project.optional-dependencies]
+gui = [
+    "mplcursors",
+    "matplotlib",
 ]
 
 [tool.setuptools.packages.find]
@@ -23,3 +34,5 @@ where = ["src"]
 
 [project.scripts]
 code-analyser = "metrics.main:main"
+code-analyser-gui = "gui.main:show_splash_and_start"
+
