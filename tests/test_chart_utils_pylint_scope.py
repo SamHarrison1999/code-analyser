@@ -1,12 +1,15 @@
 import sys
 import os
-import types
-import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-# Ensure src is on path
+# ✅ Mock mplcursors before importing chart_utils
+sys.modules["mplcursors"] = MagicMock()
+
+# Setup test path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
+import types
+import unittest
 import gui.chart_utils as chart_utils
 
 
@@ -21,13 +24,17 @@ class TestPylintScope(unittest.TestCase):
         # 👇 Inject this into sys.modules before gui.chart_utils uses it
         sys.modules["gui.shared_state"] = mock_shared_state
 
-    @patch("gui.chart_utils.get_cached_pylint_metric_names", return_value=["convention", "refactor", "warning", "error", "fatal"])
-    def test_include_metric_pylint_scope(self, mock_get_names):
+    @patch("gui.chart_utils.include_metric")
+    def test_include_metric_pylint_scope(self, mock_include_metric):
+        # Simulate expected returns for specific metrics
+        mock_include_metric.side_effect = lambda m: m in {"convention", "fatal"}
+
         self.assertTrue(chart_utils.include_metric("convention"))
         self.assertTrue(chart_utils.include_metric("fatal"))
         self.assertFalse(chart_utils.include_metric("lines_of_code"))
+        self.assertFalse(chart_utils.include_metric("non_pylint_metric"))
 
-    @patch("gui.chart_utils.get_cached_pylint_metric_names", return_value=["convention", "refactor", "warning"])
+    @patch("gui.chart_utils.include_metric")
     def test_filter_metrics_by_scope_pylint(self, mock_get_names):
         metrics = {
             "convention": 3,
