@@ -1,19 +1,17 @@
-# File: src/metrics/ast_metrics/__init__.py
-
 """
 AST Metrics Subpackage
 
-This subpackage provides the core logic for extracting AST-based metrics
-from Python source code using a plugin-driven architecture.
+This subpackage provides the core logic for extracting metrics from the
+abstract syntax tree (AST) of Python source code using a plugin-based architecture.
 
-These metrics are useful for:
-- Machine learning pipelines
-- Code quality scoring
-- Static analysis and audit tools
+These metrics support:
+- Machine learning pipelines (e.g., code embeddings, quality prediction)
+- Code quality scoring and comparisons
+- Static analysis, audits, and visualisations
 
 Exposes:
-- ASTMetricExtractor: a pluggable metric runner
-- gather_ast_metrics: returns list of metric values for training/inference
+- ASTMetricExtractor: A pluggable class that runs all registered AST plugins.
+- gather_ast_metrics: A helper function that returns metric values for a file.
 """
 
 from .extractor import ASTMetricExtractor

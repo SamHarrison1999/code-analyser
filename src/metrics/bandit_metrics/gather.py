@@ -1,5 +1,3 @@
-# File: src/metrics/bandit_metrics/gather.py
-
 from typing import List
 from metrics.bandit_metrics.extractor import BanditExtractor
 from metrics.bandit_metrics.plugins import load_plugins
@@ -13,10 +11,10 @@ def gather_bandit_metrics(file_path: str) -> List[int]:
     The ordering corresponds to the plugin registration order.
 
     Args:
-        file_path (str): Path to the Python file to analyse.
+        file_path (str): Path to the Python file to scan.
 
     Returns:
-        List[int]: Ordered list of Bandit metric values.
+        List[int]: Plugin metrics in registered order.
     """
     extractor = BanditExtractor(file_path)
     metric_dict = extractor.extract()

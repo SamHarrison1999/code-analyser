@@ -1,14 +1,21 @@
+"""
+Shared GUI State Module
+
+This module defines globally shared variables for coordinating state between
+different GUI components (e.g., chart rendering, metric filters, and TreeViews).
+"""
+
 from typing import Optional
 import tkinter as tk
 from tkinter.ttk import Treeview
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # 🔢 Collected metrics across all analysed files
 # Format: { file_path: {metric_name: value, ...}, ... }
 results: dict[str, dict] = {}
 
 # 🖼️ Currently rendered Matplotlib chart canvas (used for redraw/export)
-# Typically an instance of FigureCanvasTkAgg
-chart_canvas: Optional[object] = None
+chart_canvas: Optional[FigureCanvasTkAgg] = None
 
 # 📊 Frame widget where charts are drawn (set during GUI layout)
 chart_frame: Optional[tk.Frame] = None

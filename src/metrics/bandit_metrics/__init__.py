@@ -1,5 +1,3 @@
-# File: src/metrics/bandit_metrics/__init__.py
-
 """
 Bandit Metrics Subpackage
 
@@ -13,6 +11,10 @@ Metrics are extracted through:
 - gather_bandit_metrics() for ML/CSV-ready output
 """
 
-from .extractor import gather_bandit_metrics
+from .extractor import BanditExtractor
+from .gather import gather_bandit_metrics  # Correct import from gather.py
 
-__all__ = ["gather_bandit_metrics"]
+__all__ = [
+    "BanditExtractor",
+    "gather_bandit_metrics",
+]

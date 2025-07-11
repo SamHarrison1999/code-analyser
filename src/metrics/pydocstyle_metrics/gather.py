@@ -1,18 +1,33 @@
-# File: metrics/pydocstyle_metrics/gather.py
+"""
+Pydocstyle Metric Gatherer
+
+Provides a plugin-compatible interface to extract Pydocstyle-based
+documentation metrics in a consistent order for use in ML pipelines or CSV output.
+"""
 
 from typing import Union
 from .extractor import PydocstyleExtractor
 
+
 def gather_pydocstyle_metrics(file_path: str) -> list[Union[int, float]]:
     """
-    Gathers Pydocstyle metrics from the given file.
+    Gathers Pydocstyle metrics from the given file and returns them
+    in a fixed order for consistency across data processing pipelines.
 
-    Returns a list of metrics in the following order:
-    - number_of_pydocstyle_violations
-    - number_of_missing_doc_strings
-    - percentage_of_compliance_with_docstring_style
+    Args:
+        file_path (str): Path to the Python source file.
+
+    Returns:
+        list[Union[int, float]]: Ordered metrics:
+            - number_of_pydocstyle_violations (int)
+            - number_of_missing_doc_strings (int)
+            - percentage_of_compliance_with_docstring_style (float)
     """
-    results = PydocstyleExtractor(file_path).extract()
+    try:
+        results = PydocstyleExtractor(file_path).extract()
+    except Exception:
+        # ⚠️ SAST Risk: Don't allow metric gathering to break pipeline
+        results = {}
 
     return [
         results.get("number_of_pydocstyle_violations", 0),

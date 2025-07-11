@@ -18,7 +18,8 @@ class PydocstylePlugin(ABC):
     @abstractmethod
     def name(cls) -> str:
         """
-        Returns the unique name of the plugin metric.
+        Returns:
+            str: The unique name of the plugin metric.
         """
         pass
 
@@ -32,6 +33,7 @@ class PydocstylePlugin(ABC):
             file_path (str): Path to the source file being analysed.
 
         Returns:
-            Any: The computed metric (int, float, etc.).
+            Any: The computed metric (e.g., int or float).
         """
         pass
+

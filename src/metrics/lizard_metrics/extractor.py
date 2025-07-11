@@ -1,5 +1,3 @@
-# File: metrics/lizard_metrics/__init__.py
-
 """
 Initialise the Lizard metric extractor module.
 
@@ -31,25 +29,21 @@ class LizardExtractor(MetricExtractorBase):
         """
         try:
             analysis_result = analyze_file(self.file_path)
-            if not analysis_result.function_list:
-                return {
-                    "average_cyclomatic_complexity": 0.0,
-                    "average_token_count": 0.0,
-                    "total_function_count": 0,
-                    "max_cyclomatic_complexity": 0,
-                    "average_parameters": 0.0,
-                }
+            functions = analysis_result.function_list
 
-            complexities = [f.cyclomatic_complexity for f in analysis_result.function_list]
-            token_counts = [f.token_count for f in analysis_result.function_list]
-            parameter_counts = [len(f.parameters) for f in analysis_result.function_list]
+            if not functions:
+                return self._default_metrics()
+
+            complexities = [f.cyclomatic_complexity for f in functions]
+            token_counts = [f.token_count for f in functions]
+            parameter_counts = [len(f.parameters) for f in functions]
 
             metrics = {
                 "average_cyclomatic_complexity": round(sum(complexities) / len(complexities), 2),
                 "average_token_count": round(sum(token_counts) / len(token_counts), 2),
-                "total_function_count": len(analysis_result.function_list),
+                "total_function_count": len(functions),
                 "max_cyclomatic_complexity": max(complexities),
-                "average_parameters": round(sum(parameter_counts) / len(parameter_counts), 2)
+                "average_parameters": round(sum(parameter_counts) / len(parameter_counts), 2),
             }
 
             logging.info(f"[LizardExtractor] Metrics for {self.file_path}:\n{metrics}")
@@ -57,16 +51,24 @@ class LizardExtractor(MetricExtractorBase):
 
         except Exception as e:
             logging.error(f"[LizardExtractor] Error analysing {self.file_path}: {e}")
-            return {
-                "average_cyclomatic_complexity": 0.0,
-                "average_token_count": 0.0,
-                "total_function_count": 0,
-                "max_cyclomatic_complexity": 0,
-                "average_parameters": 0.0,
-            }
+            return self._default_metrics()
+
+    def _default_metrics(self) -> dict[str, Union[int, float]]:
+        """
+        Returns a default metrics dictionary with zeroed values.
+
+        Returns:
+            dict[str, int | float]: Zeroed fallback metrics.
+        """
+        return {
+            "average_cyclomatic_complexity": 0.0,
+            "average_token_count": 0.0,
+            "total_function_count": 0,
+            "max_cyclomatic_complexity": 0,
+            "average_parameters": 0.0,
+        }
 
 
-# ✅ Required by unified CLI entry point
 def extract_lizard_metrics(file_path: str) -> dict[str, Union[int, float]]:
     """
     Convenience wrapper for CLI and plugin integration.
@@ -79,12 +81,12 @@ def extract_lizard_metrics(file_path: str) -> dict[str, Union[int, float]]:
     """
     return LizardExtractor(file_path).extract()
 
+
 def get_lizard_extractor():
     """
     Plugin-compatible entry point for Lizard metric extraction.
 
     Returns:
-        LizardExtractor: A callable extractor instance.
+        type[LizardExtractor]: Callable extractor class for plugin runners.
     """
     return LizardExtractor
-

@@ -1,7 +1,14 @@
-from metrics.cloc_metrics.plugins.base import BaseClocMetricPlugin
+from metrics.cloc_metrics.plugins.base import CLOCMetricPlugin
 
+class CommentDensityPlugin(CLOCMetricPlugin):
+    """
+    Computes the ratio of comment lines to total lines (comment + blank + code)
+    as a float rounded to 4 decimal places.
 
-class CommentDensityPlugin(BaseClocMetricPlugin):
+    Returns:
+        float: Comment density (0.0 if total lines is zero).
+    """
+
     def name(self) -> str:
         return "comment_density"
 

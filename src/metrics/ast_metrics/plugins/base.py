@@ -1,5 +1,3 @@
-# File: src/metrics/ast_metrics/plugins/base.py
-
 import ast
 from abc import ABC, abstractmethod
 
@@ -8,29 +6,31 @@ class ASTMetricPlugin(ABC):
     """
     Abstract base class for AST metric plugins.
 
-    Each plugin must define:
-    - a unique name for the metric (used as dictionary key)
-    - a `visit()` method that computes the metric from the AST
+    Each plugin must:
+    - Provide a unique metric name via the `name()` method
+    - Implement `visit()` to compute the metric from an AST and source code
     """
 
     @abstractmethod
     def name(self) -> str:
         """
+        Get the unique name for the metric provided by this plugin.
+
         Returns:
-            str: Unique metric name this plugin computes.
+            str: The name of the metric (used as a dictionary key).
         """
-        raise NotImplementedError("Plugin must define a metric name.")
+        raise NotImplementedError("ASTMetricPlugin subclasses must implement name().")
 
     @abstractmethod
     def visit(self, tree: ast.AST, code: str) -> int:
         """
-        Computes the metric value by inspecting the AST and/or source code.
+        Compute the metric's value by traversing the AST or analysing the source code.
 
         Args:
-            tree (ast.AST): The parsed abstract syntax tree.
-            code (str): The original source code string.
+            tree (ast.AST): Parsed abstract syntax tree of the source file.
+            code (str): Raw source code as a string.
 
         Returns:
-            int: The computed value for this metric.
+            int: Computed integer value for the metric.
         """
-        raise NotImplementedError("Plugin must implement visit().")
+        raise NotImplementedError("ASTMetricPlugin subclasses must implement visit().")

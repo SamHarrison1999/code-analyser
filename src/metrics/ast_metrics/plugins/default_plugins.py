@@ -1,5 +1,3 @@
-# File: src/metrics/ast_metrics/plugins/default_plugins.py
-
 import ast
 import re
 from .base import ASTMetricPlugin
@@ -16,14 +14,14 @@ class ModuleDocstringPlugin(ASTMetricPlugin):
         return "module_docstring"
 
     def visit(self, tree: ast.AST, code: str) -> int:
-        return int(bool(ast.get_docstring(tree)))
+        return int(ast.get_docstring(tree) is not None)
 
 
 class TodoCommentPlugin(ASTMetricPlugin):
     """
     Counts the number of TODO or FIXME comments in the source code.
 
-    Only lines starting with '#' are inspected.
+    Only lines that begin with '#' are considered, case-insensitively.
     """
     def name(self) -> str:
         return "todo_comments"
@@ -32,7 +30,7 @@ class TodoCommentPlugin(ASTMetricPlugin):
         return sum(
             1
             for line in code.splitlines()
-            if line.strip().startswith("#") and re.search(r"\b(TODO|FIXME)\b", line, re.IGNORECASE)
+            if line.strip().startswith("#") and re.search(r"\b(?:TODO|FIXME)\b", line, re.IGNORECASE)
         )
 
 
@@ -44,15 +42,25 @@ class NestedFunctionPlugin(ASTMetricPlugin):
         return "nested_functions"
 
     def visit(self, tree: ast.AST, code: str) -> int:
-        def count_nested(node: ast.AST, parent_is_function: bool = False) -> int:
+        def count_nested(node: ast.AST, inside_function: bool = False) -> int:
+            """
+            Recursively count nested functions.
+
+            Args:
+                node (ast.AST): Current AST node.
+                inside_function (bool): Whether the parent is a function node.
+
+            Returns:
+                int: Count of nested functions under this node.
+            """
             count = 0
             for child in ast.iter_child_nodes(node):
                 if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                    if parent_is_function:
+                    if inside_function:
                         count += 1
                     count += count_nested(child, True)
                 else:
-                    count += count_nested(child, parent_is_function)
+                    count += count_nested(child, inside_function)
             return count
 
         return count_nested(tree)
@@ -106,5 +114,5 @@ class ClassDocstringPlugin(ASTMetricPlugin):
         return sum(
             1
             for node in ast.walk(tree)
-            if isinstance(node, ast.ClassDef) and ast.get_docstring(node)
+            if isinstance(node, ast.ClassDef) and ast.get_docstring(node) is not None
         )

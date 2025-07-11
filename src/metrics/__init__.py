@@ -46,7 +46,7 @@ __all__ = [
     "PyflakesExtractor",
     "PylintMetricExtractor",
 
-    # Utilities
+    # Utilities / Plugins
     "extract_lizard_metrics",
     "extract_pyflakes_metrics",
     "load_plugins",

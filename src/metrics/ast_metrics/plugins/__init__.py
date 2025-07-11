@@ -1,10 +1,8 @@
-# File: src/metrics/ast_metrics/plugins/__init__.py
-
 """
 Plugin system for AST metric extraction.
 
 This module exposes all available AST plugin classes and provides:
-- A central location to register default plugin classes
+- A central registry of default plugin classes
 - A loader function to instantiate all registered plugins
 """
 
@@ -38,6 +36,7 @@ def load_plugins() -> list[ASTMetricPlugin]:
         list[ASTMetricPlugin]: A list of active plugin instances.
     """
     return [plugin() for plugin in DEFAULT_PLUGINS]
+
 
 __all__ = [
     "ASTMetricPlugin",

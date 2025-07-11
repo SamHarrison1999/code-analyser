@@ -1,9 +1,16 @@
 from pathlib import Path
+from typing import Any
+
 from gui import shared_state
 
 
-def update_tree(data: dict):
-    """Refresh the metric tree view with new results, applying any active filter."""
+def update_tree(data: dict[str, dict[str, Any]]) -> None:
+    """
+    Refresh the metric tree view with new results, applying any active text filter.
+
+    Args:
+        data (dict): A mapping of file paths to metric dictionaries.
+    """
     tree = shared_state.tree
     filter_var = shared_state.filter_var
 
@@ -25,8 +32,10 @@ def update_tree(data: dict):
                 tree.insert("", "end", values=(base_name, metric_key, val))
 
 
-def update_footer_summary():
-    """Update the summary tree view with totals and averages of all collected metrics."""
+def update_footer_summary() -> None:
+    """
+    Update the summary tree view with total and average values for each metric.
+    """
     summary_tree = shared_state.summary_tree
     results = shared_state.results
 
@@ -47,14 +56,14 @@ def update_footer_summary():
 
     all_keys = sorted({k for metrics in flattened_results.values() for k in metrics})
 
-    def safe_numeric(val):
+    def safe_numeric(val: Any) -> float:
         try:
             return float(val)
         except Exception:
             return 0.0
 
     totals = {
-        key: sum(safe_numeric(flattened_results[file].get(key, 0)) for file in flattened_results)
+        key: round(sum(safe_numeric(flattened_results[file].get(key, 0)) for file in flattened_results), 2)
         for key in all_keys
     }
 
@@ -70,9 +79,18 @@ def update_footer_summary():
         summary_tree.insert("", "end", values=(key, totals[key], avgs[key]))
 
 
-def flatten_metrics(d, prefix=""):
-    """Recursively flatten nested dictionaries for consistent charting and aggregation."""
-    flat = {}
+def flatten_metrics(d: dict[str, Any], prefix: str = "") -> dict[str, float]:
+    """
+    Recursively flatten a nested dictionary of metrics.
+
+    Args:
+        d (dict): The (possibly nested) dictionary of metric values.
+        prefix (str): The current path prefix for recursive keys.
+
+    Returns:
+        dict[str, float]: Flattened dictionary with full dotted paths as keys.
+    """
+    flat: dict[str, float] = {}
     for k, v in d.items():
         full_key = f"{prefix}.{k}" if prefix else k
         if isinstance(v, (int, float)):

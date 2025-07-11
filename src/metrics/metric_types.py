@@ -1,5 +1,3 @@
-# File: src/metrics/metric_types.py
-
 from pathlib import Path
 from typing import Callable, Literal, TypedDict, Union, Dict, List
 from abc import ABC, abstractmethod
@@ -8,9 +6,9 @@ from abc import ABC, abstractmethod
 class MetricResult(TypedDict):
     name: str
     value: object
-    units: str | None
+    units: Union[str, None]
     success: bool
-    error: str | None
+    error: Union[str, None]
 
 
 # Function-style metric extractor (used for plugin systems)

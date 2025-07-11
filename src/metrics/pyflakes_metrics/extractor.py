@@ -1,25 +1,29 @@
-# File: metrics/pyflakes_metrics/extractor.py
-
 import logging
 import subprocess
-from typing import Union
+from typing import Union, List
 from metrics.metric_types import MetricExtractorBase
+from metrics.pyflakes_metrics.plugins.base import PyflakesPlugin
+from metrics.pyflakes_metrics.plugins import load_plugins
 
+# 🧠 ML Signal: Plugin-based extraction allows extensible, labelled metrics
+# ⚠️ SAST Risk: Parsing raw linter output may be brittle; sanitize carefully
 
 class PyflakesExtractor(MetricExtractorBase):
     """
-    Extracts static code issues using pyflakes.
+    Extracts static code issues using pyflakes with plugin-based extensibility.
     """
+
+    def __init__(self, file_path: str, plugins: List[PyflakesPlugin] = None):
+        self.file_path = file_path
+        self.plugins = plugins if plugins else load_plugins()
+        self.result_metrics: dict[str, Union[int, float]] = {}
 
     def extract(self) -> dict[str, Union[int, float]]:
         """
-        Runs pyflakes on the given file and parses basic issue counts.
+        Runs pyflakes on the given file and applies plugins to compute metrics.
 
         Returns:
-            dict[str, int | float]: Dictionary containing:
-                - number_of_undefined_names
-                - number_of_syntax_errors
-                - number_of_pyflakes_issues
+            dict[str, int | float]: Dictionary of computed metrics.
         """
         try:
             result = subprocess.run(
@@ -27,27 +31,24 @@ class PyflakesExtractor(MetricExtractorBase):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 encoding="utf-8",
-                check=False
+                check=False,
             )
-            output = result.stdout.splitlines()
+            output_lines = result.stdout.splitlines()
+
         except Exception as e:
             logging.error(f"[PyflakesExtractor] Error running pyflakes on {self.file_path}: {e}")
-            return {
-                "number_of_undefined_names": 0,
-                "number_of_syntax_errors": 0,
-                "number_of_pyflakes_issues": 0
-            }
+            # Return zeroed metrics for all plugins
+            return {plugin.name(): 0 for plugin in self.plugins}
 
-        # 🔍 Count lines containing specific error types
-        num_undefined = sum("undefined name" in line for line in output)
-        num_syntax = sum("syntax error" in line.lower() for line in output)
+        metrics = {}
+        for plugin in self.plugins:
+            try:
+                metrics[plugin.name()] = plugin.extract(output_lines, self.file_path)
+            except Exception as e:
+                logging.warning(f"[PyflakesExtractor] Plugin {plugin.name()} failed: {e}")
+                metrics[plugin.name()] = 0
 
-        metrics = {
-            "number_of_undefined_names": num_undefined,
-            "number_of_syntax_errors": num_syntax,
-            "number_of_pyflakes_issues": len(output)
-        }
-
+        self.result_metrics = metrics
         logging.info(f"[PyflakesExtractor] Metrics for {self.file_path}:\n{metrics}")
         return metrics
 

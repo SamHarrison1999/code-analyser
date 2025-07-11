@@ -1,7 +1,8 @@
+import tkinter as tk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import mplcursors
-import tkinter as tk
+
 from gui import shared_state
 
 # 🧠 Cache last chart data to support redraw on window resize
@@ -34,7 +35,7 @@ def include_metric(metric: str) -> bool:
 
     return True
 
-def draw_chart(keys, vals, title, filename):
+def draw_chart(keys: list[str], vals: list[float], title: str, filename: str) -> None:
     """Render either bar or pie chart for given metric values."""
     global _last_keys, _last_vals, _last_title, _last_filename
     _last_keys = keys
@@ -43,28 +44,28 @@ def draw_chart(keys, vals, title, filename):
     _last_filename = filename
 
     chart_frame = shared_state.chart_frame
-    chart_type = shared_state.chart_type
+    chart_type = shared_state.chart_type.get() if shared_state.chart_type else "bar"
 
     if not chart_frame:
         print("⚠️ chart_frame not initialised. Cannot draw chart.")
         return
 
-    print(f"🧮 Drawing chart with {len(keys)} metrics. Type: {chart_type.get()}. Title: {title}")
+    print(f"🧮 Drawing chart with {len(keys)} metrics. Type: {chart_type}. Title: {title}")
 
-    # Clear old chart widgets
+    # Clear previous chart widgets
     for widget in chart_frame.winfo_children():
         widget.destroy()
 
-    chart_frame.update_idletasks()  # Refresh dimensions
+    chart_frame.update_idletasks()
     pixel_width = max(chart_frame.winfo_width(), 800)
     inch_width = pixel_width / 100  # Matplotlib default DPI
 
-    def prettify(label):
+    def prettify(label: str) -> str:
         return label.replace("metrics.", "").replace("_", " ").strip().capitalize()
 
     pretty_keys = [prettify(k) for k in keys]
 
-    if chart_type.get() == "bar":
+    if chart_type == "bar":
         height_per_metric = 0.4
         fig_height = max(4, len(pretty_keys) * height_per_metric)
         fig, ax = plt.subplots(figsize=(inch_width, fig_height))
@@ -74,8 +75,6 @@ def draw_chart(keys, vals, title, filename):
         ax.set_ylabel("Metric")
         ax.tick_params(axis='y', labelsize=8)
         ax.set_title(title)
-
-        # ✅ Fix top and bottom clipping
         ax.set_ylim(-0.6, len(pretty_keys) - 0.4)
 
         cursor = mplcursors.cursor(bars, hover=True)
@@ -84,15 +83,12 @@ def draw_chart(keys, vals, title, filename):
         ))
 
         fig.tight_layout()
-
     else:
-        # 🥧 Pie chart with hover tooltips and equal aspect
+        # 🥧 Pie chart with hover tooltip
         fig, ax = plt.subplots(figsize=(inch_width, inch_width))
-        wedges, texts = ax.pie(vals, labels=None, startangle=90)
+        wedges, _ = ax.pie(vals, labels=None, startangle=90)
         ax.set_title(title)
-        ax.axis('equal')  # Keep chart circular
-
-        # Compact margins
+        ax.axis('equal')
         fig.subplots_adjust(left=0.05, right=0.95, top=0.90, bottom=0.05)
 
         tooltip = ax.annotate(
@@ -116,10 +112,10 @@ def draw_chart(keys, vals, title, filename):
 
         fig.canvas.mpl_connect("motion_notify_event", format_tooltip)
 
-    # Save to file
+    # Save figure
     fig.savefig(filename)
 
-    # Embed into Tkinter canvas with scrollbar
+    # Embed figure in Tkinter Canvas with scrollbar
     canvas_container = tk.Canvas(chart_frame)
     scrollbar = tk.Scrollbar(chart_frame, orient="vertical", command=canvas_container.yview)
     canvas_container.configure(yscrollcommand=scrollbar.set)
@@ -137,8 +133,7 @@ def draw_chart(keys, vals, title, filename):
 
     shared_state.chart_canvas = chart_canvas
 
-
-def redraw_last_chart():
+def redraw_last_chart() -> None:
     """Redraw the most recently displayed chart to fit resized window."""
     if _last_keys and _last_vals and _last_filename:
         draw_chart(_last_keys, _last_vals, _last_title, _last_filename)

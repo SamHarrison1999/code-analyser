@@ -1,13 +1,15 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from pathlib import Path
+
 from gui import shared_state
 from gui.file_ops import run_metric_extraction, run_directory_analysis, export_to_csv
 from gui.chart_utils import draw_chart, include_metric, redraw_last_chart
 from gui.gui_logic import update_tree, update_footer_summary
 
 
-def launch_gui():
+def launch_gui() -> None:
+    """Initialise and launch the Code Analyser Tkinter GUI."""
     root = tk.Tk()
     root.title("🧠 Code Analyser GUI")
     root.geometry("1000x900")
@@ -44,15 +46,9 @@ def launch_gui():
     tk.Label(option_frame, text="Metric Scope:").pack(side=tk.LEFT, padx=(20, 5))
 
     for label, value in [
-        ("AST", "ast"),
-        ("Bandit", "bandit"),
-        ("Flake8", "flake8"),
-        ("Cloc", "cloc"),
-        ("Lizard", "lizard"),
-        ("Pydocstyle", "pydocstyle"),
-        ("Pyflakes", "pyflakes"),
-        ("Pylint", "pylint"),
-        ("All", "all"),
+        ("AST", "ast"), ("Bandit", "bandit"), ("Flake8", "flake8"),
+        ("Cloc", "cloc"), ("Lizard", "lizard"), ("Pydocstyle", "pydocstyle"),
+        ("Pyflakes", "pyflakes"), ("Pylint", "pylint"), ("All", "all")
     ]:
         tk.Radiobutton(option_frame, text=label, variable=shared_state.metric_scope, value=value).pack(side=tk.LEFT)
 
@@ -111,13 +107,13 @@ def launch_gui():
     root.mainloop()
 
 
-def on_resize(event):
+def on_resize(event: tk.Event) -> None:
     """Redraw chart when the main window is resized."""
     if event.widget == event.widget.winfo_toplevel():
         redraw_last_chart()
 
 
-def show_chart():
+def show_chart() -> None:
     """Display chart for a selected file's metrics."""
     if not shared_state.results or not shared_state.tree:
         return
@@ -132,7 +128,7 @@ def show_chart():
     file_metrics = {}
 
     for f, data in shared_state.results.items():
-        if Path(f).name == file_name:
+        if Path(f).name == Path(file_name).name:
             file_metrics = data
             break
 
@@ -148,10 +144,11 @@ def show_chart():
         messagebox.showinfo("No Numeric Metrics", f"No numeric metrics available for {file_name}.")
         return
 
-    draw_chart(keys, vals, f"Metrics for {file_name}", f"chart_{file_name.replace('.py', '')}.png")
+    safe_name = Path(file_name).stem.replace(" ", "_").replace(".", "_")
+    draw_chart(keys, vals, f"Metrics for {file_name}", f"chart_{safe_name}.png")
 
 
-def show_directory_summary_chart():
+def show_directory_summary_chart() -> None:
     """Display combined chart summarising all metric values across files."""
     if not shared_state.results:
         messagebox.showinfo("No Data", "No analysis has been run.")
@@ -173,7 +170,7 @@ def show_directory_summary_chart():
     draw_chart(keys, vals, "Directory-wide Metric Summary", "summary_chart.png")
 
 
-def flatten_metrics(d, prefix=""):
+def flatten_metrics(d: dict, prefix: str = "") -> dict:
     """Recursively flatten nested metric dictionaries for charting."""
     flat = {}
     for k, v in d.items():

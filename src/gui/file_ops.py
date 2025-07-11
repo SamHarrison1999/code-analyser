@@ -1,18 +1,21 @@
-# src/gui/file_ops.py
-
 import subprocess
 import sys
 import json
 import csv
 from pathlib import Path
 from tkinter import filedialog, messagebox
+
 from gui.shared_state import results
 from gui.gui_logic import update_tree, update_footer_summary
 
 
-def run_metric_extraction(file_path, show_result=True):
+def run_metric_extraction(file_path: str, show_result: bool = True) -> None:
     """
-    Run metric analysis on a single file and store the result.
+    Run static metric analysis on a single Python file and store the result.
+
+    Args:
+        file_path (str): Full path to the file to analyse.
+        show_result (bool): Whether to immediately update the GUI with the result.
     """
     if not file_path:
         return
@@ -29,7 +32,7 @@ def run_metric_extraction(file_path, show_result=True):
                 "--format", "json"
             ]
         else:
-            script_path = Path(__file__).resolve().parents[1] / "metrics" / "main.py"
+            script_path = Path(__file__).resolve().parent.parent / "metrics" / "main.py"
             script_args = [
                 sys.executable,
                 str(script_path),
@@ -43,7 +46,7 @@ def run_metric_extraction(file_path, show_result=True):
         if not out_file.exists():
             raise FileNotFoundError("metrics.json not created.")
 
-        with open(out_file, "r", encoding="utf-8") as f:
+        with out_file.open("r", encoding="utf-8") as f:
             parsed = json.load(f)
 
         if not isinstance(parsed, dict) or "metrics" not in parsed:
@@ -61,12 +64,12 @@ def run_metric_extraction(file_path, show_result=True):
             f"Error analysing: {file_path}\n\nExit Code: {e.returncode}\n\n{e.stderr}"
         )
     except Exception as e:
-        messagebox.showerror("Unexpected Error", str(e))
+        messagebox.showerror("Unexpected Error", f"{type(e).__name__}: {str(e)}")
 
 
-def run_directory_analysis():
+def run_directory_analysis() -> None:
     """
-    Prompt the user to select a folder and run analysis on all .py files inside.
+    Prompt the user to select a folder and analyse all .py files inside recursively.
     """
     folder = filedialog.askdirectory()
     if not folder:
@@ -84,9 +87,9 @@ def run_directory_analysis():
     update_footer_summary()
 
 
-def export_to_csv():
+def export_to_csv() -> None:
     """
-    Export collected metrics to a CSV file, including summary rows.
+    Export the collected metrics to a CSV file, including total and average summary rows.
     """
     if not results:
         messagebox.showinfo("No Data", "No metrics to export.")
@@ -94,7 +97,8 @@ def export_to_csv():
 
     save_path = filedialog.asksaveasfilename(
         defaultextension=".csv",
-        filetypes=[("CSV files", "*.csv")]
+        filetypes=[("CSV files", "*.csv")],
+        title="Export Metrics as CSV"
     )
     if not save_path:
         return
@@ -115,7 +119,7 @@ def export_to_csv():
                 row.append(val)
             writer.writerow(row)
 
-        # Add total and average summary rows
+        # Add blank line and summary rows
         writer.writerow([])
         writer.writerow(["Summary"])
 
@@ -125,7 +129,7 @@ def export_to_csv():
             except Exception:
                 return 0.0
 
-        totals = [sum(safe_numeric(results[f].get(k, 0)) for f in results) for k in metric_keys]
+        totals = [round(sum(safe_numeric(results[f].get(k, 0)) for f in results), 2) for k in metric_keys]
         avgs = [round(t / len(results), 2) for t in totals]
 
         writer.writerow(["Total"] + totals)

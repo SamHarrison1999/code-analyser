@@ -1,10 +1,12 @@
 """
 Flake8 metric gatherer for integration with CLI or CSV pipelines.
-Wraps the Flake8Extractor to produce an ordered metric list.
+
+Wraps the Flake8Extractor to produce an ordered list of metrics suitable
+for structured analysis, ML models, or tabular export.
 """
 
-from metrics.flake8_metrics.extractor import Flake8Extractor
 from typing import Any
+from metrics.flake8_metrics.extractor import Flake8Extractor
 
 
 def gather_flake8_metrics(file_path: str) -> list[Any]:
@@ -21,8 +23,10 @@ def gather_flake8_metrics(file_path: str) -> list[Any]:
     try:
         extractor = Flake8Extractor(file_path)
         metrics = extractor.extract()
-    except Exception:
+    except Exception as e:
         # ⚠️ SAST Risk: Ensure extractor failure does not break entire analysis flow
+        from logging import warning
+        warning(f"[gather_flake8_metrics] Flake8 extraction failed for {file_path}: {e}")
         metrics = {}
 
     return [
@@ -46,7 +50,7 @@ def get_flake8_metric_names() -> list[str]:
     Returns the ordered list of metric names matching gather_flake8_metrics output.
 
     Returns:
-        list[str]: Metric names.
+        list[str]: Metric names corresponding to Flake8 metrics.
     """
     # ✅ Best Practice: Keep names stable and clearly mapped to extractor output
     return [

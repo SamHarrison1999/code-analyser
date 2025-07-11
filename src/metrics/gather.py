@@ -1,20 +1,3 @@
-# File: src/metrics/gather.py
-
-"""
-Aggregates metrics from various extractors into a single unified list.
-Used by CLI, GUI, and model export.
-
-Included extractors:
-- AST
-- Bandit (security)
-- Cloc (lines/comments)
-- Flake8 (style/lint)
-- Lizard (complexity/maintainability)
-- Pydocstyle (docstring compliance)
-- Pyflakes (undefined names, syntax errors)
-- Pylint (multi-rule linting/quality + plugin metrics)
-"""
-
 import tempfile
 from typing import List, Union
 
@@ -28,16 +11,18 @@ from metrics.pyflakes_metrics.extractor import extract_pyflakes_metrics
 from metrics.pylint_metrics.gather import gather_pylint_metrics
 
 
+def safe_number(val):
+    if isinstance(val, (int, float)):
+        return val
+    try:
+        return float(val)
+    except Exception:
+        return 0
+
+
 def gather_all_metrics(file_path: str) -> List[Union[int, float]]:
     """
-    Gathers all metric values from AST, Bandit, Cloc, Flake8, Lizard,
-    Pydocstyle, Pyflakes, and Pylint extractors.
-
-    Args:
-        file_path (str): Path to the Python file to analyse.
-
-    Returns:
-        list[int | float]: Unified list of all extracted metrics.
+    Gathers all metric values and normalizes to numeric values.
     """
     ast = ASTMetricExtractor(file_path).extract()
     bandit = BanditExtractor(file_path).extract()
@@ -47,18 +32,12 @@ def gather_all_metrics(file_path: str) -> List[Union[int, float]]:
     pydocstyle = PydocstyleExtractor(file_path).extract()
     pyflakes = extract_pyflakes_metrics(file_path)
     pylint = gather_pylint_metrics(file_path)
-    print(f"[DEBUG] Pylint metrics: {pylint_metrics}")
 
-    return (
-        list(ast.values()) +
-        list(bandit.values()) +
-        list(cloc.values()) +
-        list(flake8.values()) +
-        list(lizard.values()) +
-        list(pydocstyle.values()) +
-        list(pyflakes.values()) +
-        list(pylint.values())
-    )
+    all_metrics = []
+    for metric_set in [ast, bandit, cloc, flake8, lizard, pydocstyle, pyflakes, pylint]:
+        all_metrics.extend(safe_number(v) for v in metric_set.values())
+
+    return all_metrics
 
 
 def get_all_metric_names() -> List[str]:

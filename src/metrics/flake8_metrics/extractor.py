@@ -1,11 +1,11 @@
 import logging
 import subprocess
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 
 class Flake8Extractor:
     """
-    Extracts styling and formatting metrics using Flake8 static analysis.
+    Extracts style and formatting metrics using Flake8 static analysis.
     """
 
     def __init__(self, file_path: str):
@@ -14,12 +14,12 @@ class Flake8Extractor:
 
     def extract(self) -> Dict[str, Any]:
         """
-        Runs Flake8 and parses diagnostic codes into structured metrics.
+        Run Flake8 on the given file and parse diagnostics into structured metrics.
 
         Returns:
-            dict[str, int | float]: A dictionary of formatting-related metrics.
+            Dict[str, int | float]: Collected formatting metrics from Flake8.
         """
-        metrics: dict[str, Any] = {
+        metrics: Dict[str, Any] = {
             "number_of_unused_variables": 0,
             "number_of_unused_imports": 0,
             "number_of_inconsistent_indentations": 0,
@@ -40,7 +40,7 @@ class Flake8Extractor:
                 encoding="utf-8",
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                check=False
+                check=False,
             )
 
             for line in result.stdout.splitlines():
@@ -82,7 +82,7 @@ class Flake8Extractor:
                     total_chars = sum(len(line.rstrip("\n")) for line in lines)
                     metrics["average_line_length"] = round(total_chars / len(lines), 2) if lines else 0.0
             except Exception as e:
-                logging.warning(f"[Flake8Extractor] Line length calculation failed: {e}")
+                logging.warning(f"[Flake8Extractor] Failed to compute average line length: {e}")
                 metrics["average_line_length"] = 0.0
 
             self.result_metrics = metrics
@@ -90,7 +90,7 @@ class Flake8Extractor:
             return self.result_metrics
 
         except Exception as e:
-            logging.error(f"[Flake8Extractor] Unexpected error for {self.file_path}: {e}")
+            logging.error(f"[Flake8Extractor] Flake8 failed on {self.file_path}: {e}")
             return {key: 0 for key in metrics}
 
     def _log_metrics(self):
@@ -98,9 +98,15 @@ class Flake8Extractor:
         logging.info(f"[Flake8Extractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
 
 
-def gather_flake8_metrics(file_path: str) -> list[Any]:
+def gather_flake8_metrics(file_path: str) -> List[Any]:
     """
-    Extract Flake8 metrics in ordered list for ML/CSV export.
+    Extracts Flake8 metrics as an ordered list for ML or CSV output.
+
+    Args:
+        file_path (str): Path to the Python file to analyse.
+
+    Returns:
+        List[Any]: Ordered list of Flake8 metric values.
     """
     extractor = Flake8Extractor(file_path)
     metrics = extractor.extract()

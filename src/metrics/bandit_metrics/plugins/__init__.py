@@ -1,10 +1,8 @@
-# File: src/metrics/bandit_metrics/plugins/__init__.py
-
 """
 Plugin system for Bandit metric extraction.
 
 This module exposes all available Bandit plugin classes and provides:
-- A central location to register default plugin classes
+- A central registry of default plugin classes
 - A loader function to instantiate all registered plugins
 """
 
@@ -15,9 +13,14 @@ from .default_plugins import (
     LowSeverityIssues,
     UndefinedSeverityIssues,
 )
-from .cwe_plugin import CWEFrequencyPlugin, MostFrequentCWEPlugin
+from .cwe_plugin import (
+    CWEFrequencyPlugin,
+    MostFrequentCWEPlugin,
+    CWENameFrequencyPlugin,
+    MostFrequentCWEWithNamePlugin,
+)
 
-# Ordered list of all core severity plugins
+# ✅ Ordered list of all default plugin classes
 DEFAULT_PLUGINS: list[type[BanditMetricPlugin]] = [
     HighSeverityIssues,
     MediumSeverityIssues,
@@ -25,6 +28,8 @@ DEFAULT_PLUGINS: list[type[BanditMetricPlugin]] = [
     UndefinedSeverityIssues,
     CWEFrequencyPlugin,
     MostFrequentCWEPlugin,
+    CWENameFrequencyPlugin,
+    MostFrequentCWEWithNamePlugin,
 ]
 
 
@@ -46,6 +51,8 @@ __all__ = [
     "UndefinedSeverityIssues",
     "CWEFrequencyPlugin",
     "MostFrequentCWEPlugin",
+    "CWENameFrequencyPlugin",
+    "MostFrequentCWEWithNamePlugin",
     "DEFAULT_PLUGINS",
     "load_plugins",
 ]

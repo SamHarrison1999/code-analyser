@@ -1,5 +1,3 @@
-# File: metrics/pyflakes_metrics/plugins/base.py
-
 """
 Base structure for Pyflakes metric plugins.
 
@@ -8,6 +6,7 @@ plugins in a structured and extensible way.
 """
 
 from abc import ABC, abstractmethod
+from typing import List
 
 
 class PyflakesPlugin(ABC):
@@ -15,7 +14,7 @@ class PyflakesPlugin(ABC):
     Abstract base class for Pyflakes plugins.
 
     All plugins must implement the `extract` method which takes the Pyflakes output
-    and file path, returning a dictionary of metric names and values.
+    and file path, returning an integer metric value.
     """
 
     @classmethod
@@ -30,12 +29,12 @@ class PyflakesPlugin(ABC):
         pass
 
     @abstractmethod
-    def extract(self, pyflakes_output: list[str], file_path: str) -> int:
+    def extract(self, pyflakes_output: List[str], file_path: str) -> int:
         """
         Extracts the metric value from the given Pyflakes output.
 
         Args:
-            pyflakes_output (list[str]): The list of Pyflakes warnings and errors.
+            pyflakes_output (List[str]): The list of Pyflakes warnings and errors.
             file_path (str): Path to the analysed Python file.
 
         Returns:

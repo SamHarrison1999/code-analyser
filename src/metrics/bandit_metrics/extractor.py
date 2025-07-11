@@ -1,9 +1,7 @@
-# File: src/metrics/bandit_metrics/extractor.py
-
 import json
 import logging
 import subprocess
-from typing import Dict, List, Any
+from typing import Dict, Any, Union
 
 from metrics.bandit_metrics.plugins import load_plugins
 
@@ -18,14 +16,14 @@ class BanditExtractor:
         self.file_path = file_path
         self.plugins = load_plugins()
         self.raw_bandit_data: Dict[str, Any] = {}
-        self.result_metrics: Dict[str, int] = {}
+        self.result_metrics: Dict[str, Union[int, float]] = {}
 
-    def extract(self) -> Dict[str, int]:
+    def extract(self) -> Dict[str, Union[int, float]]:
         """
         Runs Bandit and applies plugins to compute metrics.
 
         Returns:
-            dict[str, int]: A dictionary of computed metric values.
+            dict[str, int | float]: A dictionary of computed metric values.
         """
         bandit_data = self._run_bandit()
         if bandit_data is None:
@@ -61,10 +59,15 @@ class BanditExtractor:
             return None
 
     def _apply_plugins(self):
-        """Apply each plugin to compute its metric."""
+        """Apply each plugin to compute its metric with numeric fallback."""
         for plugin in self.plugins:
             try:
-                self.result_metrics[plugin.name()] = plugin.extract(self.raw_bandit_data)
+                val = plugin.extract(self.raw_bandit_data)
+                # Coerce to int or float if possible, else fallback to 0
+                if isinstance(val, (int, float)):
+                    self.result_metrics[plugin.name()] = val
+                else:
+                    self.result_metrics[plugin.name()] = 0
             except Exception as e:
                 logging.warning(f"[BanditExtractor] Plugin {plugin.name()} failed: {e}")
                 self.result_metrics[plugin.name()] = 0
@@ -73,22 +76,3 @@ class BanditExtractor:
         """Log the final computed metrics."""
         lines = [f"{name}: {val}" for name, val in self.result_metrics.items()]
         logging.info(f"[BanditExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
-
-
-def gather_bandit_metrics(file_path: str) -> List[int]:
-    """
-    Extract Bandit plugin metrics as an ordered list for ML/CSV export.
-
-    Args:
-        file_path (str): Path to the Python file to scan.
-
-    Returns:
-        list[int]: Plugin metrics in registered order.
-    """
-    extractor = BanditExtractor(file_path)
-    metrics = extractor.extract()
-
-    # ✅ Best Practice: Maintain plugin ordering for column-aligned outputs
-    # 🧠 ML Signal: Column stability ensures retraining and comparisons are meaningful
-    plugin_order = [p.name() for p in extractor.plugins]
-    return [metrics.get(name, 0) for name in plugin_order]

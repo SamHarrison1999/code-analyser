@@ -27,24 +27,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3-tk cloc
           pip install -e .
-          pip install pytest matplotlib bandit flake8 lizard mplcursors pydocstyle
+          pip install pytest matplotlib bandit flake8 lizard mplcursors pydocstyle pylint
 
       - name: 🧪 Run full test suite
-        run: |
-          pytest tests/
+        run: pytest tests/
 
       - name: 🔐 Run fail-threshold test
-        run: |
-          pytest tests/test_fail_threshold.py
+        run: pytest tests/test_fail_threshold.py
 
       - name: ⚠️ Run fail-if-nonzero test
-        run: |
-          pytest tests/test_fail_if_nonzero.py
+        run: pytest tests/test_fail_if_nonzero.py
 
       - name: 📤 Run CLI output test
-        run: |
-          pytest tests/test_cli_output.py
+        run: pytest tests/test_cli_output.py
 
       - name: 📝 Run summary output test
-        run: |
-          pytest tests/test_summary_output_txt.py
+        run: pytest tests/test_summary_output_txt.py

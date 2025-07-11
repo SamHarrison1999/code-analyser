@@ -1,78 +1,86 @@
 import json
 import logging
 import subprocess
-from typing import Dict, Any
+from typing import Dict, Any, List
+
+from metrics.cloc_metrics.plugins import load_plugins
+from metrics.cloc_metrics.plugins.base import CLOCMetricPlugin
 
 
 class ClocExtractor:
     """
     Extracts line-based metrics from a Python file using the `cloc` command.
-    Metrics include comment density, line counts, and source lines of code.
+
+    Metrics include comment density, total lines, source lines, and more,
+    using a plugin-based architecture for modularity.
     """
 
     def __init__(self, file_path: str):
         self.file_path = file_path
+        self.plugins: List[BaseClocMetricPlugin] = load_plugins()
         self.result_metrics: Dict[str, Any] = {}
+        self.raw_data: Dict[str, Any] = {}
 
     def extract(self) -> Dict[str, Any]:
         """
-        Runs `cloc` and returns a dictionary of metrics.
+        Runs `cloc` and applies all registered metric plugins.
 
         Returns:
-            dict[str, int | float]: Metrics about lines, comments, and density.
+            dict[str, int | float]: Dictionary of computed metrics.
         """
-        try:
-            output = subprocess.check_output(
-                ["cloc", "--json", self.file_path],
-                encoding="utf-8"
-            )
-            data = json.loads(output)
-            metrics = data.get("Python", {})
-
-            blank = metrics.get("blank", 0)
-            comment = metrics.get("comment", 0)
-            code = metrics.get("code", 0)
-            total_lines = blank + comment + code
-            comment_density = comment / total_lines if total_lines > 0 else 0.0
-
-            self.result_metrics = {
-                "number_of_comments": comment,
-                "number_of_lines": total_lines,
-                "number_of_source_lines_of_code": code,
-                "comment_density": round(comment_density, 4)
-            }
-
-            self._log_metrics()
+        cloc_json = self._run_cloc()
+        if not cloc_json:
+            # Fail-safe: return 0 or default values for all known plugins
+            self.result_metrics = {plugin.name(): 0.0 if "density" in plugin.name() else 0 for plugin in self.plugins}
             return self.result_metrics
 
+        self.raw_data = cloc_json.get("Python", {})
+        for plugin in self.plugins:
+            try:
+                self.result_metrics[plugin.name()] = plugin.extract(self.raw_data)
+            except Exception as e:
+                logging.warning(f"[ClocExtractor] Plugin {plugin.name()} failed: {e}")
+                self.result_metrics[plugin.name()] = 0.0 if "density" in plugin.name() else 0
+
+        self._log_metrics()
+        return self.result_metrics
+
+    def _run_cloc(self) -> Dict[str, Any] | None:
+        """Execute cloc and return parsed JSON output."""
+        try:
+            output = subprocess.check_output(
+                ["cloc", "--json", "--include-lang=Python", self.file_path],
+                encoding="utf-8",
+                stderr=subprocess.DEVNULL
+            )
+            return json.loads(output)
         except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
             logging.error(f"[ClocExtractor] cloc error for {self.file_path}: {e}")
-            return {
-                "number_of_comments": 0,
-                "number_of_lines": 0,
-                "number_of_source_lines_of_code": 0,
-                "comment_density": 0.0
-            }
+            return None
+        except FileNotFoundError:
+            logging.error("[ClocExtractor] cloc is not installed or not in PATH.")
+            return None
 
     def _log_metrics(self):
-        """Logs the computed metrics for traceability."""
+        """Log computed metrics for transparency."""
         lines = [f"{k}: {v}" for k, v in self.result_metrics.items()]
         logging.info(f"[ClocExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
 
 
-def gather_cloc_metrics(file_path: str) -> list[Any]:
+def gather_cloc_metrics(file_path: str) -> List[Any]:
     """
-    Gathers ordered cloc metrics for use in CSV/ML output.
+    Returns ordered cloc metrics for ML pipelines or CSV export.
 
     Args:
-        file_path (str): Path to Python source file.
+        file_path (str): Path to Python file.
 
     Returns:
-        list[Any]: Ordered values of cloc metrics.
+        list[Any]: Ordered list of cloc metrics.
     """
     extractor = ClocExtractor(file_path)
     metrics = extractor.extract()
 
+    # Fixed order for ML/CSV consistency
     return [
         metrics.get("number_of_comments", 0),
         metrics.get("number_of_lines", 0),

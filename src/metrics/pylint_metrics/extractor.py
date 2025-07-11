@@ -14,13 +14,15 @@ class PylintMetricExtractor:
     """
 
     def __init__(self, file_path: str) -> None:
+        # Store absolute path to source file for consistent subprocess calls
         self.file_path = os.path.abspath(file_path)
         logging.debug(f"[PylintMetricExtractor] Initialized with file: {self.file_path}")
 
     def _get_pylint_executable(self) -> str:
         """
         Returns the absolute path to pylint executable,
-        resolving bundled pylint.exe when frozen.
+        resolving bundled pylint.exe when frozen (e.g., PyInstaller).
+        Falls back to system pylint or 'pylint' command.
         """
         if getattr(sys, "frozen", False):
             base_path = getattr(sys, "_MEIPASS", None)
@@ -29,9 +31,7 @@ class PylintMetricExtractor:
                 if os.path.isfile(candidate):
                     logging.debug(f"[PylintMetricExtractor] Using bundled pylint at: {candidate}")
                     return candidate
-            # fallback
             logging.debug("[PylintMetricExtractor] sys._MEIPASS not found or pylint.exe missing")
-        # Normal (non-frozen) fallback
         pylint_path = shutil.which("pylint")
         if pylint_path:
             logging.debug(f"[PylintMetricExtractor] Using system pylint at: {pylint_path}")
@@ -40,6 +40,13 @@ class PylintMetricExtractor:
         return "pylint"
 
     def extract(self) -> Dict[str, int]:
+        """
+        Run Pylint on the target file and aggregate issue counts
+        by severity type (convention, refactor, warning, error, fatal).
+
+        Returns:
+            Dict[str, int]: Metrics dictionary with keys prefixed by 'pylint_'.
+        """
         try:
             pylint_exe = self._get_pylint_executable()
             cmd = [pylint_exe, "--output-format=json", self.file_path]
@@ -48,7 +55,7 @@ class PylintMetricExtractor:
             result = subprocess.run(
                 cmd,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,  # capture stderr to detect errors
+                stderr=subprocess.PIPE,
                 text=True,
                 check=False,
             )
@@ -76,4 +83,5 @@ class PylintMetricExtractor:
             return self._empty_metrics()
 
     def _empty_metrics(self) -> Dict[str, int]:
+        # Returns zeroed metrics for all pylint severity types
         return {f"pylint_{k}": 0 for k in ["convention", "refactor", "warning", "error", "fatal"]}

@@ -1,10 +1,16 @@
-# File: src/metrics/ast_metrics/gather.py
+"""
+Gather AST Metrics
+
+Provides a helper function to extract and return a fixed-length, ordered
+list of AST-based metric values for downstream use in ML models or CSV export.
+"""
 
 from typing import List
 from metrics.ast_metrics.extractor import ASTMetricExtractor
 
 # Fixed order of metric names for ML or CSV pipelines
-_METRIC_ORDER = [
+# Must match feature expectations exactly.
+_METRIC_ORDER: List[str] = [
     "functions",
     "classes",
     "function_docstrings",
@@ -23,16 +29,14 @@ _METRIC_ORDER = [
 
 def gather_ast_metrics(file_path: str) -> List[int]:
     """
-    Extracts AST metrics from a Python file and returns them
-    as a list in a fixed order, ready for machine learning or export.
+    Extract AST metrics from a Python file and return them as an ordered list.
 
     Args:
-        file_path (str): Path to the Python source file.
+        file_path (str): Full path to the Python source file.
 
     Returns:
-        List[int]: Ordered list of AST metric values.
+        list[int]: AST metrics in the fixed order defined by _METRIC_ORDER.
     """
     metrics = ASTMetricExtractor(file_path).extract()
 
-    # Return metrics in a consistent order with safe fallback
-    return [metrics.get(key, 0) for key in _METRIC_ORDER]
+    return [int(metrics.get(key, 0)) for key in _METRIC_ORDER]
