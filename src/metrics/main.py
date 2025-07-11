@@ -78,8 +78,11 @@ def analyse_file(
                 logging.error(f"❌ Failed to save summary: {e}")
 
     if fail_threshold is not None:
+        # Determine which metrics to consider for failure threshold
         if fail_on == "ast":
-            metric_keys = [k for k in result_dict if k in get_all_metric_names()[:14]]
+            # Assuming AST metrics are first ~14 keys — adjust if needed
+            ast_keys = get_all_metric_names()[:14]
+            metric_keys = [k for k in result_dict if k in ast_keys]
         elif fail_on == "bandit":
             metric_keys = [k for k in result_dict if "bandit" in k or "security" in k]
         elif fail_on == "flake8":
@@ -90,12 +93,14 @@ def analyse_file(
             metric_keys = [k for k in result_dict if any(p in k for p in [
                 "complexity", "token", "parameter", "maintainability"
             ])]
+        elif fail_on == "pydocstyle":
+            metric_keys = [k for k in result_dict if "docstring" in k or "pydocstyle" in k]
         elif fail_on == "pyflakes":
             metric_keys = [k for k in result_dict if "undefined" in k or "syntax" in k]
         elif fail_on == "pylint":
-            metric_keys = [k for k in ["convention", "refactor", "warning", "error", "fatal"]]
+            metric_keys = [k for k in result_dict if k.startswith("pylint_") or k in ("missing_docstrings", "duplicate_code_blocks")]
         else:
-            metric_keys = result_dict.keys()
+            metric_keys = list(result_dict.keys())
 
         total = sum(result_dict.get(k, 0) or 0 for k in metric_keys)
         if total > fail_threshold:
@@ -135,7 +140,7 @@ def main():
     )
     parser.add_argument(
         "--fail-on",
-        choices=["all", "ast", "bandit", "flake8", "cloc", "lizard", "pyflakes", "pylint"],
+        choices=["all", "ast", "bandit", "flake8", "cloc", "lizard", "pydocstyle", "pyflakes", "pylint"],
         default="all",
         help="Restrict threshold check to a specific metric group"
     )

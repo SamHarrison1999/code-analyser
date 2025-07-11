@@ -1,5 +1,3 @@
-# src/gui/chart_utils.py
-
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import mplcursors
@@ -12,7 +10,6 @@ _last_vals = []
 _last_title = ""
 _last_filename = ""
 
-
 def include_metric(metric: str) -> bool:
     """Filter metrics based on selected analysis scope."""
     scope = shared_state.metric_scope.get()
@@ -23,19 +20,19 @@ def include_metric(metric: str) -> bool:
     elif scope == "bandit":
         return "security" in metric or "vulnerability" in metric
     elif scope == "flake8":
-        return "flake8" in metric or "styling" in metric or "line_length" in metric
+        return "styling" in metric or "line_length" in metric
     elif scope == "cloc":
         return "line" in metric or "comment" in metric
     elif scope == "lizard":
-        return any(key in metric for key in ["complexity", "token", "parameter", "maintainability"])
+        return any(k in metric for k in ["complexity", "token", "parameter", "maintainability"])
     elif scope == "pydocstyle":
-        return any(key in metric for key in ["docstring", "pydocstyle", "compliance"])
+        return any(k in metric for k in ["docstring", "pydocstyle", "compliance"])
     elif scope == "pyflakes":
-        return any(key in metric for key in ["undefined", "redefined", "syntax", "import"])
+        return any(k in metric for k in ["undefined", "redefined", "syntax", "import"])
     elif scope == "pylint":
-        return metric in {"convention", "refactor", "warning", "error", "fatal"}
-    return True
+        return metric.startswith("pylint_")
 
+    return True
 
 def draw_chart(keys, vals, title, filename):
     """Render either bar or pie chart for given metric values."""
@@ -89,9 +86,9 @@ def draw_chart(keys, vals, title, filename):
         fig.tight_layout()
 
     else:
-        # 🥧 Pie chart with tooltips and square layout
+        # 🥧 Pie chart with hover tooltips and equal aspect
         fig, ax = plt.subplots(figsize=(inch_width, inch_width))
-        wedges, _ = ax.pie(vals, labels=None, startangle=90)
+        wedges, texts = ax.pie(vals, labels=None, startangle=90)
         ax.set_title(title)
         ax.axis('equal')  # Keep chart circular
 
@@ -106,13 +103,14 @@ def draw_chart(keys, vals, title, filename):
         tooltip.set_visible(False)
 
         def format_tooltip(event):
-            for i, wedge in enumerate(wedges):
-                if wedge.contains_point([event.x, event.y]):
-                    tooltip.xy = (event.xdata, event.ydata)
-                    tooltip.set_text(f"{pretty_keys[i]}: {vals[i]:.1f}%")
-                    tooltip.set_visible(True)
-                    fig.canvas.draw_idle()
-                    return
+            if event.inaxes == ax:
+                for i, wedge in enumerate(wedges):
+                    if wedge.contains_point([event.x, event.y]):
+                        tooltip.xy = (event.xdata, event.ydata)
+                        tooltip.set_text(f"{pretty_keys[i]}: {vals[i]:.1f}")
+                        tooltip.set_visible(True)
+                        fig.canvas.draw_idle()
+                        return
             tooltip.set_visible(False)
             fig.canvas.draw_idle()
 

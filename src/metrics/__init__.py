@@ -1,16 +1,17 @@
 """
 Top-level package initializer for the `metrics` module.
 
-Exposes core extractors and gatherers for:
-- AST metrics
-- Bandit (security) metrics
-- Cloc (lines/comments) metrics
-- Flake8 (style/lint) metrics
-- Lizard (complexity/maintainability) metrics
-- Pydocstyle (docstring compliance) metrics
-- Pyflakes (undefined names/syntax errors) metrics
-- Pylint (multi-rule linting/quality) metrics
-- Unified metric aggregation
+Exposes core extractors and metric gatherers for:
+- AST (structure + constructs)
+- Bandit (security analysis)
+- Cloc (line and comment statistics)
+- Flake8 (style and lint errors)
+- Lizard (complexity + maintainability)
+- Pydocstyle (docstring compliance)
+- Pyflakes (syntax + import warnings)
+- Pylint (multi-category quality issues)
+- Pylint Plugins (extendable metric rules)
+- Unified metric aggregation (gather_all_metrics)
 """
 
 from metrics.ast_metrics.extractor import ASTMetricExtractor
@@ -21,6 +22,7 @@ from metrics.lizard_metrics.extractor import LizardExtractor, extract_lizard_met
 from metrics.pydocstyle_metrics.extractor import PydocstyleExtractor
 from metrics.pyflakes_metrics.extractor import PyflakesExtractor, extract_pyflakes_metrics
 from metrics.pylint_metrics.extractor import PylintMetricExtractor
+from metrics.pylint_metrics.plugins.default_plugins import load_plugins
 
 from metrics.ast_metrics.gather import gather_ast_metrics
 from metrics.bandit_metrics.gather import gather_bandit_metrics
@@ -34,6 +36,7 @@ from metrics.pylint_metrics.gather import gather_pylint_metrics
 from metrics.gather import gather_all_metrics, get_all_metric_names
 
 __all__ = [
+    # Extractors
     "ASTMetricExtractor",
     "BanditExtractor",
     "ClocExtractor",
@@ -42,8 +45,13 @@ __all__ = [
     "PydocstyleExtractor",
     "PyflakesExtractor",
     "PylintMetricExtractor",
+
+    # Utilities
     "extract_lizard_metrics",
     "extract_pyflakes_metrics",
+    "load_plugins",
+
+    # Metric gatherers
     "gather_ast_metrics",
     "gather_bandit_metrics",
     "gather_cloc_metrics",

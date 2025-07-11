@@ -1,5 +1,3 @@
-# src/gui/gui_logic.py
-
 from pathlib import Path
 from gui import shared_state
 
@@ -20,7 +18,8 @@ def update_tree(data: dict):
 
     for file, metrics in data.items():
         base_name = Path(file).name
-        for metric_key, metric_val in metrics.items():
+        flat = flatten_metrics(metrics)
+        for metric_key, metric_val in flat.items():
             if filter_text in metric_key.lower() or filter_text in base_name.lower():
                 val = round(metric_val, 2) if isinstance(metric_val, (float, int)) else metric_val
                 tree.insert("", "end", values=(base_name, metric_key, val))
@@ -41,8 +40,12 @@ def update_footer_summary():
         print("⚠️ No results available to summarise")
         return
 
-    # Collect all metric keys across all files
-    all_keys = sorted({k for metrics in results.values() for k in metrics})
+    flattened_results = {
+        file: flatten_metrics(metrics)
+        for file, metrics in results.items()
+    }
+
+    all_keys = sorted({k for metrics in flattened_results.values() for k in metrics})
 
     def safe_numeric(val):
         try:
@@ -51,12 +54,12 @@ def update_footer_summary():
             return 0.0
 
     totals = {
-        key: sum(safe_numeric(results[file].get(key, 0)) for file in results)
+        key: sum(safe_numeric(flattened_results[file].get(key, 0)) for file in flattened_results)
         for key in all_keys
     }
 
     avgs = {
-        key: round(totals[key] / len(results), 2)
+        key: round(totals[key] / len(flattened_results), 2)
         for key in all_keys
     }
 
@@ -65,3 +68,15 @@ def update_footer_summary():
 
     for key in all_keys:
         summary_tree.insert("", "end", values=(key, totals[key], avgs[key]))
+
+
+def flatten_metrics(d, prefix=""):
+    """Recursively flatten nested dictionaries for consistent charting and aggregation."""
+    flat = {}
+    for k, v in d.items():
+        full_key = f"{prefix}.{k}" if prefix else k
+        if isinstance(v, (int, float)):
+            flat[full_key] = v
+        elif isinstance(v, dict):
+            flat.update(flatten_metrics(v, full_key))
+    return flat

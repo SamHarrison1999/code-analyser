@@ -1,3 +1,5 @@
+# File: src/metrics/gather.py
+
 """
 Aggregates metrics from various extractors into a single unified list.
 Used by CLI, GUI, and model export.
@@ -10,7 +12,7 @@ Included extractors:
 - Lizard (complexity/maintainability)
 - Pydocstyle (docstring compliance)
 - Pyflakes (undefined names, syntax errors)
-- Pylint (multi-rule linting/quality)
+- Pylint (multi-rule linting/quality + plugin metrics)
 """
 
 import tempfile
@@ -20,10 +22,10 @@ from metrics.ast_metrics.extractor import ASTMetricExtractor
 from metrics.bandit_metrics.extractor import BanditExtractor
 from metrics.cloc_metrics.extractor import ClocExtractor
 from metrics.flake8_metrics.extractor import Flake8Extractor
-from metrics.lizard_metrics.extractor import LizardExtractor, extract_lizard_metrics
+from metrics.lizard_metrics.extractor import extract_lizard_metrics
 from metrics.pydocstyle_metrics.extractor import PydocstyleExtractor
 from metrics.pyflakes_metrics.extractor import extract_pyflakes_metrics
-from metrics.pylint_metrics.extractor import PylintMetricExtractor
+from metrics.pylint_metrics.gather import gather_pylint_metrics
 
 
 def gather_all_metrics(file_path: str) -> List[Union[int, float]]:
@@ -37,37 +39,25 @@ def gather_all_metrics(file_path: str) -> List[Union[int, float]]:
     Returns:
         list[int | float]: Unified list of all extracted metrics.
     """
-    ast_metrics = ASTMetricExtractor(file_path).extract()
-    bandit_metrics = BanditExtractor(file_path).extract()
-    cloc_metrics = ClocExtractor(file_path).extract()
-    flake8_metrics = Flake8Extractor(file_path).extract()
-    lizard_metrics = extract_lizard_metrics(file_path)
-    pydocstyle_metrics = PydocstyleExtractor(file_path).extract()
-    pyflakes_metrics = extract_pyflakes_metrics(file_path)
-    pylint_metrics = PylintMetricExtractor(file_path).extract()
-
-    # Count message types from pylint output
-    pylint_counts = {
-        "convention": 0,
-        "refactor": 0,
-        "warning": 0,
-        "error": 0,
-        "fatal": 0,
-    }
-    for msg in pylint_metrics:
-        msg_type = msg.get("type")
-        if msg_type in pylint_counts:
-            pylint_counts[msg_type] += 1
+    ast = ASTMetricExtractor(file_path).extract()
+    bandit = BanditExtractor(file_path).extract()
+    cloc = ClocExtractor(file_path).extract()
+    flake8 = Flake8Extractor(file_path).extract()
+    lizard = extract_lizard_metrics(file_path)
+    pydocstyle = PydocstyleExtractor(file_path).extract()
+    pyflakes = extract_pyflakes_metrics(file_path)
+    pylint = gather_pylint_metrics(file_path)
+    print(f"[DEBUG] Pylint metrics: {pylint_metrics}")
 
     return (
-        list(ast_metrics.values()) +
-        list(bandit_metrics.values()) +
-        list(cloc_metrics.values()) +
-        list(flake8_metrics.values()) +
-        list(lizard_metrics.values()) +
-        list(pydocstyle_metrics.values()) +
-        list(pyflakes_metrics.values()) +
-        list(pylint_counts.values())
+        list(ast.values()) +
+        list(bandit.values()) +
+        list(cloc.values()) +
+        list(flake8.values()) +
+        list(lizard.values()) +
+        list(pydocstyle.values()) +
+        list(pyflakes.values()) +
+        list(pylint.values())
     )
 
 
@@ -89,7 +79,7 @@ def get_all_metric_names() -> List[str]:
         lizard_keys = list(extract_lizard_metrics(f.name).keys())
         pydocstyle_keys = list(PydocstyleExtractor(f.name).extract().keys())
         pyflakes_keys = list(extract_pyflakes_metrics(f.name).keys())
-        pylint_keys = ["convention", "refactor", "warning", "error", "fatal"]
+        pylint_keys = list(gather_pylint_metrics(f.name).keys())
 
     return (
         ast_keys +

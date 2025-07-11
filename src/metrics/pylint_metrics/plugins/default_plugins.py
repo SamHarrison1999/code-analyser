@@ -50,3 +50,18 @@ DEFAULT_PLUGINS = [
     MissingDocstringPlugin,
     DuplicateCodePlugin,
 ]
+
+
+def load_plugins():
+    """
+    Instantiate and return all default Pylint plugins.
+    """
+    return [plugin() for plugin in DEFAULT_PLUGINS]
+
+
+__all__ = [
+    "MissingDocstringPlugin",
+    "DuplicateCodePlugin",
+    "DEFAULT_PLUGINS",
+    "load_plugins",
+]

@@ -1,68 +1,79 @@
+import sys
+import os
+import shutil
+import subprocess
 import json
 import logging
-import subprocess
-from pathlib import Path
-from typing import Any, Dict, List
+from typing import Dict
 
 
 class PylintMetricExtractor:
     """
-    Extracts Pylint-based static metrics from a Python source file.
-
-    This extractor runs Pylint as a subprocess and collects structured
-    diagnostics that can be used for ML, auditing, or code scoring.
+    Extracts summary metrics from Pylint output as a flat dictionary
+    of message type counts: convention, refactor, warning, error, fatal.
     """
 
     def __init__(self, file_path: str) -> None:
-        self.file_path = file_path
-        self.metrics: List[Dict[str, Any]] = []
+        self.file_path = os.path.abspath(file_path)
+        logging.debug(f"[PylintMetricExtractor] Initialized with file: {self.file_path}")
 
-    def extract(self) -> List[Dict[str, Any]]:
+    def _get_pylint_executable(self) -> str:
         """
-        Executes Pylint and returns a list of structured metrics.
+        Returns the absolute path to pylint executable,
+        resolving bundled pylint.exe when frozen.
+        """
+        if getattr(sys, "frozen", False):
+            base_path = getattr(sys, "_MEIPASS", None)
+            if base_path:
+                candidate = os.path.join(base_path, "pylint.exe")
+                if os.path.isfile(candidate):
+                    logging.debug(f"[PylintMetricExtractor] Using bundled pylint at: {candidate}")
+                    return candidate
+            # fallback
+            logging.debug("[PylintMetricExtractor] sys._MEIPASS not found or pylint.exe missing")
+        # Normal (non-frozen) fallback
+        pylint_path = shutil.which("pylint")
+        if pylint_path:
+            logging.debug(f"[PylintMetricExtractor] Using system pylint at: {pylint_path}")
+            return pylint_path
+        logging.warning("[PylintMetricExtractor] pylint executable not found, using 'pylint'")
+        return "pylint"
 
-        Each entry includes:
-        - type: category (e.g. 'convention', 'error')
-        - symbol: rule name (e.g. 'missing-docstring')
-        - message: descriptive text
-        - line, column: position in file (if available)
-        - message_id: short ID (e.g. 'C0114')
-        """
+    def extract(self) -> Dict[str, int]:
         try:
-            result = subprocess.run(
-                ["pylint", "--output-format=json", str(self.file_path)],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
-                check=False,
-                text=True,
-            )
-            output = result.stdout.strip()
+            pylint_exe = self._get_pylint_executable()
+            cmd = [pylint_exe, "--output-format=json", self.file_path]
+            logging.debug(f"[PylintMetricExtractor] Running command: {' '.join(cmd)}")
 
+            result = subprocess.run(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,  # capture stderr to detect errors
+                text=True,
+                check=False,
+            )
+
+            if result.stderr:
+                logging.debug(f"[PylintMetricExtractor] stderr: {result.stderr.strip()}")
+
+            output = result.stdout.strip()
             if not output:
-                return []
+                logging.debug("[PylintMetricExtractor] No output from pylint, returning zeros")
+                return self._empty_metrics()
 
             messages = json.loads(output)
-            self.metrics = [
-                {
-                    "type": msg.get("type"),
-                    "symbol": msg.get("symbol"),
-                    "message": msg.get("message"),
-                    "line": msg.get("line"),
-                    "column": msg.get("column"),
-                    "message_id": msg.get("message-id"),
-                }
-                for msg in messages
-            ]
+            counter = {k: 0 for k in ["convention", "refactor", "warning", "error", "fatal"]}
+            for msg in messages:
+                msg_type = msg.get("type")
+                if msg_type in counter:
+                    counter[msg_type] += 1
+
+            logging.debug(f"[PylintMetricExtractor] Metrics extracted: {counter}")
+            return {f"pylint_{k}": v for k, v in counter.items()}
+
         except Exception as e:
-            logging.error(f"[PylintExtractor] Failed to extract metrics: {e}")
-            self.metrics = []
+            logging.error(f"[PylintMetricExtractor] Exception during extraction: {e}")
+            return self._empty_metrics()
 
-        return self.metrics
-
-
-def gather_pylint_metrics(file_path: Path) -> List[Dict[str, Any]]:
-    """
-    Convenience wrapper to extract pylint metrics using the PylintMetricExtractor.
-    """
-    extractor = PylintMetricExtractor(str(file_path))
-    return extractor.extract()
+    def _empty_metrics(self) -> Dict[str, int]:
+        return {f"pylint_{k}": 0 for k in ["convention", "refactor", "warning", "error", "fatal"]}

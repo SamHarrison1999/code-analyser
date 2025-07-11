@@ -1,5 +1,3 @@
-# src/gui/gui_components.py
-
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from pathlib import Path
@@ -138,16 +136,6 @@ def show_chart():
             file_metrics = data
             break
 
-    def flatten_metrics(d, prefix=""):
-        flat = {}
-        for k, v in d.items():
-            full_key = f"{prefix}.{k}" if prefix else k
-            if isinstance(v, (int, float)):
-                flat[full_key] = v
-            elif isinstance(v, dict):
-                flat.update(flatten_metrics(v, full_key))
-        return flat
-
     flat_metrics = flatten_metrics(file_metrics)
     keys, vals = [], []
 
@@ -169,16 +157,6 @@ def show_directory_summary_chart():
         messagebox.showinfo("No Data", "No analysis has been run.")
         return
 
-    def flatten_metrics(d, prefix=""):
-        flat = {}
-        for k, v in d.items():
-            full_key = f"{prefix}.{k}" if prefix else k
-            if isinstance(v, (int, float)):
-                flat[full_key] = v
-            elif isinstance(v, dict):
-                flat.update(flatten_metrics(v, full_key))
-        return flat
-
     combined = {}
     for data in shared_state.results.values():
         flat = flatten_metrics(data)
@@ -193,3 +171,15 @@ def show_directory_summary_chart():
     keys = list(combined.keys())
     vals = [round(combined[k], 2) for k in keys]
     draw_chart(keys, vals, "Directory-wide Metric Summary", "summary_chart.png")
+
+
+def flatten_metrics(d, prefix=""):
+    """Recursively flatten nested metric dictionaries for charting."""
+    flat = {}
+    for k, v in d.items():
+        full_key = f"{prefix}.{k}" if prefix else k
+        if isinstance(v, (int, float)):
+            flat[full_key] = v
+        elif isinstance(v, dict):
+            flat.update(flatten_metrics(v, full_key))
+    return flat
