@@ -7,15 +7,16 @@ from pathlib import Path
 from tkinter import filedialog, messagebox
 
 from gui.gui_logic import update_tree, update_footer_summary
-from gui.utils import flatten_metrics
+from gui.utils import flatten_metrics, merge_nested_metrics
 
 
 def run_metric_extraction(file_path: str, show_result: bool = True) -> None:
     """Run static metric analysis on a single Python file and store the result."""
-    from gui import shared_state  # 🔁 defer to prevent circular import
-
     if not file_path:
         return
+
+    from gui.shared_state import get_shared_state
+    shared_state = get_shared_state()
 
     out_file = Path("metrics.json")
 
@@ -36,7 +37,8 @@ def run_metric_extraction(file_path: str, show_result: bool = True) -> None:
                 "--format", "json"
             ]
 
-        subprocess.run(script_args, capture_output=True, text=True, check=True)
+        result = subprocess.run(script_args, capture_output=True, text=True, check=True)
+        logging.debug(f"🛠️ CLI Output for {file_path}:{result.stdout}{result.stderr}")
 
         if not out_file.exists():
             raise FileNotFoundError("metrics.json not created.")
@@ -51,18 +53,26 @@ def run_metric_extraction(file_path: str, show_result: bool = True) -> None:
 
         if show_result:
             update_tree(shared_state.tree, file_path)
-            flat_metrics = flatten_metrics(shared_state.results[file_path])
+            merged = merge_nested_metrics(shared_state.results[file_path])
+            flat_metrics = flatten_metrics(merged)
             update_footer_summary(shared_state.summary_tree, flat_metrics)
 
     except subprocess.CalledProcessError as e:
-        messagebox.showerror("CLI Error", f"Error analysing: {file_path}\n\nExit Code: {e.returncode}\n\n{e.stderr}")
+        logging.error(f"❌ Subprocess error for {file_path}: {e.stderr}")
+        messagebox.showerror(
+            "CLI Error",
+            f"Error analysing: {file_path}\n\nExit Code: {e.returncode}\n\n{e.stderr}"
+        )
     except Exception as e:
+        logging.exception(f"❌ Unexpected error analysing {file_path}: {e}")
         messagebox.showerror("Unexpected Error", f"{type(e).__name__}: {str(e)}")
 
 
 def run_directory_analysis() -> None:
     """Prompt the user to select a folder and analyse all .py files inside recursively."""
-    from gui import shared_state  # 🔁 defer
+    from gui.shared_state import get_shared_state
+    shared_state = get_shared_state()
+
     folder = filedialog.askdirectory()
     if not folder:
         return
@@ -75,14 +85,17 @@ def run_directory_analysis() -> None:
     for file in py_files:
         run_metric_extraction(str(file), show_result=False)
 
-    update_tree(shared_state.tree, list(shared_state.results.keys())[0])
-    flat_metrics = flatten_metrics(shared_state.results[list(shared_state.results.keys())[0]])
+    first_file = list(shared_state.results.keys())[0]
+    update_tree(shared_state.tree, first_file)
+    merged = merge_nested_metrics(shared_state.results[first_file])
+    flat_metrics = flatten_metrics(merged)
     update_footer_summary(shared_state.summary_tree, flat_metrics)
 
 
 def export_to_csv() -> None:
-    """Export the collected metrics to a CSV file, including total and average summary rows."""
-    from gui import shared_state  # 🔁 defer
+    """Export the collected metrics to a CSV file, preserving nested tool.metric keys and summary rows."""
+    from gui.shared_state import get_shared_state
+    shared_state = get_shared_state()
 
     if not shared_state.results:
         messagebox.showinfo("No Data", "No metrics to export.")
@@ -96,35 +109,58 @@ def export_to_csv() -> None:
     if not save_path:
         return
 
-    metric_keys = sorted({key for metrics in shared_state.results.values() for key in metrics})
+    # ✅ Preserve tool.metric structure in keys
+    structured_results = {
+        file: merge_nested_metrics(metrics)
+        for file, metrics in shared_state.results.items()
+    }
 
-    with open(save_path, "w", newline='', encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["File"] + metric_keys)
+    # ✅ Collect all full tool.metric keys
+    all_keys = sorted({
+        f"{tool}.{metric}"
+        for metrics in structured_results.values()
+        for tool, group in metrics.items()
+        if isinstance(group, dict)
+        for metric in group
+    })
 
-        for file, metrics in shared_state.results.items():
-            row = [file]
-            for key in metric_keys:
-                val = metrics.get(key, 0)
-                if isinstance(val, float):
-                    val = round(val, 2)
-                row.append(val)
-            writer.writerow(row)
+    try:
+        with open(save_path, "w", newline='', encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["File"] + all_keys)
 
-        writer.writerow([])
-        writer.writerow(["Summary"])
+            for file, metrics in structured_results.items():
+                row = [file]
+                for full_key in all_keys:
+                    tool, metric = full_key.split(".", 1)
+                    val = metrics.get(tool, {}).get(metric, 0)
+                    if isinstance(val, float):
+                        val = round(val, 2)
+                    row.append(val)
+                writer.writerow(row)
 
-        def safe_numeric(val):
-            try:
-                return float(val)
-            except Exception:
-                return 0.0
+            writer.writerow([])
+            writer.writerow(["Summary"])
 
-        totals = [round(sum(safe_numeric(shared_state.results[f].get(k, 0)) for f in shared_state.results), 2)
-                  for k in metric_keys]
-        avgs = [round(t / len(shared_state.results), 2) for t in totals]
+            def safe_numeric(val):
+                try:
+                    return float(val)
+                except Exception:
+                    return 0.0
 
-        writer.writerow(["Total"] + totals)
-        writer.writerow(["Average"] + avgs)
+            totals = [
+                round(sum(safe_numeric(structured_results[f].get(tool, {}).get(metric, 0))
+                          for f in structured_results), 2)
+                for tool, metric in [key.split(".", 1) for key in all_keys]
+            ]
+            avgs = [round(t / len(structured_results), 2) for t in totals]
 
-    messagebox.showinfo("Exported", "CSV successfully saved.")
+            writer.writerow(["Total"] + totals)
+            writer.writerow(["Average"] + avgs)
+
+        logging.info(f"📄 CSV exported with full tool.metric keys: {save_path}")
+        messagebox.showinfo("Exported", "CSV successfully saved.")
+
+    except Exception as e:
+        logging.exception(f"❌ Failed to export CSV: {e}")
+        messagebox.showerror("Export Error", f"{type(e).__name__}: {str(e)}")

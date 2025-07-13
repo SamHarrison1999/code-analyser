@@ -4,13 +4,12 @@ from typing import Dict, List, Optional
 
 from metrics.ast_metrics.plugins import ASTMetricPlugin, load_plugins
 
-
 class ASTMetricExtractor:
     """
     Extracts AST-based static metrics from a Python source file.
 
-    Uses pluggable ASTMetricPlugin instances plus supplemental structural analysis
-    (e.g., loop, assert, exception usage) to produce a comprehensive metric dictionary.
+    Combines pluggable ASTMetricPlugin instances with structural AST traversal
+    to produce a comprehensive dictionary of code metrics.
     """
 
     def __init__(self, file_path: str, plugins: Optional[List[ASTMetricPlugin]] = None) -> None:
@@ -22,11 +21,11 @@ class ASTMetricExtractor:
 
     def extract(self) -> Dict[str, int]:
         """
-        Execute full metric extraction by parsing the AST, applying plugins,
-        and walking the AST for structural counts.
+        Perform the complete metric extraction pipeline: parse source,
+        apply plugins, and collect structural metrics.
 
         Returns:
-            dict[str, int]: Metric name to value map.
+            Dict[str, int]: Mapping of metric names to computed values.
         """
         if not self._read_file() or not self._parse_ast():
             return self.metrics
@@ -36,37 +35,57 @@ class ASTMetricExtractor:
         return self.metrics
 
     def _read_file(self) -> bool:
+        """
+        Read the source file into memory.
+
+        Returns:
+            bool: True if read successfully, False otherwise.
+        """
         try:
             with open(self.file_path, "r", encoding="utf-8") as f:
                 self.code = f.read()
             return True
         except Exception as e:
-            logging.error(f"[ASTExtractor] Failed to read file '{self.file_path}': {e}")
+            logging.error(f"[ASTMetricExtractor] Failed to read file '{self.file_path}': {e}")
             return False
 
     def _parse_ast(self) -> bool:
+        """
+        Parse the source code into an AST.
+
+        Returns:
+            bool: True if parsing succeeds, False otherwise.
+        """
         try:
             self.tree = ast.parse(self.code)
             return True
         except Exception as e:
-            logging.error(f"[ASTExtractor] AST parse failed: {e}")
+            logging.error(f"[ASTMetricExtractor] AST parsing failed: {e}")
             return False
 
     def _apply_plugins(self) -> None:
+        """
+        Apply all loaded ASTMetricPlugin instances to extract metric values.
+        """
         for plugin in self.plugins:
             try:
                 self.metrics[plugin.name()] = plugin.visit(self.tree, self.code)
             except Exception as e:
-                logging.warning(f"[ASTExtractor] Plugin '{plugin.name()}' failed: {e}")
+                logging.warning(f"[ASTMetricExtractor] Plugin '{plugin.name()}' failed: {e}")
 
     def _walk_ast(self) -> None:
+        """
+        Traverse the AST to collect structural (non-plugin) metrics.
+        """
         for node in ast.walk(self.tree):
             self._handle_node(node)
 
     def _handle_node(self, node: ast.AST) -> None:
         """
-        Collect non-plugin metrics from AST traversal.
-        These metrics are structural and not specific to any plugin.
+        Handle an individual AST node and update structural metrics.
+
+        Args:
+            node (ast.AST): A single node from the AST.
         """
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             self.metrics["functions"] += 1
@@ -104,14 +123,13 @@ class ASTMetricExtractor:
 
     def _init_metrics(self) -> Dict[str, int]:
         """
-        Initialise the metric dictionary with zeroed values for both plugin
-        and structural AST metrics.
+        Initialise the metric dictionary with zero values for all expected metrics.
 
         Returns:
-            dict[str, int]: Default zero-initialised metric map.
+            Dict[str, int]: Dictionary of metric names initialised to zero.
         """
         return {
-            # Plugin-covered
+            # Plugin-based metrics
             "module_docstring": 0,
             "todo_comments": 0,
             "nested_functions": 0,
@@ -120,7 +138,7 @@ class ASTMetricExtractor:
             "assert_statements": 0,
             "class_docstrings": 0,
 
-            # Additional core metrics
+            # Core structural metrics
             "functions": 0,
             "classes": 0,
             "function_docstrings": 0,

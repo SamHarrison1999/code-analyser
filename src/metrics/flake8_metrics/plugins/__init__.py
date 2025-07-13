@@ -1,29 +1,31 @@
-"""
-metrics.flake8_metrics
+import pkgutil
+import importlib
+import inspect
+import os
+import logging
 
-This subpackage provides Flake8-based static analysis metrics.
+from .base import Flake8MetricPlugin as BasePlugin
 
-It includes:
-- A Flake8Extractor class that executes Flake8 on a target file
-- A gather_flake8_metrics() function that returns a list of metric values
-- Integration with plugin-style metric loaders across the code analyser system
+logger = logging.getLogger(__name__)
+__all__ = []
 
-These metrics are useful for:
-- Static analysis pipelines
-- Machine learning feature extraction
-- Visualisation in GUI/CSV reports
+# 🔍 Discover all modules in this directory except `base`
+for _, module_name, _ in pkgutil.iter_modules([os.path.dirname(__file__)]):
+    if module_name == "base":
+        continue
+    try:
+        module = importlib.import_module(f"{__name__}.{module_name}")
+        for name, obj in inspect.getmembers(module):
+            if inspect.isclass(obj) and issubclass(obj, BasePlugin) and obj is not BasePlugin:
+                globals()[name] = obj
+                __all__.append(name)
+                logger.debug(f"✅ Loaded Flake8 plugin: {name} from {module_name}")
+    except Exception as e:
+        logger.warning(f"⚠️ Failed to load Flake8 plugin module '{module_name}': {type(e).__name__}: {e}")
 
-Returned metrics include:
-- Total number of Flake8 issues
-- Issue types grouped by Flake8 category (e.g. E, F, W)
+# Alias for base class
+Flake8MetricPlugin = BasePlugin
 
-Example usage:
-    >>> from metrics.flake8_metrics import gather_flake8_metrics
-    >>> gather_flake8_metrics("my_script.py")
-    [12, 5, 3, 4]  # e.g. total, E, F, W counts
-"""
-
-from metrics.flake8_metrics.extractor import Flake8Extractor
-from metrics.flake8_metrics.gather import gather_flake8_metrics
-
-__all__ = ["Flake8Extractor", "gather_flake8_metrics"]
+def load_plugins() -> list[BasePlugin]:
+    """Instantiate and return all discovered Flake8 metric plugin classes."""
+    return [globals()[name]() for name in __all__]

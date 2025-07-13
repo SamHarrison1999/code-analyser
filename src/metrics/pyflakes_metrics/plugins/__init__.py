@@ -1,9 +1,23 @@
-from .base import PyflakesPlugin
-from .default_plugins import UndefinedNamesPlugin, SyntaxErrorsPlugin, load_plugins
+import pkgutil
+import importlib
+import inspect
+import os
 
-__all__ = [
-    "PyflakesPlugin",
-    "UndefinedNamesPlugin",
-    "SyntaxErrorsPlugin",
-    "load_plugins",
-]
+from .base import PyflakesMetricPlugin as BasePlugin
+
+__all__ = []
+
+for _, module_name, _ in pkgutil.iter_modules([os.path.dirname(__file__)]):
+    if module_name == "base":
+        continue
+    module = importlib.import_module(f"{__name__}.{module_name}")
+    for name, obj in inspect.getmembers(module):
+        if inspect.isclass(obj) and issubclass(obj, BasePlugin) and obj is not BasePlugin:
+            globals()[name] = obj
+            __all__.append(name)
+
+PyflakesMetricPlugin = BasePlugin
+
+def load_plugins() -> list[BasePlugin]:
+    return [globals()[name]() for name in __all__]
+

@@ -1,48 +1,23 @@
-"""
-Plugin system for CLOC metric extraction.
+import pkgutil
+import importlib
+import inspect
+import os
 
-This module defines all available plugin-style extractors for CLOC output,
-used to compute consistent metrics across Python projects.
+from .base import ClocMetricPlugin as BasePlugin
 
-Each plugin must inherit from `CLOCMetricPlugin` and implement:
-- name() -> str — a unique metric name
-- extract(cloc_data: dict) -> int | float — computes the value from parsed CLOC JSON
+__all__ = []
 
-This structure supports:
-- Static metric analysis for CSV/ML export
-- Extensible plugin discovery and aggregation
-"""
+for _, module_name, _ in pkgutil.iter_modules([os.path.dirname(__file__)]):
+    if module_name == "base":
+        continue
+    module = importlib.import_module(f"{__name__}.{module_name}")
+    for name, obj in inspect.getmembers(module):
+        if inspect.isclass(obj) and issubclass(obj, BasePlugin) and obj is not BasePlugin:
+            globals()[name] = obj
+            __all__.append(name)
 
-from .base import CLOCMetricPlugin
-from .comment_count import CommentCountPlugin
-from .total_lines import TotalLinesPlugin
-from .source_lines import SourceLinesPlugin
-from .comment_density import CommentDensityPlugin
+ClocMetricPlugin = BasePlugin
 
-# Ordered list of registered plugin classes
-DEFAULT_PLUGINS: list[type[CLOCMetricPlugin]] = [
-    CommentCountPlugin,
-    TotalLinesPlugin,
-    SourceLinesPlugin,
-    CommentDensityPlugin,
-]
+def load_plugins() -> list[BasePlugin]:
+    return [globals()[name]() for name in __all__]
 
-def load_plugins() -> list[CLOCMetricPlugin]:
-    """
-    Instantiate and return all registered CLOC metric plugins.
-
-    Returns:
-        list[CLOCMetricPlugin]: List of plugin instances.
-    """
-    return [plugin() for plugin in DEFAULT_PLUGINS]
-
-
-__all__ = [
-    "CLOCMetricPlugin",
-    "CommentCountPlugin",
-    "TotalLinesPlugin",
-    "SourceLinesPlugin",
-    "CommentDensityPlugin",
-    "DEFAULT_PLUGINS",
-    "load_plugins",
-]

@@ -1,53 +1,34 @@
 """
-Pydocstyle Metric Gatherer
-
-Provides a plugin-compatible interface to extract Pydocstyle-based
-documentation metrics in a consistent order for use in ML pipelines or CSV output.
+Gatherer for Pydocstyle metrics using a plugin-driven architecture.
 """
 
-from typing import Union, List
-from .extractor import PydocstyleExtractor
 import logging
+from typing import List, Union
+from metrics.pydocstyle_metrics.extractor import PydocstyleExtractor
+from metrics.pydocstyle_metrics.plugins import load_plugins
 
 
 def gather_pydocstyle_metrics(file_path: str) -> List[Union[int, float]]:
     """
-    Gathers Pydocstyle metrics from the given file and returns them
-    in a fixed order for consistency across data processing pipelines.
+    Run pydocstyle and apply all registered plugins.
 
     Args:
-        file_path (str): Path to the Python source file.
+        file_path (str): Path to file being analysed.
 
     Returns:
-        List[Union[int, float]]: Ordered metrics:
-            - number_of_pydocstyle_violations (int)
-            - number_of_missing_doc_strings (int)
-            - percentage_of_compliance_with_docstring_style (float)
+        List[Union[int, float]]: Ordered list of plugin metric values.
     """
     try:
-        results = PydocstyleExtractor(file_path).extract()
+        raw_output = PydocstyleExtractor(file_path).extract()
+        return [plugin.extract(raw_output, file_path) for plugin in load_plugins()]
     except Exception as e:
-        # ⚠️ SAST Risk: Don't allow metric gathering to break pipeline
-        logging.warning(f"[gather_pydocstyle_metrics] Extraction failed for {file_path}: {e}")
-        results = {}
-
-    return [
-        results.get("number_of_pydocstyle_violations", 0),
-        results.get("number_of_missing_doc_strings", 0),
-        results.get("percentage_of_compliance_with_docstring_style", 0.0),
-    ]
+        logging.warning(f"[gather_pydocstyle_metrics] Extraction failed for {file_path}: {type(e).__name__}: {e}")
+        return [0.0 for _ in load_plugins()]
 
 
-def get_pydocstyle_metric_names() -> list[str]:
+def get_pydocstyle_metric_names() -> List[str]:
     """
-    Returns the ordered list of Pydocstyle metric names corresponding
-    to the output of gather_pydocstyle_metrics.
-
     Returns:
-        list[str]: Metric names.
+        List[str]: Names of metrics in plugin order.
     """
-    return [
-        "number_of_pydocstyle_violations",
-        "number_of_missing_doc_strings",
-        "percentage_of_compliance_with_docstring_style",
-    ]
+    return [plugin.name() for plugin in load_plugins()]

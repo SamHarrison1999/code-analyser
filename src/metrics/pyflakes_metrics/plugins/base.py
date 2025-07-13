@@ -2,42 +2,42 @@
 Base structure for Pyflakes metric plugins.
 
 This module defines a standard interface for implementing Pyflakes-related
-plugins in a structured and extensible way.
+plugins in a structured and extensible way. Each plugin computes a specific
+metric from the output of Pyflakes diagnostics.
 """
 
 from abc import ABC, abstractmethod
 from typing import List
 
 
-class PyflakesPlugin(ABC):
+class PyflakesMetricPlugin(ABC):
     """
     Abstract base class for Pyflakes plugins.
 
-    All plugins must implement the `extract` method which takes the Pyflakes output
-    and file path, returning an integer metric value.
+    All Pyflakes plugins must:
+    - Provide a unique metric name via `name()`
+    - Implement `extract()` to compute the metric from parsed output
     """
 
     @classmethod
     @abstractmethod
     def name(cls) -> str:
         """
-        Returns the name of the metric this plugin extracts.
-
         Returns:
-            str: The name of the metric.
+            str: The unique name of the plugin metric.
         """
-        pass
+        raise NotImplementedError("PyflakesMetricPlugin must implement name() as a @classmethod.")
 
     @abstractmethod
     def extract(self, pyflakes_output: List[str], file_path: str) -> int:
         """
-        Extracts the metric value from the given Pyflakes output.
+        Computes a metric from Pyflakes output.
 
         Args:
-            pyflakes_output (List[str]): The list of Pyflakes warnings and errors.
-            file_path (str): Path to the analysed Python file.
+            pyflakes_output (List[str]): List of Pyflakes warnings and errors.
+            file_path (str): Path to the source file being analysed.
 
         Returns:
-            int: Metric value extracted from the Pyflakes output.
+            int: The computed metric value (e.g. count of a specific issue).
         """
-        pass
+        raise NotImplementedError("PyflakesMetricPlugin must implement extract().")

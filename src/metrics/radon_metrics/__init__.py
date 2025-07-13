@@ -1,19 +1,12 @@
-"""
-Radon Metrics Subpackage
-
-Provides extraction of code complexity and Halstead metrics using Radon.
-Useful for code complexity analysis, maintainability assessment,
-and ML feature extraction.
-
-Exposes:
-- run_radon: Core function to run Radon and parse metrics.
-- gather_radon_metrics: Helper function to gather metrics as an ordered list.
-"""
-
-from metrics.radon_metrics.extractor import run_radon
-from metrics.radon_metrics.gather import gather_radon_metrics
+# ✅ Structured Radon metrics package interface
+from .extractor import RadonExtractor, extract_radon_metrics
+from .gather import gather_radon_metrics, get_radon_metric_names
+from .plugins import load_plugins
 
 __all__ = [
-    "run_radon",
+    "RadonExtractor",
+    "extract_radon_metrics",
     "gather_radon_metrics",
+    "get_radon_metric_names",
+    "load_plugins",
 ]

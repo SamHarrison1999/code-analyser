@@ -2,22 +2,26 @@
 Pylint Metrics Subpackage
 
 Provides tools for extracting static code metrics from Python source files
-using Pylint analysis.
+using Pylint analysis and a plugin-driven architecture.
 
-This is useful for:
+This subpackage is designed for:
 - Static code quality auditing
 - Supervised machine learning feature extraction
-- Software maintainability evaluations
+- Maintainability and duplication detection
+- CSV export and dashboard integration
 
 Exposes:
-- PylintMetricExtractor: A class to run Pylint on a file and extract structured metrics.
-- gather_pylint_metrics: A helper function that runs extraction and aggregates results.
+- PylintMetricExtractor: Class for running Pylint on a file and extracting metrics.
+- gather_pylint_metrics: Function that returns ordered metrics for CSV/ML pipelines.
+- load_plugins: Dynamically loads plugin metric extractors.
 """
 
 from metrics.pylint_metrics.extractor import PylintMetricExtractor
 from metrics.pylint_metrics.gather import gather_pylint_metrics
+from metrics.pylint_metrics.plugins import load_plugins
 
 __all__ = [
     "PylintMetricExtractor",
     "gather_pylint_metrics",
+    "load_plugins",
 ]

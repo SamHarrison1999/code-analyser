@@ -1,49 +1,35 @@
-"""
-Plugin system for Radon metric extraction.
+import pkgutil
+import importlib
+import inspect
+import os
 
-This module exposes all available Radon plugin classes and provides:
-- A central location to register default plugin classes
-- A loader function to instantiate all registered plugins
-"""
+from .base import RadonMetricPlugin as BasePlugin
 
-from .base import RadonMetricPlugin
-from .default_plugins import (
-    LogicalLinesPlugin,
-    BlankLinesPlugin,
-    DocstringLinesPlugin,
-    AverageHalsteadVolumePlugin,
-    AverageHalsteadDifficultyPlugin,
-    AverageHalsteadEffortPlugin,
-)
+__all__ = []
 
-DEFAULT_PLUGINS = [
-    LogicalLinesPlugin,
-    BlankLinesPlugin,
-    DocstringLinesPlugin,
-    AverageHalsteadVolumePlugin,
-    AverageHalsteadDifficultyPlugin,
-    AverageHalsteadEffortPlugin,
-]
+# 🧠 Dynamically discover and import all valid plugin classes in the current directory
+plugin_dir = os.path.dirname(__file__)
+for _, module_name, _ in pkgutil.iter_modules([plugin_dir]):
+    if module_name.startswith("_") or module_name == "base":
+        continue  # 🚫 Skip private modules and base class
+    try:
+        module = importlib.import_module(f"{__name__}.{module_name}")
+        for name, obj in inspect.getmembers(module, inspect.isclass):
+            if issubclass(obj, BasePlugin) and obj is not BasePlugin:
+                globals()[name] = obj
+                __all__.append(name)
+    except Exception as e:
+        import logging
+        logging.warning(f"[RadonPluginLoader] Skipped {module_name}: {type(e).__name__}: {e}")
 
+# Alias for type-checking and consistency
+RadonMetricPlugin = BasePlugin
 
-def load_plugins() -> list[RadonMetricPlugin]:
+def load_plugins() -> list[BasePlugin]:
     """
-    Instantiate and return all registered Radon plugin objects.
+    Instantiates and returns all discovered Radon metric plugin instances.
 
     Returns:
-        list[RadonMetricPlugin]: A list of active plugin instances.
+        list[BasePlugin]: List of instantiated Radon metric plugin classes.
     """
-    return [plugin() for plugin in DEFAULT_PLUGINS]
-
-
-__all__ = [
-    "RadonMetricPlugin",
-    "LogicalLinesPlugin",
-    "BlankLinesPlugin",
-    "DocstringLinesPlugin",
-    "AverageHalsteadVolumePlugin",
-    "AverageHalsteadDifficultyPlugin",
-    "AverageHalsteadEffortPlugin",
-    "DEFAULT_PLUGINS",
-    "load_plugins",
-]
+    return [globals()[name]() for name in __all__]

@@ -1,10 +1,13 @@
 import json
 import logging
 import subprocess
-from typing import Dict, Any, Union
+from typing import Dict, Any, Union, Optional
+
+# ✅ Best Practice: Use plugin namespace imports to avoid hardcoding deleted or renamed files
+# ⚠️ SAST Risk: Static import of missing modules (like `default_plugins`) will crash the extractor pipeline
+# 🧠 ML Signal: Plugin loading patterns inform which metrics are active and which tools require failover handling
 
 from metrics.bandit_metrics.plugins import load_plugins
-
 
 class BanditExtractor:
     """
@@ -27,7 +30,7 @@ class BanditExtractor:
         """
         bandit_data = self._run_bandit()
         if bandit_data is None:
-            self.result_metrics = {p.name(): 0 for p in self.plugins}
+            self.result_metrics = {plugin.name(): 0 for plugin in self.plugins}
             return self.result_metrics
 
         self.raw_bandit_data = bandit_data
@@ -35,8 +38,10 @@ class BanditExtractor:
         self._log_metrics()
         return self.result_metrics
 
-    def _run_bandit(self) -> Dict[str, Any] | None:
-        """Run Bandit on the target file and return parsed JSON."""
+    def _run_bandit(self) -> Optional[Dict[str, Any]]:
+        """
+        Run Bandit on the target file and return parsed JSON, or None on failure.
+        """
         try:
             proc = subprocess.run(
                 ["bandit", "-f", "json", "-r", self.file_path],
@@ -59,13 +64,14 @@ class BanditExtractor:
             return None
 
     def _apply_plugins(self):
-        """Apply each plugin to compute its metric with numeric fallback."""
+        """
+        Apply each plugin to compute its metric with numeric fallback on errors.
+        """
         for plugin in self.plugins:
             try:
-                val = plugin.extract(self.raw_bandit_data)
-                # Coerce to int or float if possible, else fallback to 0
-                if isinstance(val, (int, float)):
-                    self.result_metrics[plugin.name()] = val
+                value = plugin.extract(self.raw_bandit_data)
+                if isinstance(value, (int, float)):
+                    self.result_metrics[plugin.name()] = value
                 else:
                     self.result_metrics[plugin.name()] = 0
             except Exception as e:
@@ -73,6 +79,12 @@ class BanditExtractor:
                 self.result_metrics[plugin.name()] = 0
 
     def _log_metrics(self):
-        """Log the final computed metrics."""
-        lines = [f"{name}: {val}" for name, val in self.result_metrics.items()]
+        """
+        Log the final computed Bandit-based metrics.
+        """
+        if not self.result_metrics:
+            logging.info(f"[BanditExtractor] No metrics computed for {self.file_path}")
+            return
+
+        lines = [f"{key}: {value}" for key, value in self.result_metrics.items()]
         logging.info(f"[BanditExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines))

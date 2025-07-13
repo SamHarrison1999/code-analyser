@@ -1,35 +1,34 @@
-from typing import Dict, List
+import logging
+from typing import List, Union
 from metrics.pylint_metrics.extractor import PylintMetricExtractor
+from metrics.pylint_metrics.plugins import load_plugins
 
 
-def gather_pylint_metrics(file_path: str) -> Dict[str, int]:
+def gather_pylint_metrics(file_path: str) -> List[Union[int, float]]:
     """
-    Extracts Pylint severity metrics from the given file.
+    Extracts pylint plugin-based metrics as a stable list for CSV/ML.
 
     Args:
-        file_path (str): Path to the Python source file.
+        file_path (str): Python file path.
 
     Returns:
-        Dict[str, int]: Dictionary containing counts of Pylint severity levels:
-                        convention, refactor, warning, error, fatal.
+        List[Union[int, float]]: List of metric values.
     """
-    extractor = PylintMetricExtractor(file_path)
-    return extractor.extract()
+    try:
+        extractor = PylintMetricExtractor(file_path)
+        results = extractor.extract()
+    except Exception as e:
+        logging.warning(f"[gather_pylint_metrics] Failed to extract metrics for {file_path}: {e}")
+        results = {}
+
+    return [results.get(plugin.name(), 0) for plugin in load_plugins()]
 
 
 def get_pylint_metric_names() -> List[str]:
     """
-    Returns the list of standard Pylint severity metric keys.
-
-    These correspond to the top-level counts returned by Pylint.
+    Returns plugin metric names in stable order.
 
     Returns:
-        List[str]: List of severity metric names.
+        List[str]: Names of metrics used in gather_pylint_metrics().
     """
-    return [
-        "convention",
-        "refactor",
-        "warning",
-        "error",
-        "fatal",
-    ]
+    return [plugin.name() for plugin in load_plugins()]

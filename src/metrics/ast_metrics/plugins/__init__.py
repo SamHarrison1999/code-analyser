@@ -1,52 +1,23 @@
-"""
-Plugin system for AST metric extraction.
+import pkgutil
+import importlib
+import inspect
+import os
 
-This module exposes all available AST plugin classes and provides:
-- A central registry of default plugin classes
-- A loader function to instantiate all registered plugins
-"""
+from .base import ASTMetricPlugin as BasePlugin
 
-from .base import ASTMetricPlugin
-from .default_plugins import (
-    ModuleDocstringPlugin,
-    TodoCommentPlugin,
-    NestedFunctionPlugin,
-    LambdaFunctionPlugin,
-    MagicMethodPlugin,
-    AssertStatementPlugin,
-    ClassDocstringPlugin,
-)
+__all__ = []
 
-# List of default plugin classes to register
-DEFAULT_PLUGINS = [
-    ModuleDocstringPlugin,
-    TodoCommentPlugin,
-    NestedFunctionPlugin,
-    LambdaFunctionPlugin,
-    MagicMethodPlugin,
-    AssertStatementPlugin,
-    ClassDocstringPlugin,
-]
+for _, module_name, _ in pkgutil.iter_modules([os.path.dirname(__file__)]):
+    if module_name == "base":
+        continue
+    module = importlib.import_module(f"{__name__}.{module_name}")
+    for name, obj in inspect.getmembers(module):
+        if inspect.isclass(obj) and issubclass(obj, BasePlugin) and obj is not BasePlugin:
+            globals()[name] = obj
+            __all__.append(name)
 
-def load_plugins() -> list[ASTMetricPlugin]:
-    """
-    Instantiate and return all registered AST plugin objects.
+ASTMetricPlugin = BasePlugin
 
-    Returns:
-        list[ASTMetricPlugin]: A list of active plugin instances.
-    """
-    return [plugin() for plugin in DEFAULT_PLUGINS]
+def load_plugins() -> list[BasePlugin]:
+    return [globals()[name]() for name in __all__]
 
-
-__all__ = [
-    "ASTMetricPlugin",
-    "ModuleDocstringPlugin",
-    "TodoCommentPlugin",
-    "NestedFunctionPlugin",
-    "LambdaFunctionPlugin",
-    "MagicMethodPlugin",
-    "AssertStatementPlugin",
-    "ClassDocstringPlugin",
-    "DEFAULT_PLUGINS",
-    "load_plugins",
-]

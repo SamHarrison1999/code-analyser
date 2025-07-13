@@ -1,5 +1,13 @@
-import tempfile
-from typing import List, Union, Callable
+"""
+Unified metric gathering entry point.
+
+This module provides:
+- `gather_all_metrics(file_path: str)`: Runs all enabled metric sources and returns combined results.
+- `get_all_metric_names()`: Returns the consistent list of metric names used in CLI/CSV outputs.
+"""
+
+import logging
+from typing import Union
 
 from metrics.ast_metrics.gather import gather_ast_metrics, get_ast_metric_names
 from metrics.bandit_metrics.gather import gather_bandit_metrics, get_bandit_metric_names
@@ -10,104 +18,67 @@ from metrics.pydocstyle_metrics.gather import gather_pydocstyle_metrics, get_pyd
 from metrics.pyflakes_metrics.gather import gather_pyflakes_metrics, get_pyflakes_metric_names
 from metrics.pylint_metrics.gather import gather_pylint_metrics, get_pylint_metric_names
 from metrics.radon_metrics.gather import gather_radon_metrics, get_radon_metric_names
+from metrics.vulture_metrics.gather import gather_vulture_metrics, get_vulture_metric_names
 
 
-def get_metric_names_from_gatherer(
-    gather_func: Callable[[str], Union[dict, list]],
-    get_names_func: Callable[[], List[str]],
-    file_path: str
-) -> List[str]:
+def gather_all_metrics(file_path: str) -> dict[str, Union[int, float, str]]:
     """
-    Determine metric names from a gatherer function's output.
-
-    Args:
-        gather_func (Callable): Function that extracts metrics and returns dict or list.
-        get_names_func (Callable): Function returning list of metric names if gather_func returns a list.
-        file_path (str): Path to file to pass to gather_func.
-
-    Returns:
-        List[str]: Ordered list of metric names.
-    """
-    result = gather_func(file_path)
-    if isinstance(result, dict):
-        return list(result.keys())
-    elif isinstance(result, list):
-        return get_names_func()
-    return []
-
-
-def get_all_metric_names() -> List[str]:
-    """
-    Aggregate and return all metric names from all metric gatherers
-    in a consistent, ordered manner for CSV export or ML input features.
-
-    Returns:
-        List[str]: Combined ordered list of all metric names.
-    """
-    with tempfile.NamedTemporaryFile("w+", suffix=".py") as f:
-        f.write("def foo(): pass\n")
-        f.flush()
-        file_path = f.name
-
-        ast_keys = get_metric_names_from_gatherer(gather_ast_metrics, get_ast_metric_names, file_path)
-        bandit_keys = get_metric_names_from_gatherer(gather_bandit_metrics, get_bandit_metric_names, file_path)
-        cloc_keys = get_metric_names_from_gatherer(gather_cloc_metrics, get_cloc_metric_names, file_path)
-        flake8_keys = get_metric_names_from_gatherer(gather_flake8_metrics, get_flake8_metric_names, file_path)
-        lizard_keys = get_metric_names_from_gatherer(gather_lizard_metrics, get_lizard_metric_names, file_path)
-        pydocstyle_keys = get_metric_names_from_gatherer(gather_pydocstyle_metrics, get_pydocstyle_metric_names, file_path)
-        pyflakes_keys = get_metric_names_from_gatherer(gather_pyflakes_metrics, get_pyflakes_metric_names, file_path)
-        pylint_keys = get_metric_names_from_gatherer(gather_pylint_metrics, get_pylint_metric_names, file_path)
-        radon_keys = get_metric_names_from_gatherer(gather_radon_metrics, get_radon_metric_names, file_path)
-
-    return (
-        ast_keys +
-        bandit_keys +
-        cloc_keys +
-        flake8_keys +
-        lizard_keys +
-        pydocstyle_keys +
-        pyflakes_keys +
-        pylint_keys +
-        radon_keys
-    )
-
-
-def gather_all_metrics(file_path: str) -> List[Union[int, float]]:
-    """
-    Gathers all metrics from all gatherers into a single ordered list.
+    Runs all configured metric gatherers and merges their outputs.
 
     Args:
         file_path (str): Path to the Python source file.
 
     Returns:
-        List[int | float]: Combined list of metric values in consistent order.
+        dict[str, int | float | str]: All collected metrics as a single flat dictionary.
     """
-    ast_values = gather_ast_metrics(file_path)
-    bandit_values = gather_bandit_metrics(file_path)
-    cloc_values = gather_cloc_metrics(file_path)
-    flake8_values = gather_flake8_metrics(file_path)
-    lizard_values = gather_lizard_metrics(file_path)
-    pydocstyle_values = gather_pydocstyle_metrics(file_path)
-    pyflakes_values = gather_pyflakes_metrics(file_path)
-    pylint_dict = gather_pylint_metrics(file_path)
-    pylint_values = list(pylint_dict.values()) if isinstance(pylint_dict, dict) else []
-    radon_values = gather_radon_metrics(file_path)
+    all_metrics: dict[str, Union[int, float, str]] = {}
 
+    metric_sources = [
+        (gather_ast_metrics, get_ast_metric_names),
+        (gather_bandit_metrics, get_bandit_metric_names),
+        (gather_cloc_metrics, get_cloc_metric_names),
+        (gather_flake8_metrics, get_flake8_metric_names),
+        (gather_lizard_metrics, get_lizard_metric_names),
+        (gather_pydocstyle_metrics, get_pydocstyle_metric_names),
+        (gather_pyflakes_metrics, get_pyflakes_metric_names),
+        (gather_pylint_metrics, get_pylint_metric_names),
+        (gather_radon_metrics, get_radon_metric_names),
+        (gather_vulture_metrics, get_vulture_metric_names),
+    ]
+
+    for gather_func, name_func in metric_sources:
+        try:
+            values = gather_func(file_path)
+            names = name_func()
+            if len(values) != len(names):
+                logging.warning(
+                    f"[gather_all_metrics] Metric count mismatch for {gather_func.__name__}: "
+                    f"{len(names)} names vs {len(values)} values"
+                )
+            all_metrics.update(dict(zip(names, values)))
+        except Exception as e:
+            logging.error(f"[gather_all_metrics] Failed to gather from {gather_func.__name__}: {e}")
+            all_metrics[gather_func.__name__] = f"error: {e}"
+
+    return all_metrics
+
+
+def get_all_metric_names() -> list[str]:
+    """
+    Returns consistent metric name list for use in output and headers.
+
+    Returns:
+        list[str]: Known metrics used for ordering and fallback.
+    """
     return (
-        ast_values +
-        bandit_values +
-        cloc_values +
-        flake8_values +
-        lizard_values +
-        pydocstyle_values +
-        pyflakes_values +
-        pylint_values +
-        radon_values
+        get_ast_metric_names() +
+        get_bandit_metric_names() +
+        get_cloc_metric_names() +
+        get_flake8_metric_names() +
+        get_lizard_metric_names() +
+        get_pydocstyle_metric_names() +
+        get_pyflakes_metric_names() +
+        get_pylint_metric_names() +
+        get_radon_metric_names() +
+        get_vulture_metric_names()
     )
-
-
-__all__ = [
-    "get_metric_names_from_gatherer",
-    "get_all_metric_names",
-    "gather_all_metrics",
-]

@@ -1,6 +1,7 @@
-from metrics.cloc_metrics.plugins.base import CLOCMetricPlugin
 
-class SourceLinesPlugin(CLOCMetricPlugin):
+from metrics.cloc_metrics.plugins.base import ClocMetricPlugin
+
+class SourceLinesPlugin(ClocMetricPlugin):
     """
     Extracts the number of source (code) lines from CLOC output.
 
@@ -12,4 +13,7 @@ class SourceLinesPlugin(CLOCMetricPlugin):
         return "number_of_source_lines_of_code"
 
     def extract(self, cloc_data: dict) -> int:
-        return int(cloc_data.get("code", 0))
+        try:
+            return int(cloc_data.get("code", 0))
+        except (TypeError, ValueError):
+            return 0

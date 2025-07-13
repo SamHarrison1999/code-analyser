@@ -5,35 +5,38 @@ Each plugin inspects the Pydocstyle output and extracts one metric.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, List
 
 
-class PydocstylePlugin(ABC):
+class PydocstyleMetricPlugin(ABC):
     """
     Abstract base class for Pydocstyle metric plugins.
-    Plugins operate on parsed Pydocstyle diagnostic lines.
+
+    Plugins must:
+    - Define a unique metric name
+    - Implement an extraction method using parsed Pydocstyle output lines
     """
 
-    @classmethod
     @abstractmethod
-    def name(cls) -> str:
+    def name(self) -> str:
         """
+        Return the unique name of the metric provided by this plugin.
+
         Returns:
-            str: The unique name of the plugin metric.
+            str: Metric name used as a dictionary key.
         """
-        pass
+        raise NotImplementedError("Plugin must implement name()")
 
     @abstractmethod
-    def extract(self, pydocstyle_output: list[str], file_path: str) -> Any:
+    def extract(self, pydocstyle_output: List[str], file_path: str) -> Any:
         """
-        Computes a metric from Pydocstyle output.
+        Compute the metric from the provided Pydocstyle diagnostic output.
 
         Args:
-            pydocstyle_output (list[str]): Raw lines of Pydocstyle output.
-            file_path (str): Path to the source file being analysed.
+            pydocstyle_output (List[str]): Raw Pydocstyle output lines.
+            file_path (str): Path to the file being analysed.
 
         Returns:
-            Any: The computed metric (e.g., int or float).
+            Any: The computed metric value (typically int or float).
         """
-        pass
-
+        raise NotImplementedError("Plugin must implement extract()")

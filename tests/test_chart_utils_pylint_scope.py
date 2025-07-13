@@ -1,50 +1,79 @@
-import sys
-import os
-from unittest.mock import MagicMock, patch
+import pytest
+from unittest.mock import patch
+from gui import chart_utils
 
-# ✅ Mock mplcursors before importing chart_utils
-sys.modules["mplcursors"] = MagicMock()
+class TestPylintScope:
 
-# Setup test path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
+    @patch("gui.chart_utils.get_shared_state")
+    def test_filter_metrics_by_scope_pylint(self, mock_get_state):
+        """
+        Test that metrics are correctly filtered when 'pylint' scope is active.
+        """
+        # Mock the scope selection and available scopes
+        class MockMetricScope:
+            def get(self): return "pylint"
 
-import types
-import unittest
-import gui.chart_utils as chart_utils
-
-
-class TestPylintScope(unittest.TestCase):
-    def setUp(self):
-        # 👇 Build a fake gui.shared_state module with a mocked metric_scope
-        mock_shared_state = types.ModuleType("shared_state")
-        mock_metric_scope = MagicMock()
-        mock_metric_scope.get.return_value = "pylint"
-        mock_shared_state.metric_scope = mock_metric_scope
-
-        # 👇 Inject this into sys.modules before gui.chart_utils uses it
-        sys.modules["gui.shared_state"] = mock_shared_state
-
-    @patch("gui.chart_utils.include_metric")
-    def test_include_metric_pylint_scope(self, mock_include_metric):
-        # Simulate expected returns for specific metrics
-        mock_include_metric.side_effect = lambda m: m in {"convention", "fatal"}
-
-        self.assertTrue(chart_utils.include_metric("convention"))
-        self.assertTrue(chart_utils.include_metric("fatal"))
-        self.assertFalse(chart_utils.include_metric("lines_of_code"))
-        self.assertFalse(chart_utils.include_metric("non_pylint_metric"))
-
-    @patch("gui.chart_utils.include_metric")
-    def test_filter_metrics_by_scope_pylint(self, mock_get_names):
-        metrics = {
-            "convention": 3,
-            "refactor": 2,
-            "warning": 1,
-            "non_pylint": 99,
+        mock_get_state.return_value.metric_scope = MockMetricScope()
+        mock_get_state.return_value.available_scopes = {
+            "pylint": {"convention", "refactor", "warning", "error", "fatal"}
         }
-        filtered = chart_utils.filter_metrics_by_scope(metrics)
-        self.assertEqual(set(filtered.keys()), {"convention", "refactor", "warning"})
 
+        sample_metrics = {
+            "pylint": {
+                "convention": 5,
+                "refactor": 2,
+                "warning": 1,
+                "error": 0,
+                "fatal": 0
+            },
+            "flake8": {
+                "number_of_unused_imports": 3
+            },
+            "other": {
+                "non_numeric": "skip"
+            }
+        }
 
-if __name__ == "__main__":
-    unittest.main()
+        result = chart_utils.filter_metrics_by_scope(sample_metrics)
+
+        expected_keys = {
+            "pylint.convention",
+            "pylint.refactor",
+            "pylint.warning",
+            "pylint.error",
+            "pylint.fatal"
+        }
+
+        assert set(result.keys()) == expected_keys
+        assert all(isinstance(v, float) for v in result.values())
+
+    @patch("gui.chart_utils.get_shared_state")
+    def test_include_metric_pylint_scope(self, mock_get_state):
+        """
+        Ensure filtering excludes non-pylint metrics and non-numeric values.
+        """
+        class MockMetricScope:
+            def get(self): return "pylint"
+
+        mock_get_state.return_value.metric_scope = MockMetricScope()
+        mock_get_state.return_value.available_scopes = {
+            "pylint": {"convention", "fatal", "warning"}
+        }
+
+        sample_metrics = {
+            "pylint": {
+                "convention": 2,
+                "fatal": 1,
+                "warning": "warn"  # Invalid, should be skipped
+            },
+            "radon": {
+                "average_halstead_volume": 3.1
+            }
+        }
+
+        filtered = chart_utils.filter_metrics_by_scope(sample_metrics)
+
+        assert "pylint.convention" in filtered
+        assert "pylint.fatal" in filtered
+        assert "pylint.warning" not in filtered
+        assert "radon.average_halstead_volume" not in filtered

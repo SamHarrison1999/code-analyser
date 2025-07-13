@@ -10,11 +10,12 @@ Exposes core extractors and metric gatherers for:
 - Pydocstyle (docstring compliance)
 - Pyflakes (syntax + import warnings)
 - Pylint (multi-category quality issues)
-- Pylint Plugins (extendable metric rules)
 - Radon (code complexity and Halstead metrics)
+- Vulture (unused code detection)
 - Unified metric aggregation (gather_all_metrics)
 """
 
+# === Core Extractors ===
 from metrics.ast_metrics.extractor import ASTMetricExtractor
 from metrics.bandit_metrics.extractor import BanditExtractor
 from metrics.cloc_metrics.extractor import ClocExtractor
@@ -23,9 +24,22 @@ from metrics.lizard_metrics.extractor import LizardExtractor, extract_lizard_met
 from metrics.pydocstyle_metrics.extractor import PydocstyleExtractor
 from metrics.pyflakes_metrics.extractor import PyflakesExtractor, extract_pyflakes_metrics
 from metrics.pylint_metrics.extractor import PylintMetricExtractor
-from metrics.radon_metrics.extractor import run_radon
-from metrics.pylint_metrics.plugins.default_plugins import load_plugins
+from metrics.radon_metrics.extractor import RadonExtractor, extract_radon_metrics
+from metrics.vulture_metrics.extractor import run_vulture
 
+# === Plugin Loaders ===
+from metrics.pylint_metrics import load_plugins as load_pylint_plugins
+from metrics.vulture_metrics import load_plugins as load_vulture_plugins
+from metrics.radon_metrics import load_plugins as load_radon_plugins
+from metrics.pyflakes_metrics import load_plugins as load_pyflakes_plugins
+from metrics.pydocstyle_metrics import load_plugins as load_pydocstyle_plugins
+from metrics.lizard_metrics import load_plugins as load_lizard_plugins
+from metrics.flake8_metrics import load_plugins as load_flake8_plugins
+from metrics.cloc_metrics import load_plugins as load_cloc_plugins
+from metrics.bandit_metrics import load_plugins as load_bandit_plugins
+from metrics.ast_metrics import load_plugins as load_ast_plugins
+
+# === Metric Gather Functions ===
 from metrics.ast_metrics.gather import gather_ast_metrics
 from metrics.bandit_metrics.gather import gather_bandit_metrics
 from metrics.cloc_metrics.gather import gather_cloc_metrics
@@ -34,10 +48,10 @@ from metrics.lizard_metrics.gather import gather_lizard_metrics
 from metrics.pydocstyle_metrics.gather import gather_pydocstyle_metrics
 from metrics.pyflakes_metrics.gather import gather_pyflakes_metrics
 from metrics.pylint_metrics.gather import gather_pylint_metrics
-# ✅ Minimal and safe (let gui_logic or gather.py handle direct imports)
-from .radon_metrics import gather
+from metrics.radon_metrics.gather import gather_radon_metrics
+from metrics.vulture_metrics.gather import gather_vulture_metrics
 
-
+# === Unified Aggregation ===
 from metrics.gather import gather_all_metrics, get_all_metric_names
 
 __all__ = [
@@ -50,11 +64,24 @@ __all__ = [
     "PydocstyleExtractor",
     "PyflakesExtractor",
     "PylintMetricExtractor",
+    "RadonExtractor",
 
-    # Utilities / Plugins
+    # Plugin loaders
+    "load_ast_plugins",
+    "load_bandit_plugins",
+    "load_cloc_plugins",
+    "load_flake8_plugins",
+    "load_lizard_plugins",
+    "load_pydocstyle_plugins",
+    "load_pyflakes_plugins",
+    "load_pylint_plugins",
+    "load_radon_plugins",
+    "load_vulture_plugins",
+
+    # Utility extractors
     "extract_lizard_metrics",
     "extract_pyflakes_metrics",
-    "load_plugins",
+    "extract_radon_metrics",
 
     # Metric gatherers
     "gather_ast_metrics",
@@ -66,7 +93,12 @@ __all__ = [
     "gather_pyflakes_metrics",
     "gather_pylint_metrics",
     "gather_radon_metrics",
-    "run_radon",
+    "gather_vulture_metrics",
+
+    # Raw tool runners
+    "run_vulture",
+
+    # Unified API
     "gather_all_metrics",
     "get_all_metric_names",
 ]

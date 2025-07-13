@@ -1,36 +1,24 @@
-# File: metrics/pyflakes_metrics/gather.py
+"""
+Gathers Pyflakes metrics using plugin-based extraction.
 
-from typing import Union
+Used in ML pipelines and CSV/tabular reports.
+"""
 
-def gather_pyflakes_metrics(file_path: str) -> list[Union[int, float]]:
-    """
-    Gathers Pyflakes metrics from the given file.
+import logging
+from typing import List
+from metrics.pyflakes_metrics.extractor import PyflakesExtractor
+from metrics.pyflakes_metrics.plugins import load_plugins
 
-    Args:
-        file_path (str): Path to the Python source file.
 
-    Returns:
-        list[Union[int, float]]: Ordered metrics:
-            - number_of_undefined_names
-            - number_of_syntax_errors
-    """
-    # Local import to avoid circular import issues
-    from metrics.pyflakes_metrics.extractor import PyflakesExtractor
+def gather_pyflakes_metrics(file_path: str) -> List[int]:
+    try:
+        extractor = PyflakesExtractor(file_path)
+        output = extractor.extract()
+        return [plugin.extract(output, file_path) for plugin in load_plugins()]
+    except Exception as e:
+        logging.warning(f"[gather_pyflakes_metrics] Extraction failed for {file_path}: {e}")
+        return [0 for _ in load_plugins()]
 
-    results = PyflakesExtractor(file_path).extract()
-    return [
-        results.get("number_of_undefined_names", 0),
-        results.get("number_of_syntax_errors", 0),
-    ]
 
-def get_pyflakes_metric_names() -> list[str]:
-    """
-    Returns the list of Pyflakes metric names in the same order as gather_pyflakes_metrics.
-
-    Returns:
-        list[str]: Ordered metric names.
-    """
-    return [
-        "number_of_undefined_names",
-        "number_of_syntax_errors",
-    ]
+def get_pyflakes_metric_names() -> List[str]:
+    return [plugin.name() for plugin in load_plugins()]

@@ -1,112 +1,82 @@
-import sys
-import os
-import shutil
-import json
-import subprocess
 import logging
-from typing import Any, Dict, List
+from typing import Union
+from radon.raw import analyze
+from radon.metrics import h_visit
+from metrics.metric_types import MetricExtractorBase
 
-def _get_radon_executable() -> str:
-    """Return absolute path to radon executable, even in frozen mode."""
-    if getattr(sys, "frozen", False):
-        base_path = getattr(sys, "_MEIPASS", "")
-        candidate = os.path.join(base_path, "radon.exe")
-        if os.path.isfile(candidate):
-            logging.debug(f"[Radon] Using bundled radon at: {candidate}")
-            return candidate
-    exe_path = shutil.which("radon")
-    if exe_path:
-        logging.debug(f"[Radon] Using system radon at: {exe_path}")
-        return exe_path
-    logging.warning("[Radon] radon not found in PATH")
-    return "radon"
+# ✅ Configure module logger
+logger = logging.getLogger(__name__)
 
-def run_radon(file_path: str) -> Dict[str, Any]:
-    env = os.environ.copy()
-    env["PYTHONIOENCODING"] = "utf-8"
-    env["ANSICON"] = "0"
 
-    if os.path.basename(file_path).startswith("tmp") and "AppData" in file_path:
-        logging.warning(f"⚠️ Skipping Radon for temporary file: {file_path}")
-        return default_radon_metrics()
+class RadonExtractor(MetricExtractorBase):
+    """
+    Extracts raw and Halstead complexity metrics using Radon.
+    """
 
-    if not os.path.isfile(file_path):
-        logging.error(f"❌ Radon file not found: {file_path}")
-        return default_radon_metrics()
-    if not os.access(file_path, os.R_OK):
-        logging.error(f"❌ Radon file not readable: {file_path}")
-        return default_radon_metrics()
+    def extract(self) -> dict[str, Union[int, float]]:
+        """
+        Computes a summary of raw and Halstead metrics from the file.
 
-    radon_exe = _get_radon_executable()
-
-    def run_and_parse(cmd: List[str], label: str) -> Dict[str, Any]:
+        Returns:
+            dict[str, int | float]: Metric dictionary containing:
+                - logical_lines
+                - blank_lines
+                - docstring_lines
+                - halstead_volume
+                - halstead_difficulty
+                - halstead_effort
+        """
         try:
-            logging.debug(f"[Radon] Running command: {' '.join(cmd)}")
-            output = subprocess.check_output(cmd, encoding="utf-8", env=env, stderr=subprocess.DEVNULL)
-            return json.loads(output)
-        except subprocess.CalledProcessError as e:
-            logging.error(f"❌ Radon '{label}' failed for {file_path}: {e}")
-        except json.JSONDecodeError:
-            logging.error(f"❌ Radon '{label}' returned invalid JSON for {file_path}")
-        except FileNotFoundError:
-            logging.error(f"❌ Radon executable not found: {cmd[0]}")
+            with open(self.file_path, encoding="utf-8") as f:
+                code = f.read()
+
+            raw_metrics = analyze(code)
+            halstead = h_visit(code)
+
+            metrics = {
+                "logical_lines": raw_metrics.lloc,
+                "blank_lines": raw_metrics.blank,
+                "docstring_lines": raw_metrics.comments,
+                "halstead_volume": round(halstead.total.volume, 2),
+                "halstead_difficulty": round(halstead.total.difficulty, 2),
+                "halstead_effort": round(halstead.total.effort, 2),
+            }
+
+            logger.info(f"[RadonExtractor] Metrics for {self.file_path}:\n{metrics}")
+            return metrics
+
         except Exception as e:
-            logging.error(f"❌ Radon '{label}' unexpected error: {type(e).__name__}: {e}")
-        return {}
+            logger.warning(f"[RadonExtractor] Failed to analyse {self.file_path}: {type(e).__name__}: {e}")
+            return self._default_metrics()
 
-    raw_data = run_and_parse([radon_exe, "raw", "-j", file_path], "raw")
-    hal_data = run_and_parse([radon_exe, "hal", "-j", file_path], "hal")
+    def _default_metrics(self) -> dict[str, Union[int, float]]:
+        """
+        Fallback values if analysis fails.
 
-    return parse_radon_metrics(file_path, raw_data, hal_data)
+        Returns:
+            dict[str, int | float]: Zeroed or empty metrics.
+        """
+        return {
+            "logical_lines": 0,
+            "blank_lines": 0,
+            "docstring_lines": 0,
+            "halstead_volume": 0.0,
+            "halstead_difficulty": 0.0,
+            "halstead_effort": 0.0,
+        }
 
-def parse_radon_metrics(file_path: str, raw_data: Dict[str, Any], hal_data: Dict[str, Any]) -> Dict[str, Any]:
-    file_raw = raw_data.get(file_path, {})
-    file_hal = hal_data.get(file_path)
-    if file_hal is None and hal_data:
-        file_hal = list(hal_data.values())[0]
-    file_hal = file_hal or {}
 
-    functions = file_hal.get("functions", [])
-    if isinstance(functions, dict):
-        func_metrics = list(functions.values())
-    elif isinstance(functions, list):
-        func_metrics = functions
-    else:
-        func_metrics = []
+def extract_radon_metrics(file_path: str) -> dict[str, Union[int, float]]:
+    """
+    Runs the Radon extractor and returns a dictionary of metrics.
 
-    total_functions = len(func_metrics)
-    avg_volume = avg_difficulty = avg_effort = 0.0
+    Args:
+        file_path (str): The file to analyse.
 
-    if total_functions > 0:
-        avg_volume = sum(float(f.get("volume", 0)) for f in func_metrics) / total_functions
-        avg_difficulty = sum(float(f.get("difficulty", 0)) for f in func_metrics) / total_functions
-        avg_effort = sum(float(f.get("effort", 0)) for f in func_metrics) / total_functions
+    Returns:
+        dict[str, int | float]: Computed metric results.
+    """
+    return RadonExtractor(file_path).extract()
 
-    logging.info(
-        f"📄 File: {file_path}\n"
-        f" - Logical Lines: {file_raw.get('lloc', 0)}\n"
-        f" - Blank Lines: {file_raw.get('blank', 0)}\n"
-        f" - Docstrings: {file_raw.get('multi', 0)}\n"
-        f" - Halstead Volume (avg): {avg_volume:.2f}\n"
-        f" - Halstead Difficulty (avg): {avg_difficulty:.2f}\n"
-        f" - Halstead Effort (avg): {avg_effort:.2f}"
-    )
 
-    return {
-        "number_of_logical_lines": file_raw.get("lloc", 0),
-        "number_of_blank_lines": file_raw.get("blank", 0),
-        "number_of_doc_strings": file_raw.get("multi", 0),
-        "average_halstead_volume": avg_volume,
-        "average_halstead_difficulty": avg_difficulty,
-        "average_halstead_effort": avg_effort
-    }
-
-def default_radon_metrics() -> Dict[str, float]:
-    return {
-        "number_of_logical_lines": 0,
-        "number_of_blank_lines": 0,
-        "number_of_doc_strings": 0,
-        "average_halstead_volume": 0.0,
-        "average_halstead_difficulty": 0.0,
-        "average_halstead_effort": 0.0
-    }
+__all__ = ["RadonExtractor", "extract_radon_metrics"]

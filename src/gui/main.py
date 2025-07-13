@@ -3,26 +3,30 @@ import os
 import logging
 import tkinter as tk
 from tkinter import ttk
-from gui.gui_components import launch_gui
+from pathlib import Path
 
-# === Setup debug log location ===
+from gui.shared_state import setup_shared_gui_state  # ✅ Inject shared state before GUI
+from gui.gui_components import launch_gui  # ✅ Accepts root window
+
+# === Configure logging ===
 if getattr(sys, 'frozen', False):
-    base_dir = os.path.dirname(sys.executable)
+    base_dir = Path(sys.executable).parent
 else:
-    base_dir = os.getcwd()
+    base_dir = Path.cwd()
 
-log_path = os.path.join(base_dir, "debug.log")
+log_path = base_dir / "debug.log"
 
-# Ensure log directory exists
 try:
-    os.makedirs(os.path.dirname(log_path), exist_ok=True)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
 except Exception as e:
-    print(f"⚠️ Could not ensure log directory exists: {e}")
+    print(f"⚠️ Could not create log directory: {e}")
 
-# === Configure root logger ===
+# Suppress matplotlib font loading noise
 logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
+
+# Setup file-based logging
 logging.basicConfig(
-    filename=log_path,
+    filename=str(log_path),
     filemode='w',
     encoding='utf-8',
     level=logging.DEBUG,
@@ -34,27 +38,53 @@ logging.debug(f"🔍 Debug log path: {log_path}")
 logging.debug(f"🧩 sys.argv: {sys.argv}")
 logging.debug(f"📦 Frozen (PyInstaller): {getattr(sys, 'frozen', False)}")
 
+# === App exit logic ===
+def clean_exit(root: tk.Tk) -> None:
+    """Safely exit the application."""
+    try:
+        root.quit()
+        root.destroy()
+    except Exception:
+        pass
+    logging.info("📤 Exiting application cleanly via clean_exit()")
+    sys.exit(0)
+
 
 def start_main_gui(splash: tk.Tk, progress: ttk.Progressbar) -> None:
-    """Stop the splash animation and launch the main GUI."""
+    """Stop splash screen and launch the main GUI."""
     try:
         progress.stop()
     except Exception:
-        pass
-    splash.destroy()
-    launch_gui()
+        logging.debug("⚠️ Could not stop progress bar")
+
+    try:
+        splash.destroy()
+    except Exception:
+        logging.debug("⚠️ Could not destroy splash window")
+
+    try:
+        root = tk.Tk()
+        setup_shared_gui_state(root)  # ✅ Initialise shared state
+        root.protocol("WM_DELETE_WINDOW", lambda: clean_exit(root))  # 🛑 Handle manual window close
+        launch_gui(root)
+        root.mainloop()
+        clean_exit(root)  # 🧹 Ensure full cleanup on normal close
+    except Exception as e:
+        logging.exception(f"❌ Failed to launch GUI: {e}")
+        print("❌ Failed to launch GUI. See debug.log for details.")
+        sys.exit(1)
 
 
 def show_splash_and_start() -> None:
-    """Display a splash screen before launching the GUI."""
+    """Display splash screen and start the GUI with animation."""
     splash = tk.Tk()
     splash.overrideredirect(True)
 
     screen_width = splash.winfo_screenwidth()
     screen_height = splash.winfo_screenheight()
     splash_width, splash_height = 360, 120
-    x = (screen_width // 2) - (splash_width // 2)
-    y = (screen_height // 2) - (splash_height // 2)
+    x = (screen_width - splash_width) // 2
+    y = (screen_height - splash_height) // 2
     splash.geometry(f"{splash_width}x{splash_height}+{x}+{y}")
     splash.configure(bg="white")
 
@@ -70,7 +100,7 @@ def show_splash_and_start() -> None:
         style.theme_use('default')
         style.configure("TProgressbar", thickness=8)
     except Exception as e:
-        logging.debug(f"⚠️ Failed to set progressbar style: {e}")
+        logging.debug(f"⚠️ Failed to style progressbar: {type(e).__name__}: {e}")
 
     progress = ttk.Progressbar(splash, mode='indeterminate', length=280)
     progress.pack(pady=10)
@@ -81,10 +111,9 @@ def show_splash_and_start() -> None:
 
 
 if __name__ == "__main__":
-    # Prevent subprocess metric-only mode from launching GUI
-    safe_args = [arg.replace("\\", "/") for arg in sys.argv]
+    args = [str(arg).replace("\\", "/") for arg in sys.argv]
     if (
         "metrics.main" not in sys.argv and
-        not any(arg.endswith("metrics/main.py") for arg in safe_args)
+        not any(arg.endswith("metrics/main.py") for arg in args)
     ):
         show_splash_and_start()

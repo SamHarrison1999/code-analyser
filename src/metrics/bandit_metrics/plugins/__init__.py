@@ -1,58 +1,22 @@
-"""
-Plugin system for Bandit metric extraction.
+import pkgutil
+import importlib
+import inspect
+import os
 
-This module exposes all available Bandit plugin classes and provides:
-- A central registry of default plugin classes
-- A loader function to instantiate all registered plugins
-"""
+from .base import BanditMetricPlugin as BasePlugin
 
-from .base import BanditMetricPlugin
-from .default_plugins import (
-    HighSeverityIssues,
-    MediumSeverityIssues,
-    LowSeverityIssues,
-    UndefinedSeverityIssues,
-)
-from .cwe_plugin import (
-    CWEFrequencyPlugin,
-    MostFrequentCWEPlugin,
-    CWENameFrequencyPlugin,
-    MostFrequentCWEWithNamePlugin,
-)
+__all__ = []
 
-# ✅ Ordered list of all default plugin classes
-DEFAULT_PLUGINS: list[type[BanditMetricPlugin]] = [
-    HighSeverityIssues,
-    MediumSeverityIssues,
-    LowSeverityIssues,
-    UndefinedSeverityIssues,
-    CWEFrequencyPlugin,
-    MostFrequentCWEPlugin,
-    CWENameFrequencyPlugin,
-    MostFrequentCWEWithNamePlugin,
-]
+for _, module_name, _ in pkgutil.iter_modules([os.path.dirname(__file__)]):
+    if module_name == "base":
+        continue
+    module = importlib.import_module(f"{__name__}.{module_name}")
+    for name, obj in inspect.getmembers(module):
+        if inspect.isclass(obj) and issubclass(obj, BasePlugin) and obj is not BasePlugin:
+            globals()[name] = obj
+            __all__.append(name)
 
+BanditMetricPlugin = BasePlugin
 
-def load_plugins() -> list[BanditMetricPlugin]:
-    """
-    Instantiate and return all registered Bandit plugin objects.
-
-    Returns:
-        list[BanditMetricPlugin]: A list of active plugin instances.
-    """
-    return [plugin() for plugin in DEFAULT_PLUGINS]
-
-
-__all__ = [
-    "BanditMetricPlugin",
-    "HighSeverityIssues",
-    "MediumSeverityIssues",
-    "LowSeverityIssues",
-    "UndefinedSeverityIssues",
-    "CWEFrequencyPlugin",
-    "MostFrequentCWEPlugin",
-    "CWENameFrequencyPlugin",
-    "MostFrequentCWEWithNamePlugin",
-    "DEFAULT_PLUGINS",
-    "load_plugins",
-]
+def load_plugins() -> list[BasePlugin]:
+    return [globals()[name]() for name in __all__]

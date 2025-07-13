@@ -4,6 +4,7 @@ import json
 import logging
 from pathlib import Path
 from datetime import datetime
+from typing import Union
 
 from metrics.gather import gather_all_metrics, get_all_metric_names
 
@@ -11,14 +12,14 @@ from metrics.gather import gather_all_metrics, get_all_metric_names
 def analyse_file(
     file_path: Path,
     raw: bool = False,
-    out_path: Path = None,
+    out_path: Union[Path, None] = None,
     format: str = "json",
-    json_out: Path = None,
-    csv_out: Path = None,
-    fail_threshold: int = None,
+    json_out: Union[Path, None] = None,
+    csv_out: Union[Path, None] = None,
+    fail_threshold: Union[int, None] = None,
     fail_on: str = "all",
     show_summary: bool = False,
-    save_summary_txt: Path = None,
+    save_summary_txt: Union[Path, None] = None,
     markdown_summary: bool = False,
 ) -> int:
     """Analyse a single file and optionally write output."""
@@ -27,15 +28,16 @@ def analyse_file(
         return 1
 
     try:
-        values = gather_all_metrics(str(file_path))
-        metric_names = get_all_metric_names()
-        result_dict = dict(zip(metric_names, values))
+        result_dict = gather_all_metrics(str(file_path))
+        if not isinstance(result_dict, dict):
+            raise ValueError("gather_all_metrics did not return a dictionary")
+        metric_names = list(result_dict.keys())
     except Exception as e:
         logging.error(f"❌ Metric extraction failed: {e}")
         return 1
 
     if raw:
-        print(values)
+        print(result_dict)
         return 0
 
     wrapped_json = {
@@ -79,40 +81,33 @@ def analyse_file(
                 logging.error(f"❌ Failed to save summary: {e}")
 
     if fail_threshold is not None:
-        if fail_on == "ast":
-            ast_keys = get_all_metric_names()[:14]
-            metric_keys = [k for k in result_dict if k in ast_keys]
-        elif fail_on == "bandit":
-            metric_keys = [k for k in result_dict if "bandit" in k or "security" in k]
-        elif fail_on == "flake8":
-            metric_keys = [k for k in result_dict if "flake8" in k or "line_length" in k]
-        elif fail_on == "cloc":
-            metric_keys = [k for k in result_dict if "line" in k or "comment" in k]
-        elif fail_on == "lizard":
-            metric_keys = [k for k in result_dict if any(p in k for p in [
-                "complexity", "token", "parameter", "maintainability"
-            ])]
-        elif fail_on == "pydocstyle":
-            metric_keys = [k for k in result_dict if "docstring" in k or "pydocstyle" in k]
-        elif fail_on == "pyflakes":
-            metric_keys = [k for k in result_dict if "undefined" in k or "syntax" in k]
-        elif fail_on == "pylint":
-            from metrics.pylint_metrics.gather import get_pylint_metric_names
-            pylint_keys = set(get_pylint_metric_names())
-            metric_keys = [k for k in result_dict if k in pylint_keys]
-        elif fail_on == "radon":
-            metric_keys = [k for k in result_dict if any(sub in k for sub in [
-                "halstead", "logical_lines", "blank_lines", "doc_strings"
-            ])]
-        else:
-            metric_keys = list(result_dict.keys())
-
-        total = sum(result_dict.get(k, 0) or 0 for k in metric_keys)
+        fail_metric_keys = _select_fail_metrics(fail_on, result_dict)
+        total = sum(float(result_dict.get(k, 0) or 0) for k in fail_metric_keys)
         if total > fail_threshold:
-            logging.warning(f"⚠️ Total {fail_on.upper()} metrics = {total} > threshold = {fail_threshold}")
+            logging.warning(f"⚠️ Total '{fail_on}' metrics = {total} > threshold = {fail_threshold}")
             return 1
 
     return 0
+
+
+def _select_fail_metrics(group: str, result_dict: dict) -> list[str]:
+    """Select metric keys based on the fail-on group."""
+    group_keywords = {
+        "ast": ["ast_"],
+        "bandit": ["security_", "cwe_"],
+        "flake8": ["style", "line_length", "whitespace"],
+        "cloc": ["line", "comment"],
+        "lizard": ["complexity", "token", "parameter", "function", "maintainability"],
+        "pydocstyle": ["docstring", "compliance"],
+        "pyflakes": ["undefined", "syntax", "import"],
+        "pylint": ["convention", "refactor", "warning", "error", "fatal"],
+        "radon": ["halstead", "logical_lines", "blank_lines", "docstring_lines"],
+        "vulture": ["unused_"],
+    }
+
+    if group in group_keywords:
+        return [k for k in result_dict if any(kw in k for kw in group_keywords[group])]
+    return list(result_dict.keys())
 
 
 def format_summary_table(metrics: dict) -> str:
@@ -127,27 +122,27 @@ def format_summary_table(metrics: dict) -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="🔍 Code Analyser — AST, Bandit, Cloc, Flake8, Lizard, Pydocstyle, Pyflakes, Pylint, Radon metric extractor"
+        description="🔍 Code Analyser — AST, Bandit, Cloc, Flake8, Lizard, Pydocstyle, Pyflakes, Pylint, Radon, Vulture"
     )
     parser.add_argument("--file", "-f", type=str, help="Analyse a single Python file")
     parser.add_argument("--dir", "-d", type=str, help="Recursively analyse a directory of Python files")
-    parser.add_argument("--raw", action="store_true", help="Return raw list instead of named dict")
+    parser.add_argument("--raw", action="store_true", help="Return raw dictionary instead of writing output")
     parser.add_argument("--format", choices=["json", "csv", "both"], default="json", help="Output format")
     parser.add_argument("--out", type=str, help="Base path for output files")
-    parser.add_argument("--json-out", type=str, help="Path to write JSON")
-    parser.add_argument("--csv-out", type=str, help="Path to write CSV")
-    parser.add_argument("--summary", action="store_true", help="Print metric summary to terminal")
+    parser.add_argument("--json-out", type=str, help="Explicit path for JSON output")
+    parser.add_argument("--csv-out", type=str, help="Explicit path for CSV output")
+    parser.add_argument("--summary", action="store_true", help="Print summary table to terminal")
     parser.add_argument("--metrics-summary-table", action="store_true", help="Alias for --summary")
-    parser.add_argument("--save-summary-txt", type=str, help="Save summary as markdown table")
-    parser.add_argument(
-        "--fail-threshold", type=int,
-        help="Exit 1 if metric sum exceeds this threshold"
-    )
+    parser.add_argument("--save-summary-txt", type=str, help="Save summary table as markdown file")
+    parser.add_argument("--fail-threshold", type=int, help="Fail if total metric score exceeds this threshold")
     parser.add_argument(
         "--fail-on",
-        choices=["all", "ast", "bandit", "flake8", "cloc", "lizard", "pydocstyle", "pyflakes", "pylint", "radon"],
+        choices=[
+            "all", "ast", "bandit", "flake8", "cloc", "lizard",
+            "pydocstyle", "pyflakes", "pylint", "radon", "vulture"
+        ],
         default="all",
-        help="Restrict threshold check to a specific metric group"
+        help="Subset of metrics to use for failure threshold check"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable debug logging")
 
@@ -159,7 +154,7 @@ def main():
     )
 
     if args.file:
-        code = analyse_file(
+        exit_code = analyse_file(
             file_path=Path(args.file),
             raw=args.raw,
             out_path=Path(args.out) if args.out else None,
@@ -172,7 +167,7 @@ def main():
             save_summary_txt=Path(args.save_summary_txt) if args.save_summary_txt else None,
             markdown_summary=args.metrics_summary_table,
         )
-        sys.exit(code)
+        sys.exit(exit_code)
 
     elif args.dir:
         failed = 0

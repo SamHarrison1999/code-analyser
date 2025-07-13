@@ -2,38 +2,30 @@ import logging
 import subprocess
 from typing import Any, Dict, List
 
+from metrics.flake8_metrics.plugins import load_plugins
+from metrics.flake8_metrics.plugins.base import Flake8MetricPlugin
+
+logger = logging.getLogger(__name__)
+
 
 class Flake8Extractor:
     """
-    Extracts style and formatting metrics using Flake8 static analysis.
+    Extracts style and formatting metrics using Flake8 static analysis,
+    then computes results using dynamically loaded plugin metrics.
     """
 
     def __init__(self, file_path: str):
         self.file_path = file_path
+        self.plugins: List[Flake8MetricPlugin] = load_plugins()
         self.result_metrics: Dict[str, Any] = {}
 
     def extract(self) -> Dict[str, Any]:
         """
-        Run Flake8 on the given file and parse diagnostics into structured metrics.
+        Run Flake8 on the given file and extract plugin-based metrics.
 
         Returns:
-            Dict[str, int | float]: Collected formatting metrics from Flake8.
+            Dict[str, int | float]: Metric values keyed by plugin name.
         """
-        metrics: Dict[str, Any] = {
-            "number_of_unused_variables": 0,
-            "number_of_unused_imports": 0,
-            "number_of_inconsistent_indentations": 0,
-            "number_of_trailing_whitespaces": 0,
-            "number_of_long_lines": 0,
-            "number_of_doc_string_issues": 0,
-            "number_of_naming_issues": 0,
-            "number_of_whitespace_issues": 0,
-            "average_line_length": 0.0,
-            "number_of_styling_warnings": 0,
-            "number_of_styling_errors": 0,
-            "number_of_styling_issues": 0,
-        }
-
         try:
             result = subprocess.run(
                 ["flake8", self.file_path],
@@ -43,59 +35,30 @@ class Flake8Extractor:
                 check=False,
             )
 
-            for line in result.stdout.splitlines():
-                parts = line.strip().split(":", 3)
-                if len(parts) < 4:
-                    continue
-                code_message = parts[3].strip()
-                tokens = code_message.split()
-                if not tokens:
-                    continue
-                code = tokens[0]
-                metrics["number_of_styling_issues"] += 1
+            flake8_output = result.stdout.splitlines()
 
-                if code == "F841":
-                    metrics["number_of_unused_variables"] += 1
-                elif code == "F401":
-                    metrics["number_of_unused_imports"] += 1
-                elif code in {"E111", "E114"}:
-                    metrics["number_of_inconsistent_indentations"] += 1
-                elif code in {"W291", "W293"}:
-                    metrics["number_of_trailing_whitespaces"] += 1
-                elif code == "E501":
-                    metrics["number_of_long_lines"] += 1
-                elif code.startswith("D"):
-                    metrics["number_of_doc_string_issues"] += 1
-                elif code.startswith("N"):
-                    metrics["number_of_naming_issues"] += 1
-                elif code in {"E201", "E202", "E221"}:
-                    metrics["number_of_whitespace_issues"] += 1
-
-                if code.startswith("W"):
-                    metrics["number_of_styling_warnings"] += 1
-                elif code.startswith(("E", "F")):
-                    metrics["number_of_styling_errors"] += 1
-
-            try:
-                with open(self.file_path, "r", encoding="utf-8") as f:
-                    lines = f.readlines()
-                    total_chars = sum(len(line.rstrip("\n")) for line in lines)
-                    metrics["average_line_length"] = round(total_chars / len(lines), 2) if lines else 0.0
-            except Exception as e:
-                logging.warning(f"[Flake8Extractor] Failed to compute average line length: {e}")
-                metrics["average_line_length"] = 0.0
+            metrics = {}
+            for plugin in self.plugins:
+                try:
+                    # ✅ Match plugin API: extract(flake8_output: List[str], file_path: str)
+                    value = plugin.extract(flake8_output, self.file_path)
+                    metrics[plugin.name()] = value
+                except Exception as e:
+                    logger.warning(f"[Flake8Extractor] Plugin '{plugin.name()}' failed: {type(e).__name__}: {e}")
+                    metrics[plugin.name()] = 0
 
             self.result_metrics = metrics
             self._log_metrics()
-            return self.result_metrics
+            return metrics
 
         except Exception as e:
-            logging.error(f"[Flake8Extractor] Flake8 failed on {self.file_path}: {e}")
-            return {key: 0 for key in metrics}
+            logger.error(f"[Flake8Extractor] Flake8 execution failed on {self.file_path}: {type(e).__name__}: {e}")
+            return {plugin.name(): 0 for plugin in self.plugins}
 
     def _log_metrics(self):
+        """Log the extracted metrics for debugging and traceability."""
         lines = [f"{k}: {v}" for k, v in self.result_metrics.items()]
-        logging.info(f"[Flake8Extractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
+        logger.info(f"[Flake8Extractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
 
 
 def gather_flake8_metrics(file_path: str) -> List[Any]:
@@ -109,19 +72,6 @@ def gather_flake8_metrics(file_path: str) -> List[Any]:
         List[Any]: Ordered list of Flake8 metric values.
     """
     extractor = Flake8Extractor(file_path)
-    metrics = extractor.extract()
-
-    return [
-        metrics.get("number_of_unused_variables", 0),
-        metrics.get("number_of_unused_imports", 0),
-        metrics.get("number_of_inconsistent_indentations", 0),
-        metrics.get("number_of_trailing_whitespaces", 0),
-        metrics.get("number_of_long_lines", 0),
-        metrics.get("number_of_doc_string_issues", 0),
-        metrics.get("number_of_naming_issues", 0),
-        metrics.get("number_of_whitespace_issues", 0),
-        metrics.get("average_line_length", 0.0),
-        metrics.get("number_of_styling_warnings", 0),
-        metrics.get("number_of_styling_errors", 0),
-        metrics.get("number_of_styling_issues", 0),
-    ]
+    metric_dict = extractor.extract()
+    plugin_order = [plugin.name() for plugin in extractor.plugins]
+    return [metric_dict.get(name, 0) for name in plugin_order]

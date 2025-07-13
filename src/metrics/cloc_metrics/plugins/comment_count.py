@@ -1,6 +1,7 @@
-from metrics.cloc_metrics.plugins.base import CLOCMetricPlugin
 
-class CommentCountPlugin(CLOCMetricPlugin):
+from metrics.cloc_metrics.plugins.base import ClocMetricPlugin
+
+class CommentCountPlugin(ClocMetricPlugin):
     """
     Extracts the total number of comment lines from CLOC output.
 
@@ -12,4 +13,7 @@ class CommentCountPlugin(CLOCMetricPlugin):
         return "number_of_comments"
 
     def extract(self, cloc_data: dict) -> int:
-        return int(cloc_data.get("comment", 0))
+        try:
+            return int(cloc_data.get("comment", 0))
+        except (TypeError, ValueError):
+            return 0

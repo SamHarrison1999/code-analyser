@@ -8,31 +8,41 @@ from abc import ABC, abstractmethod
 from typing import Any, List, Dict
 
 
-class LizardPlugin(ABC):
+class LizardMetricPlugin(ABC):
     """
     Abstract base class for Lizard metric plugins.
-    Plugins operate on Lizard's pre-parsed metric entries.
+
+    Plugins operate on parsed Lizard metric data (typically a list of dictionaries)
+    and extract one scalar metric each (int or float) from that structure.
+
+    All subclasses must implement:
+    - name(): a unique string identifier for the metric
+    - extract(): a computation from parsed Lizard metric data
     """
 
-    @classmethod
     @abstractmethod
-    def name(cls) -> str:
+    def name(self) -> str:
         """
+        Return the name of the metric.
+
         Returns:
-            str: The unique name of the plugin metric.
+            str: A globally unique name used in metric output dictionaries.
         """
-        raise NotImplementedError("LizardPlugin must implement a static name() method.")
+        # ✅ Best Practice: Unique metric keys ensure safe integration into CSV/ML/GUI pipelines
+        raise NotImplementedError("LizardMetricPlugin must implement the name() method.")
 
     @abstractmethod
     def extract(self, lizard_metrics: List[Dict[str, Any]], file_path: str) -> Any:
         """
-        Computes a metric from Lizard output.
+        Compute and return a scalar metric from parsed Lizard data.
 
         Args:
-            lizard_metrics (List[Dict[str, Any]]): Parsed metric entries with keys like 'name' and 'value'.
-            file_path (str): Path to the analysed source file.
+            lizard_metrics (List[Dict[str, Any]]): Parsed entries for a single file from Lizard.
+            file_path (str): Full path to the Python file being analysed.
 
         Returns:
-            Any: The computed metric (e.g., int, float).
+            Any: The computed metric (typically an int or float).
         """
-        raise NotImplementedError("LizardPlugin must implement the extract() method.")
+        # ⚠️ SAST Risk: Plugins must validate numerical types to avoid type errors during aggregation
+        # 🧠 ML Signal: Plugins standardise feature vector structure across files
+        raise NotImplementedError("LizardMetricPlugin must implement the extract() method.")

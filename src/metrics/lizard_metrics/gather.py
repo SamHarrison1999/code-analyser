@@ -1,18 +1,21 @@
 """
 Gathers Lizard metrics for unified interface and plugin integration.
+
+Provides a wrapper around the LizardExtractor to return metrics in
+a fixed, documented order suitable for ML pipelines or CSV export.
 """
 
-from typing import Union, List
-from . import LizardExtractor
 import logging
+from typing import Union, List
+from metrics.lizard_metrics.extractor import LizardExtractor
 
 
 def gather_lizard_metrics(file_path: str) -> List[Union[int, float]]:
     """
-    Gathers Lizard metrics from the given file.
+    Extracts Lizard metrics in a defined, stable order.
 
     Args:
-        file_path (str): Path to the source Python file.
+        file_path (str): Path to the Python file to analyse.
 
     Returns:
         List[Union[int, float]]: Ordered metrics:
@@ -22,12 +25,13 @@ def gather_lizard_metrics(file_path: str) -> List[Union[int, float]]:
             - max_cyclomatic_complexity
             - average_parameters
     """
-    # 🧠 ML Signal: Vector consistency supports stable model inputs
+    # 🧠 ML Signal: Stable vector order supports reproducible ML training
     try:
-        results = LizardExtractor(file_path).extract()
+        extractor = LizardExtractor(file_path)
+        results = extractor.extract()
     except Exception as e:
-        # ⚠️ SAST Risk: Ensure metrics gatherer fails safely without crashing
-        logging.warning(f"[gather_lizard_metrics] Extraction failed for {file_path}: {e}")
+        # ⚠️ SAST Risk: Extraction errors must not crash pipeline
+        logging.warning(f"[gather_lizard_metrics] Extraction failed for {file_path}: {type(e).__name__}: {e}")
         results = {}
 
     return [
@@ -41,12 +45,12 @@ def gather_lizard_metrics(file_path: str) -> List[Union[int, float]]:
 
 def get_lizard_metric_names() -> List[str]:
     """
-    Returns the metric names in the same order as gather_lizard_metrics.
+    Returns the names of the Lizard metrics in the expected export order.
 
     Returns:
-        List[str]: Ordered metric names.
+        List[str]: Ordered list of metric names.
     """
-    # ✅ Best Practice: Stable naming ensures downstream CSV/ML compatibility
+    # ✅ Best Practice: Keep name ordering consistent for ML/CSV compatibility
     return [
         "average_cyclomatic_complexity",
         "average_token_count",

@@ -5,7 +5,7 @@ Exposes key classes and functions for integration with the main metric runner.
 """
 
 import logging
-from typing import Union
+from typing import Union, Dict
 from metrics.metric_types import MetricExtractorBase
 from lizard import analyze_file
 
@@ -13,25 +13,28 @@ from lizard import analyze_file
 class LizardExtractor(MetricExtractorBase):
     """
     Extracts complexity and maintainability metrics using Lizard.
+
+    Metrics include:
+    - average_cyclomatic_complexity
+    - average_token_count
+    - total_function_count
+    - max_cyclomatic_complexity
+    - average_parameters
     """
 
-    def extract(self) -> dict[str, Union[int, float]]:
+    def extract(self) -> Dict[str, Union[int, float]]:
         """
-        Analyses the file using Lizard and extracts a summary of metrics.
+        Analyse the file using Lizard and extract summary metrics.
 
         Returns:
-            dict[str, int | float]: Dictionary containing:
-                - average_cyclomatic_complexity
-                - average_token_count
-                - total_function_count
-                - max_cyclomatic_complexity
-                - average_parameters
+            Dict[str, int | float]: Dictionary of Lizard metrics.
         """
         try:
             analysis_result = analyze_file(self.file_path)
             functions = analysis_result.function_list
 
             if not functions:
+                logging.debug(f"[LizardExtractor] No functions found in: {self.file_path}")
                 return self._default_metrics()
 
             complexities = [f.cyclomatic_complexity for f in functions]
@@ -50,15 +53,15 @@ class LizardExtractor(MetricExtractorBase):
             return metrics
 
         except Exception as e:
-            logging.error(f"[LizardExtractor] Error analysing {self.file_path}: {e}")
+            logging.error(f"[LizardExtractor] Failed to analyse {self.file_path}: {type(e).__name__}: {e}")
             return self._default_metrics()
 
-    def _default_metrics(self) -> dict[str, Union[int, float]]:
+    def _default_metrics(self) -> Dict[str, Union[int, float]]:
         """
-        Returns a default metrics dictionary with zeroed values.
+        Provides zeroed fallback values when analysis fails.
 
         Returns:
-            dict[str, int | float]: Zeroed fallback metrics.
+            Dict[str, int | float]: Default zero-valued metric dictionary.
         """
         return {
             "average_cyclomatic_complexity": 0.0,
@@ -69,24 +72,24 @@ class LizardExtractor(MetricExtractorBase):
         }
 
 
-def extract_lizard_metrics(file_path: str) -> dict[str, Union[int, float]]:
+def extract_lizard_metrics(file_path: str) -> Dict[str, Union[int, float]]:
     """
-    Convenience wrapper for CLI and plugin integration.
+    Extracts Lizard metrics using a convenience wrapper.
 
     Args:
-        file_path (str): Path to Python file to analyse.
+        file_path (str): Path to the file to analyse.
 
     Returns:
-        dict[str, int | float]: Extracted Lizard metrics.
+        Dict[str, int | float]: Dictionary of extracted metrics.
     """
     return LizardExtractor(file_path).extract()
 
 
 def get_lizard_extractor():
     """
-    Plugin-compatible entry point for Lizard metric extraction.
+    Returns the LizardExtractor class for plugin-compatible usage.
 
     Returns:
-        type[LizardExtractor]: Callable extractor class for plugin runners.
+        type[LizardExtractor]: Extractor class reference.
     """
     return LizardExtractor

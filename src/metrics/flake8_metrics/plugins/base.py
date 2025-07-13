@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from typing import Any, List
 
 
-class Flake8Plugin(ABC):
+class Flake8MetricPlugin(ABC):
     """
     Abstract base class for Flake8 metric plugins.
 
@@ -19,14 +19,13 @@ class Flake8Plugin(ABC):
     - Implement `extract()` to compute a metric from Flake8 diagnostics
     """
 
-    @classmethod
     @abstractmethod
-    def name(cls) -> str:
+    def name(self) -> str:
         """
         Returns:
             str: The unique name of the plugin metric (used as a key in output dictionaries).
         """
-        pass
+        raise NotImplementedError("Plugin must implement name()")
 
     @abstractmethod
     def extract(self, flake8_output: List[str], file_path: str) -> Any:
@@ -38,6 +37,6 @@ class Flake8Plugin(ABC):
             file_path (str): Path to the source file being analysed.
 
         Returns:
-            Any: The computed metric value (e.g., int or float).
+            Any: The computed metric value (typically int or float).
         """
-        pass
+        raise NotImplementedError("Plugin must implement extract()")

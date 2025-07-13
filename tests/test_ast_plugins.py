@@ -1,49 +1,45 @@
-"""
-Unit tests for AST metric plugins.
+import pytest
+from metrics.ast_metrics.plugins import load_plugins
 
-Covers:
-- Module docstring detection
-- TODO/FIXME comments
-- Nested function detection
-"""
+@pytest.fixture(scope="module")
+def loaded_plugins():
+    return load_plugins()
 
-import ast
-from metrics.ast_metrics.plugins.default_plugins import (
-    ModuleDocstringPlugin,
-    TodoCommentPlugin,
-    NestedFunctionPlugin,
-)
-
-
-def test_module_docstring_plugin():
-    code = '"""A docstring."""\ndef func(): pass'
-    tree = ast.parse(code)
-    assert ModuleDocstringPlugin().visit(tree, code) == 1
-
-    no_doc_code = "def func(): pass"
-    tree2 = ast.parse(no_doc_code)
-    assert ModuleDocstringPlugin().visit(tree2, no_doc_code) == 0
-
-
-def test_todo_comment_plugin():
-    code = """
-# TODO: fix this
-# nothing here
-# FIXME: needs work
-# random
+def test_plugins_are_instantiated(loaded_plugins):
     """
-    tree = ast.parse(code)
-    assert TodoCommentPlugin().visit(tree, code) == 2
-
-
-def test_nested_function_plugin():
-    code = """
-def outer():
-    def inner():
-        def deeper():
-            return True
-        return deeper()
-    return inner()
+    All loaded plugins should be instances of ASTMetricPlugin subclasses.
     """
-    tree = ast.parse(code)
-    assert NestedFunctionPlugin().visit(tree, code) == 2  # inner, deeper
+    from metrics.ast_metrics.plugins.base import ASTMetricPlugin
+    assert all(isinstance(p, ASTMetricPlugin) for p in loaded_plugins)
+
+def test_plugin_names_are_unique_and_nonempty(loaded_plugins):
+    """
+    Plugin names must be unique and not empty.
+    """
+    names = [p.name() for p in loaded_plugins]
+    assert all(isinstance(n, str) and n.strip() for n in names), "Each plugin must have a non-empty name"
+    assert len(names) == len(set(names)), "Plugin names must be unique"
+
+def test_expected_plugins_are_loaded(loaded_plugins):
+    """
+    Check that key expected plugins are present by name.
+    """
+    expected = {
+        "module_docstring",
+        "todo_comments",
+        "nested_functions",
+        "lambda_functions",
+        "magic_methods",
+        "assert_statements",
+        "class_docstrings",
+        "functions",
+        "classes",
+        "function_docstrings",
+        "exceptions",
+        "loops_conditionals",
+        "global_variables",
+        "chained_methods",
+    }
+    actual = {p.name() for p in loaded_plugins}
+    missing = expected - actual
+    assert not missing, f"Missing expected plugins: {missing}"

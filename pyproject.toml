@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "code-analyser"
 version = "1.0.0"
-description = "Pluggable AST, Bandit, and static analysis metric extractor for Python code quality analysis with optional GUI"
+description = "Modular static analysis toolkit for Python code quality: AST, Bandit, Flake8, Pylint, Radon, and more, with optional Tkinter GUI."
 authors = [
     { name = "Samuel Harrison", email = "sh18784@essex.ac.uk" }
 ]
@@ -21,13 +21,15 @@ dependencies = [
     "pylint>=3.1.0",
     "pydocstyle>=6.3.0",
     "pyflakes>=3.2.0",
-    "setuptools>=61.0"
+    "radon>=6.0.1",
+    "vulture>=2.14"
 ]
 
 [project.optional-dependencies]
 gui = [
     "matplotlib>=3.5",
-    "mplcursors>=0.5"
+    "mplcursors>=0.5",
+    "tk"  # Needed in some environments to explicitly install Tkinter
 ]
 
 [project.scripts]
@@ -36,3 +38,11 @@ code-analyser-gui = "gui.main:show_splash_and_start"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["metrics*", "gui*"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+addopts = "-v --import-mode=importlib"

@@ -1,9 +1,19 @@
 from pathlib import Path
-from typing import Callable, Literal, TypedDict, Union, Dict, List
+from typing import Callable, Literal, TypedDict, Union, Dict, List, Protocol
 from abc import ABC, abstractmethod
 
 
 class MetricResult(TypedDict):
+    """
+    Represents a single metric extraction result.
+
+    Fields:
+        name (str): Name of the metric.
+        value (object): Extracted value (int, float, str, etc.).
+        units (str | None): Units of the value (e.g. 'lines', '%', 'errors').
+        success (bool): Whether the metric was successfully extracted.
+        error (str | None): Error message if extraction failed.
+    """
     name: str
     value: object
     units: Union[str, None]
@@ -11,14 +21,16 @@ class MetricResult(TypedDict):
     error: Union[str, None]
 
 
-# Function-style metric extractor (used for plugin systems)
+# Callable signature for simple gatherer-style metric extractors
 MetricExtractor = Callable[[Path], List[MetricResult]]
 
 
-# Base class for OO-style metric extractors (e.g. PydocstyleExtractor, BanditExtractor)
 class MetricExtractorBase(ABC):
     """
     Abstract base class for class-based metric extractors.
+
+    Implementations must define an `extract()` method returning
+    a dictionary of metric name → scalar value (int or float).
     """
 
     def __init__(self, file_path: str):
@@ -27,16 +39,16 @@ class MetricExtractorBase(ABC):
     @abstractmethod
     def extract(self) -> Dict[str, Union[int, float]]:
         """
-        Extract metrics for the file.
+        Perform metric extraction.
 
         Returns:
-            dict[str, int | float]: Metric name-value pairs.
+            dict[str, int | float]: Dictionary of extracted metrics.
         """
         pass
 
 
-# Optional: Plugin schema for ML registration / cataloguing
-MetricPlugin = dict[str, object]
+# Optional plugin metadata type for registry, ML, or API export
+MetricPlugin = Dict[str, object]
 """
 MetricPlugin = TypedDict("MetricPlugin", {
     "name": str,

@@ -1,3 +1,4 @@
+
 """
 Base class for CLOC metric plugins.
 
@@ -12,7 +13,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 
-class CLOCMetricPlugin(ABC):
+class ClocMetricPlugin(ABC):
     @abstractmethod
     def name(self) -> str:
         """
@@ -21,7 +22,7 @@ class CLOCMetricPlugin(ABC):
         Returns:
             str: Unique metric identifier (e.g. 'total_lines', 'comment_density')
         """
-        pass
+        raise NotImplementedError("ClocMetricPlugin subclasses must implement name().")
 
     @abstractmethod
     def extract(self, cloc_data: dict[str, Any]) -> float | int:
@@ -34,4 +35,4 @@ class CLOCMetricPlugin(ABC):
         Returns:
             float | int: The computed metric value
         """
-        pass
+        raise NotImplementedError("ClocMetricPlugin subclasses must implement extract().")

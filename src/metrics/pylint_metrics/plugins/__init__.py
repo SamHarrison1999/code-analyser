@@ -1,12 +1,22 @@
-# metrics/pylint_metrics/plugins/__init__.py
+import pkgutil
+import importlib
+import inspect
+import os
 
-# Import the plugin base class and loader for pylint metric plugins
-from .base import PylintMetricPlugin
-from .default_plugins import DEFAULT_PLUGINS, load_plugins
+from .base import PylintMetricPlugin as BasePlugin
 
-# Exported names for wildcard import and plugin discovery
-__all__ = [
-    "PylintMetricPlugin",
-    "DEFAULT_PLUGINS",
-    "load_plugins",
-]
+__all__ = []
+
+for _, module_name, _ in pkgutil.iter_modules([os.path.dirname(__file__)]):
+    if module_name == "base":
+        continue
+    module = importlib.import_module(f"{__name__}.{module_name}")
+    for name, obj in inspect.getmembers(module):
+        if inspect.isclass(obj) and issubclass(obj, BasePlugin) and obj is not BasePlugin:
+            globals()[name] = obj
+            __all__.append(name)
+
+PylintMetricPlugin = BasePlugin
+
+def load_plugins() -> list[BasePlugin]:
+    return [globals()[name]() for name in __all__]
