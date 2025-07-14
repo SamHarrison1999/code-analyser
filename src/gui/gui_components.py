@@ -1,3 +1,5 @@
+# File: gui_components.py
+
 # ⚠️ SAST Risk: GUI callback arguments were being evaluated immediately instead of being passed as callables
 # ✅ Best Practice: Use lambda to defer function execution
 
@@ -13,6 +15,9 @@ from gui.chart_utils import draw_chart, redraw_last_chart, filter_metrics_by_sco
 from gui.gui_logic import update_tree, update_footer_summary
 from gui.utils import flatten_metrics
 from gui.shared_state import get_shared_state  # Ensures shared state is accessible at top level
+
+# 🧠 ML Signal: Automatically annotate source files with AI to capture vulnerabilities and design signals
+from together_ai_annotator.together_ai_annotator import annotate_code_with_together_ai
 
 
 def launch_gui(root: tk.Tk) -> None:
@@ -46,7 +51,9 @@ def launch_gui(root: tk.Tk) -> None:
     tk.Button(top_frame, text="📊 File Chart", command=lambda: show_chart()).grid(row=0, column=2, padx=5)
     tk.Button(top_frame, text="📊 Dir Chart", command=lambda: show_directory_summary_chart()).grid(row=0, column=3, padx=5)
     tk.Button(top_frame, text="📄 Export CSV", command=lambda: export_to_csv()).grid(row=0, column=4, padx=5)
-    tk.Button(top_frame, text="Exit", command=lambda: clean_exit(root)).grid(row=0, column=5, padx=5)
+    # 🧠 Add AI annotation button to top bar
+    tk.Button(top_frame, text="🧠 Annotate File", command=lambda: annotate_selected_file()).grid(row=0, column=5, padx=5)
+    tk.Button(top_frame, text="Exit", command=lambda: clean_exit(root)).grid(row=0, column=6, padx=5)
 
     option_frame = tk.Frame(root)
     option_frame.pack(pady=5)
@@ -70,7 +77,6 @@ def launch_gui(root: tk.Tk) -> None:
     tk.Label(filter_frame, text="Filter: ").pack(side=tk.LEFT)
     tk.Entry(filter_frame, textvariable=shared_state.filter_var, width=40).pack(side=tk.LEFT, expand=True, fill=tk.X)
 
-    # ✅ Register trace_add *after* GUI setup to avoid premature callback
     logging.debug("📌 Calling trace_add from <launch_gui>")
     shared_state.filter_trace_id = shared_state.filter_var.trace_add("write", on_filter_change)
 
@@ -131,7 +137,6 @@ def prompt_and_extract_file() -> None:
     from gui.shared_state import get_shared_state
     shared_state = get_shared_state()
 
-    # ✅ Temporarily block trace callback to avoid double-trigger
     try:
         shared_state.filter_var.trace_remove("write", shared_state.filter_trace_id)
     except Exception as e:
@@ -145,8 +150,31 @@ def prompt_and_extract_file() -> None:
         flat_metrics = flatten_metrics(shared_state.results.get(path, {}))
         update_footer_summary(shared_state.summary_tree, flat_metrics)
 
-    # ✅ Re-enable filter_var trace after update
     shared_state.filter_trace_id = shared_state.filter_var.trace_add("write", on_filter_change)
+
+
+def annotate_selected_file() -> None:
+    """Use Together AI to annotate the selected file."""
+    shared_state = get_shared_state()
+    filepath = shared_state.current_file_path
+    if not filepath or not Path(filepath).is_file():
+        messagebox.showerror("No File Selected", "Please select a file before annotating.")
+        return
+    try:
+        logging.info(f"🧠 Annotating file with Together AI: {filepath}")
+        with open(filepath, "r", encoding="utf-8") as f:
+            original_code = f.read()
+        annotated_code = annotate_code_with_together_ai(original_code)
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(annotated_code)
+        run_metric_extraction(filepath)
+        update_tree(shared_state.tree, filepath)
+        flat_metrics = flatten_metrics(shared_state.results.get(filepath, {}))
+        update_footer_summary(shared_state.summary_tree, flat_metrics)
+        messagebox.showinfo("Annotation Complete", "File successfully annotated with AI.")
+    except Exception as e:
+        logging.exception(f"❌ Annotation failed: {e}")
+        messagebox.showerror("Annotation Error", f"An error occurred during annotation:\n{e}")
 
 
 def on_filter_change(*args) -> None:

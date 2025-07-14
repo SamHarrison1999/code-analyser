@@ -1,3 +1,5 @@
+# main.py — CLI driver for the Code Analyser
+
 import sys
 import argparse
 import json
@@ -7,6 +9,9 @@ from datetime import datetime
 from typing import Union
 
 from metrics.gather import gather_all_metrics, get_all_metric_names
+
+# ✅ Import AI annotator
+from together_ai_annotator.together_ai_annotator import annotate_code_with_together_ai
 
 
 def analyse_file(
@@ -130,6 +135,7 @@ def main():
     )
     parser.add_argument("--file", "-f", type=str, help="Analyse a single Python file")
     parser.add_argument("--dir", "-d", type=str, help="Recursively analyse a directory of Python files")
+    parser.add_argument("--annotate-file-before", action="store_true", help="🧠 Annotate the file with Together AI before analysing")
     parser.add_argument("--raw", action="store_true", help="Return raw dictionary instead of writing output")
     parser.add_argument("--format", choices=["json", "csv", "both"], default="json", help="Output format")
     parser.add_argument("--out", type=str, help="Base path for output files")
@@ -158,8 +164,21 @@ def main():
     )
 
     if args.file:
+        file_path = Path(args.file)
+
+        if args.annotate_file_before:
+            try:
+                logging.info(f"🧠 Annotating file before metric extraction: {file_path}")
+                original = file_path.read_text(encoding="utf-8")
+                annotated = annotate_code_with_together_ai(original)
+                file_path.write_text(annotated, encoding="utf-8")
+                logging.info("✅ Annotation completed.")
+            except Exception as e:
+                logging.error(f"❌ Annotation failed: {e}")
+                sys.exit(1)
+
         exit_code = analyse_file(
-            file_path=Path(args.file),
+            file_path=file_path,
             raw=args.raw,
             out_path=Path(args.out) if args.out else None,
             format=args.format,
