@@ -30,7 +30,7 @@ jobs:
       - name: 📦 Install Python dependencies
         run: |
           pip install -e .[gui,test]
-          pip install pytest coverage
+          pip install pytest coverage requests
 
       - name: 🧪 Run full test suite with Xvfb
         run: |
