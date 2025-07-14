@@ -7,6 +7,9 @@ import subprocess
 from typing import Union
 from metrics.metric_types import MetricExtractorBase
 
+# ✅ Best Practice: Use subprocess piping with encoding and safe fallback
+# ⚠️ SAST Risk: Tool output assumptions (e.g., docstring format) can break parsing
+# 🧠 ML Signal: Ratio-based docstring compliance can help predict maintainability scores
 
 class PydocstyleExtractor(MetricExtractorBase):
     """
@@ -39,10 +42,14 @@ class PydocstyleExtractor(MetricExtractorBase):
         violations = [line for line in output.splitlines() if line.strip()]
         total_violations = len(violations)
         missing_docstrings = sum(1 for line in violations if "Missing docstring" in line)
-        try:
-            compliance = round(((total_violations - missing_docstrings) / total_violations) * 100, 2) if total_violations else 100.0
-        except ZeroDivisionError:
-            compliance = 100.0
+
+        compliance = 100.0
+        if total_violations:
+            try:
+                compliance = round(((total_violations - missing_docstrings) / total_violations) * 100, 2)
+            except ZeroDivisionError:
+                logging.warning(f"[PydocstyleExtractor] Division error in compliance calculation for {self.file_path}")
+                compliance = 100.0
 
         metrics = {
             "number_of_pydocstyle_violations": total_violations,

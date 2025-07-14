@@ -20,6 +20,8 @@ from metrics.pylint_metrics.gather import gather_pylint_metrics, get_pylint_metr
 from metrics.radon_metrics.gather import gather_radon_metrics, get_radon_metric_names
 from metrics.vulture_metrics.gather import gather_vulture_metrics, get_vulture_metric_names
 
+from metrics.sonar_metrics import get_metric_gatherer, get_metric_names as get_sonar_metric_names
+
 
 def gather_all_metrics(file_path: str) -> dict[str, Union[int, float, str]]:
     """
@@ -60,6 +62,17 @@ def gather_all_metrics(file_path: str) -> dict[str, Union[int, float, str]]:
             logging.error(f"[gather_all_metrics] Failed to gather from {gather_func.__name__}: {e}")
             all_metrics[gather_func.__name__] = f"error: {e}"
 
+    # ✅ Handle SonarQube metrics separately with correct structure
+    try:
+        sonar_gatherer = get_metric_gatherer()
+        sonar_metrics = sonar_gatherer(file_path)
+        if not isinstance(sonar_metrics, dict):
+            raise ValueError("Sonar gatherer did not return a dictionary")
+        all_metrics.update(sonar_metrics)
+    except Exception as e:
+        logging.error(f"[gather_all_metrics] Failed to gather SonarQube metrics: {e}")
+        all_metrics["sonar"] = f"error: {e}"
+
     return all_metrics
 
 
@@ -80,5 +93,6 @@ def get_all_metric_names() -> list[str]:
         get_pyflakes_metric_names() +
         get_pylint_metric_names() +
         get_radon_metric_names() +
-        get_vulture_metric_names()
+        get_vulture_metric_names() +
+        get_sonar_metric_names()  # ✅ Properly loaded from plugin registry
     )

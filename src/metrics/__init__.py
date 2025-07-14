@@ -12,6 +12,7 @@ Exposes core extractors and metric gatherers for:
 - Pylint (multi-category quality issues)
 - Radon (code complexity and Halstead metrics)
 - Vulture (unused code detection)
+- SonarQube (coverage, bugs, smells, duplication, ratings)
 - Unified metric aggregation (gather_all_metrics)
 """
 
@@ -26,18 +27,20 @@ from metrics.pyflakes_metrics.extractor import PyflakesExtractor, extract_pyflak
 from metrics.pylint_metrics.extractor import PylintMetricExtractor
 from metrics.radon_metrics.extractor import RadonExtractor, extract_radon_metrics
 from metrics.vulture_metrics.extractor import run_vulture
+from metrics.sonar_metrics.scanner import run_sonar
 
 # === Plugin Loaders ===
-from metrics.pylint_metrics import load_plugins as load_pylint_plugins
-from metrics.vulture_metrics import load_plugins as load_vulture_plugins
-from metrics.radon_metrics import load_plugins as load_radon_plugins
-from metrics.pyflakes_metrics import load_plugins as load_pyflakes_plugins
-from metrics.pydocstyle_metrics import load_plugins as load_pydocstyle_plugins
-from metrics.lizard_metrics import load_plugins as load_lizard_plugins
-from metrics.flake8_metrics import load_plugins as load_flake8_plugins
-from metrics.cloc_metrics import load_plugins as load_cloc_plugins
-from metrics.bandit_metrics import load_plugins as load_bandit_plugins
 from metrics.ast_metrics import load_plugins as load_ast_plugins
+from metrics.bandit_metrics import load_plugins as load_bandit_plugins
+from metrics.cloc_metrics import load_plugins as load_cloc_plugins
+from metrics.flake8_metrics import load_plugins as load_flake8_plugins
+from metrics.lizard_metrics import load_plugins as load_lizard_plugins
+from metrics.pydocstyle_metrics import load_plugins as load_pydocstyle_plugins
+from metrics.pyflakes_metrics import load_plugins as load_pyflakes_plugins
+from metrics.pylint_metrics import load_plugins as load_pylint_plugins
+from metrics.radon_metrics import load_plugins as load_radon_plugins
+from metrics.vulture_metrics import load_plugins as load_vulture_plugins
+from metrics.sonar_metrics import load_plugins as load_sonar_plugins  # ✅ Sonar plugins
 
 # === Metric Gather Functions ===
 from metrics.ast_metrics.gather import gather_ast_metrics
@@ -50,6 +53,7 @@ from metrics.pyflakes_metrics.gather import gather_pyflakes_metrics
 from metrics.pylint_metrics.gather import gather_pylint_metrics
 from metrics.radon_metrics.gather import gather_radon_metrics
 from metrics.vulture_metrics.gather import gather_vulture_metrics
+from metrics.sonar_metrics.gather import gather_sonar_metrics  # ✅ Sonar gatherer
 
 # === Unified Aggregation ===
 from metrics.gather import gather_all_metrics, get_all_metric_names
@@ -77,6 +81,7 @@ __all__ = [
     "load_pylint_plugins",
     "load_radon_plugins",
     "load_vulture_plugins",
+    "load_sonar_plugins",
 
     # Utility extractors
     "extract_lizard_metrics",
@@ -94,9 +99,11 @@ __all__ = [
     "gather_pylint_metrics",
     "gather_radon_metrics",
     "gather_vulture_metrics",
+    "gather_sonar_metrics",
 
     # Raw tool runners
     "run_vulture",
+    "run_sonar"
 
     # Unified API
     "gather_all_metrics",

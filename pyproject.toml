@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "code-analyser"
+name = "code_analyser"
 version = "1.0.0"
 description = "Modular static analysis toolkit for Python code quality: AST, Bandit, Flake8, Pylint, Radon, and more, with optional Tkinter GUI."
 authors = [
@@ -22,23 +22,24 @@ dependencies = [
     "pydocstyle>=6.3.0",
     "pyflakes>=3.2.0",
     "radon>=6.0.1",
-    "vulture>=2.14"
+    "vulture>=2.14",
+    "python-dotenv>=1.1.1"
 ]
 
 [project.optional-dependencies]
 gui = [
     "matplotlib>=3.5",
-    "mplcursors>=0.5",
-    "tk"  # Needed in some environments to explicitly install Tkinter
+    "mplcursors>=0.5"
+    # Tkinter is built-in with most Python installations
 ]
 
 [project.scripts]
-code-analyser = "metrics.main:main"
-code-analyser-gui = "gui.main:show_splash_and_start"
+code_analyser = "metrics.main:main"
+code_analyser_gui = "gui.main:show_splash_and_start"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["metrics*", "gui*"]
+include = ["metrics", "gui"]
 
 [tool.setuptools]
 include-package-data = true

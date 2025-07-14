@@ -35,20 +35,41 @@ class PyflakesExtractor(MetricExtractorBase):
             )
             output_lines = result.stdout.splitlines()
         except Exception as e:
-            logging.error(f"[PyflakesExtractor] Error running Pyflakes on {self.file_path}: {e}")
-            return {plugin.name(): 0 for plugin in self.plugins}
+            logging.error(f"[PyflakesExtractor] Error running Pyflakes on {self.file_path}: {type(e).__name__}: {e}")
+            return self._default_metrics()
 
         metrics = {}
         for plugin in self.plugins:
             try:
-                metrics[plugin.name()] = plugin.extract(output_lines, self.file_path)
+                value = plugin.extract(output_lines, self.file_path)
+                metrics[plugin.name()] = value if isinstance(value, (int, float)) else 0
             except Exception as e:
-                logging.warning(f"[PyflakesExtractor] Plugin '{plugin.name()}' failed: {e}")
+                logging.warning(f"[PyflakesExtractor] Plugin '{plugin.name()}' failed: {type(e).__name__}: {e}")
                 metrics[plugin.name()] = 0
 
         self.result_metrics = metrics
-        logging.info(f"[PyflakesExtractor] Metrics for {self.file_path}:\n{metrics}")
+        self._log_metrics()
         return metrics
+
+    def _default_metrics(self) -> dict[str, Union[int, float]]:
+        """
+        Provides a fallback metric dictionary if analysis fails.
+
+        Returns:
+            dict[str, int | float]: Zeroed plugin metrics.
+        """
+        return {plugin.name(): 0 for plugin in self.plugins}
+
+    def _log_metrics(self):
+        """
+        Log the extracted Pyflakes metrics for debugging.
+        """
+        if not self.result_metrics:
+            logging.info(f"[PyflakesExtractor] No metrics extracted for {self.file_path}")
+            return
+
+        lines = [f"{k}: {v}" for k, v in self.result_metrics.items()]
+        logging.info(f"[PyflakesExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
 
 
 def extract_pyflakes_metrics(file_path: str) -> dict[str, Union[int, float]]:

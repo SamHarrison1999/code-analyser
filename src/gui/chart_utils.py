@@ -2,10 +2,10 @@
 import logging
 from typing import Dict, Any
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from tkinter import messagebox
+from pathlib import Path
 
 from gui.shared_state import get_shared_state
 from gui.utils import flatten_metrics, merge_nested_metrics
@@ -31,9 +31,9 @@ SCOPE_KEYWORDS = {
     ],
     "cloc": [
         "number_of_comments",
-        "number_of_lines",
+        "comment_density",
         "number_of_source_lines_of_code",
-        "comment_density"
+        "number_of_lines"
     ],
     "flake8": [
         "number_of_unused_variables",
@@ -66,11 +66,11 @@ SCOPE_KEYWORDS = {
         "number_of_syntax_errors"
     ],
     "pylint": [
-        "convention",
-        "refactor",
-        "warning",
-        "error",
-        "fatal"
+        "pylint.convention",
+        "pylint.refactor",
+        "pylint.warning",
+        "pylint.error",
+        "pylint.fatal"
     ],
     "radon": [
         "logical_lines",
@@ -87,22 +87,43 @@ SCOPE_KEYWORDS = {
         "unused_imports"
     ],
     "ast": [
-        "assert_statements",
-        "chained_methods",
-        "classes",
-        "class_docstrings",
-        "exceptions",
         "functions",
+        "classes",
         "function_docstrings",
-        "global_variables",
-        "lambda_functions",
-        "loops_conditionals",
-        "magic_methods",
+        "class_docstrings",
         "module_docstring",
+        "todo_comments",
+        "assert_statements",
+        "exceptions",
+        "loops_conditionals",
         "nested_functions",
-        "todo_comments"
+        "global_variables",
+        "chained_methods",
+        "lambda_functions",
+        "magic_methods"
     ],
+    "sonar": [
+        "bugs",
+        "code_smells",
+        "cognitive_complexity",
+        "comment_lines_density",
+        "complexity",
+        "coverage",
+        "duplicated_blocks",
+        "duplicated_lines",
+        "duplicated_lines_density",
+        "files",
+        "ncloc",
+        "tests",
+        "reliability_rating",
+        "security_rating",
+        "sqale_index",
+        "sqale_rating",
+        "test_success_density",
+        "vulnerabilities"
+    ]
 }
+
 
 
 def filter_metrics_by_scope(metrics_dict: Dict[str, Any]) -> Dict[str, float]:
@@ -121,14 +142,11 @@ def filter_metrics_by_scope(metrics_dict: Dict[str, Any]) -> Dict[str, float]:
         return {}
 
     wanted_keys = set(SCOPE_KEYWORDS[scope])
-    filtered = {}
-
-    for k, v in flat_metrics.items():
-        if not isinstance(v, (int, float)):
-            continue
-        metric_name = k.split('.')[-1]
-        if metric_name in wanted_keys:
-            filtered[k] = float(v)
+    filtered = {
+        k: float(v)
+        for k, v in flat_metrics.items()
+        if isinstance(v, (int, float)) and k in wanted_keys
+    }
 
     if not filtered:
         logger.info(f"No matching metrics found for scope: {scope}")
@@ -153,11 +171,7 @@ def draw_chart(keys: list[str], values: list[float], title: str, filename: str) 
     ax.set_ylabel("Metric", fontsize=14)
     ax.set_title(title, fontsize=18, pad=2)
     ax.tick_params(axis="y", labelsize=12)
-
-    # ✅ Force y-limits to prevent top/bottom padding
     ax.set_ylim(-0.5, len(keys) - 0.5)
-
-    # ✅ Slightly adjust layout margins but keep title visible
     fig.subplots_adjust(left=0.35, right=0.98, top=0.95, bottom=0.05)
 
     # 🧠 Hover annotation
@@ -188,7 +202,6 @@ def draw_chart(keys: list[str], values: list[float], title: str, filename: str) 
     fig.savefig(filename)
     logger.debug(f"[Chart] Chart saved to '{filename}'")
 
-    # Embed into GUI
     if shared_state.chart_frame.winfo_exists():
         for widget in shared_state.chart_frame.winfo_children():
             widget.destroy()
@@ -216,6 +229,9 @@ def draw_chart(keys: list[str], values: list[float], title: str, filename: str) 
 
         logger.debug("[Chart] Chart displayed with accurate bar layout and scrollbars.")
 
+    # ✅ Prevent figure memory leak by closing it after embedding
+    plt.close(fig)
+
 
 def redraw_last_chart() -> None:
     """Redraw the last chart if one exists."""
@@ -228,3 +244,34 @@ def redraw_last_chart() -> None:
             draw_chart(_last_keys, _last_vals, _last_title, _last_filename)
         except Exception as e:
             logger.error(f"❌ Failed to redraw chart: {type(e).__name__}: {e}")
+
+
+def save_chart_as_image(path: Path | str) -> None:
+    """Save the last drawn chart to the specified path."""
+    if not _last_keys or not _last_vals:
+        logger.warning("⚠️ No chart data available to save.")
+        return
+
+    try:
+        fig_height = max(6, len(_last_keys) * 1.4)
+        fig_width = 12
+
+        fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+        ax.barh(_last_keys, _last_vals, height=1.0)
+
+        ax.set_xlabel("Value", fontsize=14)
+        ax.set_ylabel("Metric", fontsize=14)
+        ax.set_title(_last_title, fontsize=18, pad=2)
+        ax.tick_params(axis="y", labelsize=12)
+        ax.set_ylim(-0.5, len(_last_keys) - 0.5)
+        fig.subplots_adjust(left=0.35, right=0.98, top=0.95, bottom=0.05)
+
+        fig.savefig(path)
+        logger.info(f"🖼️ Chart image saved to {path}")
+
+        # ✅ Always close the figure to avoid memory leaks
+        plt.close(fig)
+
+    except Exception as e:
+        logger.exception(f"❌ Failed to save chart image: {e}")
+

@@ -8,7 +8,7 @@ IF "%InputFile%"=="" SET "InputFile=example.py"
 REM Ensure we're in the root directory (adjust if needed)
 CD /D "%~dp0"
 
-echo Installing 'code-analyser' in editable mode...
+echo Installing 'code_analyser' in editable mode...
 pip install -e . >nul 2>&1
 IF ERRORLEVEL 1 (
     echo Failed to install package in editable mode.

@@ -3,7 +3,7 @@
 # Default to example.py if no argument is given
 INPUT_FILE="${1:-example.py}"
 
-echo "🔧 Installing 'code-analyser' in editable mode..."
+echo "🔧 Installing 'code_analyser' in editable mode..."
 pip install -e . > /dev/null
 if [ $? -ne 0 ]; then
   echo "❌ pip install failed. Are you in the project root?"

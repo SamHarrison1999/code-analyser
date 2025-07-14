@@ -29,8 +29,8 @@ class MetricExtractorBase(ABC):
     """
     Abstract base class for class-based metric extractors.
 
-    Implementations must define an `extract()` method returning
-    a dictionary of metric name → scalar value (int or float).
+    Subclasses must implement the extract() method, returning
+    a dictionary of metric name to scalar values.
     """
 
     def __init__(self, file_path: str):
@@ -42,9 +42,30 @@ class MetricExtractorBase(ABC):
         Perform metric extraction.
 
         Returns:
-            dict[str, int | float]: Dictionary of extracted metrics.
+            dict[str, int | float]: Extracted metrics.
         """
-        pass
+        ...
+
+
+class SonarStyleExtractorBase(ABC):
+    """
+    Specialised extractor interface for Sonar-style tools
+    that consume a raw context and a file path.
+    """
+
+    def __init__(self, file_path: str, context: dict):
+        self.file_path = file_path
+        self.context = context
+
+    @abstractmethod
+    def extract(self) -> Dict[str, float]:
+        """
+        Extract metrics from a raw data context.
+
+        Returns:
+            dict[str, float]: Metric values from the Sonar context.
+        """
+        ...
 
 
 # Optional plugin metadata type for registry, ML, or API export
@@ -52,9 +73,9 @@ MetricPlugin = Dict[str, object]
 """
 MetricPlugin = TypedDict("MetricPlugin", {
     "name": str,
-    "type": Literal["static_analysis", "complexity", "security"],
+    "type": Literal["static_analysis", "complexity", "security", "coverage"],
     "extractor": MetricExtractor,
-    "domain": Literal["code", "security"],
+    "domain": Literal["code", "security", "coverage"],
     "language": str,
     "source": str,
     "version": str,

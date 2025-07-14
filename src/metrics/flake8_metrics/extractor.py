@@ -5,6 +5,10 @@ from typing import Any, Dict, List
 from metrics.flake8_metrics.plugins import load_plugins
 from metrics.flake8_metrics.plugins.base import Flake8MetricPlugin
 
+# ✅ Best Practice: Use typed plugin architecture for modular metric extraction
+# ⚠️ SAST Risk: Untrusted subprocess input can break parsing or corrupt analysis if not validated
+# 🧠 ML Signal: Plugin order and metric fallback help identify gaps in static analysis results
+
 logger = logging.getLogger(__name__)
 
 
@@ -35,14 +39,18 @@ class Flake8Extractor:
                 check=False,
             )
 
-            flake8_output = result.stdout.splitlines()
+            if result.returncode > 1:
+                logger.warning(f"[Flake8Extractor] Flake8 failed with exit code {result.returncode} on {self.file_path}")
+                return {plugin.name(): 0 for plugin in self.plugins}
 
+            flake8_output = result.stdout.splitlines()
             metrics = {}
+
             for plugin in self.plugins:
                 try:
                     # ✅ Match plugin API: extract(flake8_output: List[str], file_path: str)
                     value = plugin.extract(flake8_output, self.file_path)
-                    metrics[plugin.name()] = value
+                    metrics[plugin.name()] = value if isinstance(value, (int, float)) else 0
                 except Exception as e:
                     logger.warning(f"[Flake8Extractor] Plugin '{plugin.name()}' failed: {type(e).__name__}: {e}")
                     metrics[plugin.name()] = 0
@@ -56,7 +64,13 @@ class Flake8Extractor:
             return {plugin.name(): 0 for plugin in self.plugins}
 
     def _log_metrics(self):
-        """Log the extracted metrics for debugging and traceability."""
+        """
+        Log the extracted metrics for debugging and traceability.
+        """
+        if not self.result_metrics:
+            logger.info(f"[Flake8Extractor] No metrics extracted for {self.file_path}")
+            return
+
         lines = [f"{k}: {v}" for k, v in self.result_metrics.items()]
         logger.info(f"[Flake8Extractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
 

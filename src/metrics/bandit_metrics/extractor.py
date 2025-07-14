@@ -1,12 +1,12 @@
 import json
 import logging
 import subprocess
+import os
 from typing import Dict, Any, Union, Optional
 
 # ✅ Best Practice: Use plugin namespace imports to avoid hardcoding deleted or renamed files
 # ⚠️ SAST Risk: Static import of missing modules (like `default_plugins`) will crash the extractor pipeline
 # 🧠 ML Signal: Plugin loading patterns inform which metrics are active and which tools require failover handling
-
 from metrics.bandit_metrics.plugins import load_plugins
 
 class BanditExtractor:
@@ -43,12 +43,18 @@ class BanditExtractor:
         Run Bandit on the target file and return parsed JSON, or None on failure.
         """
         try:
+            # ✅ Best Practice: Propagate PYTHONPATH to Bandit subprocess
+            # ⚠️ SAST Risk: Failing to set PYTHONPATH will crash plugin resolution in isolated subprocesses
+            env = os.environ.copy()
+            env["PYTHONPATH"] = os.path.abspath("src")
+
             proc = subprocess.run(
                 ["bandit", "-f", "json", "-r", self.file_path],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL,
                 encoding="utf-8",
                 check=False,
+                env=env
             )
             if proc.returncode > 1:
                 logging.warning(f"[BanditExtractor] Bandit failed with exit code {proc.returncode} for {self.file_path}")

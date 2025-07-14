@@ -2,7 +2,7 @@ param(
     [string]$InputFile = "example.py"
 )
 
-Write-Host "🔧 Installing 'code-analyser' in editable mode..."
+Write-Host "🔧 Installing 'code_analyser' in editable mode..."
 pip install -e . | Out-Null
 if ($LASTEXITCODE -ne 0) {
     Write-Error "❌ pip install failed. Ensure you're in the project root."

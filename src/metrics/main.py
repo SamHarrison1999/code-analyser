@@ -42,7 +42,7 @@ def analyse_file(
 
     wrapped_json = {
         "file": str(file_path),
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now().isoformat(),
         "metrics": result_dict
     }
 
@@ -103,6 +103,10 @@ def _select_fail_metrics(group: str, result_dict: dict) -> list[str]:
         "pylint": ["convention", "refactor", "warning", "error", "fatal"],
         "radon": ["halstead", "logical_lines", "blank_lines", "docstring_lines"],
         "vulture": ["unused_"],
+        "sonar": [
+            "coverage", "ncloc", "duplicated_", "cognitive_", "sqale_", "bugs",
+            "smells", "security_", "tests", "comment_lines_density", "classes", "files"
+        ],
     }
 
     if group in group_keywords:
@@ -122,7 +126,7 @@ def format_summary_table(metrics: dict) -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="🔍 Code Analyser — AST, Bandit, Cloc, Flake8, Lizard, Pydocstyle, Pyflakes, Pylint, Radon, Vulture"
+        description="🔍 Code Analyser — AST, Bandit, Cloc, Flake8, Lizard, Pydocstyle, Pyflakes, Pylint, Radon, Vulture, SonarQube"
     )
     parser.add_argument("--file", "-f", type=str, help="Analyse a single Python file")
     parser.add_argument("--dir", "-d", type=str, help="Recursively analyse a directory of Python files")
@@ -139,7 +143,7 @@ def main():
         "--fail-on",
         choices=[
             "all", "ast", "bandit", "flake8", "cloc", "lizard",
-            "pydocstyle", "pyflakes", "pylint", "radon", "vulture"
+            "pydocstyle", "pyflakes", "pylint", "radon", "vulture", "sonar"
         ],
         default="all",
         help="Subset of metrics to use for failure threshold check"

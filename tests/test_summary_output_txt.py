@@ -2,8 +2,8 @@
 
 import subprocess
 import sys
-from pathlib import Path
 import os
+from pathlib import Path
 
 
 def test_cli_summary_output_txt(tmp_path):
@@ -11,13 +11,19 @@ def test_cli_summary_output_txt(tmp_path):
     Runs the CLI with --save-summary-txt and validates that the markdown-style
     summary is saved correctly.
     """
-    test_file = Path("example.py")
-    assert test_file.exists(), "example.py must exist"
+    # ✅ Create a temporary test file with basic content
+    test_file = tmp_path / "summary_test.py"
+    test_file.write_text("def test():\n    return 42\n")
 
     summary_path = tmp_path / "summary.txt"
 
-    # ✅ Best Practice: Run CLI via fully resolved path with correct PYTHONPATH
-    script_path = Path(__file__).resolve().parent.parent / "src" / "metrics" / "main.py"
+    # ✅ Locate the CLI script and project root
+    project_root = Path(__file__).resolve().parents[1]
+    script_path = project_root / "src" / "metrics" / "main.py"
+
+    # ✅ Ensure PYTHONPATH is set for plugin loading
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(project_root / "src")
 
     result = subprocess.run(
         [
@@ -28,8 +34,8 @@ def test_cli_summary_output_txt(tmp_path):
         ],
         capture_output=True,
         text=True,
-        cwd=str(Path(__file__).resolve().parent.parent),
-        env={**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parent.parent / "src")},
+        cwd=str(project_root),
+        env=env,
     )
 
     assert result.returncode == 0, (
@@ -38,5 +44,5 @@ def test_cli_summary_output_txt(tmp_path):
 
     assert summary_path.exists(), "Summary TXT file was not created"
     content = summary_path.read_text(encoding="utf-8")
-    assert "Metric | Value" in content, "Expected metric table in summary output"
-    assert "##" in content or "-" in content, "Expected markdown-style structure"
+    assert "Metric | Value" in content, "Expected 'Metric | Value' markdown table header in summary"
+    assert any(marker in content for marker in ("##", "---")), "Expected markdown-style headings or separators"
