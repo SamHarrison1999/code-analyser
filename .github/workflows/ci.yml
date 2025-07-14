@@ -22,17 +22,20 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: 📦 Install system and Python dependencies
+      - name: 🛠️ Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-tk cloc
-          pip install -e .
-          pip install pytest coverage matplotlib bandit flake8 lizard mplcursors pydocstyle pylint requests radon vulture
+          sudo apt-get install -y python3-tk xvfb cloc
 
-      - name: 🧪 Run full test suite with coverage
+      - name: 📦 Install Python dependencies
         run: |
-          coverage run -m pytest
-          coverage report --fail-under=75  # ❌ fails if coverage is under 75%
+          pip install -e .[gui,test]
+          pip install pytest coverage
+
+      - name: 🧪 Run full test suite with Xvfb
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" coverage run -m pytest
+          coverage report --fail-under=75
           coverage html
 
       - name: 📤 Upload coverage report
@@ -42,13 +45,13 @@ jobs:
           path: htmlcov/
 
       - name: 🔐 Run fail-threshold test
-        run: coverage run -m pytest tests/test_fail_threshold.py
+        run: xvfb-run -a coverage run -m pytest tests/test_fail_threshold.py
 
       - name: ⚠️ Run fail-if-nonzero test
-        run: coverage run -m pytest tests/test_fail_if_nonzero.py
+        run: xvfb-run -a coverage run -m pytest tests/test_fail_if_nonzero.py
 
       - name: 📤 Run CLI output test
-        run: coverage run -m pytest tests/test_cli_output.py
+        run: xvfb-run -a coverage run -m pytest tests/test_cli_output.py
 
       - name: 📝 Run summary output test
-        run: coverage run -m pytest tests/test_summary_output_txt.py
+        run: xvfb-run -a coverage run -m pytest tests/test_summary_output_txt.py
