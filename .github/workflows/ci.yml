@@ -27,7 +27,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3-tk cloc
           pip install -e .
-          pip install pytest coverage matplotlib bandit flake8 lizard mplcursors pydocstyle pylint
+          pip install pytest coverage matplotlib bandit flake8 lizard mplcursors pydocstyle pylint requests radon vulture
 
       - name: 🧪 Run full test suite with coverage
         run: |
