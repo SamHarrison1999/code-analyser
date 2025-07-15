@@ -9,7 +9,9 @@ load_dotenv()
 
 TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
 TOGETHER_API_URL = "https://api.together.xyz/v1/chat/completions"
-DEFAULT_MODEL = "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+
+# ✅ Free-tier model as of latest known Together.ai support
+DEFAULT_MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
 
 def annotate_code_with_together_ai(
     code: str,
@@ -27,7 +29,8 @@ def annotate_code_with_together_ai(
         "# 🧠 ML Signal: <reason>\n"
         "# ✅ Best Practice: <reason>\n\n"
         "Place each comment directly above the relevant line. Do not change the code. Keep spacing intact.\n"
-        "Always return the full annotated code."
+        "Always return the full annotated code.\n"
+        "Do NOT include any introductory or explanatory text. Only return the raw code with inline comments."
     )
 
     headers = {
@@ -48,10 +51,17 @@ def annotate_code_with_together_ai(
     resp = requests.post(TOGETHER_API_URL, headers=headers, json=payload)
     resp.raise_for_status()
     output = resp.json()["choices"][0]["message"]["content"]
-    # Strip Markdown-style code blocks if present
-    if output.startswith("```"):
-        output = output.strip("`").split("\n", 1)[1]  # remove first line
-        if output.endswith("```"):
-            output = output.rsplit("\n", 1)[0]
-    return output
 
+    # ✂️ Remove Markdown-style code blocks and boilerplate commentary
+    output = output.strip()
+
+    if "```python" in output:
+        output = output.split("```python", 1)[1]
+    if "```" in output:
+        output = output.split("```")[0]
+    if output.lower().startswith("here is the annotated code"):
+        output = output.split("\n", 1)[1]
+    if output.strip().endswith("These comments provide context and potential issues or best practices related to security, machine learning, and general programming best practices."):
+        output = output.rsplit("\n", 1)[0]
+
+    return output.strip()
