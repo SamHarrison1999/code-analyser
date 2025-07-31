@@ -1,8 +1,13 @@
+# File: code_analyser/src/metrics/ast_metrics/extractor.py
+
 import ast
 import logging
 from typing import Dict, List, Optional
 
 from metrics.ast_metrics.plugins import ASTMetricPlugin, load_plugins
+
+logger = logging.getLogger(__name__)
+
 
 class ASTMetricExtractor:
     """
@@ -12,9 +17,13 @@ class ASTMetricExtractor:
     to produce a comprehensive dictionary of code metrics.
     """
 
-    def __init__(self, file_path: str, plugins: Optional[List[ASTMetricPlugin]] = None) -> None:
+    def __init__(
+        self, file_path: str, plugins: Optional[List[ASTMetricPlugin]] = None
+    ) -> None:
         self.file_path: str = file_path
-        self.plugins: List[ASTMetricPlugin] = plugins if plugins is not None else load_plugins()
+        self.plugins: List[ASTMetricPlugin] = (
+            plugins if plugins is not None else load_plugins()
+        )
         self.metrics: Dict[str, int] = self._init_metrics()
         self.code: str = ""
         self.tree: Optional[ast.AST] = None
@@ -34,6 +43,34 @@ class ASTMetricExtractor:
         self._walk_ast()
         return self.metrics
 
+    def get_confidences(self) -> Dict[str, float]:
+        """
+        Return a mapping of metric names to confidence scores (0.0–1.0).
+
+        Returns:
+            Dict[str, float]
+        """
+        if not self.tree:
+            return {}
+        return {
+            plugin.name(): plugin.confidence_score(self.tree, self.code)
+            for plugin in self.plugins
+        }
+
+    def get_severities(self) -> Dict[str, str]:
+        """
+        Return a mapping of metric names to severity levels (low, medium, high).
+
+        Returns:
+            Dict[str, str]
+        """
+        if not self.tree:
+            return {}
+        return {
+            plugin.name(): plugin.severity_level(self.tree, self.code)
+            for plugin in self.plugins
+        }
+
     def _read_file(self) -> bool:
         """
         Read the source file into memory.
@@ -46,7 +83,9 @@ class ASTMetricExtractor:
                 self.code = f.read()
             return True
         except Exception as e:
-            logging.error(f"[ASTMetricExtractor] Failed to read file '{self.file_path}': {e}")
+            logging.error(
+                f"[ASTMetricExtractor] Failed to read file '{self.file_path}': {e}"
+            )
             return False
 
     def _parse_ast(self) -> bool:
@@ -69,9 +108,14 @@ class ASTMetricExtractor:
         """
         for plugin in self.plugins:
             try:
-                self.metrics[plugin.name()] = plugin.visit(self.tree, self.code)
+                result = plugin.visit(self.tree, self.code)
+                self.metrics[plugin.name()] = result
+                logger.debug(f"[ASTMetricExtractor] {plugin.name()} = {result}")
             except Exception as e:
-                logging.warning(f"[ASTMetricExtractor] Plugin '{plugin.name()}' failed: {e}")
+                logging.warning(
+                    f"[ASTMetricExtractor] Plugin '{plugin.name()}' failed: {e}",
+                    exc_info=True,
+                )
 
     def _walk_ast(self) -> None:
         """
@@ -93,7 +137,9 @@ class ASTMetricExtractor:
                 self.metrics["function_docstrings"] += 1
             if node.name.startswith("__") and node.name.endswith("__"):
                 self.metrics["magic_methods"] += 1
-            self.metrics["lambda_functions"] += sum(isinstance(n, ast.Lambda) for n in ast.walk(node))
+            self.metrics["lambda_functions"] += sum(
+                isinstance(n, ast.Lambda) for n in ast.walk(node)
+            )
             self.metrics["chained_methods"] += sum(
                 isinstance(n, ast.Call)
                 and isinstance(n.func, ast.Attribute)
@@ -137,7 +183,6 @@ class ASTMetricExtractor:
             "magic_methods": 0,
             "assert_statements": 0,
             "class_docstrings": 0,
-
             # Core structural metrics
             "functions": 0,
             "classes": 0,

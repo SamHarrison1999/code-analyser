@@ -1,3 +1,5 @@
+# File: code_analyser/src/metrics/bandit_metrics/extractor.py
+
 import json
 import logging
 import subprocess
@@ -9,6 +11,7 @@ from typing import Dict, Any, Union, Optional
 # 🧠 ML Signal: Plugin loading patterns inform which metrics are active and which tools require failover handling
 from metrics.bandit_metrics.plugins import load_plugins
 
+
 class BanditExtractor:
     """
     Extracts security vulnerability metrics using the Bandit static analysis tool.
@@ -18,7 +21,7 @@ class BanditExtractor:
     def __init__(self, file_path: str):
         self.file_path = file_path
         self.plugins = load_plugins()
-        self.raw_bandit_data: Dict[str, Any] = {}
+        self.data: Dict[str, Any] = {}
         self.result_metrics: Dict[str, Union[int, float]] = {}
 
     def extract(self) -> Dict[str, Union[int, float]]:
@@ -33,7 +36,7 @@ class BanditExtractor:
             self.result_metrics = {plugin.name(): 0 for plugin in self.plugins}
             return self.result_metrics
 
-        self.raw_bandit_data = bandit_data
+        self.data = bandit_data
         self._apply_plugins()
         self._log_metrics()
         return self.result_metrics
@@ -54,16 +57,20 @@ class BanditExtractor:
                 stderr=subprocess.DEVNULL,
                 encoding="utf-8",
                 check=False,
-                env=env
+                env=env,
             )
             if proc.returncode > 1:
-                logging.warning(f"[BanditExtractor] Bandit failed with exit code {proc.returncode} for {self.file_path}")
+                logging.warning(
+                    f"[BanditExtractor] Bandit failed with exit code {proc.returncode} for {self.file_path}"
+                )
                 return None
 
             return json.loads(proc.stdout)
 
         except json.JSONDecodeError as e:
-            logging.warning(f"[BanditExtractor] JSON parse error for {self.file_path}: {e}")
+            logging.warning(
+                f"[BanditExtractor] JSON parse error for {self.file_path}: {e}"
+            )
             return None
         except Exception as e:
             logging.error(f"[BanditExtractor] Unexpected error: {e}")
@@ -75,10 +82,13 @@ class BanditExtractor:
         """
         for plugin in self.plugins:
             try:
-                value = plugin.extract(self.raw_bandit_data)
+                value = plugin.extract(self.data)
                 if isinstance(value, (int, float)):
                     self.result_metrics[plugin.name()] = value
                 else:
+                    logging.debug(
+                        f"[BanditExtractor] Plugin {plugin.name()} returned non-numeric: {value!r}"
+                    )
                     self.result_metrics[plugin.name()] = 0
             except Exception as e:
                 logging.warning(f"[BanditExtractor] Plugin {plugin.name()} failed: {e}")
@@ -93,4 +103,6 @@ class BanditExtractor:
             return
 
         lines = [f"{key}: {value}" for key, value in self.result_metrics.items()]
-        logging.info(f"[BanditExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
+        logging.info(
+            f"[BanditExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines)
+        )

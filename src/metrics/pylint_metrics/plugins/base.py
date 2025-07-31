@@ -1,3 +1,5 @@
+# File: code_analyser/src/metrics/pylint_metrics/plugins/base.py
+
 """
 Base class for Pylint metric plugins.
 
@@ -16,17 +18,46 @@ class PylintMetricPlugin(ABC):
     such as a count, score, or category-specific value.
     """
 
-    @staticmethod
+    # ✅ Best Practice: Allow plugins to declare their name and tags explicitly
+    plugin_name: str = ""
+    plugin_tags: List[str] = []
+
     @abstractmethod
-    def name() -> str:
+    def name(self) -> str:
         """
-        Return the unique name of the metric this plugin computes.
+        Returns:
+            str: Unique name of the metric produced by this plugin.
         """
-        pass
+        raise NotImplementedError("Plugin must implement name()")
 
     @abstractmethod
     def extract(self, pylint_output: List[Dict[str, Any]], file_path: str) -> Any:
         """
-        Compute and return the metric value from the parsed Pylint output.
+        Computes the plugin-specific metric from parsed Pylint results.
+
+        Args:
+            pylint_output (List[Dict[str, Any]]): Parsed JSON-like Pylint diagnostics.
+            file_path (str): Path to the file being analysed.
+
+        Returns:
+            Any: Metric value (typically int or float).
         """
-        pass
+        raise NotImplementedError("Plugin must implement extract()")
+
+    def confidence_score(self, pylint_output: List[Dict[str, Any]]) -> float:
+        """
+        Optionally provide a confidence score (range 0.0–1.0).
+
+        Returns:
+            float: Confidence in the extracted metric.
+        """
+        return 1.0
+
+    def severity_level(self, pylint_output: List[Dict[str, Any]]) -> str:
+        """
+        Optionally categorise the severity of the metric result.
+
+        Returns:
+            str: One of 'low', 'medium', or 'high'.
+        """
+        return "low"

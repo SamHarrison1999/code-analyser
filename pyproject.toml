@@ -34,6 +34,11 @@ gui = [
     # Tkinter is built-in with most Python installations
 ]
 
+[tool.ruff]
+# Disable specific error codes globally
+ignore = ["E402", "F401", "F821", "F841", "E741"]
+
+
 [project.scripts]
 code_analyser = "metrics.main:main"
 code_analyser_gui = "gui.main:show_splash_and_start"

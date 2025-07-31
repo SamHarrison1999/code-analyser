@@ -1,3 +1,5 @@
+# File: code_analyser/src/metrics/flake8_metrics/plugins/base.py
+
 """
 Base class for Flake8 metric plugins.
 
@@ -17,7 +19,12 @@ class Flake8MetricPlugin(ABC):
     All Flake8 plugins must:
     - Provide a unique metric name via `name()`
     - Implement `extract()` to compute a metric from Flake8 diagnostics
+    - Optionally provide confidence and severity metadata
     """
+
+    # ✅ Best Practice: Plugin metadata fields for registry introspection
+    plugin_name: str = ""
+    plugin_tags: list[str] = []
 
     @abstractmethod
     def name(self) -> str:
@@ -40,3 +47,21 @@ class Flake8MetricPlugin(ABC):
             Any: The computed metric value (typically int or float).
         """
         raise NotImplementedError("Plugin must implement extract()")
+
+    def confidence_score(self, flake8_output: List[str]) -> float:
+        """
+        Optionally return a confidence score for this metric (0.0–1.0).
+
+        Returns:
+            float: Confidence score (defaults to 1.0).
+        """
+        return 1.0
+
+    def severity_level(self, flake8_output: List[str]) -> str:
+        """
+        Optionally classify this metric’s result severity level.
+
+        Returns:
+            str: One of 'low', 'medium', or 'high' (defaults to 'low').
+        """
+        return "low"

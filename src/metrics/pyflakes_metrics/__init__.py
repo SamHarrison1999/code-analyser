@@ -1,35 +1,42 @@
+# File: code_analyser/src/metrics/pyflakes_metrics/__init__.py
+
 """
-Initialise Pyflakes metric plugins.
+metrics.pyflakes_metrics
 
-Dynamically loads all plugin implementations for Pyflakes diagnostics.
+This subpackage provides Pyflakes-based static error metrics using a plugin-driven architecture.
+
+Each plugin extracts a specific error-related metric from Pyflakes diagnostic output.
+
+Features:
+- Modular metric extraction via PyflakesMetricPlugin classes
+- Dynamic plugin discovery from the plugins directory
+- Structured and reproducible output for ML or CSV integration
+- Compatible with broader Code Analyser architecture
+
+Exposes:
+- PyflakesExtractor: core runner that applies all discovered plugins
+- gather_pyflakes_metrics: returns metrics as an ordered list of values
+- gather_pyflakes_metrics_bundle: returns metrics with value, confidence, severity
+- get_pyflakes_metric_names: returns metric names in extraction order
+- load_plugins: dynamically loads all available PyflakesMetricPlugin instances
 """
 
-import pkgutil
-import importlib
-import inspect
-from typing import List
-from metrics.pyflakes_metrics.plugins.base import PyflakesMetricPlugin
-import metrics.pyflakes_metrics.plugins as plugin_module_root
+# ✅ Best Practice: Centralise plugin exposure for Pyflakes metrics
+# ⚠️ SAST Risk: Avoid static imports from plugin files to prevent brittle dependencies
+# 🧠 ML Signal: Defines plugin feature boundaries for error signal learning
 
+from .extractor import PyflakesExtractor
+from .gather import (
+    gather_pyflakes_metrics,
+    gather_pyflakes_metrics_bundle,
+    get_pyflakes_metric_names,
+)
+from .plugins import load_plugins
 
-def load_plugins() -> List[PyflakesMetricPlugin]:
-    """
-    Dynamically loads all subclasses of PyflakesPlugin.
-
-    Returns:
-        List[PyflakesMetricPlugin]: All discovered and instantiated plugins.
-    """
-    plugins = []
-    for _, module_name, _ in pkgutil.iter_modules(plugin_module_root.__path__):
-        module = importlib.import_module(f"{plugin_module_root.__name__}.{module_name}")
-        for _, obj in inspect.getmembers(module, inspect.isclass):
-            if (
-                issubclass(obj, PyflakesMetricPlugin)
-                and obj is not PyflakesMetricPlugin
-                and obj.__module__.startswith(plugin_module_root.__name__)
-            ):
-                plugins.append(obj())
-    return plugins
-
-
-__all__ = ["load_plugins", "PyflakesMetricPlugin"]
+__all__ = [
+    "PyflakesExtractor",
+    "gather_pyflakes_metrics",
+    "gather_pyflakes_metrics_bundle",
+    "get_pyflakes_metric_names",
+    "load_plugins",
+]

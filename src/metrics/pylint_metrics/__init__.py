@@ -1,27 +1,40 @@
 """
-Pylint Metrics Subpackage
+metrics.pylint_metrics
 
-Provides tools for extracting static code metrics from Python source files
-using Pylint analysis and a plugin-driven architecture.
+This subpackage provides Pylint-based static code metrics
+via a plugin-driven architecture. Each plugin extracts a specific metric
+from parsed Pylint JSON output.
 
-This subpackage is designed for:
-- Static code quality auditing
-- Supervised machine learning feature extraction
-- Maintainability and duplication detection
-- CSV export and dashboard integration
+Features:
+- Modular metric extraction using PylintMetricPlugin subclasses
+- Dynamic discovery of plugins from the plugins directory
+- Ordered, reproducible output for ML pipelines and dashboards
+- Confidence and severity metadata for each metric (optional)
 
 Exposes:
-- PylintMetricExtractor: Class for running Pylint on a file and extracting metrics.
-- gather_pylint_metrics: Function that returns ordered metrics for CSV/ML pipelines.
-- load_plugins: Dynamically loads plugin metric extractors.
+- PylintMetricExtractor: Core runner that applies all registered plugins
+- gather_pylint_metrics: Returns raw values in plugin order
+- gather_pylint_metrics_bundle: Returns metrics with value, confidence, severity
+- get_pylint_metric_names: Returns names in extraction order
+- load_plugins: Discovers all PylintMetricPlugin subclasses
 """
 
-from metrics.pylint_metrics.extractor import PylintMetricExtractor
-from metrics.pylint_metrics.gather import gather_pylint_metrics
-from metrics.pylint_metrics.plugins import load_plugins
+# ✅ Best Practice: Centralised metric interface for plugin-based Pylint extraction
+# ⚠️ SAST Risk: Improper plugin discovery can cause pipeline crashes if unguarded
+# 🧠 ML Signal: This module defines feature vector boundaries for linter-based model inputs
+
+from .extractor import PylintMetricExtractor
+from .gather import (
+    gather_pylint_metrics,
+    gather_pylint_metrics_bundle,
+    get_pylint_metric_names,
+)
+from .plugins import load_plugins
 
 __all__ = [
     "PylintMetricExtractor",
     "gather_pylint_metrics",
+    "gather_pylint_metrics_bundle",
+    "get_pylint_metric_names",
     "load_plugins",
 ]

@@ -1,6 +1,8 @@
+# File: code_analyser/src/metrics/flake8_metrics/extractor.py
+
 import logging
 import subprocess
-from typing import Any, Dict, List
+from typing import Dict, List, Union
 
 from metrics.flake8_metrics.plugins import load_plugins
 from metrics.flake8_metrics.plugins.base import Flake8MetricPlugin
@@ -21,9 +23,10 @@ class Flake8Extractor:
     def __init__(self, file_path: str):
         self.file_path = file_path
         self.plugins: List[Flake8MetricPlugin] = load_plugins()
-        self.result_metrics: Dict[str, Any] = {}
+        self.result_metrics: Dict[str, Union[int, float]] = {}
+        self.data: List[str] = []  # ✅ For confidence/severity introspection
 
-    def extract(self) -> Dict[str, Any]:
+    def extract(self) -> Dict[str, Union[int, float]]:
         """
         Run Flake8 on the given file and extract plugin-based metrics.
 
@@ -40,19 +43,26 @@ class Flake8Extractor:
             )
 
             if result.returncode > 1:
-                logger.warning(f"[Flake8Extractor] Flake8 failed with exit code {result.returncode} on {self.file_path}")
+                logger.warning(
+                    f"[Flake8Extractor] Flake8 failed with exit code {result.returncode} on {self.file_path}"
+                )
                 return {plugin.name(): 0 for plugin in self.plugins}
 
             flake8_output = result.stdout.splitlines()
+            self.data = flake8_output  # ✅ Exposed for metadata hooks
             metrics = {}
 
             for plugin in self.plugins:
                 try:
                     # ✅ Match plugin API: extract(flake8_output: List[str], file_path: str)
                     value = plugin.extract(flake8_output, self.file_path)
-                    metrics[plugin.name()] = value if isinstance(value, (int, float)) else 0
+                    metrics[plugin.name()] = (
+                        value if isinstance(value, (int, float)) else 0
+                    )
                 except Exception as e:
-                    logger.warning(f"[Flake8Extractor] Plugin '{plugin.name()}' failed: {type(e).__name__}: {e}")
+                    logger.warning(
+                        f"[Flake8Extractor] Plugin '{plugin.name()}' failed: {type(e).__name__}: {e}"
+                    )
                     metrics[plugin.name()] = 0
 
             self.result_metrics = metrics
@@ -60,7 +70,9 @@ class Flake8Extractor:
             return metrics
 
         except Exception as e:
-            logger.error(f"[Flake8Extractor] Flake8 execution failed on {self.file_path}: {type(e).__name__}: {e}")
+            logger.error(
+                f"[Flake8Extractor] Flake8 execution failed on {self.file_path}: {type(e).__name__}: {e}"
+            )
             return {plugin.name(): 0 for plugin in self.plugins}
 
     def _log_metrics(self):
@@ -72,10 +84,12 @@ class Flake8Extractor:
             return
 
         lines = [f"{k}: {v}" for k, v in self.result_metrics.items()]
-        logger.info(f"[Flake8Extractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
+        logger.info(
+            f"[Flake8Extractor] Metrics for {self.file_path}:\n" + "\n".join(lines)
+        )
 
 
-def gather_flake8_metrics(file_path: str) -> List[Any]:
+def gather_flake8_metrics(file_path: str) -> List[Union[int, float]]:
     """
     Extracts Flake8 metrics as an ordered list for ML or CSV output.
 
@@ -83,7 +97,7 @@ def gather_flake8_metrics(file_path: str) -> List[Any]:
         file_path (str): Path to the Python file to analyse.
 
     Returns:
-        List[Any]: Ordered list of Flake8 metric values.
+        List[Union[int, float]]: Ordered list of Flake8 metric values.
     """
     extractor = Flake8Extractor(file_path)
     metric_dict = extractor.extract()

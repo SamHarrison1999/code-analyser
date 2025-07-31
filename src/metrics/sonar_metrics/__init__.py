@@ -1,19 +1,43 @@
-# ✅ Structured SonarQube metrics package interface
+# File: code_analyser/src/metrics/sonar_metrics/__init__.py
 
-# ✅ Best Practice: Explicit relative imports make module relationships clear within a package
-from .extractor import (
-    get_metric_gatherer,
-    get_metric_names,
-    get_metric_classes,
-    load_plugins
+"""
+metrics.sonar_metrics
+
+This subpackage provides SonarQube-based static code metrics
+via a plugin-driven architecture. Each plugin extracts a specific metric
+from scanner and API data returned by SonarQube.
+
+Features:
+- Modular metric extraction using SonarMetricPlugin subclasses
+- Dynamic discovery of plugins from the plugins directory
+- Ordered, reproducible output for ML pipelines and dashboards
+- Confidence and severity metadata for each metric (optional)
+
+Exposes:
+- SonarMetricExtractor: Core runner that applies all registered plugins
+- gather_sonar_metrics: Returns raw values in plugin order
+- gather_sonar_metrics_bundle: Returns metrics with value, confidence, severity
+- get_sonar_metric_names: Returns names in extraction order
+- load_plugins: Discovers all SonarMetricPlugin subclasses
+"""
+
+# ✅ Best Practice: Centralised metric interface for plugin-based SonarQube extraction
+# ⚠️ SAST Risk: Improper plugin discovery or missing API tokens may break analysis
+# 🧠 ML Signal: This module defines feature vector boundaries for Sonar-based model inputs
+
+from .extractor import SonarMetricExtractor
+from .gather import (
+    gather_sonar_metrics,
+    gather_sonar_metrics_bundle,
+    get_sonar_metric_names,
 )
-from .gather import gather_sonar_metrics
+from .plugins import load_plugins
 
 # ✅ Best Practice: Define public API clearly for cleaner external access
 __all__ = [
-    "get_metric_gatherer",
-    "get_metric_names",
-    "get_metric_classes",
+    "SonarMetricExtractor",
     "gather_sonar_metrics",
-    "load_plugins"
+    "gather_sonar_metrics_bundle",
+    "get_sonar_metric_names",
+    "load_plugins",
 ]

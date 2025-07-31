@@ -1,5 +1,14 @@
+"""
+metric_types.py — Unified typing for static + AI-enhanced metric extractors.
+
+Includes:
+- Plugin base classes (MetricExtractorBase, SonarStyleExtractorBase)
+- Standardised output bundles (MetricResult, AIAnnotationOverlay)
+- AI-specific logging for token logits and RL reward shaping
+"""
+
 from pathlib import Path
-from typing import Callable, Literal, TypedDict, Union, Dict, List, Protocol
+from typing import Callable, Literal, TypedDict, Union, Dict, List, Tuple, Any
 from abc import ABC, abstractmethod
 
 
@@ -14,6 +23,7 @@ class MetricResult(TypedDict):
         success (bool): Whether the metric was successfully extracted.
         error (str | None): Error message if extraction failed.
     """
+
     name: str
     value: object
     units: Union[str, None]
@@ -29,8 +39,8 @@ class MetricExtractorBase(ABC):
     """
     Abstract base class for class-based metric extractors.
 
-    Subclasses must implement the extract() method, returning
-    a dictionary of metric name to scalar values.
+    Subclasses must implement extract() and may optionally
+    implement confidence and metadata-aware variants.
     """
 
     def __init__(self, file_path: str):
@@ -44,7 +54,35 @@ class MetricExtractorBase(ABC):
         Returns:
             dict[str, int | float]: Extracted metrics.
         """
-        ...
+        raise NotImplementedError("Subclasses must implement extract()")
+
+    def extract_with_confidence(self) -> Dict[str, Tuple[Union[int, float], float]]:
+        """
+        Optional: Return both metric value and confidence for each key.
+
+        Returns:
+            Dict[str, Tuple[Union[int, float], float]]: Each metric mapped to (value, confidence).
+        """
+        raise NotImplementedError("Subclasses may implement extract_with_confidence()")
+
+    def extract_with_metadata(self) -> Dict[str, Dict[str, Union[str, float, int]]]:
+        """
+        Optional: Return extended metadata per metric for GUI/ML export.
+
+        Example:
+            {
+                "cyclomatic_complexity": {
+                    "value": 7.0,
+                    "confidence": 0.88,
+                    "severity": "medium",
+                    "source": "radon"
+                }
+            }
+
+        Returns:
+            Dict[str, Dict[str, Union[str, float, int]]]: Rich metadata per metric.
+        """
+        raise NotImplementedError("Subclasses may implement extract_with_metadata()")
 
 
 class SonarStyleExtractorBase(ABC):
@@ -65,23 +103,95 @@ class SonarStyleExtractorBase(ABC):
         Returns:
             dict[str, float]: Metric values from the Sonar context.
         """
-        ...
+        raise NotImplementedError("Subclasses must implement extract()")
+
+    def extract_with_confidence(self) -> Dict[str, Tuple[Union[int, float], float]]:
+        """
+        Optional: Return both metric value and confidence for each key.
+
+        Returns:
+            Dict[str, Tuple[Union[int, float], float]]: Each metric mapped to (value, confidence).
+        """
+        raise NotImplementedError("Subclasses may implement extract_with_confidence()")
+
+    def extract_with_metadata(self) -> Dict[str, Dict[str, Union[str, float, int]]]:
+        """
+        Optional: Return extended metadata per metric for GUI/ML export.
+
+        Example:
+            {
+                "coverage": {
+                    "value": 100.0,
+                    "confidence": 1,
+                    "severity": "low",
+                    "source": "sonar"
+                }
+            }
+
+        Returns:
+            Dict[str, Dict[str, Union[str, float, int]]]: Rich metadata per metric.
+        """
+        raise NotImplementedError("Subclasses may implement extract_with_metadata()")
 
 
-# Optional plugin metadata type for registry, ML, or API export
+# Optional plugin registry metadata
 MetricPlugin = Dict[str, object]
-"""
-MetricPlugin = TypedDict("MetricPlugin", {
-    "name": str,
-    "type": Literal["static_analysis", "complexity", "security", "coverage"],
-    "extractor": MetricExtractor,
-    "domain": Literal["code", "security", "coverage"],
-    "language": str,
-    "source": str,
-    "version": str,
-    "format": Literal["metrics"],
-    "tool": str,
-    "scope": Literal["file", "project"],
-    "outputs": list[str],
-})
-"""
+
+
+# ✅ For ML pipelines and dataset export
+class TokenExplanationMap(TypedDict):
+    line: int
+    token: str
+    confidence: float
+    severity: str
+
+
+class HuggingFaceDatasetSample(TypedDict):
+    file_path: str
+    content: str
+    labels: List[str]
+    annotations: List[TokenExplanationMap]
+
+
+class ONNXExportBundle(TypedDict):
+    model_path: str
+    tokenizer_path: str
+    input_example: Any
+    output_example: Any
+
+
+class AIAnnotationOverlay(TypedDict, total=False):
+    line: int
+    token_span: Tuple[int, int]
+    label: str
+    confidence: float
+    severity: Literal["low", "medium", "high"]
+    scope: str
+    explanation: str
+
+
+class AISummaryBundle(TypedDict):
+    file: str
+    avg_confidence: float
+    high_risk_count: int
+    total_annotations: int
+    timestamp: str
+
+
+class TokenLogits(TypedDict):
+    line: int
+    token: str
+    index: int
+    logits: List[float]
+    predicted_label: str
+    confidence: float
+
+
+class RLRewardLog(TypedDict):
+    file: str
+    episode: int
+    reward: float
+    timestamp: str
+    model_version: str
+    source: Literal["actor", "critic"]
+    explanation: str

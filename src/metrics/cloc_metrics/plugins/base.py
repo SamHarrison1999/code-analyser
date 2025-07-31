@@ -1,4 +1,3 @@
-
 """
 Base class for CLOC metric plugins.
 
@@ -14,6 +13,10 @@ from typing import Any
 
 
 class ClocMetricPlugin(ABC):
+    # ✅ Optional metadata for plugin discovery
+    plugin_name: str = ""
+    plugin_tags: list[str] = []
+
     @abstractmethod
     def name(self) -> str:
         """
@@ -35,4 +38,24 @@ class ClocMetricPlugin(ABC):
         Returns:
             float | int: The computed metric value
         """
-        raise NotImplementedError("ClocMetricPlugin subclasses must implement extract().")
+        raise NotImplementedError(
+            "ClocMetricPlugin subclasses must implement extract()."
+        )
+
+    def confidence_score(self, cloc_data: dict[str, Any]) -> float:
+        """
+        Optional: Return a confidence level for this metric's accuracy.
+
+        Returns:
+            float: Confidence value in range [0.0, 1.0]
+        """
+        return 1.0
+
+    def severity_level(self, cloc_data: dict[str, Any]) -> str:
+        """
+        Optional: Provide a severity level ('low', 'medium', 'high') based on metric logic.
+
+        Returns:
+            str: Severity label
+        """
+        return "low"

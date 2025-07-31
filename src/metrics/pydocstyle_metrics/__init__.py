@@ -1,32 +1,47 @@
+# File: code_analyser/src/metrics/pydocstyle_metrics/__init__.py
+
 """
-Pydocstyle Plugin Loader
+metrics.pydocstyle_metrics
 
-Dynamically loads all subclasses of PydocstyleMetricPlugin from the plugins package.
+This subpackage provides Pydocstyle-based documentation quality metrics
+using a dynamic plugin system. Each plugin computes a single docstring-related metric.
+
+Features:
+- Modular metric extraction via PydocstyleMetricPlugin classes
+- Dynamic plugin discovery from the plugins directory
+- Reproducible metric ordering for ML/CSV/export pipelines
+- Supports confidence and severity metadata for each metric
+
+Exposes:
+- PydocstyleExtractor: core runner that applies all discovered plugins
+- extract_pydocstyle_metrics: returns bundled metrics with metadata
+- gather_pydocstyle_metrics: returns metrics as an ordered list of values
+- get_pydocstyle_metric_names: returns metric names in plugin load order
+- load_plugins: dynamically loads all PydocstyleMetricPlugin instances
 """
 
-import pkgutil
-import importlib
-import inspect
-from typing import List
-from metrics.pydocstyle_metrics.plugins.base import PydocstyleMetricPlugin
-import metrics.pydocstyle_metrics.plugins as plugin_module_root
+# ✅ Best Practice: Centralised public API for metrics + plugin registry
+# ⚠️ SAST Risk: Static plugin mappings should be avoided — use discovery instead
+# 🧠 ML Signal: This module defines the docstring feature vector boundary
 
+from .extractor import (
+    PydocstyleExtractor,
+    extract_pydocstyle_metrics,
+    get_pydocstyle_extractor,
+)
+from .gather import (
+    gather_pydocstyle_metrics,
+    gather_pydocstyle_metrics_bundle,
+    get_pydocstyle_metric_names,
+)
+from .plugins import load_plugins
 
-def load_plugins() -> List[PydocstyleMetricPlugin]:
-    """
-    Discover and load all subclasses of PydocstylePlugin in the plugins package.
-
-    Returns:
-        List[PydocstyleMetricPlugin]: Instantiated plugin objects.
-    """
-    plugins = []
-    for _, module_name, _ in pkgutil.iter_modules(plugin_module_root.__path__):
-        module = importlib.import_module(f"{plugin_module_root.__name__}.{module_name}")
-        for _, obj in inspect.getmembers(module, inspect.isclass):
-            if (
-                issubclass(obj, PydocstyleMetricPlugin)
-                and obj is not PydocstyleMetricPlugin
-                and obj.__module__.startswith(plugin_module_root.__name__)
-            ):
-                plugins.append(obj())
-    return plugins
+__all__ = [
+    "PydocstyleExtractor",
+    "extract_pydocstyle_metrics",
+    "get_pydocstyle_extractor",
+    "gather_pydocstyle_metrics",
+    "gather_pydocstyle_metrics_bundle",
+    "get_pydocstyle_metric_names",
+    "load_plugins",
+]

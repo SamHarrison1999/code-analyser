@@ -1,6 +1,10 @@
+# File: code_analyser/src/gui/utils.py
+
 import logging
 from collections.abc import Mapping
 from typing import Dict, Any, Union
+import json
+from pathlib import Path
 
 # ✅ Structured logging setup
 logger = logging.getLogger(__name__)
@@ -31,7 +35,9 @@ def merge_nested_metrics(metrics_dict: Dict[str, Any]) -> Dict[str, Any]:
                 logger.debug(f"[merge_nested_metrics] Merged: {flat_key} = {value}")
         else:
             merged[section] = subdict
-            logger.debug(f"[merge_nested_metrics] Added top-level: {section} = {subdict}")
+            logger.debug(
+                f"[merge_nested_metrics] Added top-level: {section} = {subdict}"
+            )
 
     return merged
 
@@ -39,7 +45,9 @@ def merge_nested_metrics(metrics_dict: Dict[str, Any]) -> Dict[str, Any]:
 def flatten_metrics(
     d: dict[str, Any],
     prefix: str = "",
-    numeric_only: bool = False
+    numeric_only: bool = False,
+    severity_filter: Union[None, set[str]] = None,
+    ai_overlay: dict[str, Any] = None,
 ) -> dict[str, Union[str, int, float]]:
     """
     Recursively flatten deeply nested dictionaries into a single-level dictionary.
@@ -52,6 +60,8 @@ def flatten_metrics(
         d (dict): Input nested dictionary to flatten.
         prefix (str): Prefix for recursive keys.
         numeric_only (bool): If True, excludes non-numeric values.
+        severity_filter (set[str] | None): Optional severity filter based on AI overlays.
+        ai_overlay (dict | None): Optional AI overlay summary to match severity.
 
     Returns:
         dict: Flattened dictionary with dot-separated keys.
@@ -63,17 +73,66 @@ def flatten_metrics(
 
     for k, v in d.items():
         full_key = f"{prefix}.{k}" if prefix else k
-        logger.debug(f"[flatten_metrics] Visiting: {full_key} (type: {type(v).__name__})")
+        logger.debug(
+            f"[flatten_metrics] Visiting: {full_key} (type: {type(v).__name__})"
+        )
 
         if isinstance(v, dict):
-            flat.update(flatten_metrics(v, prefix=full_key, numeric_only=numeric_only))
+            flat.update(
+                flatten_metrics(
+                    v,
+                    prefix=full_key,
+                    numeric_only=numeric_only,
+                    severity_filter=severity_filter,
+                    ai_overlay=ai_overlay,
+                )
+            )
         elif isinstance(v, (int, float)):
+            if severity_filter and ai_overlay:
+                sev = ai_overlay.get(full_key, {}).get("AI Signal", "").lower()
+                if sev and sev not in severity_filter:
+                    logger.debug(
+                        f"[flatten_metrics] Skipping by severity: {full_key} = {sev}"
+                    )
+                    continue
             flat[full_key] = v
             logger.debug(f"[flatten_metrics] Added numeric: {full_key} = {v}")
         elif not numeric_only:
             flat[full_key] = v
             logger.debug(f"[flatten_metrics] Added non-numeric: {full_key} = {v}")
         else:
-            logger.debug(f"[flatten_metrics] Skipped non-numeric: {full_key} (type: {type(v).__name__})")
+            logger.debug(
+                f"[flatten_metrics] Skipped non-numeric: {full_key} (type: {type(v).__name__})"
+            )
 
     return flat
+
+
+def load_ai_overlay_summary(filepath: str) -> dict:
+    """
+    Load summary metrics from AI annotations (.json or logs).
+
+    Args:
+        filepath (str): Path to the source file (extension ignored).
+
+    Returns:
+        dict: Summary dictionary if available, otherwise empty.
+    """
+    try:
+        json_path = Path(filepath).with_suffix(".json")
+        if not json_path.exists():
+            raise FileNotFoundError(f"No annotation summary found at {json_path}")
+
+        with open(json_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        summary = data.get("summary", {})
+        logger.debug(f"✅ Loaded AI overlay summary from: {json_path}")
+        return summary
+
+    except json.JSONDecodeError as e:
+        logger.error(f"❌ Failed to parse JSON overlay summary: {e}")
+        return {}
+    except Exception as e:
+        logger.warning(f"⚠️ Unexpected error loading overlay summary: {e}")
+        return {}
