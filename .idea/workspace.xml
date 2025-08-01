@@ -5,200 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7c51c64d-4d4f-48eb-87bc-0484e881dbb4" name="Changes" comment="refactor">
-      <change afterPath="$PROJECT_DIR$/.idea/code-analyser.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/gui/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/gui/chart_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/gui/file_ops.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/gui/gui_components.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/gui/gui_logic.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/gui/heatmap_renderer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/gui/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/gui/overlay_loader.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/gui/shared_state.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/gui/utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/__main__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ai_overlays.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/extractor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/gather.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/assert_statements.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/chained_method_calls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/class_count.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/class_docstring.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/exception_count.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/function_count.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/function_docstring.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/global_variable_count.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/lambda_function.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/loop_conditional_count.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/magic_method.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/module_docstring.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/nested_function.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/ast_metrics/plugins/todo_comments.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/bandit_metrics/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/bandit_metrics/extractor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/bandit_metrics/gather.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/bandit_metrics/plugins/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/bandit_metrics/plugins/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/bandit_metrics/plugins/cwe_frequency_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/bandit_metrics/plugins/cwe_name_frequency_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/bandit_metrics/plugins/high_severity_issues.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/bandit_metrics/plugins/low_severity_issues.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/bandit_metrics/plugins/medium_severity_issues.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/bandit_metrics/plugins/most_frequent_cwe_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/bandit_metrics/plugins/most_frequent_cwe_with_name_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/bandit_metrics/plugins/undefined_severity_issues.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/cloc_metrics/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/cloc_metrics/extractor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/cloc_metrics/gather.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/cloc_metrics/plugins/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/cloc_metrics/plugins/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/cloc_metrics/plugins/comment_count.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/cloc_metrics/plugins/comment_density.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/cloc_metrics/plugins/source_lines.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/cloc_metrics/plugins/total_lines.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/extractor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/gather.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/plugins/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/plugins/average_line_length_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/plugins/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/plugins/doc_string_issues_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/plugins/inconsistent_indentation_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/plugins/long_lines_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/plugins/naming_issues_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/plugins/styling_errors_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/plugins/styling_issues_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/plugins/styling_warnings_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/plugins/trailing_whitespaces_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/plugins/unused_imports_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/plugins/unused_variables_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/flake8_metrics/plugins/whitespace_issues_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/gather.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/lizard_metrics/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/lizard_metrics/extractor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/lizard_metrics/gather.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/lizard_metrics/plugins/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/lizard_metrics/plugins/average_function_complexity.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/lizard_metrics/plugins/average_function_length.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/lizard_metrics/plugins/average_parameter_count.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/lizard_metrics/plugins/average_token_count.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/lizard_metrics/plugins/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/lizard_metrics/plugins/maintainability_index.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/lizard_metrics/plugins/number_of_functions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/metric_types.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pydocstyle_metrics/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pydocstyle_metrics/extractor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pydocstyle_metrics/gather.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pydocstyle_metrics/plugins/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pydocstyle_metrics/plugins/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pydocstyle_metrics/plugins/compliance_percentage.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pydocstyle_metrics/plugins/missing_docstrings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pydocstyle_metrics/plugins/total_violations_plugin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pyflakes_metrics/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pyflakes_metrics/extractor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pyflakes_metrics/gather.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pyflakes_metrics/plugins/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pyflakes_metrics/plugins/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pyflakes_metrics/plugins/syntax_errors.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pyflakes_metrics/plugins/undefined_names.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pylint_metrics/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pylint_metrics/extractor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pylint_metrics/gather.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pylint_metrics/plugins/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pylint_metrics/plugins/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pylint_metrics/plugins/convention_count.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pylint_metrics/plugins/error_count.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pylint_metrics/plugins/fatal_count.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pylint_metrics/plugins/refactor_count.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/pylint_metrics/plugins/warning_count.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/radon_metrics/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/radon_metrics/extractor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/radon_metrics/gather.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/radon_metrics/plugins/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/radon_metrics/plugins/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/radon_metrics/plugins/blank_lines.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/radon_metrics/plugins/docstring_lines.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/radon_metrics/plugins/halstead_difficulty.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/radon_metrics/plugins/halstead_effort.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/radon_metrics/plugins/halstead_volume.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/radon_metrics/plugins/logical_lines.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/extractor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/gather.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/bugs.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/classes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/code_smells.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/cognitive_complexity.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/comment_lines_density.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/complexity.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/coverage.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/duplicated_blocks.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/duplicated_lines.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/duplicated_lines_density.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/files.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/ncloc.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/number_of_tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/reliability_rating.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/security_rating.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/sqale_index.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/sqale_rating.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/success_density.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/plugins/vulnerabilities.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/sonar_metrics/scanner.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/vulture_metrics/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/vulture_metrics/extractor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/vulture_metrics/gather.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/vulture_metrics/plugins/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/vulture_metrics/plugins/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/vulture_metrics/plugins/unused_classes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/vulture_metrics/plugins/unused_functions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/vulture_metrics/plugins/unused_imports.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/vulture_metrics/plugins/unused_variables.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/__main__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/ai_cache.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/ai_metric_names.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/ai_signal_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/cli_stats.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/config_manager.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/dataset_loader.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/email_zip_sender.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/export.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/generate_annotated_dataset.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/html_dashboard.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/huggingface_uploader.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/inference.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/key_manager.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/model_tf.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/model_torch.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/ollama_llm_annotator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/overlay_export.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/overlay_gatherer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/overlay_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/pretrain_supervised.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/reward_functions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/tensorboard_logger.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/together_ai_annotator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/together_annotation.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/tokenizer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/train_hf.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/train_rl_agent.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ml/zip_exporter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ml/together_ai_annotator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/ml/together_ai_annotator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/assets/test_eval.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/assets/test_eval.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -213,8 +22,25 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;SamHarrison1999&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/SamHarrison1999/code-analyser.git&quot;,
+    &quot;accountId&quot;: &quot;e787b8c4-132a-439c-ad80-9e6eabe7f628&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>
@@ -230,7 +56,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;origin&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/sam/PycharmProjects/code-analyser/src&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -301,12 +127,41 @@
       <option name="presentableId" value="Default" />
       <updated>1753982798310</updated>
       <workItem from="1753982799875" duration="12214000" />
-      <workItem from="1754053762492" duration="2273000" />
+      <workItem from="1754053762492" duration="2518000" />
+      <workItem from="1754056409869" duration="980000" />
     </task>
+    <task id="LOCAL-00001" summary="refactor">
+      <option name="closed" value="true" />
+      <created>1754056183735</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1754056183735</updated>
+    </task>
+    <task id="LOCAL-00002" summary="refactor">
+      <option name="closed" value="true" />
+      <created>1754056358046</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1754056358046</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="refactor" />
