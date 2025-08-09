@@ -13,7 +13,6 @@ This module provides:
 from .config import AI_CACHE_DIR
 from .inference import AnnotationEngine
 from .model_tf import AnnotationClassifier
-from .model_torch import ActorCriticAgent
 from .reward_functions import compute_reward
 from .ai_signal_utils import label_to_score
 
@@ -21,7 +20,6 @@ __all__ = [
     "AI_CACHE_DIR",
     "AnnotationEngine",
     "AnnotationClassifier",
-    "ActorCriticAgent",
     "compute_reward",
     "label_to_score",
 ]

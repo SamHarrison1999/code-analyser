@@ -1,0 +1,79 @@
+[
+  {
+    "line": 1,
+    "text": "# Copyright (c) Microsoft Corporation.",
+    "annotation": "\u2705 Best Practice: Explicitly specifying imported names in __all__ for module exports",
+    "confidence": 0.5,
+    "tokens": [
+      2,
+      15069,
+      357,
+      66,
+      8,
+      5413,
+      10501,
+      13
+    ],
+    "start_token": 0,
+    "end_token": 8,
+    "annotation_tokens": [
+      26486,
+      227,
+      6705,
+      19939,
+      25,
+      11884,
+      306,
+      31577,
+      17392,
+      3891,
+      287,
+      11593,
+      439,
+      834,
+      329,
+      8265,
+      15319
+    ],
+    "label": "best_practice",
+    "reason": "Explicitly specifying imported names in __all__ for module exports"
+  },
+  {
+    "line": 2,
+    "text": "# Licensed under the MIT License.",
+    "annotation": "\u2705 Best Practice: Using __all__ to define the public API of the module",
+    "confidence": 0.5,
+    "tokens": [
+      2,
+      49962,
+      739,
+      262,
+      17168,
+      13789,
+      13
+    ],
+    "start_token": 8,
+    "end_token": 15,
+    "annotation_tokens": [
+      26486,
+      227,
+      6705,
+      19939,
+      25,
+      8554,
+      11593,
+      439,
+      834,
+      284,
+      8160,
+      262,
+      1171,
+      7824,
+      286,
+      262,
+      8265
+    ],
+    "label": "best_practice",
+    "reason": "Using __all__ to define the public API of the module"
+  }
+]

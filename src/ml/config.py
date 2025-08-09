@@ -23,30 +23,20 @@ for directory in [
 ]:
     directory.mkdir(parents=True, exist_ok=True)
 
-MODEL_CONFIG = {
-    "model_name": "microsoft/codebert-base",
-    "vocab_size": 10000,
-    "embed_dim": 128,
-    "hidden_dim": 256,
-    "output_dim": 3,  # SAST, ML Signal, Best Practice
-    "dropout": 0.3,
-    "use_attention": True,
-    "use_hf": True,
-    "use_distilled": False,
-}
-
 TRAINING_CONFIG = {
-    "epochs": 3,
+    "output_dir": "checkpoints/supervised",
+    "use_tensorboard": True,
+    "use_hf": True,
+    "epochs": 10,
     "batch_size": 8,
     "learning_rate": 2e-5,
-    "max_length": 512,
-    "confidence_threshold": 0.7,
-    "max_train_samples": None,  # Set to an int to limit training samples
-    "log_dir": str(LOG_DIR.as_posix()),
-    "output_dir": str(CHECKPOINT_DIR.as_posix()),
-    "seed": 42,
-    "stratify": True,
 }
+MODEL_CONFIG = {
+    "model_name": "microsoft/codebert-base",
+    "hidden_size": 768,
+    "num_labels": 3,
+}
+
 
 INFERENCE_CONFIG = {
     "threshold": 0.5,  # used for multi-label classification
@@ -64,4 +54,12 @@ EXPORT_CONFIG = {
 DATA_PATHS = {
     "code_dir": str(DATASET_DIR.as_posix()),
     "annotation_dir": str(ANNOTATION_DIR.as_posix()),
+    "processed_dataset": str((PROJECT_ROOT / "datasets" / "processed").as_posix()),
+    "supervised_ckpt": "checkpoints/supervised",
+    "label_map": {
+        "sast_risk": 0,
+        "ml_signal": 1,
+        "best_practice": 2
+    }
 }
+

@@ -1,0 +1,51 @@
+[
+  {
+    "line": 1,
+    "text": "# -*- coding: utf-8 -*-",
+    "annotation": "\u2705 Best Practice: Define the purpose of the module by specifying which attributes are intended for public use.",
+    "confidence": 0.5,
+    "tokens": [
+      2,
+      532,
+      9,
+      12,
+      19617,
+      25,
+      3384,
+      69,
+      12,
+      23,
+      532,
+      9,
+      12
+    ],
+    "start_token": 0,
+    "end_token": 13,
+    "annotation_tokens": [
+      26486,
+      227,
+      6705,
+      19939,
+      25,
+      2896,
+      500,
+      262,
+      4007,
+      286,
+      262,
+      8265,
+      416,
+      31577,
+      543,
+      12608,
+      389,
+      5292,
+      329,
+      1171,
+      779,
+      13
+    ],
+    "label": "best_practice",
+    "reason": "Define the purpose of the module by specifying which attributes are intended for public use."
+  }
+]

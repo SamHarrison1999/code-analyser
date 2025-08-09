@@ -1,0 +1,3 @@
+annotation,annotation_tokens,confidence,end_token,label,line,reason,start_token,text,tokens
+✅ Best Practice: Use of relative import for importing from the same package,"[26486, 227, 6705, 19939, 25, 5765, 286, 3585, 1330, 329, 33332, 422, 262, 976, 5301]",1.0,8,best_practice,1,Use of relative import for importing from the same package,0,# Copyright (c) Microsoft Corporation.,"[2, 15069, 357, 66, 8, 5413, 10501, 13]"
+✅ Best Practice: Use of __all__ to define the public interface of the module,"[26486, 227, 6705, 19939, 25, 5765, 286, 11593, 439, 834, 284, 8160, 262, 1171, 7071, 286, 262, 8265]",1.0,15,best_practice,2,Use of __all__ to define the public interface of the module,8,# Licensed under the MIT License.,"[2, 49962, 739, 262, 17168, 13789, 13]"

@@ -1,0 +1,4 @@
+annotation,annotation_tokens,confidence,end_token,label,line,reason,start_token,text,tokens
+✅ Best Practice: Importing necessary modules at the beginning of the file,"[26486, 227, 6705, 19939, 25, 17267, 278, 3306, 13103, 379, 262, 3726, 286, 262, 2393]",0.5,8,best_practice,1,Importing necessary modules at the beginning of the file,0,# Copyright (c) Microsoft Corporation.,"[2, 15069, 357, 66, 8, 5413, 10501, 13]"
+✅ Best Practice: Importing specific classes or functions from a module,"[26486, 227, 6705, 19939, 25, 17267, 278, 2176, 6097, 393, 5499, 422, 257, 8265]",0.5,8,best_practice,3,Importing specific classes or functions from a module,8,,[]
+✅ Best Practice: Defining __all__ to specify public API of the module,"[26486, 227, 6705, 19939, 25, 2896, 3191, 11593, 439, 834, 284, 11986, 1171, 7824, 286, 262, 8265]",0.5,8,best_practice,3,Defining __all__ to specify public API of the module,8,,[]

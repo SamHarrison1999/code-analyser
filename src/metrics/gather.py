@@ -3,7 +3,7 @@
 from typing import Dict, Any
 
 from ml.ai_metric_names import gather_ai_metric_names
-from ml.overlay_utils import gather_ai_overlays
+from ml.overlay_gatherer import gather_ai_overlays
 from metrics.ast_metrics.gather import gather_ast_metrics_bundle
 from metrics.bandit_metrics.gather import gather_bandit_metrics_bundle
 from metrics.flake8_metrics.gather import gather_flake8_metrics_bundle

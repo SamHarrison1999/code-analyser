@@ -1,0 +1,2 @@
+annotation,annotation_tokens,confidence,end_token,label,line,reason,start_token,text,tokens
+"✅ Best Practice: Define __all__ to specify the public API of the module, even if it's currently empty.","[26486, 227, 6705, 19939, 25, 2896, 500, 11593, 439, 834, 284, 11986, 262, 1171, 7824, 286, 262, 8265, 11, 772, 611, 340, 338, 3058, 6565, 13]",0.5,7,best_practice,1,"Define __all__ to specify the public API of the module, even if it's currently empty.",0,# the __all__ is generated,"[2, 262, 11593, 439, 834, 318, 7560]"

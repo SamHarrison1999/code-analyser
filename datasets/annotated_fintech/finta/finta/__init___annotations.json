@@ -1,0 +1,43 @@
+[
+  {
+    "line": 1,
+    "text": "from finta.finta import TA",
+    "annotation": "\ud83e\udde0 ML Signal: Importing a specific module from a library indicates usage patterns",
+    "confidence": 1.0,
+    "tokens": [
+      6738,
+      277,
+      600,
+      64,
+      13,
+      69,
+      600,
+      64,
+      1330,
+      21664
+    ],
+    "start_token": 0,
+    "end_token": 10,
+    "annotation_tokens": [
+      8582,
+      100,
+      254,
+      10373,
+      26484,
+      25,
+      17267,
+      278,
+      257,
+      2176,
+      8265,
+      422,
+      257,
+      5888,
+      9217,
+      8748,
+      7572
+    ],
+    "label": "ml_signal",
+    "reason": "Importing a specific module from a library indicates usage patterns"
+  }
+]

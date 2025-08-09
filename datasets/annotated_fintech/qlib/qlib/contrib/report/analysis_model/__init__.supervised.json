@@ -1,0 +1,78 @@
+[
+  {
+    "line": 1,
+    "text": "# Copyright (c) Microsoft Corporation.",
+    "annotation": "\u2705 Best Practice: Use of relative import for importing from the same package",
+    "confidence": 1.0,
+    "tokens": [
+      2,
+      15069,
+      357,
+      66,
+      8,
+      5413,
+      10501,
+      13
+    ],
+    "start_token": 0,
+    "end_token": 8,
+    "annotation_tokens": [
+      26486,
+      227,
+      6705,
+      19939,
+      25,
+      5765,
+      286,
+      3585,
+      1330,
+      329,
+      33332,
+      422,
+      262,
+      976,
+      5301
+    ],
+    "label": "best_practice",
+    "reason": "Use of relative import for importing from the same package"
+  },
+  {
+    "line": 2,
+    "text": "# Licensed under the MIT License.",
+    "annotation": "\u2705 Best Practice: Use of __all__ to define the public interface of the module",
+    "confidence": 1.0,
+    "tokens": [
+      2,
+      49962,
+      739,
+      262,
+      17168,
+      13789,
+      13
+    ],
+    "start_token": 8,
+    "end_token": 15,
+    "annotation_tokens": [
+      26486,
+      227,
+      6705,
+      19939,
+      25,
+      5765,
+      286,
+      11593,
+      439,
+      834,
+      284,
+      8160,
+      262,
+      1171,
+      7071,
+      286,
+      262,
+      8265
+    ],
+    "label": "best_practice",
+    "reason": "Use of __all__ to define the public interface of the module"
+  }
+]

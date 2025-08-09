@@ -1,14 +1,16 @@
+
+import argparse
+import torch
+from torch.utils.data import Dataset
 from transformers import (
-    AutoModelForSequenceClassification,
-    Trainer,
-    TrainingArguments,
+    AutoTokenizer,
     DataCollatorWithPadding,
+    TrainingArguments,
+    Trainer,
 )
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-from torch.utils.data import Dataset
-import torch
-
-from code_analyser.src.ml.dataset_loader import load_local_annotated_dataset
+from ml.model_tf import AnnotationClassifier
+from ml.dataset_loader import load_local_annotated_dataset
 
 
 class LocalFintechDataset(Dataset):
@@ -28,7 +30,8 @@ class LocalFintechDataset(Dataset):
 
 
 def compute_metrics(pred):
-    logits, labels = pred
+    logits = pred.predictions
+    labels = pred.label_ids
     probs = torch.sigmoid(torch.tensor(logits))
     preds = (probs > 0.5).int().numpy()
     labels = labels.astype(int)
@@ -40,34 +43,31 @@ def compute_metrics(pred):
     }
 
 
-def train_on_local_data(
-    output_dir="./checkpoints/local_finetuned",
-    model_name="microsoft/codebert-base",
-    log_dir="./logs/tensorboard/",
-    epochs=3,
-    batch_size=8,
-    lr=2e-5,
-    confidence_threshold=0.7,
-    max_samples=None,
-):
-    entries = load_local_annotated_dataset(
-        tokenizer_name=model_name,
-        confidence_threshold=confidence_threshold,
-        max_samples=max_samples,
+def train_on_local_data(args):
+    entries, _ = load_local_annotated_dataset(
+        code_dir=args.code_dir,
+        annotation_dir=args.annotation_dir,
+        tokenizer_name=args.model_name,
+        confidence_threshold=args.confidence_threshold,
+        max_samples=args.max_samples,
+        stratify=False
     )
     dataset = LocalFintechDataset(entries)
+    print(f"dataset = {dataset}")
 
-    model = AutoModelForSequenceClassification.from_pretrained(
-        model_name, num_labels=3, problem_type="multi_label_classification"
-    )
+    model = AnnotationClassifier(model_name=args.model_name, num_labels=args.num_labels)
+    if args.pretrained_path:
+        state_dict = torch.load(args.pretrained_path, map_location="cpu")
+        model.load_state_dict(state_dict, strict=False)
 
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     training_args = TrainingArguments(
-        output_dir=output_dir,
-        logging_dir=log_dir,
-        evaluation_strategy="epoch",
-        per_device_train_batch_size=batch_size,
-        num_train_epochs=epochs,
-        learning_rate=lr,
+        output_dir=args.output_dir,
+        logging_dir="./logs/tensorboard/",
+        per_device_train_batch_size=args.batch_size,
+        eval_strategy="epoch",
+        num_train_epochs=args.epochs,
+        learning_rate=args.learning_rate,
         save_steps=50,
         save_total_limit=2,
         report_to="tensorboard",
@@ -79,8 +79,26 @@ def train_on_local_data(
         train_dataset=dataset,
         eval_dataset=dataset,
         compute_metrics=compute_metrics,
-        data_collator=DataCollatorWithPadding(tokenizer=model.config._name_or_path),
+        data_collator=DataCollatorWithPadding(tokenizer=tokenizer),
     )
 
     trainer.train()
-    trainer.save_model(output_dir)
+    trainer.save_model(args.output_dir)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--code-dir", default="datasets/github_fintech")
+    parser.add_argument("--annotation-dir", default="datasets/annotated_fintech")
+    parser.add_argument("--output-dir", default="./checkpoints/hf")
+    parser.add_argument("--model-name", default="microsoft/codebert-base")
+    parser.add_argument("--num-labels", type=int, default=3)
+    parser.add_argument("--epochs", type=int, default=3)
+    parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--learning-rate", type=float, default=2e-5)
+    parser.add_argument("--confidence-threshold", type=float, default=0.7)
+    parser.add_argument("--max-samples", type=int, default=None)
+    parser.add_argument("--pretrained-path", type=str, default=None)
+
+    args = parser.parse_args()
+    train_on_local_data(args)

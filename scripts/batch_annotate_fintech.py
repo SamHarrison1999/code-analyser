@@ -1,18 +1,20 @@
 # scripts/batch_annotate_fintech.py
 
+import argparse
+import json
+import logging
 import os
 import sys
-import argparse
-import logging
-from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor
+import time
 import webbrowser
 import zipfile
-import time
-import json
-from huggingface_hub import upload_folder
-from dotenv import load_dotenv
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
+from dotenv import load_dotenv
+from huggingface_hub import upload_folder
+
+# ✅ Environment & sys.path setup
 load_dotenv()
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
@@ -23,7 +25,8 @@ sys.path.insert(0, str(SCRIPT_DIR))
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-from ml.together_ai_annotator import annotate_code_with_together_ai
+# ✅ Imports
+from ml.openai_annotator import annotate_code_with_openai, maybe_backfill_if_mismatch
 from ml.overlay_utils import save_overlay_csv
 from ml.html_dashboard import write_html_dashboard
 
@@ -31,42 +34,43 @@ from ml.html_dashboard import write_html_dashboard
 def annotate_file(filepath: Path, output_dir: Path, args) -> None:
     rel_path = filepath.relative_to(args.input_dir)
     base_name = rel_path.stem
-    output_base = (output_dir / rel_path).with_suffix("")
+    output_base = output_dir / rel_path.with_suffix("")
 
     for attempt in range(args.max_retries):
         try:
             code = filepath.read_text(encoding="utf-8")
-            annotated_code, confidence, annotations = annotate_code_with_together_ai(
+            annotated_code, confidence, annotations = annotate_code_with_openai(
                 code, output_dir=output_base.parent, filename=base_name
             )
 
+            logger.info(f"🧠 Annotations returned: {len(annotations)}")
+
+            output_base.parent.mkdir(parents=True, exist_ok=True)
             output_py_path = output_base.with_suffix(".annotated.py")
-            output_py_path.parent.mkdir(parents=True, exist_ok=True)
+            output_json_path = output_base.with_name(f"{base_name}_annotations.json")
+
+            # Write annotated code
             output_py_path.write_text(annotated_code, encoding="utf-8")
+
+            # ✅ Conditional backfill
+            if args.allow_backfill and output_json_path.exists():
+                maybe_backfill_if_mismatch(output_py_path, output_json_path)
+
             logger.info(f"✅ Annotated: {rel_path} ({confidence:.2f} confidence)")
 
-            if args.export_overlays:
+            if args.export_overlays and annotations:
                 overlay_path = output_base.with_suffix(".overlay.csv")
-                if annotations:
-                    save_overlay_csv(annotations, overlay_path)
-                    logger.info(f"🧠 Overlay saved: {overlay_path}")
-                else:
-                    logger.warning(
-                        f"⚠️ No annotations to export as overlay for: {rel_path}"
-                    )
+                save_overlay_csv(annotations, overlay_path)
+                logger.info(f"🧠 Overlay saved: {overlay_path}")
 
             time.sleep(args.chunk_delay)
             return
 
         except Exception as e:
-            logger.warning(
-                f"🔁 Retry {attempt + 1}/{args.max_retries} for {filepath.name}: {e}"
-            )
+            logger.warning(f"🔁 Retry {attempt + 1}/{args.max_retries} for {filepath.name}: {e}")
             time.sleep(args.retry_delay)
 
-    logger.error(
-        f"❌ Failed to annotate after {args.max_retries} attempts: {filepath.name}"
-    )
+    logger.error(f"❌ Failed to annotate after {args.max_retries} attempts: {filepath.name}")
 
 
 def zip_directory(source_dir: Path, zip_path: Path):
@@ -93,31 +97,32 @@ def upload_to_huggingface(local_dir: Path, repo_id: str, token: str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input-dir", type=str, required=True)
-    parser.add_argument("--output-dir", type=str, required=True)
+    parser.add_argument("--input-dir", required=True, type=str)
+    parser.add_argument("--output-dir", required=True, type=str)
     parser.add_argument("--export-dashboard", action="store_true")
     parser.add_argument("--export-overlays", action="store_true")
     parser.add_argument("--export-arrow", action="store_true")
     parser.add_argument("--export-heatmaps", action="store_true")
     parser.add_argument("--zip-dashboard", action="store_true")
     parser.add_argument("--launch-dashboard", action="store_true")
+    parser.add_argument("--allow-backfill", action="store_true")
     parser.add_argument("--max-workers", type=int, default=4)
     parser.add_argument("--chunk-delay", type=float, default=3.0)
     parser.add_argument("--retry-delay", type=float, default=10.0)
     parser.add_argument("--max-retries", type=int, default=5)
-
     args = parser.parse_args()
+
     args.input_dir = Path(args.input_dir).resolve()
     args.output_dir = Path(args.output_dir).resolve()
 
     logger.info(f"📂 Annotating {args.input_dir}")
     py_files = list(args.input_dir.rglob("*.py"))
+    for f in py_files:
+        logger.info(f" - {f}")
     logger.info(f"🔎 Found {len(py_files)} Python files.")
 
     with ThreadPoolExecutor(max_workers=args.max_workers) as executor:
-        futures = [
-            executor.submit(annotate_file, f, args.output_dir, args) for f in py_files
-        ]
+        futures = [executor.submit(annotate_file, f, args.output_dir, args) for f in py_files]
         for f in futures:
             f.result()
 
@@ -147,34 +152,33 @@ def main():
     # ✅ Export Arrow Dataset
     if args.export_arrow:
         try:
-            from datasets import Dataset
             import pandas as pd
+            from datasets import Dataset
 
-            supervised_files = list(args.output_dir.rglob("*.supervised.json"))
             records = []
-            for file in supervised_files:
+            for file in args.output_dir.rglob("*_annotations.json"):
                 with open(file, encoding="utf-8") as f:
                     samples = json.load(f)
-                for item in samples:
-                    records.append(
-                        {
-                            "file": file.name.replace(".supervised.json", ""),
+                    for item in samples:
+                        records.append({
+                            "file": file.name.replace("_annotations.json", ""),
                             "line": item["line"],
                             "text": item["text"],
                             "tokens": item["tokens"],
                             "start_token": item["start_token"],
                             "end_token": item["end_token"],
-                            "label": item["label"],
-                            "severity": item["severity"],
+                            "label": item.get("label", "unknown"),
+                            "severity": item.get("severity", None),
                             "confidence": item["confidence"],
                             "reason": item["reason"],
-                        }
-                    )
-
-            ds = Dataset.from_pandas(pd.DataFrame(records))
-            arrow_path = args.output_dir / "annotated.arrow"
-            ds.save_to_disk(str(arrow_path))
-            logger.info(f"📦 HuggingFace Arrow dataset saved: {arrow_path}")
+                        })
+            if records:
+                ds = Dataset.from_pandas(pd.DataFrame(records))
+                arrow_path = args.output_dir / "annotated.arrow"
+                ds.save_to_disk(str(arrow_path))
+                logger.info(f"📦 HuggingFace Arrow dataset saved: {arrow_path}")
+            else:
+                logger.warning("⚠️ No valid records to export as Arrow.")
         except ImportError:
             logger.error(
                 "❌ 'datasets' package not installed. Run: pip install datasets"
@@ -183,41 +187,27 @@ def main():
     # ✅ Export Heatmaps
     if args.export_heatmaps:
         heatmap_count = 0
-        supervised_files = list(args.output_dir.rglob("*.supervised.json"))
-        for file in supervised_files:
+        for file in args.output_dir.rglob("*_annotations.json"):
             try:
                 with open(file, encoding="utf-8") as f:
                     samples = json.load(f)
-
                 heatmap = []
                 for item in samples:
-                    tokens = item.get("tokens", [])
-                    for i, token in enumerate(tokens):
-                        heatmap.append(
-                            {
-                                "line": item["line"],
-                                "token": token,
-                                "index": i,
-                                "confidence": (
-                                    item["confidence"]
-                                    if item["start_token"] <= i < item["end_token"]
-                                    else 0.0
-                                ),
-                                "severity": (
-                                    item["severity"]
-                                    if item["start_token"] <= i < item["end_token"]
-                                    else None
-                                ),
-                            }
-                        )
-
+                    for i, token in enumerate(item.get("tokens", [])):
+                        heatmap.append({
+                            "line": item["line"],
+                            "token": token,
+                            "index": i,
+                            "confidence": item["confidence"] if item["start_token"] <= i < item["end_token"] else 0.0,
+                            "severity": item.get("severity", None) if item["start_token"] <= i < item[
+                                "end_token"] else None,
+                        })
                 output_path = file.with_suffix(".heatmap.json")
                 with open(output_path, "w", encoding="utf-8") as f:
                     json.dump(heatmap, f, indent=2)
                 heatmap_count += 1
             except Exception as e:
-                logger.warning(f"⚠️ Failed heatmap export for {file.name}: {e}")
-
+                logger.warning(f"⚠️ Heatmap export failed for {file.name}: {e}")
         logger.info(f"🧠 Token heatmaps exported: {heatmap_count}")
 
     # ✅ HuggingFace Upload (always runs if creds are present)
@@ -226,7 +216,7 @@ def main():
     if hf_token and hf_repo:
         upload_to_huggingface(args.output_dir, hf_repo, hf_token)
     else:
-        logger.warning("⚠️ HuggingFace credentials not found — skipping upload.")
+        logger.warning("⚠️ HuggingFace credentials not set — skipping upload.")
 
 
 if __name__ == "__main__":

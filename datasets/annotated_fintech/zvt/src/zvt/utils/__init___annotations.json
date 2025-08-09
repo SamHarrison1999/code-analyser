@@ -1,0 +1,49 @@
+[
+  {
+    "line": 1,
+    "text": "# the __all__ is generated",
+    "annotation": "\u2705 Best Practice: Define __all__ to specify the public API of the module, even if it's currently empty.",
+    "confidence": 0.5,
+    "tokens": [
+      2,
+      262,
+      11593,
+      439,
+      834,
+      318,
+      7560
+    ],
+    "start_token": 0,
+    "end_token": 7,
+    "annotation_tokens": [
+      26486,
+      227,
+      6705,
+      19939,
+      25,
+      2896,
+      500,
+      11593,
+      439,
+      834,
+      284,
+      11986,
+      262,
+      1171,
+      7824,
+      286,
+      262,
+      8265,
+      11,
+      772,
+      611,
+      340,
+      338,
+      3058,
+      6565,
+      13
+    ],
+    "label": "best_practice",
+    "reason": "Define __all__ to specify the public API of the module, even if it's currently empty."
+  }
+]

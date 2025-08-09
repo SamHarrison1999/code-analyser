@@ -1,0 +1,2 @@
+annotation,annotation_tokens,confidence,end_token,label,line,reason,start_token,text,tokens
+✅ Best Practice: Define the purpose of the module by specifying which attributes are intended for public use.,"[26486, 227, 6705, 19939, 25, 2896, 500, 262, 4007, 286, 262, 8265, 416, 31577, 543, 12608, 389, 5292, 329, 1171, 779, 13]",0.5,13,best_practice,1,Define the purpose of the module by specifying which attributes are intended for public use.,0,# -*- coding: utf-8 -*-,"[2, 532, 9, 12, 19617, 25, 3384, 69, 12, 23, 532, 9, 12]"

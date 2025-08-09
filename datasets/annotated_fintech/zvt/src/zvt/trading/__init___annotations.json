@@ -1,0 +1,53 @@
+[
+  {
+    "line": 1,
+    "text": "# -*- coding: utf-8 -*-",
+    "annotation": "\u2705 Best Practice: Define __all__ to specify the public API of the module, even if currently empty.",
+    "confidence": 0.5,
+    "tokens": [
+      2,
+      532,
+      9,
+      12,
+      19617,
+      25,
+      3384,
+      69,
+      12,
+      23,
+      532,
+      9,
+      12
+    ],
+    "start_token": 0,
+    "end_token": 13,
+    "annotation_tokens": [
+      26486,
+      227,
+      6705,
+      19939,
+      25,
+      2896,
+      500,
+      11593,
+      439,
+      834,
+      284,
+      11986,
+      262,
+      1171,
+      7824,
+      286,
+      262,
+      8265,
+      11,
+      772,
+      611,
+      3058,
+      6565,
+      13
+    ],
+    "label": "best_practice",
+    "reason": "Define __all__ to specify the public API of the module, even if currently empty."
+  }
+]

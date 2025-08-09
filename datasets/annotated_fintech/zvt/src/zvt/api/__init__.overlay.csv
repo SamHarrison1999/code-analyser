@@ -1,0 +1,2 @@
+annotation,annotation_tokens,confidence,end_token,label,line,reason,start_token,text,tokens
+✅ Best Practice: Define __all__ to explicitly declare public symbols for the module.,"[26486, 227, 6705, 19939, 25, 2896, 500, 11593, 439, 834, 284, 11777, 13627, 1171, 14354, 329, 262, 8265, 13]",1.0,13,best_practice,1,Define __all__ to explicitly declare public symbols for the module.,0,# -*- coding: utf-8 -*-,"[2, 532, 9, 12, 19617, 25, 3384, 69, 12, 23, 532, 9, 12]"

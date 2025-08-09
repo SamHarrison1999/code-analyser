@@ -1,0 +1,6 @@
+annotation,annotation_tokens,confidence,end_token,label,line,reason,start_token,text,tokens
+✅ Best Practice: Group imports from the same module together,"[26486, 227, 6705, 19939, 25, 4912, 17944, 422, 262, 976, 8265, 1978]",1.0,6,best_practice,2,Group imports from the same module together,0,from datetime import datetime,"[6738, 4818, 8079, 1330, 4818, 8079]"
+✅ Best Practice: Class should be defined with proper indentation,"[26486, 227, 6705, 19939, 25, 5016, 815, 307, 5447, 351, 1774, 33793, 341]",0.5,6,best_practice,3,Class should be defined with proper indentation,6,,[]
+✅ Best Practice: Type hinting improves code readability and maintainability,"[26486, 227, 6705, 19939, 25, 5994, 9254, 278, 19575, 2438, 1100, 1799, 290, 5529, 1799]",0.5,6,best_practice,5,Type hinting improves code readability and maintainability,6,,[]
+✅ Best Practice: Type hinting improves code readability and maintainability,"[26486, 227, 6705, 19939, 25, 5994, 9254, 278, 19575, 2438, 1100, 1799, 290, 5529, 1799]",0.5,6,best_practice,6,Type hinting improves code readability and maintainability,6,,[]
+✅ Best Practice: Use of __all__ to define public API of the module,"[26486, 227, 6705, 19939, 25, 5765, 286, 11593, 439, 834, 284, 8160, 1171, 7824, 286, 262, 8265]",1.0,6,best_practice,6,Use of __all__ to define public API of the module,6,,[]

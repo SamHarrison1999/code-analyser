@@ -1,0 +1,51 @@
+{
+  "citation": "",
+  "description": "",
+  "features": {
+    "file": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "line": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "text": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "tokens": {
+      "feature": {
+        "dtype": "int64",
+        "_type": "Value"
+      },
+      "_type": "List"
+    },
+    "start_token": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "end_token": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "label": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "severity": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "confidence": {
+      "dtype": "float64",
+      "_type": "Value"
+    },
+    "reason": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": ""
+}

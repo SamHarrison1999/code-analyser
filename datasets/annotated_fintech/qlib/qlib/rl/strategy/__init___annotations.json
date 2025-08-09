@@ -1,0 +1,40 @@
+[
+  {
+    "line": 2,
+    "text": "# Licensed under the MIT License.",
+    "annotation": "\u2705 Best Practice: Use of __all__ to define public interface of the module",
+    "confidence": 0.5,
+    "tokens": [
+      2,
+      49962,
+      739,
+      262,
+      17168,
+      13789,
+      13
+    ],
+    "start_token": 0,
+    "end_token": 7,
+    "annotation_tokens": [
+      26486,
+      227,
+      6705,
+      19939,
+      25,
+      5765,
+      286,
+      11593,
+      439,
+      834,
+      284,
+      8160,
+      1171,
+      7071,
+      286,
+      262,
+      8265
+    ],
+    "label": "best_practice",
+    "reason": "Use of __all__ to define public interface of the module"
+  }
+]

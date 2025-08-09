@@ -1,0 +1,48 @@
+[
+  {
+    "line": 1,
+    "text": "__version__ = \"0.0.1\"",
+    "annotation": "\ud83e\udde0 ML Signal: Versioning information can be used to track changes and compatibility in software projects.",
+    "confidence": 1.0,
+    "tokens": [
+      834,
+      9641,
+      834,
+      796,
+      366,
+      15,
+      13,
+      15,
+      13,
+      16,
+      1
+    ],
+    "start_token": 0,
+    "end_token": 11,
+    "annotation_tokens": [
+      8582,
+      100,
+      254,
+      10373,
+      26484,
+      25,
+      10628,
+      278,
+      1321,
+      460,
+      307,
+      973,
+      284,
+      2610,
+      2458,
+      290,
+      17764,
+      287,
+      3788,
+      4493,
+      13
+    ],
+    "label": "ml_signal",
+    "reason": "Versioning information can be used to track changes and compatibility in software projects."
+  }
+]

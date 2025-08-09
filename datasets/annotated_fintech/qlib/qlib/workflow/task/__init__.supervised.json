@@ -1,0 +1,42 @@
+[
+  {
+    "line": 1,
+    "text": "# Copyright (c) Microsoft Corporation.",
+    "annotation": "\u2705 Best Practice: Use of a docstring to describe the module's purpose and workflow",
+    "confidence": 0.5,
+    "tokens": [
+      2,
+      15069,
+      357,
+      66,
+      8,
+      5413,
+      10501,
+      13
+    ],
+    "start_token": 0,
+    "end_token": 8,
+    "annotation_tokens": [
+      26486,
+      227,
+      6705,
+      19939,
+      25,
+      5765,
+      286,
+      257,
+      2205,
+      8841,
+      284,
+      6901,
+      262,
+      8265,
+      338,
+      4007,
+      290,
+      30798
+    ],
+    "label": "best_practice",
+    "reason": "Use of a docstring to describe the module's purpose and workflow"
+  }
+]

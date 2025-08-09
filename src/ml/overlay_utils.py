@@ -1,47 +1,22 @@
 # File: src/ml/overlay_utils.py
-from pathlib import Path
-from typing import Union, Tuple, Dict, List
-from metrics.metric_types import AIAnnotationOverlay
-from ml.ai_cache import load_cached_annotation
+
 import csv
+import json
+from pathlib import Path
+from typing import List, Dict, Any
 
 
-def gather_ai_overlays(
-    file_path: Union[str, Path], min_confidence: float = 0.5
-) -> Tuple[Dict[str, Union[int, float]], List[AIAnnotationOverlay]]:
-    data = load_cached_annotation(file_path)
-    if not data:
-        return {}, []
+def save_overlay_csv(annotations: List[Dict[str, Any]], csv_path: Path) -> None:
+    """
+    Save structured annotation data to CSV format.
 
-    overlays = data.get("overlays", [])
-    filtered = [
-        o
-        for o in overlays
-        if isinstance(o, dict) and o.get("confidence", 0) >= min_confidence
-    ]
-    grouped: Dict[str, List[float]] = {}
-    for overlay in filtered:
-        label = overlay.get("type", "").lower()
-        conf = overlay.get("confidence", 0)
-        grouped.setdefault(label, []).append(conf)
-
-    result = {}
-    for label, values in grouped.items():
-        result[f"{label}_count"] = len(values)
-        result[f"{label}_avg_conf"] = round(sum(values) / len(values), 4)
-
-    result["ai_overlay_total"] = len(filtered)
-
-    overlay_objs = [
-        AIAnnotationOverlay(**o) for o in filtered if "line" in o and "type" in o
-    ]
-
-    return result, overlay_objs
-
-
-def save_overlay_csv(annotations: List[dict], csv_path: Path):
+    Args:
+        annotations (List[Dict]): List of AI overlay annotation dictionaries.
+        csv_path (Path): Path to save the CSV file.
+    """
     if not annotations:
         return
+
     # 🔧 Automatically determine all field names, including "text"
     fieldnames = sorted(set().union(*(a.keys() for a in annotations)))
 
@@ -49,3 +24,19 @@ def save_overlay_csv(annotations: List[dict], csv_path: Path):
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(annotations)
+
+
+def save_overlay_heatmap(heatmap: List[Dict[str, Any]], heatmap_path: Path) -> None:
+    """
+    Save token-level confidence/severity overlay heatmap to a .json file.
+
+    Args:
+        heatmap (List[Dict]): List of heatmap entries with token metadata.
+        heatmap_path (Path): Path to save the .json file.
+    """
+    if not heatmap:
+        return
+
+    heatmap_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(heatmap_path, "w", encoding="utf-8") as f:
+        json.dump(heatmap, f, indent=2, ensure_ascii=False)

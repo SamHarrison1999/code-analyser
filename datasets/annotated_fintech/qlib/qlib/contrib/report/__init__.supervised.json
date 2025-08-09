@@ -1,0 +1,38 @@
+[
+  {
+    "line": 1,
+    "text": "# Copyright (c) Microsoft Corporation.",
+    "annotation": "\ud83e\udde0 ML Signal: List of graph names indicating specific analysis types",
+    "confidence": 0.5,
+    "tokens": [
+      2,
+      15069,
+      357,
+      66,
+      8,
+      5413,
+      10501,
+      13
+    ],
+    "start_token": 0,
+    "end_token": 8,
+    "annotation_tokens": [
+      8582,
+      100,
+      254,
+      10373,
+      26484,
+      25,
+      7343,
+      286,
+      4823,
+      3891,
+      12739,
+      2176,
+      3781,
+      3858
+    ],
+    "label": "ml_signal",
+    "reason": "List of graph names indicating specific analysis types"
+  }
+]

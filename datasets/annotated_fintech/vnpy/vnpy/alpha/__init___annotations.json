@@ -1,0 +1,32 @@
+[
+  {
+    "line": 6,
+    "text": "",
+    "annotation": "\u2705 Best Practice: Use of __all__ to define public API of the module",
+    "confidence": 0.5,
+    "tokens": [],
+    "start_token": 0,
+    "end_token": 0,
+    "annotation_tokens": [
+      26486,
+      227,
+      6705,
+      19939,
+      25,
+      5765,
+      286,
+      11593,
+      439,
+      834,
+      284,
+      8160,
+      1171,
+      7824,
+      286,
+      262,
+      8265
+    ],
+    "label": "best_practice",
+    "reason": "Use of __all__ to define public API of the module"
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "line": 2,
+    "text": "# Licensed under the MIT License.",
+    "annotation": "\u2705 Best Practice: Explicitly defining __all__ helps to control what is exported when the module is imported using 'from module import *'.",
+    "confidence": 1.0,
+    "tokens": [
+      2,
+      49962,
+      739,
+      262,
+      17168,
+      13789,
+      13
+    ],
+    "start_token": 0,
+    "end_token": 7,
+    "annotation_tokens": [
+      26486,
+      227,
+      6705,
+      19939,
+      25,
+      11884,
+      306,
+      16215,
+      11593,
+      439,
+      834,
+      5419,
+      284,
+      1630,
+      644,
+      318,
+      29050,
+      618,
+      262,
+      8265,
+      318,
+      17392,
+      1262,
+      705,
+      6738,
+      8265,
+      1330,
+      1635,
+      4458
+    ],
+    "label": "best_practice",
+    "reason": "Explicitly defining __all__ helps to control what is exported when the module is imported using 'from module import *'."
+  }
+]
