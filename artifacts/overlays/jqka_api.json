@@ -1,0 +1,14 @@
+{
+  "filename": "jqka_api",
+  "probs": {
+    "sast_risk": 0.40869998931884766,
+    "ml_signal": 0.48936688899993896,
+    "best_practice": 0.5977425575256348
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

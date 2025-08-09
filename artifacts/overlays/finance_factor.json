@@ -1,0 +1,14 @@
+{
+  "filename": "finance_factor",
+  "probs": {
+    "sast_risk": 0.40334126353263855,
+    "ml_signal": 0.49236708879470825,
+    "best_practice": 0.5934369564056396
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

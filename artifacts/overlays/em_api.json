@@ -1,0 +1,14 @@
+{
+  "filename": "em_api",
+  "probs": {
+    "sast_risk": 0.40489766001701355,
+    "ml_signal": 0.5016403794288635,
+    "best_practice": 0.5934934020042419
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

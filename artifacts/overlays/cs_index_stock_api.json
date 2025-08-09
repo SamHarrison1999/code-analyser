@@ -1,0 +1,14 @@
+{
+  "filename": "cs_index_stock_api",
+  "probs": {
+    "sast_risk": 0.40333259105682373,
+    "ml_signal": 0.5011259317398071,
+    "best_practice": 0.5935434699058533
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

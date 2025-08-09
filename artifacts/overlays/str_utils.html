@@ -1,0 +1,33 @@
+<!doctype html><meta charset='utf-8'><title>str_utils – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: str_utils</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.39</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+
+
+def to_snake_str(input: str) -&gt; str:
+    parts = []
+    part = ""
+    for c in input:
+        if c.isupper() or c.isdigit():
+            if part:
+                parts.append(part)
+            part = c.lower()
+        else:
+            part = part + c
+
+    parts.append(part)
+
+    if len(parts) &gt; 1:
+        return "_".join(parts)
+    elif parts:
+        return parts[0]
+
+
+def to_camel_str(input: str) -&gt; str:
+    parts = input.split("_")
+    domain_name = ""
+    for part in parts:
+        domain_name = domain_name + part.capitalize()
+    return domain_name
+
+
+# the __all__ is generated
+__all__ = ["to_snake_str", "to_camel_str"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

@@ -1,0 +1,64 @@
+<!doctype html><meta charset='utf-8'><title>typehint – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: typehint</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+"""Commonly used types."""
+
+import sys
+from typing import Union
+from pathlib import Path
+
+__all__ = ["Literal", "TypedDict", "final"]
+
+if sys.version_info &gt;= (3, 8):
+    from typing import Literal, TypedDict, final  # type: ignore  # pylint: disable=no-name-in-module
+else:
+    from typing_extensions import Literal, TypedDict, final
+
+
+class InstDictConf(TypedDict):
+    """
+    InstDictConf  is a Dict-based config to describe an instance
+
+        case 1)
+        {
+            'class': 'ClassName',
+            'kwargs': dict, #  It is optional. {} will be used if not given
+            'model_path': path, # It is optional if module is given in the class
+        }
+        case 2)
+        {
+            'class': &lt;The class it self&gt;,
+            'kwargs': dict, #  It is optional. {} will be used if not given
+        }
+    """
+
+    # class: str  # because class is a keyword of Python. We have to comment it
+    kwargs: dict  # It is optional. {} will be used if not given
+    module_path: str  # It is optional if module is given in the class
+
+
+InstConf = Union[InstDictConf, str, object, Path]
+"""
+InstConf is a type to describe an instance; it will be passed into init_instance_by_config for Qlib
+
+    config : Union[str, dict, object, Path]
+
+        InstDictConf example.
+            please refer to the docs of InstDictConf
+
+        str example.
+            1) specify a pickle object
+                - path like 'file:///&lt;path to pickle file&gt;/obj.pkl'
+            2) specify a class name
+                - "ClassName":  getattr(module, "ClassName")() will be used.
+            3) specify module path with class name
+                - "a.b.c.ClassName" getattr(&lt;a.b.c.module&gt;, "ClassName")() will be used.
+
+        object example:
+            instance of accept_types
+
+        Path example:
+            specify a pickle object
+                - it will be treated like 'file:///&lt;path to pickle file&gt;/obj.pkl'
+"""
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

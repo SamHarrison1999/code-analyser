@@ -1,0 +1,14 @@
+{
+  "filename": "test_dividend_financing",
+  "probs": {
+    "sast_risk": 0.39965537190437317,
+    "ml_signal": 0.4979599118232727,
+    "best_practice": 0.5917606353759766
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

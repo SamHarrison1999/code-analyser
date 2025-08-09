@@ -1,0 +1,14 @@
+{
+  "filename": "zen_factor",
+  "probs": {
+    "sast_risk": 0.39957907795906067,
+    "ml_signal": 0.49972859025001526,
+    "best_practice": 0.5925496220588684
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,22 @@
+<!doctype html><meta charset='utf-8'><title>app – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: app</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.39</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.49</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.58</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>from abc import ABC
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from .engine import BaseEngine
+
+
+class BaseApp(ABC):
+    """
+    Abstract class for app.
+    """
+
+    app_name: str                       # Unique name used for creating engine and widget
+    app_module: str                     # App module string used in import_module
+    app_path: Path                      # Absolute path of app folder
+    display_name: str                   # Name for display on the menu.
+    engine_class: type["BaseEngine"]    # App engine class
+    widget_name: str                    # Class name of app widget
+    icon_name: str                      # Icon file name of app widget
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

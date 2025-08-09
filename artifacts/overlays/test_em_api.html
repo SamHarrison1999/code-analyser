@@ -1,0 +1,60 @@
+<!doctype html><meta charset='utf-8'><title>test_em_api – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: test_em_api</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+from zvt.contract import IntervalLevel, AdjustType
+from zvt.recorders.em import em_api
+
+import requests
+
+
+def test_get_kdata():
+    # 上证A股
+    session = requests.Session()
+    df = em_api.get_kdata(
+        session=session,
+        entity_id="stock_sh_601318",
+        level=IntervalLevel.LEVEL_1DAY,
+        adjust_type=AdjustType.qfq,
+        limit=5,
+    )
+    print(df)
+    df = em_api.get_kdata(
+        session=session,
+        entity_id="stock_sh_601318",
+        level=IntervalLevel.LEVEL_1DAY,
+        adjust_type=AdjustType.hfq,
+        limit=5,
+    )
+    print(df)
+    df = em_api.get_kdata(
+        session=session,
+        entity_id="stock_sh_601318",
+        level=IntervalLevel.LEVEL_1DAY,
+        adjust_type=AdjustType.bfq,
+        limit=5,
+    )
+    print(df)
+    # 深圳A股
+    df = em_api.get_kdata(
+        session=session,
+        entity_id="stock_sz_000338",
+        level=IntervalLevel.LEVEL_1DAY,
+        adjust_type=AdjustType.qfq,
+        limit=5,
+    )
+    print(df)
+    df = em_api.get_kdata(
+        session=session,
+        entity_id="stock_sz_000338",
+        level=IntervalLevel.LEVEL_1DAY,
+        adjust_type=AdjustType.hfq,
+        limit=5,
+    )
+    print(df)
+    df = em_api.get_kdata(
+        session=session,
+        entity_id="stock_sz_000338",
+        level=IntervalLevel.LEVEL_1DAY,
+        adjust_type=AdjustType.bfq,
+        limit=5,
+    )
+    print(df)
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

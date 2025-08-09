@@ -1,0 +1,92 @@
+<!doctype html><meta charset='utf-8'><title>user – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: user</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.39</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+# pylint: skip-file
+# flake8: noqa
+
+import logging
+
+from ...log import get_module_logger
+from ..evaluate import risk_analysis
+from ...data import D
+
+
+class User:
+    def __init__(self, account, strategy, model, verbose=False):
+        """
+        A user in online system, which contains account, strategy and model three module.
+            Parameter
+                account : Account()
+                strategy :
+                    a strategy instance
+                model :
+                    a model instance
+                report_save_path : string
+                    the path to save report. Will not save report if None
+                verbose : bool
+                    Whether to print the info during the process
+        """
+        self.logger = get_module_logger("User", level=logging.INFO)
+        self.account = account
+        self.strategy = strategy
+        self.model = model
+        self.verbose = verbose
+
+    def init_state(self, date):
+        """
+        init state when each trading date begin
+            Parameter
+                date : pd.Timestamp
+        """
+        self.account.init_state(today=date)
+        self.strategy.init_state(
+            trade_date=date, model=self.model, account=self.account
+        )
+        return
+
+    def get_latest_trading_date(self):
+        """
+        return the latest trading date for user {user_id}
+            Parameter
+                user_id : string
+            :return
+                date : string (e.g '2018-10-08')
+        """
+        if not self.account.last_trade_date:
+            return None
+        return str(self.account.last_trade_date.date())
+
+    def showReport(self, benchmark="SH000905"):
+        """
+        show the newly report (mean, std, information_ratio, annualized_return)
+            Parameter
+                benchmark : string
+                    bench that to be compared, 'SH000905' for csi500
+        """
+        bench = D.features([benchmark], ["$change"], disk_cache=True).loc[
+            benchmark, "$change"
+        ]
+        portfolio_metrics = (
+            self.account.portfolio_metrics.generate_portfolio_metrics_dataframe()
+        )
+        portfolio_metrics["bench"] = bench
+        analysis_result = {
+            "pred": {},
+            "excess_return_without_cost": {},
+            "excess_return_with_cost": {},
+        }
+        r = (portfolio_metrics["return"] - portfolio_metrics["bench"]).dropna()
+        analysis_result["excess_return_without_cost"][0] = risk_analysis(r)
+        r = (
+            portfolio_metrics["return"]
+            - portfolio_metrics["bench"]
+            - portfolio_metrics["cost"]
+        ).dropna()
+        analysis_result["excess_return_with_cost"][0] = risk_analysis(r)
+        self.logger.info("Result of porfolio:")
+        self.logger.info("excess_return_without_cost:")
+        self.logger.info(analysis_result["excess_return_without_cost"][0])
+        self.logger.info("excess_return_with_cost:")
+        self.logger.info(analysis_result["excess_return_with_cost"][0])
+        return portfolio_metrics
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

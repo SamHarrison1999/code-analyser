@@ -1,0 +1,14 @@
+{
+  "filename": "pd_utils",
+  "probs": {
+    "sast_risk": 0.40120625495910645,
+    "ml_signal": 0.502776563167572,
+    "best_practice": 0.5895160436630249
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

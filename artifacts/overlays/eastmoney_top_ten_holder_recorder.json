@@ -1,0 +1,14 @@
+{
+  "filename": "eastmoney_top_ten_holder_recorder",
+  "probs": {
+    "sast_risk": 0.39929595589637756,
+    "ml_signal": 0.49856236577033997,
+    "best_practice": 0.588002622127533
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

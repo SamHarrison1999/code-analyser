@@ -1,0 +1,14 @@
+{
+  "filename": "block_meta",
+  "probs": {
+    "sast_risk": 0.40710633993148804,
+    "ml_signal": 0.4970880150794983,
+    "best_practice": 0.5914199948310852
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

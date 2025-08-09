@@ -1,0 +1,14 @@
+{
+  "filename": "task_manager_rolling",
+  "probs": {
+    "sast_risk": 0.4079911410808563,
+    "ml_signal": 0.4992857575416565,
+    "best_practice": 0.5921749472618103
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

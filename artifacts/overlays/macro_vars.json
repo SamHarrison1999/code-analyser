@@ -1,0 +1,14 @@
+{
+  "filename": "macro_vars",
+  "probs": {
+    "sast_risk": 0.41166985034942627,
+    "ml_signal": 0.4954342246055603,
+    "best_practice": 0.5854287147521973
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

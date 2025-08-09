@@ -1,0 +1,14 @@
+{
+  "filename": "test_general_nn",
+  "probs": {
+    "sast_risk": 0.38789427280426025,
+    "ml_signal": 0.49568289518356323,
+    "best_practice": 0.584086537361145
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

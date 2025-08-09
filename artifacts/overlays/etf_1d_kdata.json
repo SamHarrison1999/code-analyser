@@ -1,0 +1,14 @@
+{
+  "filename": "etf_1d_kdata",
+  "probs": {
+    "sast_risk": 0.407716304063797,
+    "ml_signal": 0.4899784326553345,
+    "best_practice": 0.5947336554527283
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

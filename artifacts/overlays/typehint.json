@@ -1,0 +1,14 @@
+{
+  "filename": "typehint",
+  "probs": {
+    "sast_risk": 0.39662089943885803,
+    "ml_signal": 0.49594199657440186,
+    "best_practice": 0.5901371836662292
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

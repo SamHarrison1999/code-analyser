@@ -1,0 +1,14 @@
+{
+  "filename": "em_kdata_recorder",
+  "probs": {
+    "sast_risk": 0.40104520320892334,
+    "ml_signal": 0.4986015558242798,
+    "best_practice": 0.59337317943573
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

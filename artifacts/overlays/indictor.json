@@ -1,0 +1,14 @@
+{
+  "filename": "indictor",
+  "probs": {
+    "sast_risk": 0.40233439207077026,
+    "ml_signal": 0.4972011148929596,
+    "best_practice": 0.581261932849884
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

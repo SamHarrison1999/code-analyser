@@ -1,0 +1,59 @@
+<!doctype html><meta charset='utf-8'><title>task – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: task</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+from qlib.data.dataset import Dataset
+from ...utils import init_instance_by_config
+
+
+class MetaTask:
+    """
+    A single meta-task, a meta-dataset contains a list of them.
+    It serves as a component as in MetaDatasetDS
+
+    The data processing is different
+
+    - the processed input may be different between training and testing
+
+        - When training, the X, y, X_test, y_test in training tasks are necessary (# PROC_MODE_FULL #)
+          but not necessary in test tasks. (# PROC_MODE_TEST #)
+        - When the meta model can be transferred into other dataset, only meta_info is necessary  (# PROC_MODE_TRANSFER #)
+    """
+
+    PROC_MODE_FULL = "full"
+    PROC_MODE_TEST = "test"
+    PROC_MODE_TRANSFER = "transfer"
+
+    def __init__(self, task: dict, meta_info: object, mode: str = PROC_MODE_FULL):
+        """
+        The `__init__` func is responsible for
+
+        - store the task
+        - store the origin input data for
+        - process the input data for meta data
+
+        Parameters
+        ----------
+        task : dict
+            the task to be enhanced by meta model
+
+        meta_info : object
+            the input for meta model
+        """
+        self.task = task
+        self.meta_info = (
+            meta_info  # the original meta input information, it will be processed later
+        )
+        self.mode = mode
+
+    def get_dataset(self) -&gt; Dataset:
+        return init_instance_by_config(self.task["dataset"], accept_types=Dataset)
+
+    def get_meta_input(self) -&gt; object:
+        """
+        Return the **processed** meta_info
+        """
+        return self.meta_info
+
+    def __repr__(self):
+        return f"MetaTask(task={self.task}, meta_info={self.meta_info})"
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

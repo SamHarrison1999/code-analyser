@@ -1,0 +1,14 @@
+{
+  "filename": "factor_models",
+  "probs": {
+    "sast_risk": 0.40417078137397766,
+    "ml_signal": 0.4981287717819214,
+    "best_practice": 0.5923953652381897
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

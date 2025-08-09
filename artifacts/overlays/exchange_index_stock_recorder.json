@@ -1,0 +1,14 @@
+{
+  "filename": "exchange_index_stock_recorder",
+  "probs": {
+    "sast_risk": 0.3936266303062439,
+    "ml_signal": 0.5003917813301086,
+    "best_practice": 0.5863229632377625
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

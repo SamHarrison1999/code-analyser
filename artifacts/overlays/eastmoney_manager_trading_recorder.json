@@ -1,0 +1,14 @@
+{
+  "filename": "eastmoney_manager_trading_recorder",
+  "probs": {
+    "sast_risk": 0.3964533805847168,
+    "ml_signal": 0.499619722366333,
+    "best_practice": 0.5857523083686829
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

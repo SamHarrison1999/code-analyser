@@ -1,0 +1,14 @@
+{
+  "filename": "simulator_qlib",
+  "probs": {
+    "sast_risk": 0.3993067741394043,
+    "ml_signal": 0.49903804063796997,
+    "best_practice": 0.5932726860046387
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,14 @@
+{
+  "filename": "callbacks",
+  "probs": {
+    "sast_risk": 0.40353018045425415,
+    "ml_signal": 0.4942013919353485,
+    "best_practice": 0.5927659273147583
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

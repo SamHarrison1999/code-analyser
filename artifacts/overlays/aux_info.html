@@ -1,0 +1,44 @@
+<!doctype html><meta charset='utf-8'><title>aux_info – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: aux_info</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Generic, Optional, TypeVar
+
+from qlib.typehint import final
+
+from .simulator import StateType
+
+if TYPE_CHECKING:
+    from .utils.env_wrapper import EnvWrapper
+
+
+__all__ = ["AuxiliaryInfoCollector"]
+
+AuxInfoType = TypeVar("AuxInfoType")
+
+
+class AuxiliaryInfoCollector(Generic[StateType, AuxInfoType]):
+    """Override this class to collect customized auxiliary information from environment."""
+
+    env: Optional[EnvWrapper] = None
+
+    @final
+    def __call__(self, simulator_state: StateType) -&gt; AuxInfoType:
+        return self.collect(simulator_state)
+
+    def collect(self, simulator_state: StateType) -&gt; AuxInfoType:
+        """Override this for customized auxiliary info.
+        Usually useful in Multi-agent RL.
+
+        Parameters
+        ----------
+        simulator_state
+            Retrieved with ``simulator.get_state()``.
+
+        Returns
+        -------
+        Auxiliary information.
+        """
+        raise NotImplementedError("collect is not implemented!")
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

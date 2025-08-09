@@ -1,0 +1,14 @@
+{
+  "filename": "ensemble",
+  "probs": {
+    "sast_risk": 0.4020490050315857,
+    "ml_signal": 0.4982067048549652,
+    "best_practice": 0.5888540744781494
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

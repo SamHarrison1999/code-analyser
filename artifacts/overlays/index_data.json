@@ -1,0 +1,14 @@
+{
+  "filename": "index_data",
+  "probs": {
+    "sast_risk": 0.4041725993156433,
+    "ml_signal": 0.49947643280029297,
+    "best_practice": 0.5904774069786072
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,19 @@
+<!doctype html><meta charset='utf-8'><title>stock_1d_zen_factor – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: stock_1d_zen_factor</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.41</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.49</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+from sqlalchemy.ext.declarative import declarative_base
+
+from zvt.contract.register import register_schema
+from zvt.factors.zen.domain.common import ZenFactorCommon
+
+Stock1dZenFactorBase = declarative_base()
+
+
+class Stock1dZenFactor(Stock1dZenFactorBase, ZenFactorCommon):
+    __tablename__ = "stock_1d_zen_factor"
+
+
+register_schema(providers=["zvt"], db_name="stock_1d_zen_factor", schema_base=Stock1dZenFactorBase, entity_type="stock")
+
+
+# the __all__ is generated
+__all__ = ["Stock1dZenFactor"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

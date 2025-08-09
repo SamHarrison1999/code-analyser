@@ -1,0 +1,14 @@
+{
+  "filename": "test_holder",
+  "probs": {
+    "sast_risk": 0.40179774165153503,
+    "ml_signal": 0.5024867653846741,
+    "best_practice": 0.5915466547012329
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,14 @@
+{
+  "filename": "pytorch_localformer",
+  "probs": {
+    "sast_risk": 0.3998778760433197,
+    "ml_signal": 0.4960537254810333,
+    "best_practice": 0.5903873443603516
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

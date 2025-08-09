@@ -1,0 +1,14 @@
+{
+  "filename": "test_unittest",
+  "probs": {
+    "sast_risk": 0.3923398554325104,
+    "ml_signal": 0.4987916350364685,
+    "best_practice": 0.5938932299613953
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

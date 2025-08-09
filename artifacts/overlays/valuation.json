@@ -1,0 +1,14 @@
+{
+  "filename": "valuation",
+  "probs": {
+    "sast_risk": 0.40238913893699646,
+    "ml_signal": 0.4946010410785675,
+    "best_practice": 0.5917519927024841
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

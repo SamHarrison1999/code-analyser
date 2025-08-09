@@ -1,0 +1,14 @@
+{
+  "filename": "caixinnews",
+  "probs": {
+    "sast_risk": 0.40541818737983704,
+    "ml_signal": 0.49647602438926697,
+    "best_practice": 0.5937647223472595
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

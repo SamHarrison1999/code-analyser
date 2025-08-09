@@ -1,0 +1,20 @@
+<!doctype html><meta charset='utf-8'><title>data_type – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: data_type</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.39</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.49</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+
+
+class Bean(object):
+    def __init__(self) -&gt; None:
+        super().__init__()
+        self.__dict__
+
+    def dict(self):
+        return self.__dict__
+
+    def from_dct(self, dct: dict):
+        if dct:
+            for k in dct:
+                self.__dict__[k] = dct[k]
+
+
+# the __all__ is generated
+__all__ = ["Bean"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

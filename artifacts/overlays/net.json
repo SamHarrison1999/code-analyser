@@ -1,0 +1,14 @@
+{
+  "filename": "net",
+  "probs": {
+    "sast_risk": 0.4048141539096832,
+    "ml_signal": 0.5034772157669067,
+    "best_practice": 0.5918264389038086
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

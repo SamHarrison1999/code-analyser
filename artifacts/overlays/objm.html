@@ -1,0 +1,134 @@
+<!doctype html><meta charset='utf-8'><title>objm – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: objm</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.39</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+import os
+import pickle
+import tempfile
+from pathlib import Path
+
+from qlib.config import C
+
+
+class ObjManager:
+    def save_obj(self, obj: object, name: str):
+        """
+        save obj as name
+
+        Parameters
+        ----------
+        obj : object
+            object to be saved
+        name : str
+            name of the object
+        """
+        raise NotImplementedError(f"Please implement `save_obj`")
+
+    def save_objs(self, obj_name_l):
+        """
+        save objects
+
+        Parameters
+        ----------
+        obj_name_l : list of &lt;obj, name&gt;
+        """
+        raise NotImplementedError(f"Please implement the `save_objs` method")
+
+    def load_obj(self, name: str) -&gt; object:
+        """
+        load object by name
+
+        Parameters
+        ----------
+        name : str
+            the name of the object
+
+        Returns
+        -------
+        object:
+            loaded object
+        """
+        raise NotImplementedError(f"Please implement the `load_obj` method")
+
+    def exists(self, name: str) -&gt; bool:
+        """
+        if the object named `name` exists
+
+        Parameters
+        ----------
+        name : str
+            name of the objecT
+
+        Returns
+        -------
+        bool:
+            If the object exists
+        """
+        raise NotImplementedError(f"Please implement the `exists` method")
+
+    def list(self) -&gt; list:
+        """
+        list the objects
+
+        Returns
+        -------
+        list:
+            the list of returned objects
+        """
+        raise NotImplementedError(f"Please implement the `list` method")
+
+    def remove(self, fname=None):
+        """remove.
+
+        Parameters
+        ----------
+        fname :
+            if file name is provided. specific file is removed
+            otherwise, The all the objects will be removed.
+        """
+        raise NotImplementedError(f"Please implement the `remove` method")
+
+
+class FileManager(ObjManager):
+    """
+    Use file system to manage objects
+    """
+
+    def __init__(self, path=None):
+        if path is None:
+            self.path = Path(self.create_path())
+        else:
+            self.path = Path(path).resolve()
+
+    def create_path(self) -&gt; str:
+        try:
+            return tempfile.mkdtemp(prefix=str(C["file_manager_path"]) + os.sep)
+        except AttributeError as attribute_e:
+            raise NotImplementedError(
+                f"If path is not given, the `create_path` function should be implemented"
+            ) from attribute_e
+
+    def save_obj(self, obj, name):
+        with (self.path / name).open("wb") as f:
+            pickle.dump(obj, f, protocol=C.dump_protocol_version)
+
+    def save_objs(self, obj_name_l):
+        for obj, name in obj_name_l:
+            self.save_obj(obj, name)
+
+    def load_obj(self, name):
+        with (self.path / name).open("rb") as f:
+            return pickle.load(f)
+
+    def exists(self, name):
+        return (self.path / name).exists()
+
+    def list(self):
+        return list(self.path.iterdir())
+
+    def remove(self, fname=None):
+        if fname is None:
+            for fp in self.path.glob("*"):
+                fp.unlink()
+            self.path.rmdir()
+        else:
+            (self.path / fname).unlink()
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

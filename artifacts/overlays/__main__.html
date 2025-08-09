@@ -1,0 +1,17 @@
+<!doctype html><meta charset='utf-8'><title>__main__ – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: __main__</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>import fire
+from qlib import auto_init
+from qlib.contrib.rolling.base import Rolling
+from qlib.utils.mod import find_all_classes
+
+if __name__ == "__main__":
+    sub_commands = {}
+    for cls in find_all_classes("qlib.contrib.rolling", Rolling):
+        sub_commands[cls.__module__.split(".")[-1]] = cls
+    # The sub_commands will be like
+    # {'base': &lt;class 'qlib.contrib.rolling.base.Rolling'&gt;, ...}
+    # So the you can run it with commands like command below
+    # - `python -m qlib.contrib.rolling base --conf_path &lt;path to the yaml&gt; run`
+    # - base can be replace with other module names
+    auto_init()
+    fire.Fire(sub_commands)
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

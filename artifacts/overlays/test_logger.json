@@ -1,0 +1,14 @@
+{
+  "filename": "test_logger",
+  "probs": {
+    "sast_risk": 0.4046720862388611,
+    "ml_signal": 0.49682900309562683,
+    "best_practice": 0.5947616100311279
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

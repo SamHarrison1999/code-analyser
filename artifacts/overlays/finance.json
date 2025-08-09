@@ -1,0 +1,14 @@
+{
+  "filename": "finance",
+  "probs": {
+    "sast_risk": 0.39306730031967163,
+    "ml_signal": 0.4958135485649109,
+    "best_practice": 0.591116726398468
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,14 @@
+{
+  "filename": "test_china_stock_list_recorder",
+  "probs": {
+    "sast_risk": 0.39301854372024536,
+    "ml_signal": 0.4926002621650696,
+    "best_practice": 0.5823401212692261
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

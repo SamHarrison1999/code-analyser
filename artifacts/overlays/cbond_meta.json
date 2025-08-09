@@ -1,0 +1,14 @@
+{
+  "filename": "cbond_meta",
+  "probs": {
+    "sast_risk": 0.40594932436943054,
+    "ml_signal": 0.49395671486854553,
+    "best_practice": 0.5890979766845703
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

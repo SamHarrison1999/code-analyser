@@ -1,0 +1,15 @@
+{
+  "model_type": "roberta",
+  "num_labels": 3,
+  "id2label": {
+    "0": "sast_risk",
+    "1": "ml_signal",
+    "2": "best_practice"
+  },
+  "label2id": {
+    "sast_risk": 0,
+    "ml_signal": 1,
+    "best_practice": 2
+  },
+  "problem_type": "multi_label_classification"
+}

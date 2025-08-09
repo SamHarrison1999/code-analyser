@@ -1,0 +1,14 @@
+{
+  "filename": "demo_script",
+  "probs": {
+    "sast_risk": 0.40559443831443787,
+    "ml_signal": 0.49069225788116455,
+    "best_practice": 0.58289635181427
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

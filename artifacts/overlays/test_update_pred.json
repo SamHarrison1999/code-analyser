@@ -1,0 +1,14 @@
+{
+  "filename": "test_update_pred",
+  "probs": {
+    "sast_risk": 0.3974926173686981,
+    "ml_signal": 0.49992597103118896,
+    "best_practice": 0.5940804481506348
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

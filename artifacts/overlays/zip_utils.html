@@ -1,0 +1,46 @@
+<!doctype html><meta charset='utf-8'><title>zip_utils – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: zip_utils</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+
+import datetime
+import os
+import pathlib
+import zipfile
+
+
+def zip_dir(src_dir, dst_dir=None, zip_file_name=None):
+    if not zip_file_name:
+        zip_file_name = "data-{}.zip".format(datetime.datetime.today())
+
+    if dst_dir:
+        dst_path = os.path.join(dst_dir, zip_file_name)
+    else:
+        dst_path = zip_file_name
+
+    # os.remove(dst_path)
+
+    the_zip_file = zipfile.ZipFile(dst_path, "w")
+
+    for folder, subfolders, files in os.walk(src_dir):
+        for file in files:
+            the_path = os.path.join(folder, file)
+            # if 'zvt_business.db' in the_path:
+            #     continue
+            print("zip {}".format(the_path))
+            the_zip_file.write(the_path, os.path.relpath(the_path, src_dir), compress_type=zipfile.ZIP_DEFLATED)
+
+    the_zip_file.close()
+
+
+def unzip(zip_file, dst_dir):
+    the_zip_file = zipfile.ZipFile(zip_file)
+    print("start unzip {} to {}".format(zip_file, dst_dir))
+
+    for name in the_zip_file.namelist():
+        extracted_path = pathlib.Path(the_zip_file.extract(name, path=dst_dir))
+        extracted_path.rename(f"{extracted_path}".encode("cp437").decode("gbk"))
+    print("finish unzip {} to {}".format(zip_file, dst_dir))
+    the_zip_file.close()
+
+
+# the __all__ is generated
+__all__ = ["zip_dir", "unzip"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

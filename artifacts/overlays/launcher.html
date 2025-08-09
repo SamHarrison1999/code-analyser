@@ -1,0 +1,40 @@
+<!doctype html><meta charset='utf-8'><title>launcher – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: launcher</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.41</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+# pylint: skip-file
+# flake8: noqa
+
+# coding=utf-8
+
+import argparse
+import importlib
+import os
+import yaml
+
+from .config import TunerConfigManager
+
+
+args_parser = argparse.ArgumentParser(prog="tuner")
+args_parser.add_argument(
+    "-c",
+    "--config_path",
+    required=True,
+    type=str,
+    help="config path indicates where to load yaml config.",
+)
+
+args = args_parser.parse_args()
+
+TUNER_CONFIG_MANAGER = TunerConfigManager(args.config_path)
+
+
+def run():
+    # 1. Get pipeline class.
+    tuner_pipeline_class = getattr(
+        importlib.import_module(".pipeline", package="qlib.contrib.tuner"), "Pipeline"
+    )
+    # 2. Init tuner pipeline.
+    tuner_pipeline = tuner_pipeline_class(TUNER_CONFIG_MANAGER)
+    # 3. Begin to tune
+    tuner_pipeline.run()
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

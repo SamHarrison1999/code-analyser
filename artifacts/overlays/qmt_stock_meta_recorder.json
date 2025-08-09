@@ -1,0 +1,14 @@
+{
+  "filename": "qmt_stock_meta_recorder",
+  "probs": {
+    "sast_risk": 0.3977617025375366,
+    "ml_signal": 0.5020872354507446,
+    "best_practice": 0.588495135307312
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

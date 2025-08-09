@@ -1,0 +1,14 @@
+{
+  "filename": "test_get_data",
+  "probs": {
+    "sast_risk": 0.4005635380744934,
+    "ml_signal": 0.5014923810958862,
+    "best_practice": 0.5923182964324951
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

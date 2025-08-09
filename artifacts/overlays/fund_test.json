@@ -1,0 +1,14 @@
+{
+  "filename": "fund_test",
+  "probs": {
+    "sast_risk": 0.3948362469673157,
+    "ml_signal": 0.4971715211868286,
+    "best_practice": 0.5911293029785156
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

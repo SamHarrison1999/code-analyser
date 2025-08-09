@@ -1,0 +1,14 @@
+{
+  "filename": "top_dragon_tiger",
+  "probs": {
+    "sast_risk": 0.40066730976104736,
+    "ml_signal": 0.49751096963882446,
+    "best_practice": 0.5914939641952515
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

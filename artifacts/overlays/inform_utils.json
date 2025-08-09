@@ -1,0 +1,14 @@
+{
+  "filename": "inform_utils",
+  "probs": {
+    "sast_risk": 0.3962995707988739,
+    "ml_signal": 0.49994897842407227,
+    "best_practice": 0.5893251299858093
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

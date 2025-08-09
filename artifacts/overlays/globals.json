@@ -1,0 +1,14 @@
+{
+  "filename": "globals",
+  "probs": {
+    "sast_risk": 0.39821651577949524,
+    "ml_signal": 0.5004108548164368,
+    "best_practice": 0.5855333805084229
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

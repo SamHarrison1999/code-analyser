@@ -1,0 +1,14 @@
+{
+  "filename": "base_factor",
+  "probs": {
+    "sast_risk": 0.401960164308548,
+    "ml_signal": 0.49995100498199463,
+    "best_practice": 0.5954216718673706
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

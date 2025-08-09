@@ -1,0 +1,14 @@
+{
+  "filename": "ma_trader",
+  "probs": {
+    "sast_risk": 0.3934907019138336,
+    "ml_signal": 0.49849778413772583,
+    "best_practice": 0.5852371454238892
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,14 @@
+{
+  "filename": "trendline",
+  "probs": {
+    "sast_risk": 0.40753984451293945,
+    "ml_signal": 0.499211847782135,
+    "best_practice": 0.5890522003173828
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

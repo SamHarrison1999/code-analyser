@@ -1,0 +1,14 @@
+{
+  "filename": "example",
+  "probs": {
+    "sast_risk": 0.39715665578842163,
+    "ml_signal": 0.5006031394004822,
+    "best_practice": 0.5852805972099304
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

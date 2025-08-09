@@ -1,0 +1,62 @@
+<!doctype html><meta charset='utf-8'><title>test_utils_unit – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: test_utils_unit</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.49</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>import pytest
+import os
+from pandas import DataFrame, Series
+from finta import TA
+from finta.utils import to_dataframe, resample, trending_down, trending_up
+import numpy
+import json
+
+
+def rootdir():
+
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+data_file = os.path.join(rootdir(), "data/poloniex_xrp-btc.json")
+
+with open(data_file, "r") as outfile:
+    data = json.load(outfile)
+
+
+def test_to_dataframe():
+
+    assert isinstance(to_dataframe(data), DataFrame)
+
+
+def test_resample():
+
+    df = to_dataframe(data)
+    assert isinstance(resample(df, "2d"), DataFrame)
+    assert list(resample(df, "2d").index.values[-2:]) == [
+        numpy.datetime64("2019-05-05T00:00:00.000000000"),
+        numpy.datetime64("2019-05-07T00:00:00.000000000"),
+    ]
+
+
+def test_resample_calendar():
+
+    df = to_dataframe(data)
+    assert isinstance(resample(df, "W-Mon"), DataFrame)
+    assert list(resample(df, "W-Mon").index.values[-2:]) == [
+        numpy.datetime64("2019-05-06T00:00:00.000000000"),
+        numpy.datetime64("2019-05-13T00:00:00.000000000"),
+    ]
+
+
+def test_trending_up():
+
+    df = to_dataframe(data)
+    ma = TA.HMA(df)
+    assert isinstance(trending_up(ma, 10), Series)
+
+    assert not trending_up(ma, 10).values[-1]
+
+
+def test_trending_down():
+
+    df = to_dataframe(data)
+    ma = TA.HMA(df)
+    assert isinstance(trending_down(ma, 10), Series)
+
+    assert trending_down(ma, 10).values[-1]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

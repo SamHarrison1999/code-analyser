@@ -1,0 +1,14 @@
+{
+  "filename": "qmt_data_runner",
+  "probs": {
+    "sast_risk": 0.3974389135837555,
+    "ml_signal": 0.50087970495224,
+    "best_practice": 0.5955391526222229
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

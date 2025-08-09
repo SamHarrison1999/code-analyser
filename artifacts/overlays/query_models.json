@@ -1,0 +1,14 @@
+{
+  "filename": "query_models",
+  "probs": {
+    "sast_risk": 0.39605554938316345,
+    "ml_signal": 0.4947015047073364,
+    "best_practice": 0.5890690088272095
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

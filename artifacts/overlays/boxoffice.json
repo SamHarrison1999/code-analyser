@@ -1,0 +1,14 @@
+{
+  "filename": "boxoffice",
+  "probs": {
+    "sast_risk": 0.4039047062397003,
+    "ml_signal": 0.4952985346317291,
+    "best_practice": 0.5849643349647522
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

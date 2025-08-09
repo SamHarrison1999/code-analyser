@@ -1,0 +1,14 @@
+{
+  "filename": "stock_4h_hfq_kdata",
+  "probs": {
+    "sast_risk": 0.4103793203830719,
+    "ml_signal": 0.49216291308403015,
+    "best_practice": 0.5935856103897095
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

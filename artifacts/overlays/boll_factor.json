@@ -1,0 +1,14 @@
+{
+  "filename": "boll_factor",
+  "probs": {
+    "sast_risk": 0.397381454706192,
+    "ml_signal": 0.4976181089878082,
+    "best_practice": 0.5844432711601257
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

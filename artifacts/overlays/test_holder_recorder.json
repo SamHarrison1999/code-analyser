@@ -1,0 +1,14 @@
+{
+  "filename": "test_holder_recorder",
+  "probs": {
+    "sast_risk": 0.40103432536125183,
+    "ml_signal": 0.500752329826355,
+    "best_practice": 0.5836166739463806
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

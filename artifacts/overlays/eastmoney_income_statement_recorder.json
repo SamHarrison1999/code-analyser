@@ -1,0 +1,14 @@
+{
+  "filename": "eastmoney_income_statement_recorder",
+  "probs": {
+    "sast_risk": 0.4015280306339264,
+    "ml_signal": 0.4975012242794037,
+    "best_practice": 0.5894022583961487
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

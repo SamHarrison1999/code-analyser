@@ -1,0 +1,21 @@
+<!doctype html><meta charset='utf-8'><title>lables – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: lables</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.39</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.49</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+from enum import Enum
+
+
+class BehaviorCategory(Enum):
+    # 上涨
+    up = 1
+    # 下跌
+    down = -1
+
+
+class RelativePerformance(Enum):
+    # 表现比90%好
+    best = 0.9
+    ordinary = 0.5
+    poor = 0
+
+
+# the __all__ is generated
+__all__ = ["BehaviorCategory", "RelativePerformance"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

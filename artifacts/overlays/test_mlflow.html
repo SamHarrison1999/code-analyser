@@ -1,0 +1,39 @@
+<!doctype html><meta charset='utf-8'><title>test_mlflow – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: test_mlflow</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+import unittest
+import platform
+import mlflow
+import time
+from pathlib import Path
+import shutil
+
+
+class MLflowTest(unittest.TestCase):
+    TMP_PATH = Path("./.mlruns_tmp/")
+
+    def tearDown(self) -&gt; None:
+        if self.TMP_PATH.exists():
+            shutil.rmtree(self.TMP_PATH)
+
+    def test_creating_client(self):
+        """
+        Please refer to qlib/workflow/expm.py:MLflowExpManager._client
+        we don't cache _client (this is helpful to reduce maintainance work when MLflowExpManager's uri is chagned)
+
+        This implementation is based on the assumption creating a client is fast
+        """
+        start = time.time()
+        for i in range(10):
+            _ = mlflow.tracking.MlflowClient(tracking_uri=str(self.TMP_PATH))
+        end = time.time()
+        elapsed = end - start
+        if platform.system() == "Linux":
+            self.assertLess(elapsed, 1e-2)  # it can be done in less than 10ms
+        else:
+            self.assertLess(elapsed, 2e-2)
+        print(elapsed)
+
+
+if __name__ == "__main__":
+    unittest.main()
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

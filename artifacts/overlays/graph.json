@@ -1,0 +1,14 @@
+{
+  "filename": "graph",
+  "probs": {
+    "sast_risk": 0.3968476951122284,
+    "ml_signal": 0.4968576729297638,
+    "best_practice": 0.5875471234321594
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

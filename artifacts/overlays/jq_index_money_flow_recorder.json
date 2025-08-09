@@ -1,0 +1,14 @@
+{
+  "filename": "jq_index_money_flow_recorder",
+  "probs": {
+    "sast_risk": 0.39310869574546814,
+    "ml_signal": 0.49924999475479126,
+    "best_practice": 0.5863838791847229
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

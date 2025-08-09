@@ -1,0 +1,14 @@
+{
+  "filename": "task",
+  "probs": {
+    "sast_risk": 0.3958851397037506,
+    "ml_signal": 0.49765175580978394,
+    "best_practice": 0.5851967930793762
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

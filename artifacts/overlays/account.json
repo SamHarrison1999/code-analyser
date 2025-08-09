@@ -1,0 +1,14 @@
+{
+  "filename": "account",
+  "probs": {
+    "sast_risk": 0.3993816673755646,
+    "ml_signal": 0.4967363774776459,
+    "best_practice": 0.5907796621322632
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

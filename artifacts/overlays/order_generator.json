@@ -1,0 +1,14 @@
+{
+  "filename": "order_generator",
+  "probs": {
+    "sast_risk": 0.4012393355369568,
+    "ml_signal": 0.4959366023540497,
+    "best_practice": 0.5902364253997803
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

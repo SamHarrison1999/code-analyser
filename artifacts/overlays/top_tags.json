@@ -1,0 +1,14 @@
+{
+  "filename": "top_tags",
+  "probs": {
+    "sast_risk": 0.4025898277759552,
+    "ml_signal": 0.4961443245410919,
+    "best_practice": 0.5885077118873596
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,48 @@
+<!doctype html><meta charset='utf-8'><title>test_holder – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: test_holder</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>from zvt.contract.api import get_db_session
+from ..context import init_test_context
+
+init_test_context()
+
+from typing import List
+
+from zvt.domain import TopTenHolder, TopTenTradableHolder
+
+session = get_db_session(provider="eastmoney", db_name="holder")  # type: sqlalchemy.orm.Session
+
+
+# 十大股东
+def test_000778_top_ten_holder():
+    result: List[TopTenHolder] = TopTenHolder.query_data(
+        session=session,
+        provider="eastmoney",
+        return_type="domain",
+        codes=["000778"],
+        end_timestamp="2018-09-30",
+        start_timestamp="2018-09-30",
+        order=TopTenHolder.shareholding_ratio.desc(),
+    )
+    assert len(result) == 10
+    assert result[0].holder_name == "新兴际华集团有限公司"
+    assert result[0].shareholding_numbers == 1595000000
+    assert result[0].shareholding_ratio == 0.3996
+    assert result[0].change == 32080000
+    assert result[0].change_ratio == 0.0205
+
+
+def test_000778_top_ten_tradable_holder():
+    result: List[TopTenHolder] = TopTenTradableHolder.query_data(
+        session=session,
+        provider="eastmoney",
+        return_type="domain",
+        codes=["000778"],
+        end_timestamp="2018-09-30",
+        start_timestamp="2018-09-30",
+        order=TopTenTradableHolder.shareholding_ratio.desc(),
+    )
+    assert len(result) == 10
+    assert result[0].holder_name == "新兴际华集团有限公司"
+    assert result[0].shareholding_numbers == 1525000000
+    assert result[0].shareholding_ratio == 0.389
+    assert result[0].change == 38560000
+    assert result[0].change_ratio == 0.0259
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

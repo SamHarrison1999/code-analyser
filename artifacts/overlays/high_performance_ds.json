@@ -1,0 +1,14 @@
+{
+  "filename": "high_performance_ds",
+  "probs": {
+    "sast_risk": 0.39997005462646484,
+    "ml_signal": 0.49703842401504517,
+    "best_practice": 0.5914958715438843
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

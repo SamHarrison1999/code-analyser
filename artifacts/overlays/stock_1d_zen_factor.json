@@ -1,0 +1,14 @@
+{
+  "filename": "stock_1d_zen_factor",
+  "probs": {
+    "sast_risk": 0.40662938356399536,
+    "ml_signal": 0.4940401315689087,
+    "best_practice": 0.587059736251831
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

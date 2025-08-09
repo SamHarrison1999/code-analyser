@@ -1,0 +1,14 @@
+{
+  "filename": "news_vars",
+  "probs": {
+    "sast_risk": 0.4047349691390991,
+    "ml_signal": 0.5008816719055176,
+    "best_practice": 0.5806804299354553
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

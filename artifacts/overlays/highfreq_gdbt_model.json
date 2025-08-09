@@ -1,0 +1,14 @@
+{
+  "filename": "highfreq_gdbt_model",
+  "probs": {
+    "sast_risk": 0.39653539657592773,
+    "ml_signal": 0.49823126196861267,
+    "best_practice": 0.5889903903007507
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

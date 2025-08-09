@@ -1,0 +1,14 @@
+{
+  "filename": "test_special_ops",
+  "probs": {
+    "sast_risk": 0.3945561349391937,
+    "ml_signal": 0.5019795894622803,
+    "best_practice": 0.5886788964271545
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

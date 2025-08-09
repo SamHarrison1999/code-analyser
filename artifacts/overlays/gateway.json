@@ -1,0 +1,14 @@
+{
+  "filename": "gateway",
+  "probs": {
+    "sast_risk": 0.3985573649406433,
+    "ml_signal": 0.49706658720970154,
+    "best_practice": 0.5887563228607178
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

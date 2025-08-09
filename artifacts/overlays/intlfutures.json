@@ -1,0 +1,14 @@
+{
+  "filename": "intlfutures",
+  "probs": {
+    "sast_risk": 0.39437952637672424,
+    "ml_signal": 0.4989737570285797,
+    "best_practice": 0.5888362526893616
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

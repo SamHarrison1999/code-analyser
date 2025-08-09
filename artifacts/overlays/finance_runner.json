@@ -1,0 +1,14 @@
+{
+  "filename": "finance_runner",
+  "probs": {
+    "sast_risk": 0.40274491906166077,
+    "ml_signal": 0.4972592294216156,
+    "best_practice": 0.5918388366699219
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

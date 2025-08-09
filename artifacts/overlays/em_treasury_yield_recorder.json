@@ -1,0 +1,14 @@
+{
+  "filename": "em_treasury_yield_recorder",
+  "probs": {
+    "sast_risk": 0.3976149260997772,
+    "ml_signal": 0.49899643659591675,
+    "best_practice": 0.5886446833610535
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

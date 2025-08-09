@@ -1,0 +1,14 @@
+{
+  "filename": "eastmoney_dividend_financing_recorder",
+  "probs": {
+    "sast_risk": 0.3971305191516876,
+    "ml_signal": 0.5015257000923157,
+    "best_practice": 0.5872837901115417
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

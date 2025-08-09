@@ -1,0 +1,14 @@
+{
+  "filename": "bar_test",
+  "probs": {
+    "sast_risk": 0.3928793668746948,
+    "ml_signal": 0.49658361077308655,
+    "best_practice": 0.5943801999092102
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

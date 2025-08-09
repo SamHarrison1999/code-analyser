@@ -1,0 +1,24 @@
+<!doctype html><meta charset='utf-8'><title>build_hook – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: build_hook</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>from pathlib import Path
+
+from hatchling.builders.hooks.plugin.interface import BuildHookInterface
+from babel.messages.mofile import write_mo
+from babel.messages.pofile import read_po
+
+
+class LocaleBuildHook(BuildHookInterface):
+    """Custom build hook for generating .mo files."""
+
+    def initialize(self, version: str, build_data: dict) -&gt; None:
+        """Initialize the build hook"""
+        # Only generate mo file when building wheel
+        if "pure_python" not in build_data:
+            return
+
+        self.locale_path: Path = Path(self.root).joinpath("vnpy", "trader", "locale")
+        self.mo_path: Path = self.locale_path.joinpath("en", "LC_MESSAGES", "vnpy.mo")
+        self.po_path: Path = self.locale_path.joinpath("en", "LC_MESSAGES", "vnpy.po")
+
+        with open(self.mo_path, "wb") as mo_f:
+            with open(self.po_path, encoding="utf-8") as po_f:
+                write_mo(mo_f, read_po(po_f))
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

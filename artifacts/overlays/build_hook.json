@@ -1,0 +1,14 @@
+{
+  "filename": "build_hook",
+  "probs": {
+    "sast_risk": 0.39846304059028625,
+    "ml_signal": 0.4982767105102539,
+    "best_practice": 0.5885167121887207
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

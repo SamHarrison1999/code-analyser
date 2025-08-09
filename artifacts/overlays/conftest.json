@@ -1,0 +1,14 @@
+{
+  "filename": "conftest",
+  "probs": {
+    "sast_risk": 0.3942253887653351,
+    "ml_signal": 0.491925448179245,
+    "best_practice": 0.5974174737930298
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

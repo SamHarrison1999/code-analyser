@@ -1,0 +1,14 @@
+{
+  "filename": "dragon_and_tiger_trader",
+  "probs": {
+    "sast_risk": 0.40127360820770264,
+    "ml_signal": 0.49579164385795593,
+    "best_practice": 0.5894032120704651
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

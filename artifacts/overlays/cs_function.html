@@ -1,0 +1,38 @@
+<!doctype html><meta charset='utf-8'><title>cs_function – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: cs_function</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>"""
+Cross Section Operators
+"""
+
+import polars as pl
+
+from .utility import DataProxy
+
+
+def cs_rank(feature: DataProxy) -&gt; DataProxy:
+    """Perform cross-sectional ranking"""
+    df: pl.DataFrame = feature.df.select(
+        pl.col("datetime"),
+        pl.col("vt_symbol"),
+        pl.col("data").rank().over("datetime")
+    )
+    return DataProxy(df)
+
+
+def cs_mean(feature: DataProxy) -&gt; DataProxy:
+    """Calculate cross-sectional mean"""
+    df: pl.DataFrame = feature.df.select(
+        pl.col("datetime"),
+        pl.col("vt_symbol"),
+        pl.col("data").mean().over("datetime")
+    )
+    return DataProxy(df)
+
+
+def cs_std(feature: DataProxy) -&gt; DataProxy:
+    """Calculate cross-sectional standard deviation"""
+    df: pl.DataFrame = feature.df.select(
+        pl.col("datetime"),
+        pl.col("vt_symbol"),
+        pl.col("data").std().over("datetime")
+    )
+    return DataProxy(df)
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

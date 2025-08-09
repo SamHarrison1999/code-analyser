@@ -1,0 +1,14 @@
+{
+  "filename": "test_workflow",
+  "probs": {
+    "sast_risk": 0.39592039585113525,
+    "ml_signal": 0.5011850595474243,
+    "best_practice": 0.5882521271705627
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,14 @@
+{
+  "filename": "pytorch_gru_ts",
+  "probs": {
+    "sast_risk": 0.39796650409698486,
+    "ml_signal": 0.49681252241134644,
+    "best_practice": 0.5878638029098511
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,14 @@
+{
+  "filename": "today_shoot_runner",
+  "probs": {
+    "sast_risk": 0.3984427750110626,
+    "ml_signal": 0.5009244084358215,
+    "best_practice": 0.5880882740020752
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,69 @@
+<!doctype html><meta charset='utf-8'><title>datafeed – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: datafeed</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>from types import ModuleType
+from collections.abc import Callable
+from importlib import import_module
+
+from .object import HistoryRequest, TickData, BarData
+from .setting import SETTINGS
+from .locale import _
+
+
+class BaseDatafeed:
+    """
+    Abstract datafeed class for connecting to different datafeed.
+    """
+
+    def init(self, output: Callable = print) -&gt; bool:
+        """
+        Initialize datafeed service connection.
+        """
+        return False
+
+    def query_bar_history(self, req: HistoryRequest, output: Callable = print) -&gt; list[BarData]:
+        """
+        Query history bar data.
+        """
+        output(_("查询K线数据失败：没有正确配置数据服务"))
+        return []
+
+    def query_tick_history(self, req: HistoryRequest, output: Callable = print) -&gt; list[TickData]:
+        """
+        Query history tick data.
+        """
+        output(_("查询Tick数据失败：没有正确配置数据服务"))
+        return []
+
+
+datafeed: BaseDatafeed | None = None
+
+
+def get_datafeed() -&gt; BaseDatafeed:
+    """"""
+    # Return datafeed object if already inited
+    global datafeed
+    if datafeed:
+        return datafeed
+
+    # Read datafeed related global setting
+    datafeed_name: str = SETTINGS["datafeed.name"]
+
+    if not datafeed_name:
+        datafeed = BaseDatafeed()
+
+        print(_("没有配置要使用的数据服务，请修改全局配置中的datafeed相关内容"))
+    else:
+        module_name: str = f"vnpy_{datafeed_name}"
+
+        # Try to import datafeed module
+        try:
+            module: ModuleType = import_module(module_name)
+
+            # Create datafeed object from module
+            datafeed = module.Datafeed()
+        # Use base class if failed
+        except ModuleNotFoundError:
+            datafeed = BaseDatafeed()
+
+            print(_("无法加载数据服务模块，请运行 pip install {} 尝试安装").format(module_name))
+
+    return datafeed
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

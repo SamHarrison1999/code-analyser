@@ -1,0 +1,14 @@
+{
+  "filename": "native",
+  "probs": {
+    "sast_risk": 0.39887261390686035,
+    "ml_signal": 0.4959849417209625,
+    "best_practice": 0.5921807885169983
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

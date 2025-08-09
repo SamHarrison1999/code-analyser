@@ -1,0 +1,14 @@
+{
+  "filename": "cumulative_return",
+  "probs": {
+    "sast_risk": 0.3969781994819641,
+    "ml_signal": 0.4950198233127594,
+    "best_practice": 0.5925359129905701
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

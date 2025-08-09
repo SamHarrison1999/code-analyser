@@ -1,0 +1,14 @@
+{
+  "filename": "fundamental_selector",
+  "probs": {
+    "sast_risk": 0.3956298530101776,
+    "ml_signal": 0.5000552535057068,
+    "best_practice": 0.5827624797821045
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

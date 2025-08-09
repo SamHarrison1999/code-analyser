@@ -1,0 +1,14 @@
+{
+  "filename": "domestic_cons",
+  "probs": {
+    "sast_risk": 0.4137870967388153,
+    "ml_signal": 0.4966907501220703,
+    "best_practice": 0.5890793800354004
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

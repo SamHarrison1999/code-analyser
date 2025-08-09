@@ -1,0 +1,14 @@
+{
+  "filename": "cs_function",
+  "probs": {
+    "sast_risk": 0.39563649892807007,
+    "ml_signal": 0.4981231987476349,
+    "best_practice": 0.5890242457389832
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

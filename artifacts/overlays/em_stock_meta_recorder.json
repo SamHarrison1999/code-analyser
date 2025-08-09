@@ -1,0 +1,14 @@
+{
+  "filename": "em_stock_meta_recorder",
+  "probs": {
+    "sast_risk": 0.3952311873435974,
+    "ml_signal": 0.4998820722103119,
+    "best_practice": 0.5871413946151733
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

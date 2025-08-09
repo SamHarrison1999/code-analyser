@@ -1,0 +1,44 @@
+<!doctype html><meta charset='utf-8'><title>run – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: run</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.42</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>from datetime import datetime
+
+from vnpy.trader.ui import create_qapp, QtCore
+from vnpy.trader.constant import Exchange, Interval
+from vnpy.trader.database import get_database
+from vnpy.chart import ChartWidget, VolumeItem, CandleItem
+
+
+if __name__ == "__main__":
+    app = create_qapp()
+
+    database = get_database()
+    bars = database.load_bar_data(
+        "IF888",
+        Exchange.CFFEX,
+        interval=Interval.MINUTE,
+        start=datetime(2019, 7, 1),
+        end=datetime(2019, 7, 17)
+    )
+
+    widget = ChartWidget()
+    widget.add_plot("candle", hide_x_axis=True)
+    widget.add_plot("volume", maximum_height=200)
+    widget.add_item(CandleItem, "candle", "candle")
+    widget.add_item(VolumeItem, "volume", "volume")
+    widget.add_cursor()
+
+    n = 1000
+    history = bars[:n]
+    new_data = bars[n:]
+
+    widget.update_history(history)
+
+    def update_bar() -&gt; None:
+        bar = new_data.pop(0)
+        widget.update_bar(bar)
+
+    timer = QtCore.QTimer()
+    timer.timeout.connect(update_bar)
+    # timer.start(100)
+
+    widget.show()
+    app.exec()
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

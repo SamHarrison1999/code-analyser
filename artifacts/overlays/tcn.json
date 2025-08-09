@@ -1,0 +1,14 @@
+{
+  "filename": "tcn",
+  "probs": {
+    "sast_risk": 0.3952502906322479,
+    "ml_signal": 0.49798905849456787,
+    "best_practice": 0.589317262172699
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

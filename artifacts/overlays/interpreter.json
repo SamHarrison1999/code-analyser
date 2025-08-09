@@ -1,0 +1,14 @@
+{
+  "filename": "interpreter",
+  "probs": {
+    "sast_risk": 0.40391549468040466,
+    "ml_signal": 0.4990632236003876,
+    "best_practice": 0.5942457914352417
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

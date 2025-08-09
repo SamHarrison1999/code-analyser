@@ -1,0 +1,14 @@
+{
+  "filename": "mod",
+  "probs": {
+    "sast_risk": 0.40695810317993164,
+    "ml_signal": 0.49876102805137634,
+    "best_practice": 0.5926761627197266
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

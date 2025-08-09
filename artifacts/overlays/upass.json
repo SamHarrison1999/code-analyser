@@ -1,0 +1,14 @@
+{
+  "filename": "upass",
+  "probs": {
+    "sast_risk": 0.4005153477191925,
+    "ml_signal": 0.4990062117576599,
+    "best_practice": 0.5948593020439148
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,14 @@
+{
+  "filename": "actor_meta",
+  "probs": {
+    "sast_risk": 0.40462297201156616,
+    "ml_signal": 0.4947275221347809,
+    "best_practice": 0.5884937047958374
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

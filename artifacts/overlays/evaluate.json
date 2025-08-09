@@ -1,0 +1,14 @@
+{
+  "filename": "evaluate",
+  "probs": {
+    "sast_risk": 0.40031686425209045,
+    "ml_signal": 0.4961286187171936,
+    "best_practice": 0.595869243144989
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

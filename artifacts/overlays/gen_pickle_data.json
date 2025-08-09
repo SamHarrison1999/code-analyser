@@ -1,0 +1,14 @@
+{
+  "filename": "gen_pickle_data",
+  "probs": {
+    "sast_risk": 0.3977166712284088,
+    "ml_signal": 0.4996397793292999,
+    "best_practice": 0.5931744575500488
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

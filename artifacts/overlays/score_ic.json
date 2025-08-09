@@ -1,0 +1,14 @@
+{
+  "filename": "score_ic",
+  "probs": {
+    "sast_risk": 0.4005705714225769,
+    "ml_signal": 0.4975356459617615,
+    "best_practice": 0.590209424495697
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,86 @@
+<!doctype html><meta charset='utf-8'><title>reward – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: reward</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, Generic, Optional, Tuple, TypeVar
+
+from qlib.typehint import final
+
+if TYPE_CHECKING:
+    from .utils.env_wrapper import EnvWrapper
+
+SimulatorState = TypeVar("SimulatorState")
+
+
+class Reward(Generic[SimulatorState]):
+    """
+    Reward calculation component that takes a single argument: state of simulator. Returns a real number: reward.
+
+    Subclass should implement ``reward(simulator_state)`` to implement their own reward calculation recipe.
+    """
+
+    env: Optional[EnvWrapper] = None
+
+    @final
+    def __call__(self, simulator_state: SimulatorState) -&gt; float:
+        return self.reward(simulator_state)
+
+    def reward(self, simulator_state: SimulatorState) -&gt; float:
+        """Implement this method for your own reward."""
+        raise NotImplementedError("Implement reward calculation recipe in `reward()`.")
+
+    def log(self, name: str, value: Any) -&gt; None:
+        assert self.env is not None
+        self.env.logger.add_scalar(name, value)
+
+
+class RewardCombination(Reward):
+    """Combination of multiple reward."""
+
+    def __init__(self, rewards: Dict[str, Tuple[Reward, float]]) -&gt; None:
+        self.rewards = rewards
+
+    def reward(self, simulator_state: Any) -&gt; float:
+        total_reward = 0.0
+        for name, (reward_fn, weight) in self.rewards.items():
+            rew = reward_fn(simulator_state) * weight
+            total_reward += rew
+            self.log(name, rew)
+        return total_reward
+
+
+# TODO:
+# reward_factory is disabled for now
+
+# _RegistryConfigReward = RegistryConfig[REWARDS]
+
+
+# @configclass
+# class _WeightedRewardConfig:
+#     weight: float
+#     reward: _RegistryConfigReward
+
+
+# RewardConfig = Union[_RegistryConfigReward, Dict[str, Union[_RegistryConfigReward, _WeightedRewardConfig]]]
+
+
+# def reward_factory(reward_config: RewardConfig) -&gt; Reward:
+#     """
+#     Use this factory to instantiate the reward from config.
+#     Simply using ``reward_config.build()`` might not work because reward can have complex combinations.
+#     """
+#     if isinstance(reward_config, dict):
+#         # as reward combination
+#         rewards = {}
+#         for name, rew in reward_config.items():
+#             if not isinstance(rew, _WeightedRewardConfig):
+#                 # default weight is 1.
+#                 rew = _WeightedRewardConfig(weight=1., rew=rew)
+#             # no recursive build in this step
+#             rewards[name] = (rew.reward.build(), rew.weight)
+#         return RewardCombination(rewards)
+#     else:
+#         # single reward
+#         return reward_config.build()
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

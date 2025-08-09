@@ -1,0 +1,14 @@
+{
+  "filename": "em_stock_top_ten_recorder",
+  "probs": {
+    "sast_risk": 0.39999037981033325,
+    "ml_signal": 0.4999215602874756,
+    "best_practice": 0.5904209017753601
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

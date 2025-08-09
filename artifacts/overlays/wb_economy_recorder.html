@@ -1,0 +1,37 @@
+<!doctype html><meta charset='utf-8'><title>wb_economy_recorder – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: wb_economy_recorder</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+
+from zvt.contract.api import df_to_db
+from zvt.contract.recorder import FixedCycleDataRecorder
+from zvt.domain import Country, Economy
+from zvt.recorders.wb import wb_api
+from zvt.utils.time_utils import current_date
+
+
+class WBEconomyRecorder(FixedCycleDataRecorder):
+    entity_schema = Country
+    data_schema = Economy
+    entity_provider = "wb"
+    provider = "wb"
+
+    def record(self, entity, start, end, size, timestamps):
+        date = None
+        if start:
+            date = f"{start.year}:{current_date().year}"
+        try:
+            df = wb_api.get_economy_data(entity_id=entity.id, date=date)
+            df["name"] = entity.name
+            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+        # 一些地方获取不到数据会报错
+        except Exception as e:
+            self.logger.warning(f"Failed to get {entity.name} economy data", e)
+
+
+if __name__ == "__main__":
+    entity_ids = ["country_galaxy_CN", "country_galaxy_US"]
+    r = WBEconomyRecorder(entity_ids=entity_ids)
+    r.run()
+
+
+# the __all__ is generated
+__all__ = ["WBEconomyRecorder"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

@@ -1,0 +1,23 @@
+<!doctype html><meta charset='utf-8'><title>misc – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: misc</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.39</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.49</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+from fastapi import APIRouter
+
+from zvt.misc import misc_service
+from zvt.misc.misc_models import TimeMessage
+
+misc_router = APIRouter(
+    prefix="/api/misc",
+    tags=["misc"],
+    responses={404: {"description": "Not found"}},
+)
+
+
+@misc_router.get(
+    "/time_message",
+    response_model=TimeMessage,
+)
+def get_time_message():
+    """
+    Get time message
+    """
+    return misc_service.get_time_message()
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

@@ -1,0 +1,72 @@
+<!doctype html><meta charset='utf-8'><title>collect_info – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: collect_info</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.39</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>import sys
+import platform
+import qlib
+import fire
+import pkg_resources
+from pathlib import Path
+
+QLIB_PATH = Path(__file__).absolute().resolve().parent.parent
+
+
+class InfoCollector:
+    """
+    User could collect system info by following commands
+    `cd scripts &amp;&amp; python collect_info.py all`
+    - NOTE: please avoid running this script in the project folder which contains `qlib`
+    """
+
+    def sys(self):
+        """collect system related info"""
+        for method in ["system", "machine", "platform", "version"]:
+            print(getattr(platform, method)())
+
+    def py(self):
+        """collect Python related info"""
+        print("Python version: {}".format(sys.version.replace("\n", " ")))
+
+    def qlib(self):
+        """collect qlib related info"""
+        print("Qlib version: {}".format(qlib.__version__))
+        REQUIRED = [
+            "numpy",
+            "pandas",
+            "scipy",
+            "requests",
+            "sacred",
+            "python-socketio",
+            "redis",
+            "python-redis-lock",
+            "schedule",
+            "cvxpy",
+            "hyperopt",
+            "fire",
+            "statsmodels",
+            "xlrd",
+            "plotly",
+            "matplotlib",
+            "tables",
+            "pyyaml",
+            "mlflow",
+            "tqdm",
+            "loguru",
+            "lightgbm",
+            "tornado",
+            "joblib",
+            "fire",
+            "ruamel.yaml",
+        ]
+
+        for package in REQUIRED:
+            version = pkg_resources.get_distribution(package).version
+            print(f"{package}=={version}")
+
+    def all(self):
+        """collect all info"""
+        for method in ["sys", "py", "qlib"]:
+            getattr(self, method)()
+            print()
+
+
+if __name__ == "__main__":
+    fire.Fire(InfoCollector)
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

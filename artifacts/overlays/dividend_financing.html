@@ -1,0 +1,79 @@
+<!doctype html><meta charset='utf-8'><title>dividend_financing – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: dividend_financing</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.60</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+from sqlalchemy import Column, String, DateTime, Float
+from sqlalchemy.orm import declarative_base
+
+from zvt.contract import Mixin
+from zvt.contract.register import register_schema
+
+DividendFinancingBase = declarative_base()
+
+
+class DividendFinancing(DividendFinancingBase, Mixin):
+    __tablename__ = "dividend_financing"
+
+    provider = Column(String(length=32))
+    code = Column(String(length=32))
+
+    #: 分红总额
+    dividend_money = Column(Float)
+
+    #: 新股
+    ipo_issues = Column(Float)
+    ipo_raising_fund = Column(Float)
+
+    #: 增发
+    spo_issues = Column(Float)
+    spo_raising_fund = Column(Float)
+    #: 配股
+    rights_issues = Column(Float)
+    rights_raising_fund = Column(Float)
+
+
+class DividendDetail(DividendFinancingBase, Mixin):
+    __tablename__ = "dividend_detail"
+
+    provider = Column(String(length=32))
+    code = Column(String(length=32))
+
+    #: 公告日
+    announce_date = Column(DateTime)
+    #: 股权登记日
+    record_date = Column(DateTime)
+    #: 除权除息日
+    dividend_date = Column(DateTime)
+
+    #: 方案
+    dividend = Column(String(length=128))
+
+
+class SpoDetail(DividendFinancingBase, Mixin):
+    __tablename__ = "spo_detail"
+
+    provider = Column(String(length=32))
+    code = Column(String(length=32))
+
+    spo_issues = Column(Float)
+    spo_price = Column(Float)
+    spo_raising_fund = Column(Float)
+
+
+class RightsIssueDetail(DividendFinancingBase, Mixin):
+    __tablename__ = "rights_issue_detail"
+
+    provider = Column(String(length=32))
+    code = Column(String(length=32))
+
+    #: 配股
+    rights_issues = Column(Float)
+    rights_issue_price = Column(Float)
+    rights_raising_fund = Column(Float)
+
+
+register_schema(
+    providers=["eastmoney"], db_name="dividend_financing", schema_base=DividendFinancingBase, entity_type="stock"
+)
+
+
+# the __all__ is generated
+__all__ = ["DividendFinancing", "DividendDetail", "SpoDetail", "RightsIssueDetail"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

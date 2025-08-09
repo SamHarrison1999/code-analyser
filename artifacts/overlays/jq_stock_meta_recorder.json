@@ -1,0 +1,14 @@
+{
+  "filename": "jq_stock_meta_recorder",
+  "probs": {
+    "sast_risk": 0.4026252329349518,
+    "ml_signal": 0.4981856942176819,
+    "best_practice": 0.5919426679611206
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

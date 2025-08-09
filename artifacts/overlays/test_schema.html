@@ -1,0 +1,53 @@
+<!doctype html><meta charset='utf-8'><title>test_schema – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: test_schema</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.41</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.49</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+from zvt.domain import Stock, Stockhk
+
+
+def test_stock_trading_time():
+    assert Stock.in_real_trading_time(timestamp="2024-09-02 08:00") is False
+    assert Stock.in_real_trading_time(timestamp="2024-09-02 09:20") is True
+    assert Stock.in_real_trading_time(timestamp="2024-09-02 09:30") is True
+    assert Stock.in_real_trading_time(timestamp="2024-09-02 11:00") is True
+    assert Stock.in_real_trading_time(timestamp="2024-09-02 11:30") is True
+    assert Stock.in_real_trading_time(timestamp="2024-09-02 11:40") is False
+    assert Stock.in_real_trading_time(timestamp="2024-09-02 13:00") is True
+    assert Stock.in_real_trading_time(timestamp="2024-09-02 15:00") is True
+    assert Stock.in_real_trading_time(timestamp="2024-09-02 15:10") is False
+    assert Stock.in_real_trading_time(timestamp="2024-09-02 16:10") is False
+
+    assert Stock.in_trading_time(timestamp="2024-09-02 08:00") is False
+    assert Stock.in_trading_time(timestamp="2024-09-02 09:20") is True
+    assert Stock.in_trading_time(timestamp="2024-09-02 09:30") is True
+    assert Stock.in_trading_time(timestamp="2024-09-02 11:00") is True
+    assert Stock.in_trading_time(timestamp="2024-09-02 11:30") is True
+    assert Stock.in_trading_time(timestamp="2024-09-02 11:40") is True
+    assert Stock.in_trading_time(timestamp="2024-09-02 13:00") is True
+    assert Stock.in_trading_time(timestamp="2024-09-02 15:00") is True
+    assert Stock.in_trading_time(timestamp="2024-09-02 15:10") is False
+    assert Stock.in_trading_time(timestamp="2024-09-02 16:10") is False
+
+
+def test_stock_hk_trading_time():
+    assert Stockhk.in_real_trading_time(timestamp="2024-09-02 08:00") is False
+    assert Stockhk.in_real_trading_time(timestamp="2024-09-02 09:15") is True
+    assert Stockhk.in_real_trading_time(timestamp="2024-09-02 09:30") is True
+    assert Stockhk.in_real_trading_time(timestamp="2024-09-02 11:00") is True
+    assert Stockhk.in_real_trading_time(timestamp="2024-09-02 12:00") is True
+    assert Stockhk.in_real_trading_time(timestamp="2024-09-02 12:40") is False
+    assert Stockhk.in_real_trading_time(timestamp="2024-09-02 13:00") is True
+    assert Stockhk.in_real_trading_time(timestamp="2024-09-02 15:00") is True
+    assert Stockhk.in_real_trading_time(timestamp="2024-09-02 16:10") is False
+    assert Stockhk.in_real_trading_time(timestamp="2024-09-02 17:10") is False
+
+    assert Stockhk.in_trading_time(timestamp="2024-09-02 08:00") is False
+    assert Stockhk.in_trading_time(timestamp="2024-09-02 09:20") is True
+    assert Stockhk.in_trading_time(timestamp="2024-09-02 09:30") is True
+    assert Stockhk.in_trading_time(timestamp="2024-09-02 11:00") is True
+    assert Stockhk.in_trading_time(timestamp="2024-09-02 11:30") is True
+    assert Stockhk.in_trading_time(timestamp="2024-09-02 11:40") is True
+    assert Stockhk.in_trading_time(timestamp="2024-09-02 12:00") is True
+    assert Stockhk.in_trading_time(timestamp="2024-09-02 13:00") is True
+    assert Stockhk.in_trading_time(timestamp="2024-09-02 15:00") is True
+    assert Stockhk.in_trading_time(timestamp="2024-09-02 16:00") is True
+    assert Stockhk.in_trading_time(timestamp="2024-09-02 16:10") is False
+    assert Stockhk.in_trading_time(timestamp="2024-09-02 17:10") is False
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

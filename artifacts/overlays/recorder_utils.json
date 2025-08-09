@@ -1,0 +1,14 @@
+{
+  "filename": "recorder_utils",
+  "probs": {
+    "sast_risk": 0.393873006105423,
+    "ml_signal": 0.4968443214893341,
+    "best_practice": 0.5886674523353577
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

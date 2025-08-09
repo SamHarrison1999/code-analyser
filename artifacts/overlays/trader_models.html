@@ -1,0 +1,53 @@
+<!doctype html><meta charset='utf-8'><title>trader_models – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: trader_models</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.49</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+from typing import List
+
+from zvt.contract.model import MixinModel
+
+
+class PositionModel(MixinModel):
+    #: 机器人名字
+    trader_name: str
+    #: 做多数量
+    long_amount: float
+    #: 可平多数量
+    available_long: float
+    #: 平均做多价格
+    average_long_price: float
+    #: 做空数量
+    short_amount: float
+    #: 可平空数量
+    available_short: float
+    #: 平均做空价格
+    average_short_price: float
+    #: 盈亏
+    profit: float
+    #: 盈亏比例
+    profit_rate: float
+    #: 市值 或者 占用的保证金(方便起见，总是100%)
+    value: float
+    #: 交易类型(0代表T+0,1代表T+1)
+    trading_t: int
+
+
+class AccountStatsModel(MixinModel):
+    #: 投入金额
+    input_money: float
+    #: 机器人名字
+    trader_name: str
+    #: 具体仓位
+    positions: List[PositionModel]
+    #: 市值
+    value: float
+    #: 可用现金
+    cash: float
+    #: value + cash
+    all_value: float
+
+    #: 盈亏
+    profit: float
+    #: 盈亏比例
+    profit_rate: float
+
+    #: 收盘计算
+    closing: bool
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

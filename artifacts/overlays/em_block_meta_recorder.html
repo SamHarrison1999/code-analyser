@@ -1,0 +1,44 @@
+<!doctype html><meta charset='utf-8'><title>em_block_meta_recorder – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: em_block_meta_recorder</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+import pandas as pd
+
+from zvt.contract.api import df_to_db
+from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
+from zvt.domain import Block, BlockCategory, BlockStock
+from zvt.recorders.em import em_api
+
+
+class EMBlockRecorder(Recorder):
+    provider = "em"
+    data_schema = Block
+
+    def run(self):
+        for block_category in [BlockCategory.concept, BlockCategory.industry]:
+            df = em_api.get_tradable_list(entity_type="block", block_category=block_category)
+            self.logger.info(df)
+            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+
+
+class EMBlockStockRecorder(TimeSeriesDataRecorder):
+    entity_provider = "em"
+    entity_schema = Block
+
+    provider = "em"
+    data_schema = BlockStock
+
+    def record(self, entity, start, end, size, timestamps):
+        the_list = em_api.get_block_stocks(entity.id, entity.name)
+        if the_list:
+            df = pd.DataFrame.from_records(the_list)
+            df_to_db(data_schema=self.data_schema, df=df, provider=self.provider, force_update=True)
+            self.logger.info("finish recording block:{},{}".format(entity.category, entity.name))
+            self.sleep()
+
+
+if __name__ == "__main__":
+    recorder = EMBlockStockRecorder(day_data=True, sleeping_time=0)
+    recorder.run()
+
+
+# the __all__ is generated
+__all__ = ["EMBlockRecorder", "EMBlockStockRecorder"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

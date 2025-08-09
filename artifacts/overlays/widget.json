@@ -1,0 +1,14 @@
+{
+  "filename": "widget",
+  "probs": {
+    "sast_risk": 0.402628093957901,
+    "ml_signal": 0.4967539310455322,
+    "best_practice": 0.5991331934928894
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

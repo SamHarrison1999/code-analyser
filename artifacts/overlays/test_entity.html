@@ -1,0 +1,65 @@
+<!doctype html><meta charset='utf-8'><title>test_entity – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: test_entity</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.49</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+from zvt.contract import TradableEntity, IntervalLevel
+from zvt.utils.time_utils import to_pd_timestamp
+
+
+def test_get_1min_timestamps():
+    timestamps = []
+    for timestamp in TradableEntity.get_interval_timestamps(
+        start_date="2020-06-17", end_date="2020-06-18", level=IntervalLevel.LEVEL_1MIN
+    ):
+        timestamps.append(timestamp)
+
+    assert to_pd_timestamp("2020-06-17 09:31:00") in timestamps
+    assert to_pd_timestamp("2020-06-17 11:30:00") in timestamps
+    assert to_pd_timestamp("2020-06-17 13:01:00") in timestamps
+    assert to_pd_timestamp("2020-06-17 15:00:00") in timestamps
+
+    assert to_pd_timestamp("2020-06-17 09:31:00") in timestamps
+    assert to_pd_timestamp("2020-06-17 11:30:00") in timestamps
+    assert to_pd_timestamp("2020-06-17 13:01:00") in timestamps
+    assert to_pd_timestamp("2020-06-18 15:00:00") in timestamps
+
+
+def test_get_1h_timestamps():
+    timestamps = []
+    for timestamp in TradableEntity.get_interval_timestamps(
+        start_date="2020-06-17", end_date="2020-06-18", level=IntervalLevel.LEVEL_1HOUR
+    ):
+        timestamps.append(timestamp)
+
+    assert to_pd_timestamp("2020-06-17 10:30:00") in timestamps
+    assert to_pd_timestamp("2020-06-17 11:30:00") in timestamps
+    assert to_pd_timestamp("2020-06-17 14:00:00") in timestamps
+    assert to_pd_timestamp("2020-06-17 15:00:00") in timestamps
+
+    assert to_pd_timestamp("2020-06-17 10:30:00") in timestamps
+    assert to_pd_timestamp("2020-06-17 11:30:00") in timestamps
+    assert to_pd_timestamp("2020-06-17 14:00:00") in timestamps
+    assert to_pd_timestamp("2020-06-18 15:00:00") in timestamps
+
+
+def test_is_finished_kdata_timestamp():
+    assert TradableEntity.is_finished_kdata_timestamp("2020-06-17 10:30", IntervalLevel.LEVEL_30MIN)
+    assert not TradableEntity.is_finished_kdata_timestamp("2020-06-17 10:30", IntervalLevel.LEVEL_1DAY)
+
+    assert TradableEntity.is_finished_kdata_timestamp("2020-06-17 11:30", IntervalLevel.LEVEL_30MIN)
+    assert not TradableEntity.is_finished_kdata_timestamp("2020-06-17 11:30", IntervalLevel.LEVEL_1DAY)
+
+    assert TradableEntity.is_finished_kdata_timestamp("2020-06-17 13:30", IntervalLevel.LEVEL_30MIN)
+    assert not TradableEntity.is_finished_kdata_timestamp("2020-06-17 13:30", IntervalLevel.LEVEL_1DAY)
+
+
+def test_open_close():
+    assert TradableEntity.is_open_timestamp("2020-06-17 09:30")
+    assert TradableEntity.is_close_timestamp("2020-06-17 15:00")
+
+    timestamps = []
+    for timestamp in TradableEntity.get_interval_timestamps(
+        start_date="2020-06-17", end_date="2020-06-18", level=IntervalLevel.LEVEL_1HOUR
+    ):
+        timestamps.append(timestamp)
+
+    assert TradableEntity.is_open_timestamp(timestamps[0])
+    assert TradableEntity.is_close_timestamp(timestamps[-1])
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

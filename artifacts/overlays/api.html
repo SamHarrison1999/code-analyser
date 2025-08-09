@@ -1,0 +1,119 @@
+<!doctype html><meta charset='utf-8'><title>api – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: api</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+from __future__ import annotations
+
+from typing import Any, Callable, Dict, List, Sequence, cast
+
+from tianshou.policy import BasePolicy
+
+from qlib.rl.interpreter import ActionInterpreter, StateInterpreter
+from qlib.rl.reward import Reward
+from qlib.rl.simulator import InitialStateType, Simulator
+from qlib.rl.utils import FiniteEnvType, LogWriter
+
+from .trainer import Trainer
+from .vessel import TrainingVessel
+
+
+def train(
+    simulator_fn: Callable[[InitialStateType], Simulator],
+    state_interpreter: StateInterpreter,
+    action_interpreter: ActionInterpreter,
+    initial_states: Sequence[InitialStateType],
+    policy: BasePolicy,
+    reward: Reward,
+    vessel_kwargs: Dict[str, Any],
+    trainer_kwargs: Dict[str, Any],
+) -&gt; None:
+    """Train a policy with the parallelism provided by RL framework.
+
+    Experimental API. Parameters might change shortly.
+
+    Parameters
+    ----------
+    simulator_fn
+        Callable receiving initial seed, returning a simulator.
+    state_interpreter
+        Interprets the state of simulators.
+    action_interpreter
+        Interprets the policy actions.
+    initial_states
+        Initial states to iterate over. Every state will be run exactly once.
+    policy
+        Policy to train against.
+    reward
+        Reward function.
+    vessel_kwargs
+        Keyword arguments passed to :class:`TrainingVessel`, like ``episode_per_iter``.
+    trainer_kwargs
+        Keyword arguments passed to :class:`Trainer`, like ``finite_env_type``, ``concurrency``.
+    """
+
+    vessel = TrainingVessel(
+        simulator_fn=simulator_fn,
+        state_interpreter=state_interpreter,
+        action_interpreter=action_interpreter,
+        policy=policy,
+        train_initial_states=initial_states,
+        reward=reward,  # ignore none
+        **vessel_kwargs,
+    )
+    trainer = Trainer(**trainer_kwargs)
+    trainer.fit(vessel)
+
+
+def backtest(
+    simulator_fn: Callable[[InitialStateType], Simulator],
+    state_interpreter: StateInterpreter,
+    action_interpreter: ActionInterpreter,
+    initial_states: Sequence[InitialStateType],
+    policy: BasePolicy,
+    logger: LogWriter | List[LogWriter],
+    reward: Reward | None = None,
+    finite_env_type: FiniteEnvType = "subproc",
+    concurrency: int = 2,
+) -&gt; None:
+    """Backtest with the parallelism provided by RL framework.
+
+    Experimental API. Parameters might change shortly.
+
+    Parameters
+    ----------
+    simulator_fn
+        Callable receiving initial seed, returning a simulator.
+    state_interpreter
+        Interprets the state of simulators.
+    action_interpreter
+        Interprets the policy actions.
+    initial_states
+        Initial states to iterate over. Every state will be run exactly once.
+    policy
+        Policy to test against.
+    logger
+        Logger to record the backtest results. Logger must be present because
+        without logger, all information will be lost.
+    reward
+        Optional reward function. For backtest, this is for testing the rewards
+        and logging them only.
+    finite_env_type
+        Type of finite env implementation.
+    concurrency
+        Parallel workers.
+    """
+
+    vessel = TrainingVessel(
+        simulator_fn=simulator_fn,
+        state_interpreter=state_interpreter,
+        action_interpreter=action_interpreter,
+        policy=policy,
+        test_initial_states=initial_states,
+        reward=cast(Reward, reward),  # ignore none
+    )
+    trainer = Trainer(
+        finite_env_type=finite_env_type,
+        concurrency=concurrency,
+        loggers=logger,
+    )
+    trainer.test(vessel)
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

@@ -1,0 +1,14 @@
+{
+  "filename": "dateu_test",
+  "probs": {
+    "sast_risk": 0.3966997563838959,
+    "ml_signal": 0.48730745911598206,
+    "best_practice": 0.5915699005126953
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

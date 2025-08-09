@@ -1,0 +1,14 @@
+{
+  "filename": "top_stocks",
+  "probs": {
+    "sast_risk": 0.4054587483406067,
+    "ml_signal": 0.5007768273353577,
+    "best_practice": 0.5955487489700317
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

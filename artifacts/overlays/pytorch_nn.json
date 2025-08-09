@@ -1,0 +1,14 @@
+{
+  "filename": "pytorch_nn",
+  "probs": {
+    "sast_risk": 0.40384426712989807,
+    "ml_signal": 0.495724081993103,
+    "best_practice": 0.5930345058441162
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

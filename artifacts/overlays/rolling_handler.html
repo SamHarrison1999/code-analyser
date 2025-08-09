@@ -1,0 +1,37 @@
+<!doctype html><meta charset='utf-8'><title>rolling_handler – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: rolling_handler</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.39</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>from qlib.data.dataset.handler import DataHandlerLP
+from qlib.data.dataset.loader import DataLoaderDH
+from qlib.contrib.data.handler import check_transform_proc
+
+
+class RollingDataHandler(DataHandlerLP):
+    def __init__(
+        self,
+        start_time=None,
+        end_time=None,
+        infer_processors=[],
+        learn_processors=[],
+        fit_start_time=None,
+        fit_end_time=None,
+        data_loader_kwargs={},
+    ):
+        infer_processors = check_transform_proc(
+            infer_processors, fit_start_time, fit_end_time
+        )
+        learn_processors = check_transform_proc(
+            learn_processors, fit_start_time, fit_end_time
+        )
+
+        data_loader = {
+            "class": "DataLoaderDH",
+            "kwargs": {**data_loader_kwargs},
+        }
+
+        super().__init__(
+            instruments=None,
+            start_time=start_time,
+            end_time=end_time,
+            data_loader=data_loader,
+            infer_processors=infer_processors,
+            learn_processors=learn_processors,
+        )
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

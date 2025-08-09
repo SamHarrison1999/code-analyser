@@ -1,0 +1,14 @@
+{
+  "filename": "hyperparameter_360",
+  "probs": {
+    "sast_risk": 0.3915485143661499,
+    "ml_signal": 0.49876832962036133,
+    "best_practice": 0.589277982711792
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

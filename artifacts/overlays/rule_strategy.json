@@ -1,0 +1,14 @@
+{
+  "filename": "rule_strategy",
+  "probs": {
+    "sast_risk": 0.40299245715141296,
+    "ml_signal": 0.49733853340148926,
+    "best_practice": 0.5909773707389832
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

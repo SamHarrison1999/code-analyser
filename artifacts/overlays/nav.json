@@ -1,0 +1,14 @@
+{
+  "filename": "nav",
+  "probs": {
+    "sast_risk": 0.40139347314834595,
+    "ml_signal": 0.4938769042491913,
+    "best_practice": 0.5818986296653748
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

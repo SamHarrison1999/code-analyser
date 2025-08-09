@@ -1,0 +1,14 @@
+{
+  "filename": "fill_project",
+  "probs": {
+    "sast_risk": 0.3956620693206787,
+    "ml_signal": 0.5004734396934509,
+    "best_practice": 0.5881954431533813
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

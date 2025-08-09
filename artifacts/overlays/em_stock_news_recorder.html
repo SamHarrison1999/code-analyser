@@ -1,0 +1,55 @@
+<!doctype html><meta charset='utf-8'><title>em_stock_news_recorder – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: em_stock_news_recorder</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+import pandas as pd
+
+from zvt.contract.api import df_to_db
+from zvt.contract.recorder import FixedCycleDataRecorder
+from zvt.domain import Stock
+from zvt.domain.misc.stock_news import StockNews
+from zvt.recorders.em import em_api
+from zvt.utils.time_utils import count_interval, now_pd_timestamp, recent_year_date
+
+
+class EMStockNewsRecorder(FixedCycleDataRecorder):
+    original_page_url = "https://wap.eastmoney.com/quote/stock/0.002572.html"
+    url = "https://np-listapi.eastmoney.com/comm/wap/getListInfo?cb=callback&amp;client=wap&amp;type=1&amp;mTypeAndCode=0.002572&amp;pageSize=200&amp;pageIndex={}&amp;callback=jQuery1830017478247906740352_1644568731256&amp;_=1644568879493"
+
+    entity_schema = Stock
+    data_schema = StockNews
+    entity_provider = "em"
+    provider = "em"
+
+    def record(self, entity, start, end, size, timestamps):
+        from_date = recent_year_date()
+        if not start or (start &lt; from_date):
+            start = from_date
+
+        if count_interval(start, now_pd_timestamp()) &lt;= 30:
+            ps = 30
+        else:
+            ps = 200
+
+        latest_news: StockNews = self.get_latest_saved_record(entity=entity)
+
+        news = em_api.get_news(
+            session=self.http_session,
+            entity_id=entity.id,
+            ps=ps,
+            start_timestamp=start,
+            latest_code=latest_news.news_code if latest_news else None,
+        )
+        if news:
+            df = pd.DataFrame.from_records(news)
+            self.logger.info(df)
+            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+
+
+if __name__ == "__main__":
+    # df = Stock.query_data(filters=[Stock.exchange == "bj"], provider="em")
+    # entity_ids = df["entity_id"].tolist()
+    r = EMStockNewsRecorder(entity_ids=["stock_sh_600345"], sleeping_time=0)
+    r.run()
+
+
+# the __all__ is generated
+__all__ = ["EMStockNewsRecorder"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

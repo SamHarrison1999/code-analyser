@@ -1,0 +1,19 @@
+<!doctype html><meta charset='utf-8'><title>dragon_and_tiger – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: dragon_and_tiger</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+from zvt.api.selector import get_big_players, get_player_success_rate
+from zvt.domain import DragonAndTiger
+from zvt.utils.time_utils import date_time_by_interval, current_date
+
+if __name__ == "__main__":
+    provider = "em"
+    DragonAndTiger.record_data(provider=provider)
+    end_timestamp = date_time_by_interval(current_date(), -60)
+    # recent year
+    start_timestamp = date_time_by_interval(end_timestamp, -400)
+    print(f"{start_timestamp} to {end_timestamp}")
+    players = get_big_players(start_timestamp=start_timestamp, end_timestamp=end_timestamp)
+    print(players)
+    df = get_player_success_rate(
+        start_timestamp=start_timestamp, end_timestamp=end_timestamp, intervals=[3, 5, 10], players=players
+    )
+    print(df)
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

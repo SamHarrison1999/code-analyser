@@ -1,0 +1,14 @@
+{
+  "filename": "parse_position",
+  "probs": {
+    "sast_risk": 0.39171814918518066,
+    "ml_signal": 0.4933047592639923,
+    "best_practice": 0.5827760100364685
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

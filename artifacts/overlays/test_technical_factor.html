@@ -1,0 +1,102 @@
+<!doctype html><meta charset='utf-8'><title>test_technical_factor – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: test_technical_factor</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+from zvt.contract import IntervalLevel
+from zvt.factors.algorithm import MaTransformer, MacdTransformer
+from zvt.factors.ma.ma_factor import CrossMaFactor
+from ..context import init_test_context
+
+init_test_context()
+
+from zvt.factors.technical_factor import TechnicalFactor
+
+
+def test_ma():
+    factor = TechnicalFactor(
+        provider="joinquant",
+        codes=["000338"],
+        start_timestamp="2019-01-01",
+        end_timestamp="2019-06-10",
+        level=IntervalLevel.LEVEL_1DAY,
+        keep_window=30,
+        transformer=MaTransformer(windows=[5, 10, 30]),
+        adjust_type="qfq",
+    )
+
+    print(factor.factor_df.tail())
+
+    # compare with east money manually
+    ma5 = factor.factor_df["ma5"]
+    ma10 = factor.factor_df["ma10"]
+    ma30 = factor.factor_df["ma30"]
+
+    assert round(ma5.loc[("stock_sz_000338", "2019-06-10")], 2) &lt;= 11.23
+    assert round(ma10.loc[("stock_sz_000338", "2019-06-10")], 2) &lt;= 11.43
+    assert round(ma30.loc[("stock_sz_000338", "2019-06-10")], 2) &lt;= 11.52
+
+    factor.move_on(to_timestamp="2019-06-17")
+    ma5 = factor.factor_df["ma5"]
+    ma10 = factor.factor_df["ma10"]
+    ma30 = factor.factor_df["ma30"]
+
+    assert round(ma5.loc[("stock_sz_000338", "2019-06-17")], 2) &lt;= 12.06
+    assert round(ma10.loc[("stock_sz_000338", "2019-06-17")], 2) &lt;= 11.64
+    assert round(ma30.loc[("stock_sz_000338", "2019-06-17")], 2) &lt;= 11.50
+
+
+def test_macd():
+    factor = TechnicalFactor(
+        provider="joinquant",
+        codes=["000338"],
+        start_timestamp="2019-01-01",
+        end_timestamp="2019-06-10",
+        level=IntervalLevel.LEVEL_1DAY,
+        keep_window=None,
+        transformer=MacdTransformer(),
+        adjust_type="qfq",
+    )
+
+    print(factor.factor_df.tail())
+
+    # compare with east money manually
+    diff = factor.factor_df["diff"]
+    dea = factor.factor_df["dea"]
+    macd = factor.factor_df["macd"]
+
+    assert round(diff.loc[("stock_sz_000338", "2019-06-10")], 2) == -0.14
+    assert round(dea.loc[("stock_sz_000338", "2019-06-10")], 2) == -0.15
+    assert round(macd.loc[("stock_sz_000338", "2019-06-10")], 2) == 0.02
+
+    factor.move_on(to_timestamp="2019-06-17")
+    diff = factor.factor_df["diff"]
+    dea = factor.factor_df["dea"]
+    macd = factor.factor_df["macd"]
+
+    assert round(diff.loc[("stock_sz_000338", "2019-06-17")], 2) == 0.06
+    assert round(dea.loc[("stock_sz_000338", "2019-06-17")], 2) == -0.03
+    assert round(macd.loc[("stock_sz_000338", "2019-06-17")], 2) &lt;= 0.19
+
+
+def test_cross_ma():
+    factor = CrossMaFactor(
+        codes=["000338"],
+        start_timestamp="2019-01-01",
+        end_timestamp="2019-06-10",
+        level=IntervalLevel.LEVEL_1DAY,
+        provider="joinquant",
+        windows=[5, 10],
+        adjust_type="qfq",
+    )
+    print(factor.factor_df.tail())
+    print(factor.result_df.tail())
+
+    score = factor.result_df["filter_result"]
+
+    assert score[("stock_sz_000338", "2019-06-03")] == True
+    assert score[("stock_sz_000338", "2019-06-04")] == True
+    assert ("stock_sz_000338", "2019-06-05") not in score or score[("stock_sz_000338", "2019-06-05")] == False
+    assert ("stock_sz_000338", "2019-06-06") not in score or score[("stock_sz_000338", "2019-06-06")] == False
+    assert ("stock_sz_000338", "2019-06-10") not in score or score[("stock_sz_000338", "2019-06-10")] == False
+
+    factor.move_on()
+    score = factor.result_df["filter_result"]
+    assert score[("stock_sz_000338", "2019-06-17")] == True
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

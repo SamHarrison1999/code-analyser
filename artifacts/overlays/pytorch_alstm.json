@@ -1,0 +1,14 @@
+{
+  "filename": "pytorch_alstm",
+  "probs": {
+    "sast_risk": 0.399732381105423,
+    "ml_signal": 0.4966852068901062,
+    "best_practice": 0.588596522808075
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

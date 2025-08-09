@@ -1,0 +1,14 @@
+{
+  "filename": "actor_runner",
+  "probs": {
+    "sast_risk": 0.39825335144996643,
+    "ml_signal": 0.4968549609184265,
+    "best_practice": 0.5948680639266968
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,14 @@
+{
+  "filename": "pytorch_sfm",
+  "probs": {
+    "sast_risk": 0.40095165371894836,
+    "ml_signal": 0.4949336051940918,
+    "best_practice": 0.5933688879013062
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

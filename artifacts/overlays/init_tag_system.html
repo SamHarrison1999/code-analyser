@@ -1,0 +1,30 @@
+<!doctype html><meta charset='utf-8'><title>init_tag_system – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: init_tag_system</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+from zvt.domain import Block, BlockStock, Stock
+from zvt.tag.tag_service import build_default_main_tag, build_default_sub_tags
+from zvt.tag.tag_utils import (
+    build_initial_stock_pool_info,
+    build_initial_main_tag_info,
+    build_initial_sub_tag_info,
+    build_initial_industry_info,
+)
+from zvt.trading.trading_service import build_default_query_stock_quote_setting
+
+if __name__ == "__main__":
+    # init industry info
+    build_initial_industry_info()
+
+    # init tag info
+    build_initial_main_tag_info()
+    build_initial_sub_tag_info()
+    build_initial_stock_pool_info()
+    build_default_query_stock_quote_setting()
+
+    Stock.record_data(provider="em")
+    Block.record_data(provider="em", sleeping_time=0)
+    BlockStock.record_data(provider="em", sleeping_time=0)
+    # init default main tag
+    build_default_main_tag()
+
+    # init default sub tags
+    build_default_sub_tags()
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

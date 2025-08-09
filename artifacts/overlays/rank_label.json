@@ -1,0 +1,14 @@
+{
+  "filename": "rank_label",
+  "probs": {
+    "sast_risk": 0.399560809135437,
+    "ml_signal": 0.495385080575943,
+    "best_practice": 0.5892272591590881
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

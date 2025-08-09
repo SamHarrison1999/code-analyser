@@ -1,0 +1,14 @@
+{
+  "filename": "alpha",
+  "probs": {
+    "sast_risk": 0.39625808596611023,
+    "ml_signal": 0.49580147862434387,
+    "best_practice": 0.5882605314254761
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

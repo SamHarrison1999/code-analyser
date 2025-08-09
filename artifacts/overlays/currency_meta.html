@@ -1,0 +1,21 @@
+<!doctype html><meta charset='utf-8'><title>currency_meta – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: currency_meta</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.49</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+
+from sqlalchemy.orm import declarative_base
+
+from zvt.contract.register import register_schema, register_entity
+from zvt.contract.schema import TradableEntity
+
+CurrencyMetaBase = declarative_base()
+
+
+@register_entity(entity_type="currency")
+class Currency(CurrencyMetaBase, TradableEntity):
+    __tablename__ = "currency"
+
+
+register_schema(providers=["em"], db_name="currency_meta", schema_base=CurrencyMetaBase)
+
+
+# the __all__ is generated
+__all__ = ["Currency"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

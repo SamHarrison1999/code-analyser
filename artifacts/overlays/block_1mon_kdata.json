@@ -1,0 +1,14 @@
+{
+  "filename": "block_1mon_kdata",
+  "probs": {
+    "sast_risk": 0.40773141384124756,
+    "ml_signal": 0.4905656576156616,
+    "best_practice": 0.5904908776283264
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

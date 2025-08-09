@@ -1,0 +1,14 @@
+{
+  "filename": "prepare_riskdata",
+  "probs": {
+    "sast_risk": 0.39960309863090515,
+    "ml_signal": 0.5019937753677368,
+    "best_practice": 0.5885347127914429
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

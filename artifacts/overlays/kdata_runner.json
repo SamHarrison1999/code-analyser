@@ -1,0 +1,14 @@
+{
+  "filename": "kdata_runner",
+  "probs": {
+    "sast_risk": 0.40327954292297363,
+    "ml_signal": 0.4983575940132141,
+    "best_practice": 0.5940409898757935
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

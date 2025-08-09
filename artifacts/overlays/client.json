@@ -1,0 +1,14 @@
+{
+  "filename": "client",
+  "probs": {
+    "sast_risk": 0.3972073495388031,
+    "ml_signal": 0.49876144528388977,
+    "best_practice": 0.5906596183776855
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

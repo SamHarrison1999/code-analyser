@@ -1,0 +1,50 @@
+<!doctype html><meta charset='utf-8'><title>tagger – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: tagger</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+import logging
+from typing import Type
+
+from zvt.contract import Mixin
+from zvt.contract import TradableEntity
+from zvt.contract.api import get_db_session
+from zvt.contract.base_service import OneStateService
+from zvt.contract.zvt_info import TaggerState
+from zvt.domain import Stock
+from zvt.tag.tag_schemas import StockTags
+
+logger = logging.getLogger(__name__)
+
+
+class Tagger(OneStateService):
+    state_schema = TaggerState
+
+    entity_schema: Type[TradableEntity] = None
+
+    data_schema: Type[Mixin] = None
+
+    start_timestamp = "2018-01-01"
+
+    def __init__(self, force=False) -&gt; None:
+        super().__init__()
+        assert self.entity_schema is not None
+        assert self.data_schema is not None
+        self.force = force
+        self.session = get_db_session(provider="zvt", data_schema=self.data_schema)
+        if self.state and not self.force:
+            logger.info(f"get start_timestamp from state")
+            self.start_timestamp = self.state["current_timestamp"]
+        logger.info(f"tag start_timestamp: {self.start_timestamp}")
+
+    def tag(self):
+        raise NotImplementedError
+
+
+class StockTagger(Tagger):
+    data_schema = StockTags
+    entity_schema = Stock
+
+    def tag(self):
+        raise NotImplementedError
+
+
+# the __all__ is generated
+__all__ = ["Tagger", "StockTagger"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

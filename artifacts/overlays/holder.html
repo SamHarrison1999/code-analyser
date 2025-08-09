@@ -1,0 +1,101 @@
+<!doctype html><meta charset='utf-8'><title>holder – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: holder</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.49</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+from sqlalchemy import Column, String, DateTime, Float
+from sqlalchemy.orm import declarative_base
+
+from zvt.contract import Mixin
+from zvt.contract.register import register_schema
+
+HolderBase = declarative_base()
+
+
+class HkHolder(HolderBase, Mixin):
+    __tablename__ = "hk_holder"
+    #: 股票代码
+    code = Column(String(length=32))
+    #: 股票名称
+    name = Column(String(length=32))
+
+    #: 市场通编码	三种类型：310001-沪股通，310002-深股通，310005-港股通
+    holder_code = Column(String(length=32))
+    #: 市场通名称	三种类型：沪股通，深股通，港股通
+    holder_name = Column(String(length=32))
+
+    #: 持股数量
+    share_number = Column(Float)
+    #: 持股比例
+    share_ratio = Column(Float)
+
+
+class TopTenTradableHolder(HolderBase, Mixin):
+    __tablename__ = "top_ten_tradable_holder"
+
+    provider = Column(String(length=32))
+    code = Column(String(length=32))
+
+    report_period = Column(String(length=32))
+    report_date = Column(DateTime)
+
+    #: 股东代码
+    holder_code = Column(String(length=32))
+    #: 股东名称
+    holder_name = Column(String(length=32))
+    #: 持股数
+    shareholding_numbers = Column(Float)
+    #: 持股比例
+    shareholding_ratio = Column(Float)
+    #: 变动
+    change = Column(Float)
+    #: 变动比例
+    change_ratio = Column(Float)
+
+
+class TopTenHolder(HolderBase, Mixin):
+    __tablename__ = "top_ten_holder"
+
+    provider = Column(String(length=32))
+    code = Column(String(length=32))
+
+    report_period = Column(String(length=32))
+    report_date = Column(DateTime)
+
+    #: 股东代码
+    holder_code = Column(String(length=32))
+    #: 股东名称
+    holder_name = Column(String(length=32))
+    #: 持股数
+    shareholding_numbers = Column(Float)
+    #: 持股比例
+    shareholding_ratio = Column(Float)
+    #: 变动
+    change = Column(Float)
+    #: 变动比例
+    change_ratio = Column(Float)
+
+
+class InstitutionalInvestorHolder(HolderBase, Mixin):
+    __tablename__ = "institutional_investor_holder"
+
+    provider = Column(String(length=32))
+    code = Column(String(length=32))
+
+    report_period = Column(String(length=32))
+    report_date = Column(DateTime)
+
+    #: 机构类型
+    institutional_investor_type = Column(String(length=64))
+    #: 股东代码
+    holder_code = Column(String(length=32))
+    #: 股东名称
+    holder_name = Column(String(length=32))
+    #: 持股数
+    shareholding_numbers = Column(Float)
+    #: 持股比例
+    shareholding_ratio = Column(Float)
+
+
+register_schema(providers=["eastmoney", "joinquant"], db_name="holder", schema_base=HolderBase, entity_type="stock")
+
+
+# the __all__ is generated
+__all__ = ["HkHolder", "TopTenTradableHolder", "TopTenHolder", "InstitutionalInvestorHolder"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

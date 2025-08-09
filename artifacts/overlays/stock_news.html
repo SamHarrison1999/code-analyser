@@ -1,0 +1,53 @@
+<!doctype html><meta charset='utf-8'><title>stock_news – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: stock_news</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+from sqlalchemy import Column, String, JSON, Boolean, DateTime, Integer
+from sqlalchemy.orm import declarative_base
+
+from zvt.contract import Mixin
+from zvt.contract.register import register_schema
+
+NewsBase = declarative_base()
+
+
+class StockNews(NewsBase, Mixin):
+    __tablename__ = "stock_news"
+
+    #: 新闻编号
+    news_code = Column(String)
+    #: 新闻地址
+    news_url = Column(String)
+    #: 新闻标题
+    news_title = Column(String)
+    #: 新闻内容
+    news_content = Column(String)
+    #: 新闻解读
+    news_analysis = Column(JSON)
+    #: 用户设置为忽略
+    ignore_by_user = Column(Boolean, default=False)
+
+
+class StockHotTopic(NewsBase, Mixin):
+    __tablename__ = "stock_hot_topic"
+
+    #: 出现时间
+    created_timestamp = Column(DateTime)
+    #: 热度排行
+    position = Column(Integer)
+    #: 相关标的
+    entity_ids = Column(JSON)
+
+    #: 新闻编号
+    news_code = Column(String)
+    #: 新闻标题
+    news_title = Column(String)
+    #: 新闻内容
+    news_content = Column(String)
+    #: 新闻解读
+    news_analysis = Column(JSON)
+
+
+register_schema(providers=["em"], db_name="stock_news", schema_base=NewsBase, entity_type="stock")
+
+
+# the __all__ is generated
+__all__ = ["StockNews", "StockHotTopic"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

@@ -1,0 +1,14 @@
+{
+  "filename": "stock_1d_ma_factor",
+  "probs": {
+    "sast_risk": 0.3994884192943573,
+    "ml_signal": 0.4967416226863861,
+    "best_practice": 0.5903811454772949
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,14 @@
+{
+  "filename": "train_onpolicy",
+  "probs": {
+    "sast_risk": 0.40511399507522583,
+    "ml_signal": 0.4973173141479492,
+    "best_practice": 0.5906957983970642
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

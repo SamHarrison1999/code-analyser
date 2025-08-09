@@ -1,0 +1,14 @@
+{
+  "filename": "query_snippet",
+  "probs": {
+    "sast_risk": 0.4008350968360901,
+    "ml_signal": 0.49966561794281006,
+    "best_practice": 0.5890812277793884
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

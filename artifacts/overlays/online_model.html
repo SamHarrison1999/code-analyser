@@ -1,0 +1,46 @@
+<!doctype html><meta charset='utf-8'><title>online_model – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: online_model</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+# pylint: skip-file
+# flake8: noqa
+
+import random
+import pandas as pd
+from ...data import D
+from ..model.base import Model
+
+
+class ScoreFileModel(Model):
+    """
+    This model will load a score file, and return score at date exists in score file.
+    """
+
+    def __init__(self, score_path):
+        pred_test = pd.read_csv(
+            score_path, index_col=[0, 1], parse_dates=True, infer_datetime_format=True
+        )
+        self.pred = pred_test
+
+    def get_data_with_date(self, date, **kwargs):
+        score = self.pred.loc(axis=0)[
+            :, date
+        ]  # (stock_id, trade_date) multi_index, score in pdate
+        score_series = score.reset_index(level="datetime", drop=True)[
+            "score"
+        ]  # pd.Series ; index:stock_id, data: score
+        return score_series
+
+    def predict(self, x_test, **kwargs):
+        return x_test
+
+    def score(self, x_test, **kwargs):
+        return
+
+    def fit(
+        self, x_train, y_train, x_valid, y_valid, w_train=None, w_valid=None, **kwargs
+    ):
+        return
+
+    def save(self, fname, **kwargs):
+        return
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

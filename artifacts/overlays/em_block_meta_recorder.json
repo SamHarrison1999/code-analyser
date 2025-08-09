@@ -1,0 +1,14 @@
+{
+  "filename": "em_block_meta_recorder",
+  "probs": {
+    "sast_risk": 0.3984583020210266,
+    "ml_signal": 0.5009358525276184,
+    "best_practice": 0.5887681841850281
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

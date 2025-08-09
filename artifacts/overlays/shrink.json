@@ -1,0 +1,14 @@
+{
+  "filename": "shrink",
+  "probs": {
+    "sast_risk": 0.39886075258255005,
+    "ml_signal": 0.4992287755012512,
+    "best_practice": 0.5869648456573486
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

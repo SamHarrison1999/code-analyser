@@ -1,0 +1,14 @@
+{
+  "filename": "weight",
+  "probs": {
+    "sast_risk": 0.39328208565711975,
+    "ml_signal": 0.49998873472213745,
+    "best_practice": 0.582372784614563
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

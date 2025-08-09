@@ -1,0 +1,14 @@
+{
+  "filename": "vis_data",
+  "probs": {
+    "sast_risk": 0.4065532982349396,
+    "ml_signal": 0.5012530088424683,
+    "best_practice": 0.5983139872550964
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

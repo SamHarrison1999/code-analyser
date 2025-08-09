@@ -1,0 +1,57 @@
+<!doctype html><meta charset='utf-8'><title>gen_pickle_data – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: gen_pickle_data</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+import yaml
+import argparse
+import os
+import shutil
+from copy import deepcopy
+
+from qlib.contrib.data.highfreq_provider import HighFreqProvider
+
+loader = yaml.FullLoader
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--config", type=str, default="config.yml")
+    parser.add_argument("-d", "--dest", type=str, default=".")
+    parser.add_argument(
+        "-s",
+        "--split",
+        type=str,
+        choices=["none", "date", "stock", "both"],
+        default="stock",
+    )
+    args = parser.parse_args()
+
+    conf = yaml.load(open(args.config), Loader=loader)
+
+    for k, v in conf.items():
+        if isinstance(v, dict) and "path" in v:
+            v["path"] = os.path.join(args.dest, v["path"])
+    provider = HighFreqProvider(**conf)
+
+    # Gen dataframe
+    if "feature_conf" in conf:
+        feature = provider._gen_dataframe(deepcopy(provider.feature_conf))
+    if "backtest_conf" in conf:
+        backtest = provider._gen_dataframe(deepcopy(provider.backtest_conf))
+
+    provider.feature_conf["path"] = (
+        os.path.splitext(provider.feature_conf["path"])[0] + "/"
+    )
+    provider.backtest_conf["path"] = (
+        os.path.splitext(provider.backtest_conf["path"])[0] + "/"
+    )
+    # Split by date
+    if args.split == "date" or args.split == "both":
+        provider._gen_day_dataset(deepcopy(provider.feature_conf), "feature")
+        provider._gen_day_dataset(deepcopy(provider.backtest_conf), "backtest")
+
+    # Split by stock
+    if args.split == "stock" or args.split == "both":
+        provider._gen_stock_dataset(deepcopy(provider.feature_conf), "feature")
+        provider._gen_stock_dataset(deepcopy(provider.backtest_conf), "backtest")
+
+    shutil.rmtree("stat/", ignore_errors=True)
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

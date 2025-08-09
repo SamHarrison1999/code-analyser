@@ -1,0 +1,14 @@
+{
+  "filename": "index_1wk_kdata",
+  "probs": {
+    "sast_risk": 0.4053984582424164,
+    "ml_signal": 0.49174192547798157,
+    "best_practice": 0.5918935537338257
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,14 @@
+{
+  "filename": "__init__",
+  "probs": {
+    "sast_risk": 0.40524551272392273,
+    "ml_signal": 0.4894217252731323,
+    "best_practice": 0.5918560028076172
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

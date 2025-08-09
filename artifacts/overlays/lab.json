@@ -1,0 +1,14 @@
+{
+  "filename": "lab",
+  "probs": {
+    "sast_risk": 0.3996935784816742,
+    "ml_signal": 0.4984389543533325,
+    "best_practice": 0.592750072479248
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

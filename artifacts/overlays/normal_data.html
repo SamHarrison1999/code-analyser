@@ -1,0 +1,49 @@
+<!doctype html><meta charset='utf-8'><title>normal_data – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: normal_data</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.39</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.58</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+
+from zvt.utils.pd_utils import pd_is_not_null, fill_with_same_index, normal_index_df, is_normal_df
+
+
+class NormalData(object):
+    table_type_sample = None
+
+    def __init__(self, df, category_field="entity_id", time_field="timestamp", fill_index: bool = False) -&gt; None:
+        self.data_df = df
+        self.category_field = category_field
+        self.time_field = time_field
+        self.fill_index = fill_index
+
+        self.entity_ids = []
+        self.df_list = []
+        self.entity_map_df = {}
+
+        self.normalize()
+
+    def normalize(self):
+        """
+        normalize data_df to::
+
+                                        col1    col2    col3
+            entity_id    timestamp
+
+        """
+        if pd_is_not_null(self.data_df):
+            if not is_normal_df(self.data_df):
+                self.data_df = normal_index_df(self.data_df, self.category_field, self.time_field)
+
+            self.entity_ids = self.data_df.index.levels[0].to_list()
+
+            for entity_id in self.entity_ids:
+                df = self.data_df.loc[(entity_id,)]
+                self.df_list.append(df)
+                self.entity_map_df[entity_id] = df
+
+            if len(self.df_list) &gt; 1 and self.fill_index:
+                self.df_list = fill_with_same_index(df_list=self.df_list)
+
+    def empty(self):
+        return not pd_is_not_null(self.data_df)
+
+
+# the __all__ is generated
+__all__ = ["NormalData"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

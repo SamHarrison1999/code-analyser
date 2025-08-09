@@ -1,0 +1,22 @@
+<!doctype html><meta charset='utf-8'><title>test_joinquant_quotes – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: test_joinquant_quotes</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>from zvt.api.kdata import get_kdata
+from zvt.contract import IntervalLevel
+from zvt.contract.api import get_db_session
+from ..context import init_test_context
+
+init_test_context()
+
+day_k_session = get_db_session(provider="joinquant", db_name="stock_1d_kdata")  # type: sqlalchemy.orm.Session
+
+day_1h_session = get_db_session(provider="joinquant", db_name="stock_1h_kdata")  # type: sqlalchemy.orm.Session
+
+
+def test_jq_603220_kdata():
+    df = get_kdata(
+        entity_id="stock_sh_603220", session=day_k_session, level=IntervalLevel.LEVEL_1DAY, provider="joinquant"
+    )
+    print(df)
+    df = get_kdata(
+        entity_id="stock_sh_603220", session=day_1h_session, level=IntervalLevel.LEVEL_1HOUR, provider="joinquant"
+    )
+    print(df)
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

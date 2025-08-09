@@ -1,0 +1,14 @@
+{
+  "filename": "test_register_ops",
+  "probs": {
+    "sast_risk": 0.3972755968570709,
+    "ml_signal": 0.502081036567688,
+    "best_practice": 0.5947780609130859
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

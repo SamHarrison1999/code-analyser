@@ -1,0 +1,14 @@
+{
+  "filename": "conns",
+  "probs": {
+    "sast_risk": 0.39598238468170166,
+    "ml_signal": 0.4977021813392639,
+    "best_practice": 0.5875551700592041
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

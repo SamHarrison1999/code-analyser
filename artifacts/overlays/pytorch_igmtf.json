@@ -1,0 +1,14 @@
+{
+  "filename": "pytorch_igmtf",
+  "probs": {
+    "sast_risk": 0.39945709705352783,
+    "ml_signal": 0.49725309014320374,
+    "best_practice": 0.5888409614562988
+  },
+  "preds": {
+    "sast_risk": true,
+    "ml_signal": true,
+    "best_practice": true
+  },
+  "threshold": 0.3
+}

@@ -1,0 +1,30 @@
+<!doctype html><meta charset='utf-8'><title>block_meta – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: block_meta</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.41</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding: utf-8 -*-
+
+from sqlalchemy import Column, String
+from sqlalchemy.orm import declarative_base
+
+from zvt.contract import Portfolio, PortfolioStock
+from zvt.contract.register import register_schema, register_entity
+
+BlockMetaBase = declarative_base()
+
+
+#: 板块
+@register_entity(entity_type="block")
+class Block(BlockMetaBase, Portfolio):
+    __tablename__ = "block"
+
+    #: 板块类型，行业(industry),概念(concept)
+    category = Column(String(length=64))
+
+
+class BlockStock(BlockMetaBase, PortfolioStock):
+    __tablename__ = "block_stock"
+
+
+register_schema(providers=["em", "eastmoney", "sina"], db_name="block_meta", schema_base=BlockMetaBase)
+
+
+# the __all__ is generated
+__all__ = ["Block", "BlockStock"]
+</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>
