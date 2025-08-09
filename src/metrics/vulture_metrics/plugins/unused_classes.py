@@ -22,9 +22,7 @@ class UnusedClassesPlugin(VultureMetricPlugin):
         """
         Confidence decreases if very few class candidates are found.
         """
-        total_classes = sum(
-            1 for item in vulture_items if getattr(item, "typ", "") == "class"
-        )
+        total_classes = sum(1 for item in vulture_items if getattr(item, "typ", "") == "class")
         return 1.0 if total_classes > 0 else 0.0
 
     def severity_level(self, vulture_items: list) -> str:

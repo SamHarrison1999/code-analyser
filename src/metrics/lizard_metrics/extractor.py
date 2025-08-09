@@ -38,9 +38,7 @@ class LizardExtractor(MetricExtractorBase):
             self.data = self._prepare_lizard_entries(result.function_list)
 
             if not self.data:
-                logging.debug(
-                    f"[LizardExtractor] No valid function entries in: {self.file_path}"
-                )
+                logging.debug(f"[LizardExtractor] No valid function entries in: {self.file_path}")
                 return self._fallback_metrics()
 
             for plugin in self.plugins:
@@ -82,10 +80,7 @@ class LizardExtractor(MetricExtractorBase):
                 }
                 for f in function_list
             ]
-            + [
-                {"name": "average_token_count", "value": f.token_count}
-                for f in function_list
-            ]
+            + [{"name": "average_token_count", "value": f.token_count} for f in function_list]
             + [
                 {"name": "average_parameter_count", "value": len(f.parameters)}
                 for f in function_list
@@ -115,9 +110,7 @@ class LizardExtractor(MetricExtractorBase):
             return
 
         lines = [f"{name}: {value}" for name, value in self.result_metrics.items()]
-        logging.info(
-            f"[LizardExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines)
-        )
+        logging.info(f"[LizardExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
 
 
 def extract_lizard_metrics(file_path: str) -> List[Dict[str, Union[str, float, int]]]:

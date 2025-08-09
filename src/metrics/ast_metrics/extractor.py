@@ -17,13 +17,9 @@ class ASTMetricExtractor:
     to produce a comprehensive dictionary of code metrics.
     """
 
-    def __init__(
-        self, file_path: str, plugins: Optional[List[ASTMetricPlugin]] = None
-    ) -> None:
+    def __init__(self, file_path: str, plugins: Optional[List[ASTMetricPlugin]] = None) -> None:
         self.file_path: str = file_path
-        self.plugins: List[ASTMetricPlugin] = (
-            plugins if plugins is not None else load_plugins()
-        )
+        self.plugins: List[ASTMetricPlugin] = plugins if plugins is not None else load_plugins()
         self.metrics: Dict[str, int] = self._init_metrics()
         self.code: str = ""
         self.tree: Optional[ast.AST] = None
@@ -53,8 +49,7 @@ class ASTMetricExtractor:
         if not self.tree:
             return {}
         return {
-            plugin.name(): plugin.confidence_score(self.tree, self.code)
-            for plugin in self.plugins
+            plugin.name(): plugin.confidence_score(self.tree, self.code) for plugin in self.plugins
         }
 
     def get_severities(self) -> Dict[str, str]:
@@ -67,8 +62,7 @@ class ASTMetricExtractor:
         if not self.tree:
             return {}
         return {
-            plugin.name(): plugin.severity_level(self.tree, self.code)
-            for plugin in self.plugins
+            plugin.name(): plugin.severity_level(self.tree, self.code) for plugin in self.plugins
         }
 
     def _read_file(self) -> bool:
@@ -83,9 +77,7 @@ class ASTMetricExtractor:
                 self.code = f.read()
             return True
         except Exception as e:
-            logging.error(
-                f"[ASTMetricExtractor] Failed to read file '{self.file_path}': {e}"
-            )
+            logging.error(f"[ASTMetricExtractor] Failed to read file '{self.file_path}': {e}")
             return False
 
     def _parse_ast(self) -> bool:

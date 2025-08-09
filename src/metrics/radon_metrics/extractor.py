@@ -41,17 +41,13 @@ class RadonMetricExtractor(MetricExtractorBase):
         self.data = self._run_radon()
 
         if not self.data:
-            logger.warning(
-                f"[RadonMetricExtractor] No metrics parsed for {self.file_path}"
-            )
+            logger.warning(f"[RadonMetricExtractor] No metrics parsed for {self.file_path}")
             return self._fallback_metrics()
 
         for plugin in self.plugins:
             try:
                 value = plugin.extract(self.data, self.file_path)
-                self.result_metrics[plugin.name()] = (
-                    value if isinstance(value, (int, float)) else 0
-                )
+                self.result_metrics[plugin.name()] = value if isinstance(value, (int, float)) else 0
             except Exception as e:
                 logger.warning(
                     f"[RadonMetricExtractor] Plugin '{plugin.name()}' failed: {type(e).__name__}: {e}"
@@ -103,15 +99,11 @@ class RadonMetricExtractor(MetricExtractorBase):
         Log the final results after extraction.
         """
         if not self.result_metrics:
-            logger.info(
-                f"[RadonMetricExtractor] No metrics extracted for {self.file_path}"
-            )
+            logger.info(f"[RadonMetricExtractor] No metrics extracted for {self.file_path}")
             return
 
         lines = [f"{name}: {value}" for name, value in self.result_metrics.items()]
-        logger.info(
-            f"[RadonMetricExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines)
-        )
+        logger.info(f"[RadonMetricExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
 
 
 def extract_radon_metrics(file_path: str) -> List[Dict[str, Union[str, float, int]]]:
@@ -138,9 +130,7 @@ def extract_radon_metrics(file_path: str) -> List[Dict[str, Union[str, float, in
             for plugin in extractor.plugins
         ]
     except Exception as e:
-        logger.warning(
-            f"[extract_radon_metrics] Failed for {file_path}: {type(e).__name__}: {e}"
-        )
+        logger.warning(f"[extract_radon_metrics] Failed for {file_path}: {type(e).__name__}: {e}")
         return [
             {"metric": plugin.name(), "value": 0, "confidence": 0.0, "severity": "low"}
             for plugin in load_plugins()

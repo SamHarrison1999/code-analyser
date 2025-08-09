@@ -38,9 +38,7 @@ class DuplicatedBlocksPlugin(SonarMetricPlugin):
             value = sonar_data.get("duplicated_blocks", 0)
             return float(value)
         except (ValueError, TypeError) as e:
-            logging.warning(
-                f"[DuplicatedBlocksPlugin] Failed to extract for {file_path}: {e}"
-            )
+            logging.warning(f"[DuplicatedBlocksPlugin] Failed to extract for {file_path}: {e}")
             return 0.0
 
     def confidence_score(self, sonar_data: dict[str, Any]) -> float:

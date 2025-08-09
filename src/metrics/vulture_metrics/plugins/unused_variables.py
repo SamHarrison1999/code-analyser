@@ -16,9 +16,7 @@ class UnusedVariablesPlugin(VultureMetricPlugin):
         return self.plugin_name
 
     def extract(self, vulture_items: list) -> int:
-        return sum(
-            1 for item in vulture_items if getattr(item, "typ", "") == "variable"
-        )
+        return sum(1 for item in vulture_items if getattr(item, "typ", "") == "variable")
 
     def confidence_score(self, vulture_items: list) -> float:
         """

@@ -20,9 +20,7 @@ class CountFunctionDefinitionsMetricPlugin(LizardMetricPlugin):
     # 🧠 ML Signal: Function count reflects structural complexity and modularity
     def extract(self, lizard_metrics: List[Dict[str, Any]], file_path: str) -> int:
         for m in lizard_metrics:
-            if m.get("name") == self.plugin_name and isinstance(
-                m.get("value"), (int, float)
-            ):
+            if m.get("name") == self.plugin_name and isinstance(m.get("value"), (int, float)):
                 return int(m["value"])
         return 0
 

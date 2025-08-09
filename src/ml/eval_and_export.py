@@ -306,9 +306,7 @@ def main() -> None:
     # Force multi‑label just in case; respects saved num_labels.
     config.problem_type = "multi_label_classification"
     # Load model weights.
-    model = AutoModelForSequenceClassification.from_pretrained(
-        args.checkpoint_dir, config=config
-    )
+    model = AutoModelForSequenceClassification.from_pretrained(args.checkpoint_dir, config=config)
     # Load tokeniser (merges/vocab present in checkpoint root).
     tok = AutoTokenizer.from_pretrained(args.checkpoint_dir)
     # Set up a Trainer purely for prediction, with TensorBoard logging enabled for eval scalars.
@@ -319,9 +317,7 @@ def main() -> None:
         logging_dir=args.tensorboard_dir,
     )
     # Build Trainer.
-    trainer = Trainer(
-        model=model, args=targs, data_collator=default_data_collator, tokenizer=tok
-    )
+    trainer = Trainer(model=model, args=targs, data_collator=default_data_collator, tokenizer=tok)
     # Run prediction to obtain logits.
     print("🔎 Running inference on evaluation split...")
     out = trainer.predict(ds)
@@ -350,9 +346,7 @@ def main() -> None:
             "support": int(y_true.sum()),
         }
     # Compute overall micro and macro F1.
-    micro_f1 = float(
-        f1_score(gts.flatten(), preds.flatten(), average="micro", zero_division=0)
-    )
+    micro_f1 = float(f1_score(gts.flatten(), preds.flatten(), average="micro", zero_division=0))
     # Macro over labels.
     macro_f1 = float(f1_score(gts, preds, average="macro", zero_division=0))
     # Exact‑match accuracy (all labels correct for a sample).
@@ -389,9 +383,7 @@ def main() -> None:
             "plot": os.path.relpath(plot_path, args.export_dir),
         }
     # Write metrics JSON.
-    with open(
-        os.path.join(args.export_dir, "metrics.json"), "w", encoding="utf-8"
-    ) as f:
+    with open(os.path.join(args.export_dir, "metrics.json"), "w", encoding="utf-8") as f:
         json.dump(
             {
                 "accuracy_exact_match": exact_match,
@@ -418,9 +410,7 @@ def main() -> None:
         # JSON overlay content.
         overlay = {"filename": fname, "probs": pmap, "preds": predmap, "threshold": thr}
         # Write JSON overlay.
-        with open(
-            os.path.join(args.overlays_dir, f"{fname}.json"), "w", encoding="utf-8"
-        ) as jf:
+        with open(os.path.join(args.overlays_dir, f"{fname}.json"), "w", encoding="utf-8") as jf:
             json.dump(overlay, jf, indent=2)
         # Try to read source code for the HTML overlay.
         code_path = find_code_path(args.code_dir, fname)
@@ -445,11 +435,7 @@ def main() -> None:
             }
         )
     # Build a very small static dashboard HTML.
-    thead = (
-        "<tr><th>file</th>"
-        + "".join(f"<th>{lbl}</th>" for lbl in LABEL_MAP.keys())
-        + "</tr>"
-    )
+    thead = "<tr><th>file</th>" + "".join(f"<th>{lbl}</th>" for lbl in LABEL_MAP.keys()) + "</tr>"
     # Body rows with ticks for positives.
     tbody = "".join(
         f"<tr><td><a href='{r['overlay_rel']}'>{html_escape(r['filename'])}</a></td>"
@@ -471,14 +457,10 @@ def main() -> None:
     # Ensure dashboard directory and write index.html.
     os.makedirs(args.dashboard_dir, exist_ok=True)
     # Write the dashboard HTML.
-    with open(
-        os.path.join(args.dashboard_dir, "index.html"), "w", encoding="utf-8"
-    ) as df:
+    with open(os.path.join(args.dashboard_dir, "index.html"), "w", encoding="utf-8") as df:
         df.write(dash)
     # Save a quick text pointer for convenience.
-    with open(
-        os.path.join(args.dashboard_dir, "README.txt"), "w", encoding="utf-8"
-    ) as rf:
+    with open(os.path.join(args.dashboard_dir, "README.txt"), "w", encoding="utf-8") as rf:
         rf.write(
             "Open index.html in a browser. Overlays are in ../overlays. Metrics and calibration in ../calibration."
         )
@@ -501,9 +483,7 @@ def main() -> None:
             token=token,
             path_in_repo=local_model_dir.name,
         )
-        print(
-            f"☁️ Uploaded trained model to: https://huggingface.co/datasets/{args.hub_repo}"
-        )
+        print(f"☁️ Uploaded trained model to: https://huggingface.co/datasets/{args.hub_repo}")
     # Final message.
     print("✅ Evaluation and export complete.")
 

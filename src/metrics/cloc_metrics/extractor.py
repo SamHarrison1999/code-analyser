@@ -20,9 +20,7 @@ class ClocExtractor:
     def __init__(self, file_path: str):
         self.file_path = file_path
         self.plugins: list[ClocMetricPlugin] = load_plugins()
-        self.data: Dict[str, Any] = (
-            {}
-        )  # Parsed per-language data (e.g., cloc_data["Python"])
+        self.data: Dict[str, Any] = {}  # Parsed per-language data (e.g., cloc_data["Python"])
         self.result_metrics: Dict[str, Union[int, float]] = {}
 
     def extract(self) -> Dict[str, Union[int, float]]:
@@ -38,9 +36,7 @@ class ClocExtractor:
             self.result_metrics = {plugin.name(): 0 for plugin in self.plugins}
             return self.result_metrics
 
-        self.data = cloc_data.get(
-            "Python", {}
-        )  # ✅ Best Practice: Extract Python-specific metrics
+        self.data = cloc_data.get("Python", {})  # ✅ Best Practice: Extract Python-specific metrics
         self._apply_plugins()
         self._log_metrics()
         return self.result_metrics
@@ -70,9 +66,7 @@ class ClocExtractor:
             return json.loads(proc.stdout)
 
         except json.JSONDecodeError as e:
-            logging.warning(
-                f"[ClocExtractor] JSON decode error for {self.file_path}: {e}"
-            )
+            logging.warning(f"[ClocExtractor] JSON decode error for {self.file_path}: {e}")
             return None
         except Exception as e:
             logging.error(f"[ClocExtractor] Unexpected error running cloc: {e}")
@@ -105,6 +99,4 @@ class ClocExtractor:
             return
 
         lines = [f"{key}: {value}" for key, value in self.result_metrics.items()]
-        logging.info(
-            f"[ClocExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines)
-        )
+        logging.info(f"[ClocExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines))

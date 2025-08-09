@@ -138,9 +138,7 @@ def gather_sonar_metrics_bundle(file_path: str) -> list[dict[str, str | float]]:
                     f"[SonarQube] {plugin.name()} bundle: value={value}, confidence={confidence}, severity={severity}"
                 )
             except Exception as e:
-                logging.warning(
-                    f"[SonarQube] Plugin '{plugin.name()}' bundle failed: {e}"
-                )
+                logging.warning(f"[SonarQube] Plugin '{plugin.name()}' bundle failed: {e}")
                 bundle.append(
                     {
                         "metric": plugin.name(),
@@ -153,9 +151,7 @@ def gather_sonar_metrics_bundle(file_path: str) -> list[dict[str, str | float]]:
         return bundle
 
     except Exception as e:
-        logging.exception(
-            f"[SonarQube] Failed to gather metric bundle for {file_path}: {e}"
-        )
+        logging.exception(f"[SonarQube] Failed to gather metric bundle for {file_path}: {e}")
         return []
 
 

@@ -39,9 +39,7 @@ class PydocstyleExtractor(MetricExtractorBase):
             self.data = self._run_pydocstyle()
 
             if not self.data:
-                logger.debug(
-                    f"[PydocstyleExtractor] No Pydocstyle output for {self.file_path}"
-                )
+                logger.debug(f"[PydocstyleExtractor] No Pydocstyle output for {self.file_path}")
                 return self._fallback_metrics()
 
             for plugin in self.plugins:
@@ -87,9 +85,7 @@ class PydocstyleExtractor(MetricExtractorBase):
                 return []
             return proc.stdout.strip().splitlines()
         except Exception as e:
-            logger.error(
-                f"[PydocstyleExtractor] Subprocess failed: {type(e).__name__}: {e}"
-            )
+            logger.error(f"[PydocstyleExtractor] Subprocess failed: {type(e).__name__}: {e}")
             return []
 
     def _fallback_metrics(self) -> Dict[str, Union[int, float]]:
@@ -106,14 +102,10 @@ class PydocstyleExtractor(MetricExtractorBase):
         Logs the plugin-derived metric results.
         """
         if not self.result_metrics:
-            logger.info(
-                f"[PydocstyleExtractor] No metrics extracted for {self.file_path}"
-            )
+            logger.info(f"[PydocstyleExtractor] No metrics extracted for {self.file_path}")
             return
         lines = [f"{name}: {value}" for name, value in self.result_metrics.items()]
-        logger.info(
-            f"[PydocstyleExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines)
-        )
+        logger.info(f"[PydocstyleExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
 
 
 def extract_pydocstyle_metrics(

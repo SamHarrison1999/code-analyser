@@ -20,9 +20,7 @@ class MaintainabilityIndexMetricPlugin(LizardMetricPlugin):
     # 🧠 ML Signal: MI is a strong predictor of code quality and maintainability
     def extract(self, lizard_metrics: List[Dict[str, Any]], file_path: str) -> float:
         for m in lizard_metrics:
-            if m.get("name") == self.plugin_name and isinstance(
-                m.get("value"), (int, float)
-            ):
+            if m.get("name") == self.plugin_name and isinstance(m.get("value"), (int, float)):
                 return float(m["value"])
         return 0.0
 

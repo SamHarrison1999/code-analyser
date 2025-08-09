@@ -38,9 +38,7 @@ class ClocMetricPlugin(ABC):
         Returns:
             float | int: The computed metric value
         """
-        raise NotImplementedError(
-            "ClocMetricPlugin subclasses must implement extract()."
-        )
+        raise NotImplementedError("ClocMetricPlugin subclasses must implement extract().")
 
     def confidence_score(self, cloc_data: dict[str, Any]) -> float:
         """

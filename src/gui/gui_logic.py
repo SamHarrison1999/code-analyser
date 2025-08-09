@@ -14,9 +14,7 @@ logger = logging.getLogger(__name__)
 def update_tree(tree: ttk.Treeview, file_path: str) -> None:
     """Update the Treeview with metrics from the specified file."""
     if not file_path or not tree:
-        logger.warning(
-            "⚠️ update_tree() called with missing file_path or tree reference."
-        )
+        logger.warning("⚠️ update_tree() called with missing file_path or tree reference.")
         return
 
     try:
@@ -48,9 +46,7 @@ def update_tree(tree: ttk.Treeview, file_path: str) -> None:
         update_chart(flat_metrics)
 
     except Exception as e:
-        logger.error(
-            f"❌ Failed to update tree for {file_path}: {type(e).__name__}: {e}"
-        )
+        logger.error(f"❌ Failed to update tree for {file_path}: {type(e).__name__}: {e}")
 
 
 def update_chart(metrics_dict: Dict[str, Any]) -> None:
@@ -76,9 +72,7 @@ def update_chart(metrics_dict: Dict[str, Any]) -> None:
         logger.warning(f"⚠️ Could not draw chart: {type(e).__name__}: {e}")
 
 
-def update_footer_summary(
-    tree: ttk.Treeview, file_or_merged_metrics: Dict[str, Any]
-) -> None:
+def update_footer_summary(tree: ttk.Treeview, file_or_merged_metrics: Dict[str, Any]) -> None:
     try:
         from gui.shared_state import get_shared_state
 
@@ -93,9 +87,7 @@ def update_footer_summary(
         for file_data in shared_state.results.values():
             merged = merge_nested_metrics(file_data)
             filtered = filter_metrics_by_scope(merged)
-            numeric_only = {
-                k: float(v) for k, v in filtered.items() if isinstance(v, (int, float))
-            }
+            numeric_only = {k: float(v) for k, v in filtered.items() if isinstance(v, (int, float))}
             all_flattened.append(numeric_only)
 
         if not all_flattened:

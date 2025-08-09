@@ -38,9 +38,7 @@ class TestsPlugin(SonarMetricPlugin):
             value = sonar_data.get("tests", 0)
             return float(value)
         except (ValueError, TypeError) as e:
-            logging.warning(
-                f"[TestsPlugin] Failed to extract 'tests' metric for {file_path}: {e}"
-            )
+            logging.warning(f"[TestsPlugin] Failed to extract 'tests' metric for {file_path}: {e}")
             return 0.0
 
     def confidence_score(self, sonar_data: dict[str, Any]) -> float:

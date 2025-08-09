@@ -68,9 +68,7 @@ class BanditExtractor:
             return json.loads(proc.stdout)
 
         except json.JSONDecodeError as e:
-            logging.warning(
-                f"[BanditExtractor] JSON parse error for {self.file_path}: {e}"
-            )
+            logging.warning(f"[BanditExtractor] JSON parse error for {self.file_path}: {e}")
             return None
         except Exception as e:
             logging.error(f"[BanditExtractor] Unexpected error: {e}")
@@ -103,6 +101,4 @@ class BanditExtractor:
             return
 
         lines = [f"{key}: {value}" for key, value in self.result_metrics.items()]
-        logging.info(
-            f"[BanditExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines)
-        )
+        logging.info(f"[BanditExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines))

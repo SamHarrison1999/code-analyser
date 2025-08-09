@@ -29,9 +29,7 @@ class HighSeverityIssues(BanditMetricPlugin):
 
     def confidence_score(self, data: dict) -> float:
         count = self.extract(data)
-        return min(
-            1.0, 0.5 + (0.1 * count)
-        )  # Boosted confidence for critical vulnerabilities
+        return min(1.0, 0.5 + (0.1 * count))  # Boosted confidence for critical vulnerabilities
 
     def severity_level(self, data: dict) -> str:
         count = self.extract(data)

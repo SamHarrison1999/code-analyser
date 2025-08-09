@@ -24,9 +24,7 @@ class RLEnvironment:
 
         for _ in range(max_steps):
             sample = random.choice(self.entries)
-            input_tensor = (
-                torch.tensor(sample["input_ids"]).unsqueeze(0).to(self.device)
-            )
+            input_tensor = torch.tensor(sample["input_ids"]).unsqueeze(0).to(self.device)
             label_tensor = torch.tensor(sample["labels"]).float().to(self.device)
 
             output = model(input_tensor)
@@ -86,9 +84,7 @@ def train_rl_agent(
         optimizer.step()
 
         avg_reward = sum(rewards) / len(rewards)
-        print(
-            f"🎮 Episode {ep+1}/{episodes} | Reward: {avg_reward:.3f} | Loss: {loss.item():.4f}"
-        )
+        print(f"🎮 Episode {ep+1}/{episodes} | Reward: {avg_reward:.3f} | Loss: {loss.item():.4f}")
 
     save_path = f"{TRAINING_CONFIG['output_dir']}/rl_finetuned_epoch_{episodes}.pt"
     torch.save(model.state_dict(), save_path)

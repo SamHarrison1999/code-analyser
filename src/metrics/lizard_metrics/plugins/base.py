@@ -35,9 +35,7 @@ class LizardMetricPlugin(ABC):
             str: A globally unique name used in metric output dictionaries.
         """
         # ✅ Best Practice: Unique metric keys ensure safe integration into CSV/ML/GUI pipelines
-        raise NotImplementedError(
-            "LizardMetricPlugin must implement the name() method."
-        )
+        raise NotImplementedError("LizardMetricPlugin must implement the name() method.")
 
     @abstractmethod
     def extract(self, lizard_metrics: List[Dict[str, Any]], file_path: str) -> Any:
@@ -53,9 +51,7 @@ class LizardMetricPlugin(ABC):
         """
         # ⚠️ SAST Risk: Plugins must validate numerical types to avoid type errors during aggregation
         # 🧠 ML Signal: Plugins standardise feature vector structure across files
-        raise NotImplementedError(
-            "LizardMetricPlugin must implement the extract() method."
-        )
+        raise NotImplementedError("LizardMetricPlugin must implement the extract() method.")
 
     def confidence_score(self, lizard_metrics: List[Dict[str, Any]]) -> float:
         """

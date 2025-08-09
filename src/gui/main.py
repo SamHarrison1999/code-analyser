@@ -74,9 +74,7 @@ def start_main_gui(splash: tk.Tk, progress: ttk.Progressbar) -> None:
     try:
         root = tk.Tk()
         setup_shared_gui_state(root)  # ✅ Initialise GUI shared state
-        root.protocol(
-            "WM_DELETE_WINDOW", lambda: clean_exit(root)
-        )  # ✅ Safe shutdown binding
+        root.protocol("WM_DELETE_WINDOW", lambda: clean_exit(root))  # ✅ Safe shutdown binding
         launch_gui(root)
         root.mainloop()
         clean_exit(root)  # ✅ If GUI exits naturally, ensure cleanup
@@ -117,9 +115,7 @@ def show_splash_and_start() -> None:
     progress.pack(pady=10)
     progress.start(10)
 
-    splash.after(
-        1500, lambda: start_main_gui(splash, progress)
-    )  # ✅ Delay to let splash display
+    splash.after(1500, lambda: start_main_gui(splash, progress))  # ✅ Delay to let splash display
     splash.mainloop()
 
 
@@ -135,9 +131,7 @@ def launch_tensorboard(logdir: str = "runs") -> None:
         print(f"✅ TensorBoard launched at http://localhost:6006 (logdir: {logdir})")
     except Exception as e:
         logging.error(f"❌ Failed to launch TensorBoard: {e}")
-        print(
-            "❌ Could not start TensorBoard. Ensure it is installed and accessible in PATH."
-        )
+        print("❌ Could not start TensorBoard. Ensure it is installed and accessible in PATH.")
 
 
 if __name__ == "__main__":

@@ -20,9 +20,7 @@ SUMMARY_JSON = "annotations_summary.json"
 SUMMARY_CSV = "per_file_stats.csv"
 
 
-def generate_dataset(
-    input_dir=INPUT_DIR, output_dir=OUTPUT_DIR, overwrite=False, stream=False
-):
+def generate_dataset(input_dir=INPUT_DIR, output_dir=OUTPUT_DIR, overwrite=False, stream=False):
     os.makedirs(output_dir, exist_ok=True)
     files = [
         f
@@ -72,11 +70,7 @@ def generate_dataset(
                     "count": len(parsed),
                     "confidence": confidence_avg,
                     **types,
-                    **{
-                        f"{k}_{s}": severity[k][s]
-                        for k in severity
-                        for s in severity[k]
-                    },
+                    **{f"{k}_{s}": severity[k][s] for k in severity for s in severity[k]},
                 }
             )
 
@@ -119,12 +113,8 @@ def generate_dataset(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Generate annotated dataset using Together.ai"
-    )
-    parser.add_argument(
-        "--input-dir", default=INPUT_DIR, help="Directory of source .py files"
-    )
+    parser = argparse.ArgumentParser(description="Generate annotated dataset using Together.ai")
+    parser.add_argument("--input-dir", default=INPUT_DIR, help="Directory of source .py files")
     parser.add_argument(
         "--output-dir",
         default=OUTPUT_DIR,
@@ -133,9 +123,7 @@ def main():
     parser.add_argument(
         "--overwrite", action="store_true", help="Overwrite existing annotation files"
     )
-    parser.add_argument(
-        "--stream", action="store_true", help="Use Together.ai streaming mode"
-    )
+    parser.add_argument("--stream", action="store_true", help="Use Together.ai streaming mode")
     args = parser.parse_args()
 
     generate_dataset(

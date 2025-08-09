@@ -38,9 +38,7 @@ class CommentLinesDensityPlugin(SonarMetricPlugin):
             value = sonar_data.get("comment_lines_density", 0)
             return float(value)
         except (ValueError, TypeError) as e:
-            logging.warning(
-                f"[CommentLinesDensityPlugin] Failed to extract for {file_path}: {e}"
-            )
+            logging.warning(f"[CommentLinesDensityPlugin] Failed to extract for {file_path}: {e}")
             return 0.0
 
     def confidence_score(self, sonar_data: dict[str, Any]) -> float:

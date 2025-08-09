@@ -68,9 +68,7 @@ def compute_confidence_weighted_signals(annotations: List[Dict]) -> Dict[str, fl
     weights = defaultdict(float)
     for ann in annotations:
         if "type" in ann and "confidence" in ann:
-            weights[ann["type"]] += float(ann["confidence"]) * label_to_score(
-                ann["type"]
-            )
+            weights[ann["type"]] += float(ann["confidence"]) * label_to_score(ann["type"])
     return dict(weights)
 
 
@@ -80,9 +78,7 @@ def severity_breakdown_by_type(annotations: List[Dict]) -> Dict[str, Dict[str, i
     Returns:
         { "SAST Risk": {"Low": X, "Medium": Y, "High": Z}, ... }
     """
-    nested = {
-        label: {s: 0 for s in SEVERITY_LEVELS} for label in LABEL_PREFIXES.values()
-    }
+    nested = {label: {s: 0 for s in SEVERITY_LEVELS} for label in LABEL_PREFIXES.values()}
     for ann in annotations:
         label = ann.get("type")
         severity = ann.get("severity", "Medium").capitalize()
@@ -135,15 +131,11 @@ def compute_summary_stats(annotations: List[Dict]) -> Dict[str, object]:
             "confidence_percentiles": {},
         }
 
-    confidences = [
-        float(a.get("confidence", 0)) for a in annotations if "confidence" in a
-    ]
+    confidences = [float(a.get("confidence", 0)) for a in annotations if "confidence" in a]
 
     return {
         "total_annotations": len(annotations),
-        "average_confidence": (
-            sum(confidences) / len(confidences) if confidences else 0.0
-        ),
+        "average_confidence": (sum(confidences) / len(confidences) if confidences else 0.0),
         "label_distribution": count_annotations_by_type(annotations),
         "weighted_signals": compute_confidence_weighted_signals(annotations),
         "severity_by_type": severity_breakdown_by_type(annotations),

@@ -16,9 +16,7 @@ class UnusedFunctionsPlugin(VultureMetricPlugin):
         return self.plugin_name
 
     def extract(self, vulture_items: list) -> int:
-        return sum(
-            1 for item in vulture_items if getattr(item, "typ", "") == "function"
-        )
+        return sum(1 for item in vulture_items if getattr(item, "typ", "") == "function")
 
     def confidence_score(self, vulture_items: list) -> float:
         """

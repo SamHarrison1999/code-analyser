@@ -66,9 +66,7 @@ def run_metric_extraction(file_path: str, show_result: bool = True) -> None:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(Path(__file__).resolve().parents[1])
 
-        result = subprocess.run(
-            script_args, capture_output=True, text=True, check=True, env=env
-        )
+        result = subprocess.run(script_args, capture_output=True, text=True, check=True, env=env)
         logger.debug(f"🛠️ CLI Output for {file_path}:\n{result.stdout}\n{result.stderr}")
 
         if not out_file.exists():
@@ -120,9 +118,7 @@ def run_directory_analysis() -> None:
         if file_path in shared_state.results:
             logger.debug(f"⏩ Skipping already-analysed file: {file_path}")
             continue
-        logger.debug(
-            f"📌 Calling run_metric_extraction from <run_directory_analysis>: {file_path}"
-        )
+        logger.debug(f"📌 Calling run_metric_extraction from <run_directory_analysis>: {file_path}")
         run_metric_extraction(file_path, show_result=False)
 
     if not shared_state.results:
@@ -157,8 +153,7 @@ def export_to_csv(default_path: Path = None) -> None:
 
     try:
         flat_results = {
-            file: merge_nested_metrics(metrics)
-            for file, metrics in shared_state.results.items()
+            file: merge_nested_metrics(metrics) for file, metrics in shared_state.results.items()
         }
 
         all_keys = sorted({key for metrics in flat_results.values() for key in metrics})
@@ -225,9 +220,7 @@ def export_last_chart_data(chart_type: str = "bar", format: str = "csv") -> None
             raise ValueError(f"Unsupported export format: {format}")
 
         logger.info(f"✅ Exported chart ({chart_type}) as {format} to {save_path}")
-        messagebox.showinfo(
-            "Exported", f"{chart_type.capitalize()} chart exported to {save_path}"
-        )
+        messagebox.showinfo("Exported", f"{chart_type.capitalize()} chart exported to {save_path}")
 
     except Exception as e:
         logger.exception(f"❌ Failed to export chart data: {e}")
@@ -253,22 +246,12 @@ def export_all_assets() -> None:
         export_overlay_as_json("overlay_export.json")
         export_html_dashboard("dashboard.html")
 
-        if (
-            include_overlay
-            and shared_state.heatmap_frame
-            and shared_state.overlay_tokens
-        ):
-            export_heatmap_to_csv(
-                "exports/heatmap_overlay.csv", shared_state.overlay_tokens
-            )
-            export_heatmap_to_png(
-                shared_state.heatmap_frame, "exports/heatmap_overlay.png"
-            )
+        if include_overlay and shared_state.heatmap_frame and shared_state.overlay_tokens:
+            export_heatmap_to_csv("exports/heatmap_overlay.csv", shared_state.overlay_tokens)
+            export_heatmap_to_png(shared_state.heatmap_frame, "exports/heatmap_overlay.png")
 
         logger.info("📤 All visual assets exported successfully.")
-        messagebox.showinfo(
-            "Export Complete", "All charts and overlays exported to /exports/"
-        )
+        messagebox.showinfo("Export Complete", "All charts and overlays exported to /exports/")
     except Exception as e:
         logger.error(f"❌ Failed unified export: {e}")
         messagebox.showerror("Export Error", f"Unified export failed: {e}")

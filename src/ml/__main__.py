@@ -84,9 +84,7 @@ def annotate_and_parse_file(
         print(f"✍️ Overwrote: {filepath}")
 
     output_dir = output_dir or DATA_PATHS["annotation_dir"]
-    save_path = save_annotation_json(
-        annotated_code, source_path=filepath, output_dir=output_dir
-    )
+    save_path = save_annotation_json(annotated_code, source_path=filepath, output_dir=output_dir)
     print(f"✅ Annotation saved to {save_path}")
 
 
@@ -133,15 +131,11 @@ def annotate_file(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Unified AI/Together.ai CLI for code annotation"
-    )
+    parser = argparse.ArgumentParser(description="Unified AI/Together.ai CLI for code annotation")
 
     parser.add_argument("--file", help="Annotate a single file using model")
     parser.add_argument("--dir", help="Annotate all files in directory using model")
-    parser.add_argument(
-        "--refresh", action="store_true", help="Refresh cache (model mode)"
-    )
+    parser.add_argument("--refresh", action="store_true", help="Refresh cache (model mode)")
     parser.add_argument(
         "--use-distilled", action="store_true", help="Use distilled transformer model"
     )
@@ -156,12 +150,8 @@ def main():
         "--annotate-and-parse", help="Annotate + parse a single file using Together.ai"
     )
     parser.add_argument("--batch", help="Batch annotate folder using Together.ai")
-    parser.add_argument(
-        "--overwrite", action="store_true", help="Overwrite original .py files"
-    )
-    parser.add_argument(
-        "--stream", action="store_true", help="Enable Together.ai streaming"
-    )
+    parser.add_argument("--overwrite", action="store_true", help="Overwrite original .py files")
+    parser.add_argument("--stream", action="store_true", help="Enable Together.ai streaming")
 
     args = parser.parse_args()
 
@@ -200,9 +190,7 @@ def main():
                         all_results.extend(annotated)
 
             merged_summary = summarize_annotations(all_results)
-            with open(
-                export_dir / "annotations_summary.json", "w", encoding="utf-8"
-            ) as f:
+            with open(export_dir / "annotations_summary.json", "w", encoding="utf-8") as f:
                 json.dump(merged_summary, f, indent=2)
             export_summary_csv(export_dir / "annotations_summary.csv", merged_summary)
 

@@ -23,8 +23,7 @@ class AverageCyclomaticComplexityMetricPlugin(LizardMetricPlugin):
         values = [
             m["value"]
             for m in lizard_metrics
-            if m.get("name") == self.plugin_name
-            and isinstance(m.get("value"), (int, float))
+            if m.get("name") == self.plugin_name and isinstance(m.get("value"), (int, float))
         ]
         return round(sum(values) / len(values), 2) if values else 0.0
 

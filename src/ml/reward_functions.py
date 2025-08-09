@@ -64,12 +64,9 @@ def diversity_penalty(
         float: Diversity bonus or penalty.
     """
     flattened = [
-        tuple(p.tolist() if isinstance(p, torch.Tensor) else p)
-        for p in prediction_history
+        tuple(p.tolist() if isinstance(p, torch.Tensor) else p) for p in prediction_history
     ]
-    flattened.append(
-        tuple(new_pred.tolist() if isinstance(new_pred, torch.Tensor) else new_pred)
-    )
+    flattened.append(tuple(new_pred.tolist() if isinstance(new_pred, torch.Tensor) else new_pred))
 
     unique = len(set(flattened))
     if unique < min_unique:

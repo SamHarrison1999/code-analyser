@@ -169,9 +169,7 @@ def filter_metrics_by_scope(metrics_dict: Dict[str, Any]) -> Dict[str, float]:
     logger.debug(f"[Filter Scope] Flattened metrics: {len(flat_metrics)}")
 
     if scope == "all":
-        return {
-            k: float(v) for k, v in flat_metrics.items() if isinstance(v, (int, float))
-        }
+        return {k: float(v) for k, v in flat_metrics.items() if isinstance(v, (int, float))}
 
     if scope not in SCOPE_KEYWORDS:
         logger.warning(f"⚠️ Unknown scope '{scope}' specified")
@@ -212,9 +210,7 @@ def draw_chart(keys: list[str], values: list[float], title: str, filename: str) 
             if not isinstance(width, (int, float)):
                 raise TypeError(f"❌ fig_width is not numeric: {width} ({type(width)})")
             if not isinstance(height, (int, float)):
-                raise TypeError(
-                    f"❌ fig_height is not numeric: {height} ({type(height)})"
-                )
+                raise TypeError(f"❌ fig_height is not numeric: {height} ({type(height)})")
 
             logger.debug(f"[DPI] dpi: {dpi} ({type(dpi)})")
             fig_width = float(width) / dpi
@@ -239,10 +235,7 @@ def draw_chart(keys: list[str], values: list[float], title: str, filename: str) 
         keys,
         values,
         height=1.0,
-        color=[
-            get_severity_colour(overlay_lookup.get(k, {}).get("severity", "low"))
-            for k in keys
-        ],
+        color=[get_severity_colour(overlay_lookup.get(k, {}).get("severity", "low")) for k in keys],
     )
 
     ax.set_xlabel("Value", fontsize=14)
@@ -456,9 +449,7 @@ def export_html_dashboard(filename="dashboard.html"):
     with open(html_path, "w", encoding="utf-8") as f:
         f.write("<html><head><title>Code Analyser Dashboard</title></head><body>")
         f.write(f"<h1>{summary['title']}</h1>")
-        f.write(
-            "<h2>Metrics</h2><table border='1'><tr><th>Metric</th><th>Value</th></tr>"
-        )
+        f.write("<h2>Metrics</h2><table border='1'><tr><th>Metric</th><th>Value</th></tr>")
         for row in summary["entries"]:
             f.write(f"<tr><td>{row['metric']}</td><td>{row['value']}</td></tr>")
         f.write("</table>")

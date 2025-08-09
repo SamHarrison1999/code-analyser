@@ -22,8 +22,7 @@ class AverageFunctionLengthMetricPlugin(LizardMetricPlugin):
         lengths = [
             m["value"]
             for m in lizard_metrics
-            if m.get("name") == self.plugin_name
-            and isinstance(m.get("value"), (int, float))
+            if m.get("name") == self.plugin_name and isinstance(m.get("value"), (int, float))
         ]
         return round(sum(lengths) / len(lengths), 2) if lengths else 0.0
 

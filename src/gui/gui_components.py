@@ -80,9 +80,7 @@ def update_footer_summary(tree: ttk.Treeview, flat_metrics: dict) -> None:
 
     if hasattr(shared_state, "overlay_status_label"):
         if overlay_summary:
-            shared_state.overlay_status_label.config(
-                text="🧠 AI overlay: loaded ✅", fg="green"
-            )
+            shared_state.overlay_status_label.config(text="🧠 AI overlay: loaded ✅", fg="green")
         else:
             shared_state.overlay_status_label.config(
                 text="🧠 AI overlay: not loaded", fg="darkgrey"
@@ -155,9 +153,7 @@ def launch_gui(root: tk.Tk) -> None:
         3,
         "Aggregate chart across folder",
     )
-    create_button(
-        top_frame, "📄 Export CSV", lambda: export_to_csv(), 4, "Export metrics to CSV"
-    )
+    create_button(top_frame, "📄 Export CSV", lambda: export_to_csv(), 4, "Export metrics to CSV")
     create_button(
         top_frame,
         "🧠 Annotate File",
@@ -193,9 +189,7 @@ def launch_gui(root: tk.Tk) -> None:
         12,
         "Send ZIP bundle via email",
     )
-    create_button(
-        top_frame, "📊 Open Dashboard", lambda: open_dashboard(), 13, "Open dashboard"
-    )
+    create_button(top_frame, "📊 Open Dashboard", lambda: open_dashboard(), 13, "Open dashboard")
 
     def refresh_ai_overlay():
         filepath = shared_state.current_file_path
@@ -259,9 +253,7 @@ def launch_gui(root: tk.Tk) -> None:
     export_format_frame = tk.Frame(root)
     export_format_frame.pack(pady=(0, 10))
 
-    tk.Label(export_format_frame, text="Export Formats:").pack(
-        side=tk.LEFT, padx=(0, 5)
-    )
+    tk.Label(export_format_frame, text="Export Formats:").pack(side=tk.LEFT, padx=(0, 5))
     for fmt in ["csv", "json", "png"]:
         cb = tk.Checkbutton(
             export_format_frame,
@@ -293,9 +285,9 @@ def launch_gui(root: tk.Tk) -> None:
     option_frame = tk.Frame(root)
     option_frame.pack(pady=5)
     tk.Label(option_frame, text="Chart Type:").pack(side=tk.LEFT)
-    tk.Radiobutton(
-        option_frame, text="Bar", variable=shared_state.chart_type, value="bar"
-    ).pack(side=tk.LEFT)
+    tk.Radiobutton(option_frame, text="Bar", variable=shared_state.chart_type, value="bar").pack(
+        side=tk.LEFT
+    )
 
     tk.Label(option_frame, text="Metric Scope:").pack(side=tk.LEFT, padx=(20, 5))
 
@@ -333,9 +325,7 @@ def launch_gui(root: tk.Tk) -> None:
     )
 
     logging.debug("📌 Calling trace_add from <launch_gui>")
-    shared_state.filter_trace_id = shared_state.filter_var.trace_add(
-        "write", on_filter_change
-    )
+    shared_state.filter_trace_id = shared_state.filter_var.trace_add("write", on_filter_change)
 
     # === Notebook ===
     notebook = ttk.Notebook(root)
@@ -344,15 +334,11 @@ def launch_gui(root: tk.Tk) -> None:
     # Charts Tab
     chart_tab = tk.Frame(notebook)
     chart_canvas_widget = tk.Canvas(chart_tab)
-    chart_scroll = ttk.Scrollbar(
-        chart_tab, orient="vertical", command=chart_canvas_widget.yview
-    )
+    chart_scroll = ttk.Scrollbar(chart_tab, orient="vertical", command=chart_canvas_widget.yview)
     scrollable_chart = tk.Frame(chart_canvas_widget)
     scrollable_chart.bind(
         "<Configure>",
-        lambda e: chart_canvas_widget.configure(
-            scrollregion=chart_canvas_widget.bbox("all")
-        ),
+        lambda e: chart_canvas_widget.configure(scrollregion=chart_canvas_widget.bbox("all")),
     )
     chart_canvas_widget.create_window((0, 0), window=scrollable_chart, anchor="nw")
     chart_canvas_widget.configure(yscrollcommand=chart_scroll.set)
@@ -434,9 +420,7 @@ def launch_gui(root: tk.Tk) -> None:
             "Enter your token:",
             default=config.get("huggingface_token"),
         )
-        repo = simple_input(
-            "Repo Name", "Dataset repo:", default=config.get("huggingface_repo")
-        )
+        repo = simple_input("Repo Name", "Dataset repo:", default=config.get("huggingface_repo"))
         try:
             url = upload_zip_to_huggingface(zip_path, repo, token)
             messagebox.showinfo("Uploaded", f"✅ Uploaded to: {url}")
@@ -450,18 +434,10 @@ def launch_gui(root: tk.Tk) -> None:
         config = load_config()
         zip_path = export_zip_bundle()
         to_email = simple_input("Send To", "Recipient email:")
-        smtp_user = simple_input(
-            "SMTP User", "Your email:", default=config.get("smtp_user")
-        )
-        smtp_pass = simple_input(
-            "SMTP Pass", "App password:", default=config.get("smtp_pass")
-        )
-        smtp_host = simple_input(
-            "SMTP Host", "SMTP server:", default=config.get("smtp_host")
-        )
-        smtp_port = simple_input(
-            "SMTP Port", "SMTP port:", default=str(config.get("smtp_port"))
-        )
+        smtp_user = simple_input("SMTP User", "Your email:", default=config.get("smtp_user"))
+        smtp_pass = simple_input("SMTP Pass", "App password:", default=config.get("smtp_pass"))
+        smtp_host = simple_input("SMTP Host", "SMTP server:", default=config.get("smtp_host"))
+        smtp_port = simple_input("SMTP Port", "SMTP port:", default=str(config.get("smtp_port")))
 
         try:
             send_zip_email(
@@ -541,9 +517,7 @@ def prompt_and_extract_file() -> None:
         flat_metrics = flatten_metrics(shared_state.results.get(path, {}))
         update_footer_summary(shared_state.summary_tree, flat_metrics)
 
-    shared_state.filter_trace_id = shared_state.filter_var.trace_add(
-        "write", on_filter_change
-    )
+    shared_state.filter_trace_id = shared_state.filter_var.trace_add("write", on_filter_change)
 
 
 def annotate_selected_file() -> None:
@@ -551,9 +525,7 @@ def annotate_selected_file() -> None:
     shared_state = get_shared_state()
     filepath = shared_state.current_file_path
     if not filepath or not Path(filepath).is_file():
-        messagebox.showerror(
-            "No File Selected", "Please select a file before annotating."
-        )
+        messagebox.showerror("No File Selected", "Please select a file before annotating.")
         return
     try:
         logging.info(f"🧠 Annotating file with Together AI: {filepath}")
@@ -566,14 +538,10 @@ def annotate_selected_file() -> None:
         update_tree(shared_state.tree, filepath)
         flat_metrics = flatten_metrics(shared_state.results.get(filepath, {}))
         update_footer_summary(shared_state.summary_tree, flat_metrics)
-        messagebox.showinfo(
-            "Annotation Complete", "File successfully annotated with AI."
-        )
+        messagebox.showinfo("Annotation Complete", "File successfully annotated with AI.")
     except Exception as e:
         logging.exception(f"❌ Annotation failed: {e}")
-        messagebox.showerror(
-            "Annotation Error", f"An error occurred during annotation:\n{e}"
-        )
+        messagebox.showerror("Annotation Error", f"An error occurred during annotation:\n{e}")
 
 
 def on_filter_change(*args) -> None:
@@ -631,9 +599,7 @@ def show_directory_summary_chart() -> None:
             except (TypeError, ValueError):
                 continue
     if not combined:
-        messagebox.showinfo(
-            "No Metrics", f"No numeric metrics available for scope: {scope}"
-        )
+        messagebox.showinfo("No Metrics", f"No numeric metrics available for scope: {scope}")
         return
     keys = list(combined.keys())
     vals = [round(combined[k], 2) for k in keys]
@@ -642,9 +608,7 @@ def show_directory_summary_chart() -> None:
 
 def on_export_all():
     path = export_all_assets()
-    messagebox.showinfo(
-        "Export Complete", f"All charts and overlays exported to: {path}"
-    )
+    messagebox.showinfo("Export Complete", f"All charts and overlays exported to: {path}")
 
 
 def export_current_to_tensorboard():

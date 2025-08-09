@@ -30,11 +30,7 @@ class WhitespaceIssuesPlugin(Flake8MetricPlugin):
         Returns:
             int: Count of lines reporting whitespace issues (typically E2xx or W2xx codes).
         """
-        return sum(
-            1
-            for line in flake8_output
-            if any(code in line for code in [": E2", ": W2"])
-        )
+        return sum(1 for line in flake8_output if any(code in line for code in [": E2", ": W2"]))
 
     # ✅ Best Practice: High confidence when flake8_output is present
     def confidence_score(self, flake8_output: List[str]) -> float:

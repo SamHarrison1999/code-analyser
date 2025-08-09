@@ -35,9 +35,7 @@ def merge_nested_metrics(metrics_dict: Dict[str, Any]) -> Dict[str, Any]:
                 logger.debug(f"[merge_nested_metrics] Merged: {flat_key} = {value}")
         else:
             merged[section] = subdict
-            logger.debug(
-                f"[merge_nested_metrics] Added top-level: {section} = {subdict}"
-            )
+            logger.debug(f"[merge_nested_metrics] Added top-level: {section} = {subdict}")
 
     return merged
 
@@ -73,9 +71,7 @@ def flatten_metrics(
 
     for k, v in d.items():
         full_key = f"{prefix}.{k}" if prefix else k
-        logger.debug(
-            f"[flatten_metrics] Visiting: {full_key} (type: {type(v).__name__})"
-        )
+        logger.debug(f"[flatten_metrics] Visiting: {full_key} (type: {type(v).__name__})")
 
         if isinstance(v, dict):
             flat.update(
@@ -91,9 +87,7 @@ def flatten_metrics(
             if severity_filter and ai_overlay:
                 sev = ai_overlay.get(full_key, {}).get("AI Signal", "").lower()
                 if sev and sev not in severity_filter:
-                    logger.debug(
-                        f"[flatten_metrics] Skipping by severity: {full_key} = {sev}"
-                    )
+                    logger.debug(f"[flatten_metrics] Skipping by severity: {full_key} = {sev}")
                     continue
             flat[full_key] = v
             logger.debug(f"[flatten_metrics] Added numeric: {full_key} = {v}")

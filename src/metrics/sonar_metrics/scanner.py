@@ -8,9 +8,7 @@ import platform
 from typing import Any, List
 
 # ✅ Automatically choose the correct sonar-scanner binary
-SCANNER_BINARY = (
-    "sonar-scanner.bat" if platform.system() == "Windows" else "sonar-scanner"
-)
+SCANNER_BINARY = "sonar-scanner.bat" if platform.system() == "Windows" else "sonar-scanner"
 
 
 def run_sonar(
@@ -108,9 +106,7 @@ def run_sonar(
             try:
                 metrics[m["metric"]] = float(m["value"])
             except (KeyError, ValueError, TypeError):
-                logging.warning(
-                    f"[SonarQube] Could not parse metric {m.get('metric', 'unknown')}"
-                )
+                logging.warning(f"[SonarQube] Could not parse metric {m.get('metric', 'unknown')}")
                 metrics[m.get("metric", "unknown")] = 0.0
 
         logging.info(f"[SonarQube] Metrics retrieved for {file_path}: {metrics}")

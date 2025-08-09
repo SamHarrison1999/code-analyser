@@ -26,9 +26,7 @@ def send_zip_email(
     )
 
     with open(zip_path, "rb") as f:
-        msg.add_attachment(
-            f.read(), maintype="application", subtype="zip", filename=zip_path.name
-        )
+        msg.add_attachment(f.read(), maintype="application", subtype="zip", filename=zip_path.name)
 
     with smtplib.SMTP_SSL(smtp_host, smtp_port) as smtp:
         smtp.login(smtp_user, smtp_pass)

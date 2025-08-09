@@ -55,8 +55,7 @@ def parse_annotated_code(raw_code: str) -> List[Dict]:
             severity = severity or infer_severity_from_text(content)
 
             pending = {
-                "line": idx
-                + 2,  # annotation is assumed to be directly above target line
+                "line": idx + 2,  # annotation is assumed to be directly above target line
                 "type": annotation_type,
                 "severity": severity,
                 "content": content,

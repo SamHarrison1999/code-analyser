@@ -22,20 +22,14 @@ class AnnotationClassifier(nn.Module):
     - ✅ Best Practice
     """
 
-    def __init__(
-        self, model_name="microsoft/codebert-base", num_labels=3, dropout: float = 0.1
-    ):
+    def __init__(self, model_name="microsoft/codebert-base", num_labels=3, dropout: float = 0.1):
         super().__init__()
         config = AutoConfig.from_pretrained(model_name, num_labels=num_labels)
         config.hidden_dropout_prob = dropout
-        self.model = AutoModelForSequenceClassification.from_pretrained(
-            model_name, config=config
-        )
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_name, config=config)
 
     def forward(self, input_ids, attention_mask, labels=None):
-        return self.model(
-            input_ids=input_ids, attention_mask=attention_mask, labels=labels
-        )
+        return self.model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
 
     def predict(self, input_ids, attention_mask):
         """

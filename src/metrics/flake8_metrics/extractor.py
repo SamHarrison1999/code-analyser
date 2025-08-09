@@ -56,9 +56,7 @@ class Flake8Extractor:
                 try:
                     # ✅ Match plugin API: extract(flake8_output: List[str], file_path: str)
                     value = plugin.extract(flake8_output, self.file_path)
-                    metrics[plugin.name()] = (
-                        value if isinstance(value, (int, float)) else 0
-                    )
+                    metrics[plugin.name()] = value if isinstance(value, (int, float)) else 0
                 except Exception as e:
                     logger.warning(
                         f"[Flake8Extractor] Plugin '{plugin.name()}' failed: {type(e).__name__}: {e}"
@@ -84,9 +82,7 @@ class Flake8Extractor:
             return
 
         lines = [f"{k}: {v}" for k, v in self.result_metrics.items()]
-        logger.info(
-            f"[Flake8Extractor] Metrics for {self.file_path}:\n" + "\n".join(lines)
-        )
+        logger.info(f"[Flake8Extractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
 
 
 def gather_flake8_metrics(file_path: str) -> List[Union[int, float]]:

@@ -24,8 +24,7 @@ class FunctionCountPlugin(ASTMetricPlugin):
     def visit(self, tree: ast.AST, code: str) -> int:
         # ✅ Best Practice: Count both sync and async function definitions
         return sum(
-            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-            for node in ast.walk(tree)
+            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) for node in ast.walk(tree)
         )
 
     def severity_level(self, tree: ast.AST, code: str) -> str:

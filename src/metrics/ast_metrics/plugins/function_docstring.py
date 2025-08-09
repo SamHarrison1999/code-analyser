@@ -33,8 +33,7 @@ class FunctionDocstringPlugin(ASTMetricPlugin):
     def severity_level(self, tree: ast.AST, code: str) -> str:
         # ✅ Best Practice: Classify severity by docstring coverage ratio
         total = sum(
-            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-            for node in ast.walk(tree)
+            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) for node in ast.walk(tree)
         )
         documented = self.visit(tree, code)
         if total == 0:
@@ -50,8 +49,7 @@ class FunctionDocstringPlugin(ASTMetricPlugin):
     def confidence_score(self, tree: ast.AST, code: str) -> float:
         # ✅ Best Practice: Confidence reflects how well-covered the functions are
         total = sum(
-            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-            for node in ast.walk(tree)
+            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) for node in ast.walk(tree)
         )
         documented = self.visit(tree, code)
         if total == 0:

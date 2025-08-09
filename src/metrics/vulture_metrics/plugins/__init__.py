@@ -44,9 +44,7 @@ for _, module_name, _ in pkgutil.iter_modules([plugin_dir]):
                     "name": plugin_id,
                     "tags": plugin_tags,
                 }
-                logger.debug(
-                    f"✅ Loaded Vulture plugin: {plugin_id} (tags={plugin_tags})"
-                )
+                logger.debug(f"✅ Loaded Vulture plugin: {plugin_id} (tags={plugin_tags})")
     except Exception as e:
         logger.warning(
             f"⚠️ Failed to load Vulture plugin module '{module_name}': {type(e).__name__}: {e}"
@@ -63,11 +61,7 @@ def load_plugins() -> list[BasePlugin]:
 
 def load_plugins_by_tag(tag: str) -> list[BasePlugin]:
     """Return only Vulture plugins tagged with a specific label."""
-    return [
-        entry["class"]()
-        for entry in _discovered_plugins.values()
-        if tag in entry["tags"]
-    ]
+    return [entry["class"]() for entry in _discovered_plugins.values() if tag in entry["tags"]]
 
 
 def get_plugin_by_name(name: str) -> BasePlugin | None:
@@ -79,6 +73,5 @@ def get_plugin_by_name(name: str) -> BasePlugin | None:
 def list_plugins_metadata() -> list[dict]:
     """Return metadata about all registered Vulture plugins."""
     return [
-        {"name": entry["name"], "tags": entry["tags"]}
-        for entry in _discovered_plugins.values()
+        {"name": entry["name"], "tags": entry["tags"]} for entry in _discovered_plugins.values()
     ]

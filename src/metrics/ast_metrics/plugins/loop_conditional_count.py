@@ -23,9 +23,7 @@ class LoopConditionalPlugin(ASTMetricPlugin):
 
     def visit(self, tree: ast.AST, code: str) -> int:
         # ✅ Best Practice: Count loop and conditional statements using AST
-        return sum(
-            isinstance(node, (ast.For, ast.While, ast.If)) for node in ast.walk(tree)
-        )
+        return sum(isinstance(node, (ast.For, ast.While, ast.If)) for node in ast.walk(tree))
 
     def severity_level(self, tree: ast.AST, code: str) -> str:
         # ✅ Best Practice: Classify severity based on total loop/conditional count

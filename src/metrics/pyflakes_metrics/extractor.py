@@ -46,9 +46,7 @@ class PyflakesExtractor(MetricExtractorBase):
         for plugin in self.plugins:
             try:
                 value = plugin.extract(self.data, self.file_path)
-                self.result_metrics[plugin.name()] = (
-                    value if isinstance(value, (int, float)) else 0
-                )
+                self.result_metrics[plugin.name()] = value if isinstance(value, (int, float)) else 0
             except Exception as e:
                 logging.warning(
                     f"[PyflakesExtractor] Plugin '{plugin.name()}' failed: {type(e).__name__}: {e}"
@@ -75,9 +73,7 @@ class PyflakesExtractor(MetricExtractorBase):
             )
             return result.stdout.splitlines()
         except Exception as e:
-            logging.error(
-                f"[PyflakesExtractor] Error running Pyflakes: {type(e).__name__}: {e}"
-            )
+            logging.error(f"[PyflakesExtractor] Error running Pyflakes: {type(e).__name__}: {e}")
             return []
 
     def _fallback_metrics(self) -> Dict[str, Union[int, float]]:
@@ -94,15 +90,11 @@ class PyflakesExtractor(MetricExtractorBase):
         Print final extracted metrics for traceability.
         """
         if not self.result_metrics:
-            logging.info(
-                f"[PyflakesExtractor] No metrics extracted for {self.file_path}"
-            )
+            logging.info(f"[PyflakesExtractor] No metrics extracted for {self.file_path}")
             return
 
         lines = [f"{k}: {v}" for k, v in self.result_metrics.items()]
-        logging.info(
-            f"[PyflakesExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines)
-        )
+        logging.info(f"[PyflakesExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
 
 
 def extract_pyflakes_metrics(file_path: str) -> List[Dict[str, Union[str, float, int]]]:

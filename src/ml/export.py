@@ -3,18 +3,14 @@
 import torch
 
 
-def export_torchscript(
-    model: torch.nn.Module, dummy_input: torch.Tensor, path: str = "model.pt"
-):
+def export_torchscript(model: torch.nn.Module, dummy_input: torch.Tensor, path: str = "model.pt"):
     model.eval()
     traced = torch.jit.trace(model, dummy_input)
     traced.save(path)
     print(f"TorchScript model saved to {path}")
 
 
-def export_onnx(
-    model: torch.nn.Module, dummy_input: torch.Tensor, path: str = "model.onnx"
-):
+def export_onnx(model: torch.nn.Module, dummy_input: torch.Tensor, path: str = "model.onnx"):
     model.eval()
     torch.onnx.export(
         model,

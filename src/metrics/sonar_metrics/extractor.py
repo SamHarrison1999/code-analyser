@@ -40,9 +40,7 @@ class SonarMetricExtractor(MetricExtractorBase):
         self.data = self._run_sonar()
 
         if not self.data:
-            logger.warning(
-                f"[SonarMetricExtractor] No metrics returned for {self.file_path}"
-            )
+            logger.warning(f"[SonarMetricExtractor] No metrics returned for {self.file_path}")
             return self._fallback_metrics()
 
         for plugin in self.plugins:
@@ -78,9 +76,7 @@ class SonarMetricExtractor(MetricExtractorBase):
                 sonar_url="http://localhost:9000",
             )
         except Exception as e:
-            logger.warning(
-                f"[SonarMetricExtractor] Scanner failed: {type(e).__name__}: {e}"
-            )
+            logger.warning(f"[SonarMetricExtractor] Scanner failed: {type(e).__name__}: {e}")
             return {}
 
     def _fallback_metrics(self) -> Dict[str, Union[int, float]]:
@@ -97,15 +93,11 @@ class SonarMetricExtractor(MetricExtractorBase):
         Log the final plugin results after extraction.
         """
         if not self.result_metrics:
-            logger.info(
-                f"[SonarMetricExtractor] No plugin metrics extracted for {self.file_path}"
-            )
+            logger.info(f"[SonarMetricExtractor] No plugin metrics extracted for {self.file_path}")
             return
 
         lines = [f"{name}: {value}" for name, value in self.result_metrics.items()]
-        logger.info(
-            f"[SonarMetricExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines)
-        )
+        logger.info(f"[SonarMetricExtractor] Metrics for {self.file_path}:\n" + "\n".join(lines))
 
 
 def extract_sonar_metrics(file_path: str) -> List[Dict[str, Union[str, float]]]:
@@ -132,9 +124,7 @@ def extract_sonar_metrics(file_path: str) -> List[Dict[str, Union[str, float]]]:
             for plugin in extractor.plugins
         ]
     except Exception as e:
-        logger.warning(
-            f"[extract_sonar_metrics] Fallback for {file_path}: {type(e).__name__}: {e}"
-        )
+        logger.warning(f"[extract_sonar_metrics] Fallback for {file_path}: {type(e).__name__}: {e}")
         return [
             {
                 "metric": plugin.name(),

@@ -41,14 +41,10 @@ class AnnotationEngine:
         self.model_name = DISTILLED_MODEL_NAME if use_distilled else model_name
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.model = AnnotationClassifier(model_name=self.model_name, dropout=dropout)
-        self.model.load_state_dict(
-            torch.load(model_path, map_location=torch.device("cpu"))
-        )
+        self.model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
         self.model.eval()
 
-    def annotate_line(
-        self, line: str, min_confidence: float = 0.0, line_num: int = None
-    ) -> dict:
+    def annotate_line(self, line: str, min_confidence: float = 0.0, line_num: int = None) -> dict:
         inputs = self.tokenizer(
             line, return_tensors="pt", truncation=True, padding=True, max_length=128
         )
@@ -91,9 +87,7 @@ class AnnotationEngine:
         for i, line in enumerate(lines):
             stripped = line.strip()
             if stripped and not stripped.startswith("#"):
-                result = self.annotate_line(
-                    line, min_confidence=min_confidence, line_num=i + 1
-                )
+                result = self.annotate_line(line, min_confidence=min_confidence, line_num=i + 1)
                 annotated.append(result)
                 output_lines.append(result["annotated"])
             else:

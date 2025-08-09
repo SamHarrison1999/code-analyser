@@ -72,12 +72,8 @@ def draw_token_heatmap(container: tk.Frame, overlays: List[Dict[str, Any]]) -> N
             )
             label.pack(side=tk.LEFT, padx=1)
 
-            tooltip = (
-                f"{token} | Confidence: {conf:.2f} | Severity: {severity.capitalize()}"
-            )
-            label.bind(
-                "<Enter>", lambda e, msg=tooltip: shared_state.status_var.set(msg)
-            )
+            tooltip = f"{token} | Confidence: {conf:.2f} | Severity: {severity.capitalize()}"
+            label.bind("<Enter>", lambda e, msg=tooltip: shared_state.status_var.set(msg))
             label.bind("<Leave>", lambda e: shared_state.status_var.set(""))
 
 
@@ -87,14 +83,10 @@ def export_heatmap_to_csv(filepath: str, overlays: List[Dict[str, Any]]) -> None
     """
     try:
         with open(filepath, "w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(
-                f, fieldnames=["line", "token", "confidence", "severity"]
-            )
+            writer = csv.DictWriter(f, fieldnames=["line", "token", "confidence", "severity"])
             writer.writeheader()
             writer.writerows(overlays)
-        messagebox.showinfo(
-            "Export Successful", f"Overlay heatmap exported to:\n{filepath}"
-        )
+        messagebox.showinfo("Export Successful", f"Overlay heatmap exported to:\n{filepath}")
     except Exception as e:
         logging.error(f"❌ Failed to export CSV: {e}")
         messagebox.showerror("Export Failed", f"Could not export heatmap to CSV:\n{e}")
@@ -118,9 +110,7 @@ def export_heatmap_to_png(widget: tk.Widget, filepath: str) -> None:
         messagebox.showerror("Export Failed", f"Could not export image:\n{e}")
 
 
-def refresh_overlay_for_file(
-    file_path: str, overlay_data: List[Dict[str, Any]]
-) -> None:
+def refresh_overlay_for_file(file_path: str, overlay_data: List[Dict[str, Any]]) -> None:
     """
     Called when user switches files or updates filters.
     Applies overlays to heatmap panel.

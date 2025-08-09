@@ -117,9 +117,7 @@ def analyse_file(
         fail_metric_keys = _select_fail_metrics(fail_on, result_dict)
         total = sum(float(result_dict.get(k, 0) or 0) for k in fail_metric_keys)
         if total > fail_threshold:
-            logger.warning(
-                f"⚠️ Total '{fail_on}' metrics = {total} > threshold = {fail_threshold}"
-            )
+            logger.warning(f"⚠️ Total '{fail_on}' metrics = {total} > threshold = {fail_threshold}")
             return 1
 
     return 0
@@ -193,13 +191,9 @@ def main():
     parser.add_argument("--json-out", type=str, help="Explicit JSON path")
     parser.add_argument("--csv-out", type=str, help="Explicit CSV path")
     parser.add_argument("--summary", action="store_true", help="Print terminal summary")
-    parser.add_argument(
-        "--metrics-summary-table", action="store_true", help="Alias for --summary"
-    )
+    parser.add_argument("--metrics-summary-table", action="store_true", help="Alias for --summary")
     parser.add_argument("--save-summary-txt", type=str, help="Save markdown summary")
-    parser.add_argument(
-        "--fail-threshold", type=int, help="Fail if score exceeds threshold"
-    )
+    parser.add_argument("--fail-threshold", type=int, help="Fail if score exceeds threshold")
     parser.add_argument(
         "--fail-on",
         choices=[
@@ -219,9 +213,7 @@ def main():
         default="all",
     )
     parser.add_argument("--export-dir", type=str, help="Directory for output files")
-    parser.add_argument(
-        "--export-html", action="store_true", help="Export HTML dashboard"
-    )
+    parser.add_argument("--export-html", action="store_true", help="Export HTML dashboard")
     parser.add_argument(
         "--export-heatmap-csv",
         action="store_true",
@@ -232,15 +224,11 @@ def main():
         action="store_true",
         help="Use Torch overlay instead of TF",
     )
-    parser.add_argument(
-        "--launch-gui", action="store_true", help="Launch GUI interface"
-    )
+    parser.add_argument("--launch-gui", action="store_true", help="Launch GUI interface")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose logging")
 
     args = parser.parse_args()
-    logging.basicConfig(
-        level=logging.DEBUG if args.verbose else logging.INFO, format="%(message)s"
-    )
+    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format="%(message)s")
 
     if args.launch_gui:
         launch_gui()
@@ -269,9 +257,7 @@ def main():
             fail_threshold=args.fail_threshold,
             fail_on=args.fail_on,
             show_summary=args.summary or args.metrics_summary_table,
-            save_summary_txt=(
-                Path(args.save_summary_txt) if args.save_summary_txt else None
-            ),
+            save_summary_txt=(Path(args.save_summary_txt) if args.save_summary_txt else None),
             markdown_summary=args.metrics_summary_table,
             export_dir=Path(args.export_dir) if args.export_dir else None,
             export_html=args.export_html,

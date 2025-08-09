@@ -23,9 +23,7 @@ class GlobalVariablePlugin(ASTMetricPlugin):
 
     def visit(self, tree: ast.AST, code: str) -> int:
         # ✅ Best Practice: Count declared global variable names in all global statements
-        return sum(
-            len(node.names) for node in ast.walk(tree) if isinstance(node, ast.Global)
-        )
+        return sum(len(node.names) for node in ast.walk(tree) if isinstance(node, ast.Global))
 
     def severity_level(self, tree: ast.AST, code: str) -> str:
         # ✅ Best Practice: Thresholds classify risk from global variable use

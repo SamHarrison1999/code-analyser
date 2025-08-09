@@ -38,9 +38,7 @@ class CoveragePlugin(SonarMetricPlugin):
             value = sonar_data.get("coverage", 0)
             return float(value)
         except (ValueError, TypeError) as e:
-            logging.warning(
-                f"[CoveragePlugin] Failed to extract 'coverage' for {file_path}: {e}"
-            )
+            logging.warning(f"[CoveragePlugin] Failed to extract 'coverage' for {file_path}: {e}")
             return 0.0
 
     def confidence_score(self, sonar_data: dict[str, Any]) -> float:

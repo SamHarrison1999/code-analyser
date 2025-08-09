@@ -87,7 +87,5 @@ def get_shared_state() -> SharedState:
         RuntimeError: If setup_shared_gui_state() was not called before access.
     """
     if _shared_state is None:
-        raise RuntimeError(
-            "Shared state not initialised. Call setup_shared_gui_state(root) first."
-        )
+        raise RuntimeError("Shared state not initialised. Call setup_shared_gui_state(root) first.")
     return _shared_state

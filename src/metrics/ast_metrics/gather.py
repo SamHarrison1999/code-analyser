@@ -52,9 +52,7 @@ def gather_ast_metrics(file_path: str) -> List[int]:
 def gather_ast_confidence_scores(file_path: str) -> List[float]:
     with open(file_path, "r", encoding="utf-8") as f:
         code = f.read()
-    tree = compile(
-        code, file_path, mode="exec", flags=ast.PyCF_ONLY_AST, dont_inherit=True
-    )
+    tree = compile(code, file_path, mode="exec", flags=ast.PyCF_ONLY_AST, dont_inherit=True)
     scores = {p.name(): p.confidence_score(tree, code) for p in load_plugins()}
     return [float(scores.get(key, 0.0)) for key in _METRIC_ORDER]
 
@@ -62,9 +60,7 @@ def gather_ast_confidence_scores(file_path: str) -> List[float]:
 def gather_ast_severity_levels(file_path: str) -> List[str]:
     with open(file_path, "r", encoding="utf-8") as f:
         code = f.read()
-    tree = compile(
-        code, file_path, mode="exec", flags=ast.PyCF_ONLY_AST, dont_inherit=True
-    )
+    tree = compile(code, file_path, mode="exec", flags=ast.PyCF_ONLY_AST, dont_inherit=True)
     levels = {p.name(): p.severity_level(tree, code) for p in load_plugins()}
     return [str(levels.get(key, "low")) for key in _METRIC_ORDER]
 
@@ -94,21 +90,13 @@ def gather_ast_metrics_bundle(file_path: str) -> List[Dict[str, object]]:
 
     # Ensure safe fallback lengths
     if not (len(values) == len(confidences) == len(severities) == len(_METRIC_ORDER)):
-        logging.warning(
-            "⚠️ Mismatch in AST metric vector lengths; filling with defaults."
-        )
-        values = (
-            values if len(values) == len(_METRIC_ORDER) else [0] * len(_METRIC_ORDER)
-        )
+        logging.warning("⚠️ Mismatch in AST metric vector lengths; filling with defaults.")
+        values = values if len(values) == len(_METRIC_ORDER) else [0] * len(_METRIC_ORDER)
         confidences = (
-            confidences
-            if len(confidences) == len(_METRIC_ORDER)
-            else [0.0] * len(_METRIC_ORDER)
+            confidences if len(confidences) == len(_METRIC_ORDER) else [0.0] * len(_METRIC_ORDER)
         )
         severities = (
-            severities
-            if len(severities) == len(_METRIC_ORDER)
-            else ["low"] * len(_METRIC_ORDER)
+            severities if len(severities) == len(_METRIC_ORDER) else ["low"] * len(_METRIC_ORDER)
         )
 
     return [
@@ -137,9 +125,7 @@ def export_ast_metrics_to_csv(file_path: str, output_path: str):
     """
     bundle = gather_ast_metrics_bundle(file_path)
     with open(output_path, "w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(
-            f, fieldnames=["metric", "value", "confidence", "severity"]
-        )
+        writer = csv.DictWriter(f, fieldnames=["metric", "value", "confidence", "severity"])
         writer.writeheader()
         writer.writerows(bundle)
 

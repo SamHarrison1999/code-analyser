@@ -38,15 +38,9 @@ def log_metric_bundle_to_tensorboard(
         writer.add_scalar(f"{name}/confidence", conf, step)
 
         # One-hot severity
-        writer.add_scalar(
-            f"{name}/severity_low", 1.0 if severity == "low" else 0.0, step
-        )
-        writer.add_scalar(
-            f"{name}/severity_medium", 1.0 if severity == "medium" else 0.0, step
-        )
-        writer.add_scalar(
-            f"{name}/severity_high", 1.0 if severity == "high" else 0.0, step
-        )
+        writer.add_scalar(f"{name}/severity_low", 1.0 if severity == "low" else 0.0, step)
+        writer.add_scalar(f"{name}/severity_medium", 1.0 if severity == "medium" else 0.0, step)
+        writer.add_scalar(f"{name}/severity_high", 1.0 if severity == "high" else 0.0, step)
 
     writer.flush()
     writer.close()

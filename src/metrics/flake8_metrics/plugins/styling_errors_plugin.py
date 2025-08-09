@@ -31,9 +31,7 @@ class StylingErrorPlugin(Flake8MetricPlugin):
             int: Count of styling errors (E* or F* codes).
         """
         return sum(
-            1
-            for line in flake8_output
-            if any(f" {prefix}" in line for prefix in ("E", "F"))
+            1 for line in flake8_output if any(f" {prefix}" in line for prefix in ("E", "F"))
         )
 
     # ✅ Best Practice: Confidence is high if output is non-empty
