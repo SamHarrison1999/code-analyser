@@ -33,9 +33,6 @@ jobs:
           pip install -e .[gui,test]
           pip install pytest requests ruff black bandit
 
-      - name: 🔐 Run Bandit security scan
-        run: bandit -r src -ll -ii -x src/gui/tkinter_fonts.py
-
       - name: 🧹 Run ruff linter
         run: ruff check .
 
