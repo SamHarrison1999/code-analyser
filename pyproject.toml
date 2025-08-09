@@ -34,9 +34,9 @@ gui = [
     # Tkinter is built-in with most Python installations
 ]
 
-[tool.ruff]
+[tool.ruff.lint]
 # Disable specific error codes globally
-ignore = ["E402", "F401", "F821", "F841", "E741"]
+ignore = ["E402", "F401", "F821", "F841", "E741", "E731"]
 
 
 [project.scripts]
