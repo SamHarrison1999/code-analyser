@@ -2,12 +2,16 @@
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 
 from zvt.contract.api import df_to_db
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.contract.recorder import Recorder
+
 # ✅ Best Practice: Class definition should follow PEP 8 naming conventions, using CamelCase for class names.
 from zvt.domain.meta.stockhk_meta import Stockhk
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.recorders.em import em_api
+
 # ✅ Best Practice: Class attributes should be defined at the top of the class for better readability.
 
 
@@ -36,8 +40,18 @@ class EMStockhkRecorder(Recorder):
         # 🧠 ML Signal: Entry point for script execution
         # 🧠 ML Signal: Defining public API of the module
         df_other["south"] = False
-        df_to_db(df=df_south, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
-        df_to_db(df=df_other, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+        df_to_db(
+            df=df_south,
+            data_schema=self.data_schema,
+            provider=self.provider,
+            force_update=self.force_update,
+        )
+        df_to_db(
+            df=df_other,
+            data_schema=self.data_schema,
+            provider=self.provider,
+            force_update=self.force_update,
+        )
 
 
 if __name__ == "__main__":

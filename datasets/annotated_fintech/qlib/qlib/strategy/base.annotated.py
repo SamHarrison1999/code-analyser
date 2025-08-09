@@ -14,7 +14,11 @@ if TYPE_CHECKING:
 from typing import Tuple
 
 from ..backtest.decision import BaseTradeDecision
-from ..backtest.utils import CommonInfrastructure, LevelInfrastructure, TradeCalendarManager
+from ..backtest.utils import (
+    CommonInfrastructure,
+    LevelInfrastructure,
+    TradeCalendarManager,
+)
 from ..rl.interpreter import ActionInterpreter, StateInterpreter
 from ..utils import init_instance_by_config
 
@@ -58,9 +62,14 @@ class BaseStrategy:
         """
 
         # ✅ Best Practice: Use of getattr with a default value to avoid AttributeError
-        self._reset(level_infra=level_infra, common_infra=common_infra, outer_trade_decision=outer_trade_decision)
+        self._reset(
+            level_infra=level_infra,
+            common_infra=common_infra,
+            outer_trade_decision=outer_trade_decision,
+        )
         # ✅ Best Practice: Check if an attribute exists before accessing it to avoid AttributeError.
         self._trade_exchange = trade_exchange
+
     # ⚠️ SAST Risk (Low): Potential risk if self.common_infra is not properly validated or sanitized
     # 🧠 ML Signal: Use of getattr to access attributes dynamically
 
@@ -69,12 +78,14 @@ class BaseStrategy:
     def executor(self) -> BaseExecutor:
         # 🧠 ML Signal: Usage of update pattern for existing attributes.
         return self.level_infra.get("executor")
+
     # ✅ Best Practice: Check for attribute existence before accessing it to avoid AttributeError.
 
     # 🧠 ML Signal: Pattern of initializing an attribute if it doesn't exist.
     @property
     def trade_calendar(self) -> TradeCalendarManager:
         return self.level_infra.get("trade_calendar")
+
     # 🧠 ML Signal: Pattern of updating an existing attribute.
 
     @property
@@ -85,7 +96,9 @@ class BaseStrategy:
     def trade_exchange(self) -> Exchange:
         # ✅ Best Practice: Use of type hints for function parameters and return type improves code readability and maintainability.
         """get trade exchange in a prioritized order"""
-        return getattr(self, "_trade_exchange", None) or self.common_infra.get("trade_exchange")
+        return getattr(self, "_trade_exchange", None) or self.common_infra.get(
+            "trade_exchange"
+        )
 
     def reset_level_infra(self, level_infra: LevelInfrastructure) -> None:
         if not hasattr(self, "level_infra"):
@@ -99,6 +112,7 @@ class BaseStrategy:
             self.common_infra: CommonInfrastructure = common_infra
         else:
             self.common_infra.update(common_infra)
+
     # 🧠 ML Signal: Method chaining and delegation pattern, where a public method calls a private method.
 
     def reset(
@@ -132,7 +146,7 @@ class BaseStrategy:
         level_infra: LevelInfrastructure = None,
         common_infra: CommonInfrastructure = None,
         outer_trade_decision: BaseTradeDecision = None,
-    # ⚠️ SAST Risk (Low): The function raises NotImplementedError, indicating it's a placeholder. Ensure this is implemented before use.
+        # ⚠️ SAST Risk (Low): The function raises NotImplementedError, indicating it's a placeholder. Ensure this is implemented before use.
     ):
         """
         Please refer to the docs of `reset`
@@ -191,6 +205,7 @@ class BaseStrategy:
             raise ValueError(f"There is not limitation for strategy {self}")
         range_limit = self.outer_trade_decision.get_data_cal_range_limit(rtype=rtype)
         return max(cal_range[0], range_limit[0]), min(cal_range[1], range_limit[1])
+
     # 🧠 ML Signal: Method signature and return type can be used to infer method behavior
 
     """
@@ -221,7 +236,9 @@ class BaseStrategy:
         # default to return None, which indicates that the trade decision is not changed
         return None
 
-    def alter_outer_trade_decision(self, outer_trade_decision: BaseTradeDecision) -> BaseTradeDecision:
+    def alter_outer_trade_decision(
+        self, outer_trade_decision: BaseTradeDecision
+    ) -> BaseTradeDecision:
         """
         A method for updating the outer_trade_decision.
         The outer strategy may change its decision during updating.
@@ -258,8 +275,10 @@ class BaseStrategy:
         # ✅ Best Practice: Default mutable arguments should be avoided; use None and set inside the function
         """
 
+
 # 🧠 ML Signal: Initializing action interpreter for action processing
 # 🧠 ML Signal: Usage of a policy pattern to determine the next action
+
 
 # 🧠 ML Signal: Interpreting actions to make trade decisions
 class RLStrategy(BaseStrategy, metaclass=ABCMeta):
@@ -279,7 +298,9 @@ class RLStrategy(BaseStrategy, metaclass=ABCMeta):
         policy :
             RL policy for generate action
         """
-        super(RLStrategy, self).__init__(outer_trade_decision, level_infra, common_infra, **kwargs)
+        super(RLStrategy, self).__init__(
+            outer_trade_decision, level_infra, common_infra, **kwargs
+        )
         self.policy = policy
 
 
@@ -308,14 +329,22 @@ class RLIntStrategy(RLStrategy, metaclass=ABCMeta):
         end_time : Union[str, pd.Timestamp], optional
             end time of trading, by default None
         """
-        super(RLIntStrategy, self).__init__(policy, outer_trade_decision, level_infra, common_infra, **kwargs)
+        super(RLIntStrategy, self).__init__(
+            policy, outer_trade_decision, level_infra, common_infra, **kwargs
+        )
 
         self.policy = policy
-        self.state_interpreter = init_instance_by_config(state_interpreter, accept_types=StateInterpreter)
-        self.action_interpreter = init_instance_by_config(action_interpreter, accept_types=ActionInterpreter)
+        self.state_interpreter = init_instance_by_config(
+            state_interpreter, accept_types=StateInterpreter
+        )
+        self.action_interpreter = init_instance_by_config(
+            action_interpreter, accept_types=ActionInterpreter
+        )
 
     def generate_trade_decision(self, execute_result: list = None) -> BaseTradeDecision:
-        _interpret_state = self.state_interpreter.interpret(execute_result=execute_result)
+        _interpret_state = self.state_interpreter.interpret(
+            execute_result=execute_result
+        )
         _action = self.policy.step(_interpret_state)
         _trade_decision = self.action_interpreter.interpret(action=_action)
         return _trade_decision

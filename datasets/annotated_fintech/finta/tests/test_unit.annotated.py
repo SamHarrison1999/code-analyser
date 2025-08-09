@@ -1,9 +1,11 @@
 import pytest
 import os
 import pandas as pd
+
 # ✅ Best Practice: Importing specific modules or classes can improve code readability and maintainability.
 from pandas.core import series
 from finta import TA
+
 # ✅ Best Practice: Importing specific functions or classes from a library can improve code readability and maintainability.
 # ⚠️ SAST Risk (Medium): os.path.abspath(__file__) can expose sensitive file path information.
 
@@ -12,6 +14,7 @@ def rootdir():
 
     # ⚠️ SAST Risk (Medium): os.path.join with user-controlled input can lead to directory traversal vulnerabilities.
     return os.path.dirname(os.path.abspath(__file__))
+
 
 # 🧠 ML Signal: Usage of TA.SMA function with specific parameters
 
@@ -26,6 +29,7 @@ ohlc = pd.read_csv(data_file, index_col="date", parse_dates=True)
 
 # 🧠 ML Signal: Testing function for TA.SMM, useful for learning test patterns
 
+
 def test_sma():
     # ⚠️ SAST Risk (Low): Potential risk if 'ohlc' is not validated or sanitized
     """test TA.ma"""
@@ -39,6 +43,8 @@ def test_sma():
     # ⚠️ SAST Risk (Low): Direct comparison of floating-point numbers can be unreliable
     # ⚠️ SAST Risk (Low): Potential risk if 'ohlc' is not validated or sanitized
     assert ma.values[-1] == 6922.33922063
+
+
 # 🧠 ML Signal: Use of assert to validate expected outcomes in tests
 # ✅ Best Practice: Use of round() for consistent decimal precision
 # 🧠 ML Signal: Function definition for testing, useful for identifying test patterns
@@ -58,10 +64,13 @@ def test_smm():
     assert isinstance(ma, series.Series)
     # ⚠️ SAST Risk (Low): Direct comparison of floating-point numbers can lead to precision issues
     assert ma.values[-1] == 6490.0
+
+
 # ⚠️ SAST Risk (Low): Ensure 'ohlc' is validated and sanitized before use
 # 🧠 ML Signal: Assertion with specific value, indicating expected output for test case
 
 # ✅ Best Practice: Use of 'round' for consistent decimal precision
+
 
 def test_ssma():
     # ⚠️ SAST Risk (Low): Ensure 'series.Series' is the correct type and imported
@@ -77,10 +86,13 @@ def test_ssma():
     assert isinstance(ma, series.Series)
     # 🧠 ML Signal: Function name follows a common pattern for test functions
     assert ma.values[-1] == 6907.53759817
+
+
 # ⚠️ SAST Risk (Low): Ensure 'series.Series' is the correct type and imported properly
 
 # 🧠 ML Signal: Type checking with 'isinstance' is a common pattern for ensuring data integrity
 # ⚠️ SAST Risk (Low): Ensure 'ohlc' is validated to prevent unexpected data issues
+
 
 # 🧠 ML Signal: Use of method chaining with round, common in data processing
 def test_ema():
@@ -99,6 +111,8 @@ def test_ema():
     assert isinstance(ma, series.Series)
     # 🧠 ML Signal: Use of assert for validation in test functions
     assert ma.values[-1] == 7606.84391951
+
+
 # 🧠 ML Signal: Testing function for TA.VAMA, useful for learning test patterns
 # ✅ Best Practice: Use of isinstance to check type, ensures correct type handling
 
@@ -120,10 +134,13 @@ def test_dema():
     # ⚠️ SAST Risk (Low): Direct comparison of floating-point values can lead to precision issues
     # ✅ Best Practice: Using isinstance to check the type of the variable
     assert ma.values[-1] == 6323.41923994
+
+
 # ✅ Best Practice: Use of assert to validate the final value of 'ma'
 
 # 🧠 ML Signal: Testing function for TA.KAMA, useful for learning test patterns
 # 🧠 ML Signal: Assertion to check value range, indicating expected behavior
+
 
 def test_tema():
     # ⚠️ SAST Risk (Low): Potential risk if 'ohlc' is not validated or sanitized
@@ -138,6 +155,8 @@ def test_tema():
     # 🧠 ML Signal: Use of assert to validate expected output, useful for learning expected behavior
     # ⚠️ SAST Risk (Low): Potential risk if 'ohlc' is not validated or sanitized
     assert ma.values[-1] == 6307.48151844
+
+
 # ⚠️ SAST Risk (Low): Hardcoded value in test, ensure it matches expected output
 # 🧠 ML Signal: Rounding to a specific number of decimals is a common data preprocessing step
 
@@ -158,9 +177,12 @@ def test_trima():
     # 🧠 ML Signal: Function call to TA.HMA with ohlc as input, indicating usage of a specific technical analysis function
     assert isinstance(ma, series.Series)
     assert ma.values[-1] == 7464.85307304
+
+
 # ⚠️ SAST Risk (Low): Lack of exception handling for TA.HMA call could lead to unhandled exceptions
 
 # ✅ Best Practice: Use isinstance to ensure ma is of the expected type, improving code robustness
+
 
 def test_trix():
     # 🧠 ML Signal: Function name follows a common test naming pattern
@@ -176,9 +198,12 @@ def test_trix():
     assert isinstance(ma, series.Series)
     # ⚠️ SAST Risk (Low): Assertion without error message can make debugging harder
     assert ma.values[-1] == -0.5498364
+
+
 # 🧠 ML Signal: Usage of TA.VWAP indicates a pattern of using technical analysis functions
 
 # ⚠️ SAST Risk (Low): Direct comparison of floating-point numbers can lead to precision issues
+
 
 # ⚠️ SAST Risk (Low): Ensure that 'ohlc' is properly validated and sanitized before use
 def test_vama():
@@ -193,10 +218,13 @@ def test_vama():
     # 🧠 ML Signal: Use of method chaining with round, common in data processing
     assert isinstance(ma, series.Series)
     assert ma.values[-1] == 6991.57791258
+
+
 # ⚠️ SAST Risk (Low): Assumes 'series.Series' is a valid type, could raise an exception if not
 # 🧠 ML Signal: Usage of TA.FRAMA function indicates a pattern for financial analysis
 
 # 🧠 ML Signal: Assertion for type checking, useful for learning type validation
+
 
 # ⚠️ SAST Risk (Low): Potential risk if 'ohlc' is not validated or sanitized
 def test_er():
@@ -214,6 +242,8 @@ def test_er():
     assert isinstance(er, series.Series)
     # ⚠️ SAST Risk (Low): Lack of exception handling for potential errors in method calls
     assert -100 < er.values[-1] < 100
+
+
 # ✅ Best Practice: Use of isinstance to ensure the correct type of the object
 
 
@@ -230,6 +260,8 @@ def test_kama():
     # 🧠 ML Signal: Checking type of "SIGNAL" key in ppo dictionary
     assert isinstance(ma, series.Series)
     assert ma.values[-1] == 6742.11786502
+
+
 # 🧠 ML Signal: Checking type of "HISTO" key in ppo dictionary
 
 
@@ -249,7 +281,9 @@ def test_zlema():
     # ✅ Best Practice: Include a docstring to describe the purpose of the test function
     assert ma.values[-1] == 6462.46183365
 
+
 # ⚠️ SAST Risk (Low): Assumes 'series.Series' is the correct type, potential for TypeError
+
 
 # 🧠 ML Signal: Usage of a specific method from a library (TA.EV_MACD) indicates a pattern in how this library is used
 def test_wma():
@@ -265,9 +299,12 @@ def test_wma():
     assert isinstance(ma, series.Series)
     # 🧠 ML Signal: Use of a method from a library (TA) to perform a calculation
     assert ma.values[-1] == 6474.47003078
+
+
 # ✅ Best Practice: Use of assert to validate the expected value of the result
 
 # ⚠️ SAST Risk (Low): Lack of error handling for TA.MOM method call
+
 
 # ✅ Best Practice: Use of assert to validate the expected value of the result
 # 🧠 ML Signal: Type checking with isinstance, indicating expected data type
@@ -283,6 +320,8 @@ def test_hma():
     # ✅ Best Practice: Use of 'round' for precision control in floating-point operations
     assert isinstance(ma, series.Series)
     assert ma.values[-1] == 6186.93727146
+
+
 # ⚠️ SAST Risk (Low): Ensure 'series.Series' is the correct type and imported properly
 # 🧠 ML Signal: Testing function for TA.VBM, useful for learning test patterns
 
@@ -302,8 +341,10 @@ def test_evwma():
     # ✅ Best Practice: Use of assert to validate the type of 'rsi'
     assert evwma.values[-1] == 7445.46084062
 
+
 # 🧠 ML Signal: Function name follows a common test naming pattern
 # ✅ Best Practice: Use of assert to validate the range of 'rsi' values
+
 
 def test_vwap():
     # ⚠️ SAST Risk (Low): Potential risk if 'ohlc' is not validated or sanitized
@@ -318,11 +359,14 @@ def test_vwap():
     # ✅ Best Practice: Rounding to a specific number of decimals for consistency in test results
     assert isinstance(ma, series.Series)
     assert ma.values[-1] == 7976.51743477
+
+
 # ⚠️ SAST Risk (Low): Direct comparison of floating-point numbers can lead to precision issues
 # ⚠️ SAST Risk (Low): Lack of exception handling may cause the test to fail ungracefully if TA.DYMI or rounding fails
 
 # 🧠 ML Signal: Use of assert for validation in tests
 # 🧠 ML Signal: Checking the type of a variable is a common pattern in testing
+
 
 # 🧠 ML Signal: Testing function for TA.TR, useful for learning test patterns
 def test_smma():
@@ -337,10 +381,13 @@ def test_smma():
     # 🧠 ML Signal: Function name follows a common pattern for test functions, useful for identifying test cases.
     assert isinstance(ma, series.Series)
     assert ma.values[-1] == 8020.2742957
+
+
 # ⚠️ SAST Risk (Low): Hardcoded value in test, ensure it matches expected output
 # ⚠️ SAST Risk (Low): Ensure that 'ohlc' is validated and sanitized before use to prevent data integrity issues.
 
 # ✅ Best Practice: Rounding to a fixed number of decimals improves consistency in test results.
+
 
 def test_frama():
     # 🧠 ML Signal: Function name follows a common test naming pattern
@@ -357,8 +404,10 @@ def test_frama():
     # 🧠 ML Signal: Usage of TA.PSAR indicates a pattern of using technical analysis for financial data.
     assert ma.values[-1] == 6574.14605454
 
+
 # ⚠️ SAST Risk (Low): Hardcoded value in test may lead to false positives/negatives
 # ⚠️ SAST Risk (Low): Ensure that 'ohlc' is validated and sanitized to prevent potential data integrity issues.
+
 
 # ✅ Best Practice: Use of assert to validate expected outcome
 # 🧠 ML Signal: Checking the type of 'sar.psar' suggests a pattern of verifying data structures.
@@ -377,9 +426,12 @@ def test_macd():
     # ✅ Best Practice: Checking the type of the result ensures that the function returns the expected data structure.
     assert macd["MACD"].values[-1] == -419.21923359
     assert macd["SIGNAL"].values[-1] == -372.39851312
+
+
 # 🧠 ML Signal: Use of hardcoded expected values in assertions can indicate a test for specific known outputs.
 
 # 🧠 ML Signal: Use of TA.MOBO function indicates a pattern of using technical analysis for financial data.
+
 
 # 🧠 ML Signal: Use of hardcoded expected values in assertions can indicate a test for specific known outputs.
 def test_ppo():
@@ -403,9 +455,12 @@ def test_ppo():
     assert ppo["SIGNAL"].values[-1] == -5.05947256
     # ⚠️ SAST Risk (Low): Use of assert statements for testing can be disabled with optimization flags.
     assert ppo["HISTO"].values[-1] == -0.79604402
+
+
 # ⚠️ SAST Risk (Low): Ensure 'series.Series' is the correct type and not a typo or undefined
 
 # 🧠 ML Signal: Function name follows a common test naming pattern
+
 
 # ✅ Best Practice: Asserting value range to ensure expected output
 def test_vw_macd():
@@ -427,6 +482,8 @@ def test_vw_macd():
     # ✅ Best Practice: Checking the type of the result ensures that the function returns the expected data structure
     assert macd["MACD"].values[-1] == -535.21281201
     assert macd["SIGNAL"].values[-1] == -511.64584818
+
+
 # ✅ Best Practice: Checking the type of the result ensures that the function returns the expected data structure
 
 
@@ -448,9 +505,12 @@ def test_ev_macd():
     assert macd["MACD"].values[-1] == -786.70979566
     # 🧠 ML Signal: Use of TA.DMI indicates a pattern of using technical analysis for financial data
     assert macd["SIGNAL"].values[-1] == -708.68194345
+
+
 # 🧠 ML Signal: Asserting specific values, indicating a pattern of expected output.
 
 # ⚠️ SAST Risk (Low): Potential risk if 'ohlc' is not validated or sanitized
+
 
 # 🧠 ML Signal: Asserting specific values, indicating a pattern of expected output.
 def test_mom():
@@ -465,6 +525,8 @@ def test_mom():
     assert isinstance(mom, series.Series)
     # ⚠️ SAST Risk (Low): Potential risk if 'ohlc' is not validated or sanitized
     assert mom.values[-1] == -1215.54681371
+
+
 # ⚠️ SAST Risk (Low): Direct comparison of floating-point numbers can lead to precision issues
 # 🧠 ML Signal: Use of method chaining with round function
 
@@ -484,7 +546,10 @@ def test_roc():
     # 🧠 ML Signal: Testing function for TA.STOCHD, useful for learning test patterns
     assert isinstance(roc, series.Series)
     assert roc.values[-1] == -16.0491877
+
+
 # ✅ Best Practice: Checking the type of the result to ensure correct function behavior
+
 
 def test_vbm():
     # ✅ Best Practice: Asserting value range to ensure expected output
@@ -497,8 +562,11 @@ def test_vbm():
     # ✅ Best Practice: Rounding to a fixed number of decimals improves consistency in floating-point operations.
     assert isinstance(vbm, series.Series)
     assert vbm.values[-1] == -27.57038694
+
+
 # ⚠️ SAST Risk (Low): Assumes 'series.Series' is the correct type, potential for AssertionError if not.
 # 🧠 ML Signal: Use of TA.WILLIAMS indicates a pattern of financial technical analysis
+
 
 def test_rsi():
     # ⚠️ SAST Risk (Low): Assumes 'st.values' is a valid list-like object, potential for IndexError if empty.
@@ -513,6 +581,8 @@ def test_rsi():
     assert isinstance(rsi, series.Series)
     # ⚠️ SAST Risk (Low): Assumes 'TA.UO' and 'ohlc' are safe and correctly implemented
     assert -100 < rsi.values[-1] < 100
+
+
 # ✅ Best Practice: Rounding to a fixed number of decimals for consistency
 
 
@@ -531,11 +601,14 @@ def test_ift_rsi():
     # 🧠 ML Signal: Function name follows a common test naming pattern
     assert isinstance(rsi, series.Series)
     assert rsi.values[-1] == 0.62803976
+
+
 # ⚠️ SAST Risk (Low): Direct comparison of floating-point numbers can be unreliable
 # ⚠️ SAST Risk (Low): Assumes TA.MI and ohlc are safe and correctly implemented
 
 # 🧠 ML Signal: Use of assert to validate expected outcomes in tests
 # ✅ Best Practice: Rounding to a fixed number of decimals for consistency
+
 
 def test_dymi():
     # ⚠️ SAST Risk (Low): Assumes mi is a valid series object
@@ -554,8 +627,10 @@ def test_dymi():
     # 🧠 ML Signal: Usage of a specific method from a library (TA.VORTEX) indicates a pattern in how this library is used.
     assert dymi.values[-1] == 32.4897564
 
+
 # ⚠️ SAST Risk (Low): Hardcoded value in test may lead to false positives/negatives
 # ⚠️ SAST Risk (Low): Direct use of assert statements for testing can be disabled with the -O and -OO flags in Python, potentially skipping these checks.
+
 
 # ✅ Best Practice: Use of assertions to validate expected outcomes
 # 🧠 ML Signal: Checking the type of an object is a common pattern in testing to ensure correct data types.
@@ -572,9 +647,12 @@ def test_tr():
     # 🧠 ML Signal: Asserting specific values in a test indicates expected behavior or output.
     # ⚠️ SAST Risk (Low): Assumes 'ohlc' is defined and valid, potential NameError if not
     assert tr.values[-1] == 113.4
+
+
 # ✅ Best Practice: Use of round() for consistent decimal precision
 
 # ⚠️ SAST Risk (Low): Direct use of assert statements for testing can be disabled with the -O and -OO flags in Python, potentially skipping these checks.
+
 
 # 🧠 ML Signal: Asserting specific values in a test indicates expected behavior or output.
 # ⚠️ SAST Risk (Low): Assumes 'series.Series' is the correct type, potential AttributeError if not
@@ -592,7 +670,9 @@ def test_atr():
     # ⚠️ SAST Risk (Low): Assumes 'tsi["TSI"]' is a valid key and 'series.Series' is the correct type
     assert tr.values[-1] == 328.56890383
 
+
 # ⚠️ SAST Risk (Low): Assumes 'tsi["signal"]' is a valid key and 'series.Series' is the correct type
+
 
 # 🧠 ML Signal: Function name follows a common test naming pattern
 def test_sar():
@@ -609,11 +689,14 @@ def test_sar():
     # 🧠 ML Signal: Instantiation of a class from a module, indicating usage pattern
     assert isinstance(sar, series.Series)
     assert sar.values[-1] == 7127.15087821
+
+
 # ⚠️ SAST Risk (Low): Lack of exception handling for potential errors in class instantiation
 # ⚠️ SAST Risk (Low): Direct comparison of floating-point numbers can lead to precision issues
 
 # 🧠 ML Signal: Use of assert to validate expected outcomes in tests
 # ✅ Best Practice: Use of isinstance to check the type of a variable
+
 
 # 🧠 ML Signal: Function name follows a common pattern for test functions, useful for identifying test cases.
 def test_psar():
@@ -630,6 +713,8 @@ def test_psar():
     # 🧠 ML Signal: Usage of TA.MFI function indicates a pattern for financial analysis
     # ⚠️ SAST Risk (Low): Assumes `series.Series` is defined, potential for NameError if not.
     assert sar.psar.values[-1] == 7113.5666702
+
+
 # ✅ Best Practice: Rounding the result to a specific number of decimals for consistency
 # 🧠 ML Signal: Type checking with `isinstance`, common pattern for ensuring correct data types.
 
@@ -661,12 +746,13 @@ def test_bbands():
     # 🧠 ML Signal: Function name follows a common test naming pattern
     assert bb["BB_LOWER"].values[-1] == 6008.30372428
 
+
 # ⚠️ SAST Risk (Low): Ensure 'ohlc' is validated and sanitized before use
 def test_mobo():
     # 🧠 ML Signal: Function definition with a specific naming pattern indicating a test function
     # 🧠 ML Signal: Use of TA.VZO indicates a pattern of technical analysis
     """test TA.mobo"""
-    
+
     # ✅ Best Practice: Use of isinstance for type checking
     mbb = TA.MOBO(ohlc).round(decimals=8)
     # 🧠 ML Signal: Instantiation of a class from a module, indicating usage pattern
@@ -685,6 +771,8 @@ def test_mobo():
     # ⚠️ SAST Risk (Low): Assumes TA.EFI and ohlc are defined and valid
     assert mbb["BB_MIDDLE"].values[-1] == 6633.75040888
     assert mbb["BB_LOWER"].values[-1] == 6348.01745146
+
+
 # ⚠️ SAST Risk (Low): Lack of exception handling for the assertion
 # ⚠️ SAST Risk (Low): Assumes efi is a series.Series object
 
@@ -703,10 +791,13 @@ def test_bbwidth():
     assert isinstance(bb, series.Series)
     # ⚠️ SAST Risk (Low): Assumes efi.values has enough elements and valid indices
     assert 0 < bb.values[-1] < 1
+
+
 # ⚠️ SAST Risk (Low): Assumes `cfi` is always a `series.Series`, which may not be the case if `TA.CFI` changes
 # 🧠 ML Signal: Function name follows a common pattern for test functions
 
 # 🧠 ML Signal: Use of `assert` to validate the type of `cfi`
+
 
 # ⚠️ SAST Risk (Low): Assumes 'TA.EBBP' and 'ohlc' are defined and safe
 def test_percentb():
@@ -724,6 +815,8 @@ def test_percentb():
     # ⚠️ SAST Risk (Low): Ensure 'ohlc' is validated to prevent unexpected data issues
     # ⚠️ SAST Risk (Low): Assumes 'eb' has the expected structure with "Bear." key
     assert bb.values[-1] == 0.18695874
+
+
 # ✅ Best Practice: Use of 'isinstance' for type checking
 # ✅ Best Practice: Use descriptive variable names for clarity
 
@@ -752,9 +845,12 @@ def test_kc():
     # ⚠️ SAST Risk (Low): Potential risk if 'basp["Buy."]' is not properly validated or sanitized.
     assert kc["KC_UPPER"].values[-1] == 7014.74943624
     assert kc["KC_LOWER"].values[-1] == 5546.71157518
+
+
 # ⚠️ SAST Risk (Low): Potential risk if 'basp["Sell."]' is not properly validated or sanitized.
 
 # 🧠 ML Signal: Usage of TA.BASPN with rounding indicates a pattern for data preprocessing
+
 
 # ⚠️ SAST Risk (Low): Direct comparison of floating-point numbers can lead to precision issues.
 def test_do():
@@ -778,9 +874,12 @@ def test_do():
     # 🧠 ML Signal: Use of TA.CHANDELIER indicates a pattern of using technical analysis indicators.
     # ⚠️ SAST Risk (Low): Assumes series is defined and valid, potential NameError if not
     assert do["LOWER"].values[-1] == 6250.0010000000002
+
+
 # 🧠 ML Signal: Checking type of cmo, useful for learning type validation patterns
 
 # ⚠️ SAST Risk (Low): Potential risk if 'ohlc' is not validated or sanitized before use.
+
 
 # 🧠 ML Signal: Validating range of cmo values, useful for learning validation patterns
 # 🧠 ML Signal: Use of isinstance to check types is a common pattern for type validation.
@@ -804,10 +903,13 @@ def test_dmi():
     assert dmi["DI+"].values[-1] == 7.07135289
     # ✅ Best Practice: Using pytest.raises to assert exceptions is a good practice for testing error handling
     assert dmi["DI-"].values[-1] == 28.62895818
+
+
 # 🧠 ML Signal: Function definition with a specific naming pattern indicating a test function
 # 🧠 ML Signal: Use of isinstance to check object type
 
 # ⚠️ SAST Risk (Low): Instantiating an object without checking input validation may lead to unexpected behavior
+
 
 # 🧠 ML Signal: Use of assert to validate expected outcome
 def test_adx():
@@ -822,9 +924,12 @@ def test_adx():
     assert isinstance(adx, series.Series)
     # 🧠 ML Signal: Type checking using isinstance
     assert adx.values[-1] == 46.43950615
+
+
 # 🧠 ML Signal: Function name follows a common pattern for test functions
 
 # ⚠️ SAST Risk (Low): Direct comparison of floating-point numbers
+
 
 # ⚠️ SAST Risk (Low): Potential risk if 'ohlc' is not validated or sanitized
 def test_stoch():
@@ -841,6 +946,8 @@ def test_stoch():
     assert isinstance(st, series.Series)
     # 🧠 ML Signal: Use of assert to validate expected outcomes in tests
     assert 0 < st.values[-1] < 100
+
+
 # ✅ Best Practice: Using isinstance to check the type of an object ensures that the object behaves as expected.
 
 
@@ -858,8 +965,10 @@ def test_stochd():
     # 🧠 ML Signal: Instantiation of TA.APZ with rounding, useful for understanding usage patterns
     assert 0 < st.values[-1] < 100
 
+
 # 🧠 ML Signal: Asserting specific values in the output could indicate expected patterns or thresholds in the data.
 # ⚠️ SAST Risk (Low): Lack of error handling for potential exceptions in isinstance checks
+
 
 def test_stochrsi():
     # 🧠 ML Signal: Asserting specific values in the output could indicate expected patterns or thresholds in the data.
@@ -874,10 +983,13 @@ def test_stochrsi():
     # ✅ Best Practice: Check if the result is an instance of the expected type
     assert isinstance(st, series.Series)
     assert 0 < st.values[-1] < 100
+
+
 # 🧠 ML Signal: Use of assert to validate the behavior of the result
 # 🧠 ML Signal: Testing function for VPT calculation, useful for learning test patterns
 
 # ✅ Best Practice: Ensure the last value in the series is as expected
+
 
 # ⚠️ SAST Risk (Low): Ensure 'ohlc' is validated to prevent unexpected data issues
 def test_williams():
@@ -894,8 +1006,10 @@ def test_williams():
     # 🧠 ML Signal: Use of TA.FVE indicates a pattern of using technical analysis functions
     assert -100 < w.values[-1] < 0
 
+
 # ✅ Best Practice: Asserting the type ensures the function returns the expected data structure
 # 🧠 ML Signal: Function name follows a common test naming pattern
+
 
 def test_uo():
     # ⚠️ SAST Risk (Low): Ensure 'ohlc' is validated before use to prevent potential data issues
@@ -912,7 +1026,9 @@ def test_uo():
     # 🧠 ML Signal: Checking type of pivot["pivot"] suggests a pattern of ensuring data structure integrity.
     assert 0 < uo.values[-1] < 100
 
+
 # 🧠 ML Signal: Checking type of pivot["s1"] suggests a pattern of ensuring data structure integrity.
+
 
 def test_ao():
     # 🧠 ML Signal: Checking type of pivot["s2"] suggests a pattern of ensuring data structure integrity.
@@ -924,6 +1040,8 @@ def test_ao():
     # 🧠 ML Signal: Checking type of pivot["r1"] suggests a pattern of ensuring data structure integrity.
     assert isinstance(ao, series.Series)
     assert ao.values[-1] == -957.63459033
+
+
 # 🧠 ML Signal: Checking type of pivot["r2"] suggests a pattern of ensuring data structure integrity.
 
 
@@ -939,9 +1057,12 @@ def test_mi():
     assert isinstance(mi, series.Series)
     # 🧠 ML Signal: Asserting specific value of pivot["s2"] indicates a pattern of expected output validation.
     assert mi.values[-1] == 23.92808696
+
+
 # ✅ Best Practice: Using isinstance to check the type of pivot["pivot"]
 
 # 🧠 ML Signal: Asserting specific value of pivot["s3"] indicates a pattern of expected output validation.
+
 
 # ✅ Best Practice: Using isinstance to check the type of pivot["s1"]
 def test_bop():
@@ -957,9 +1078,12 @@ def test_bop():
     assert isinstance(bop, series.Series)
     # ✅ Best Practice: Using isinstance to check the type of pivot["r1"]
     assert bop.values[-1] == 0.03045138
+
+
 # 🧠 ML Signal: Asserting specific value of pivot["r3"] indicates a pattern of expected output validation.
 
 # ✅ Best Practice: Using isinstance to check the type of pivot["r2"]
+
 
 # 🧠 ML Signal: Asserting specific value of pivot["r4"] indicates a pattern of expected output validation.
 def test_vortex():
@@ -981,9 +1105,11 @@ def test_vortex():
     # 🧠 ML Signal: Use of 'round' method indicates a pattern of precision control in numerical computations.
     assert v["VIm"].values[-1] == 1.27305188
 
+
 # 🧠 ML Signal: Asserting specific values, useful for learning expected output patterns
 # ⚠️ SAST Risk (Low): Assumes 'msd' is always a 'series.Series', which might not be the case if input changes.
 # 🧠 ML Signal: Function definition with a specific naming pattern indicating a test function
+
 
 # 🧠 ML Signal: Use of 'assert' indicates a pattern of test-driven development or validation.
 def test_kst():
@@ -1013,6 +1139,8 @@ def test_kst():
     assert kst["KST"].values[-1] == -157.42229442
     # ⚠️ SAST Risk (Low): Assumes series is imported and valid, potential for NameError
     assert kst["signal"].values[-1] == -132.10367593
+
+
 # ✅ Best Practice: Use of isinstance() to ensure correct type
 # 🧠 ML Signal: Calling a method from a module with a specific pattern
 
@@ -1039,8 +1167,10 @@ def test_tsi():
     # ⚠️ SAST Risk (Low): Assumes 'vc' contains the expected keys and types.
     assert tsi["signal"].values[-1] == -26.94173827
 
+
 # 🧠 ML Signal: Usage of a specific TA function with parameters
 # ⚠️ SAST Risk (Low): Direct comparison of floating-point numbers can lead to precision issues.
+
 
 # ✅ Best Practice: Use of assert to validate the type of the result
 # ⚠️ SAST Risk (Low): Direct comparison of floating-point numbers can lead to precision issues.
@@ -1155,7 +1285,8 @@ def test_emv():
 
     assert isinstance(emv, series.Series)
     assert emv.values[-1] == -26103140.8
-                             
+
+
 def test_cci():
     """test TA.CCI"""
 
@@ -1256,9 +1387,9 @@ def test_ichimoku():
     assert isinstance(ichi["SENKOU"], series.Series)
     assert isinstance(ichi["CHIKOU"], series.Series)
 
-    assert ichi["TENKAN"].values[-1] == 6911.5 
+    assert ichi["TENKAN"].values[-1] == 6911.5
     assert ichi["KIJUN"].values[-1] == 6946.5
-    assert ichi["SENKOU"].values[-1] == 8243.0 
+    assert ichi["SENKOU"].values[-1] == 8243.0
     assert ichi["CHIKOU"].values[-27] == 6420.45318629
 
 
@@ -1408,6 +1539,7 @@ def test_vc():
     assert isinstance(vc["Value Chart Open"], series.Series)
     assert vc.values[-1][0] == 0.50469864
     assert vc.values[-1][-1] == -0.87573258
+
 
 def test_sma():
     """test TA.WAVEPM"""

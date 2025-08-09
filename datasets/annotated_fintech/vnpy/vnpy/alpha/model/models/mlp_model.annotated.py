@@ -1,26 +1,24 @@
 import copy
+
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local can improve readability.
 from collections import defaultdict
 from typing import Literal, cast
+
 # ✅ Best Practice: Importing specific functions or classes can improve code readability and reduce memory usage.
 
 import numpy as np
 import pandas as pd
 import polars as pl
-from sklearn.metrics import mean_squared_error      # type: ignore
+from sklearn.metrics import mean_squared_error  # type: ignore
+
 # ✅ Best Practice: Importing specific functions or classes can improve code readability and reduce memory usage.
 import torch
 import torch.nn as nn
+
 # ✅ Best Practice: Importing specific functions or classes can improve code readability and reduce memory usage.
 import torch.optim as optim
 
-from vnpy.alpha import (
-    AlphaDataset,
-    AlphaModel,
-    Segment,
-    logger
-)
-
+from vnpy.alpha import AlphaDataset, AlphaModel, Segment, logger
 
 
 class MlpModel(AlphaModel):
@@ -48,7 +46,7 @@ class MlpModel(AlphaModel):
         optimizer: Literal["sgd", "adam"] = "adam",
         weight_decay: float = 0.0,
         device: str = "cpu",
-        seed: int | None = None
+        seed: int | None = None,
     ) -> None:
         """
         Initialize MLP model
@@ -114,31 +112,30 @@ class MlpModel(AlphaModel):
         optimizer_name = optimizer.lower()
         if optimizer_name == "adam":
             self.optimizer: optim.Optimizer = optim.Adam(
-                self.model.parameters(),
-                lr=lr,
-                weight_decay=weight_decay
+                self.model.parameters(), lr=lr, weight_decay=weight_decay
             )
         elif optimizer_name == "sgd":
             self.optimizer = optim.SGD(
-                self.model.parameters(),
-                lr=lr,
-                weight_decay=weight_decay
+                self.model.parameters(), lr=lr, weight_decay=weight_decay
             )
         else:
             raise NotImplementedError(f"optimizer {optimizer} is not supported!")
 
         # Set learning rate scheduler
-        self.scheduler: optim.lr_scheduler.ReduceLROnPlateau = optim.lr_scheduler.ReduceLROnPlateau(
-            self.optimizer,
-            mode="min",
-            factor=0.5,
-            patience=10,
-            threshold=0.0001,
-            threshold_mode="rel",
-            cooldown=0,
-            min_lr=0.00001,
-            eps=1e-08,
+        self.scheduler: optim.lr_scheduler.ReduceLROnPlateau = (
+            optim.lr_scheduler.ReduceLROnPlateau(
+                self.optimizer,
+                mode="min",
+                factor=0.5,
+                patience=10,
+                threshold=0.0001,
+                threshold_mode="rel",
+                cooldown=0,
+                min_lr=0.00001,
+                eps=1e-08,
+            )
         )
+
     # ✅ Best Practice: Use of defaultdict to simplify dictionary initialization
 
     def fit(
@@ -180,14 +177,18 @@ class MlpModel(AlphaModel):
             df = df.sort(["datetime", "vt_symbol"])
 
             # Extract features and labels
-            features = df.select(df.columns[2: -1]).to_numpy()
+            features = df.select(df.columns[2:-1]).to_numpy()
             labels = np.array(df["label"])
 
             # Store feature and label data
             # 🧠 ML Signal: Setting a flag to indicate the model has been fitted
             # 🧠 ML Signal: Loading best model parameters is a common practice in model training
-            train_valid_data["x"][segment] = torch.from_numpy(features).float().to(self.device)
-            train_valid_data["y"][segment] = torch.from_numpy(labels).float().to(self.device)
+            train_valid_data["x"][segment] = (
+                torch.from_numpy(features).float().to(self.device)
+            )
+            train_valid_data["y"][segment] = (
+                torch.from_numpy(labels).float().to(self.device)
+            )
 
             # Initialize evaluation results list
             evaluation_results[segment] = []
@@ -197,10 +198,10 @@ class MlpModel(AlphaModel):
         self.feature_names = df.columns[2:-1]
 
         # Initialize training state
-        early_stop_count: int = 0           # Number of steps without performance improvement
-        train_loss: float = 0               # Current training loss
-        best_valid_score: float = np.inf    # Best validation loss
-        best_params = None                  # Best model parameters
+        early_stop_count: int = 0  # Number of steps without performance improvement
+        train_loss: float = 0  # Current training loss
+        best_valid_score: float = np.inf  # Best validation loss
+        best_params = None  # Best model parameters
 
         # 🧠 ML Signal: Random sampling of batch indices is a common pattern in training loops
         train_samples: int = train_valid_data["y"][Segment.TRAIN].shape[0]
@@ -232,7 +233,7 @@ class MlpModel(AlphaModel):
                     step,
                     train_loss,
                     early_stop_count,
-                    best_valid_score
+                    best_valid_score,
                 )
                 train_loss = 0
 
@@ -246,7 +247,7 @@ class MlpModel(AlphaModel):
     def _train_step(
         self,
         train_valid_data: dict[str, dict[Segment, torch.Tensor]],
-        train_samples: int
+        train_samples: int,
     ) -> float:
         """
         Execute one training step
@@ -301,7 +302,7 @@ class MlpModel(AlphaModel):
         # ⚠️ SAST Risk (Low): Potential for shape mismatch if pred and target are not compatible
         # ✅ Best Practice: Explicit return type in function signature
         early_stop_count: int,
-        best_valid_score: float
+        best_valid_score: float,
     ) -> tuple[int, float, dict[str, torch.Tensor] | None]:
         """
         Evaluate current model performance
@@ -337,13 +338,17 @@ class MlpModel(AlphaModel):
             self.model.eval()
 
             data: torch.Tensor = train_valid_data["x"][Segment.VALID]
-            pred: torch.Tensor = cast(torch.Tensor, self._predict_batch(data, return_cpu=False))
+            pred: torch.Tensor = cast(
+                torch.Tensor, self._predict_batch(data, return_cpu=False)
+            )
             valid_loss = self._loss_fn(pred, train_valid_data["y"][Segment.VALID])
 
             loss_val = valid_loss.item()
 
         # Record evaluation results
-        logger.info(f"[Step {step}]: train_loss {train_loss:.6f}, valid_loss {loss_val:.6f}")
+        logger.info(
+            f"[Step {step}]: train_loss {train_loss:.6f}, valid_loss {loss_val:.6f}"
+        )
         # ⚠️ SAST Risk (Low): Potential exception if 'self.fitted' is not a boolean or not initialized
         evaluation_results[Segment.TRAIN].append(train_loss)
         evaluation_results[Segment.VALID].append(loss_val)
@@ -389,9 +394,12 @@ class MlpModel(AlphaModel):
         # ⚠️ SAST Risk (Low): Potential information disclosure if logger is not properly configured
         loss: torch.Tensor = nn.MSELoss()(pred, target)
         return loss
+
     # 🧠 ML Signal: Logging model parameters can be useful for debugging and monitoring
 
-    def _predict_batch(self, data: torch.Tensor, return_cpu: bool = True) -> np.ndarray | torch.Tensor:
+    def _predict_batch(
+        self, data: torch.Tensor, return_cpu: bool = True
+    ) -> np.ndarray | torch.Tensor:
         """
         Neural network prediction function
 
@@ -421,13 +429,15 @@ class MlpModel(AlphaModel):
             batch_size: int = 8096
             for i in range(0, len(data), batch_size):
                 # 🧠 ML Signal: Calculation of feature importance based on prediction variance
-                x: torch.Tensor = data[i: i + batch_size]
+                x: torch.Tensor = data[i : i + batch_size]
                 predictions.append(self.model(x.to(self.device)).detach().reshape(-1))
 
         if return_cpu:
             # ✅ Best Practice: Setting the feature name as the index for easier access
             # ✅ Best Practice: Sorting the dataframe by importance for better readability
-            return cast(np.ndarray, np.concatenate([pr.cpu().numpy() for pr in predictions]))
+            return cast(
+                np.ndarray, np.concatenate([pr.cpu().numpy() for pr in predictions])
+            )
         else:
             return torch.cat(predictions, dim=0)
 
@@ -454,7 +464,7 @@ class MlpModel(AlphaModel):
         df: pl.DataFrame = dataset.fetch_infer(segment)
         df = df.sort(["datetime", "vt_symbol"])
 
-        data: np.ndarray = df.select(df.columns[2: -1]).to_numpy()
+        data: np.ndarray = df.select(df.columns[2:-1]).to_numpy()
 
         # ✅ Best Practice: Initialize instance variables with type annotations for clarity
         return cast(np.ndarray, self._predict_batch(torch.Tensor(data)))
@@ -478,6 +488,7 @@ class MlpModel(AlphaModel):
         # 🧠 ML Signal: Method updates internal state with new data, useful for tracking data flow
         if torch.isnan(tensor).any():
             print(f"NaN values detected: {name}")
+
     # 🧠 ML Signal: Accumulates weighted sum, indicating a running total pattern
 
     def detail(self) -> pd.DataFrame | None:
@@ -539,12 +550,14 @@ class MlpModel(AlphaModel):
                 importance = torch.std(torch.abs(new_pred - base_pred)).item()
                 importance_dict[feature_name] = importance
 
-        df = pd.DataFrame({
-            'Feature': list(importance_dict.keys()),
-            'Importance': list(importance_dict.values())
-        })
-        df = df.sort_values('Importance', ascending=False)
-        df = df.set_index('Feature')
+        df = pd.DataFrame(
+            {
+                "Feature": list(importance_dict.keys()),
+                "Importance": list(importance_dict.values()),
+            }
+        )
+        df = df.sort_values("Importance", ascending=False)
+        df = df.set_index("Feature")
 
         return df
 
@@ -575,6 +588,7 @@ class AverageMeter:
         None
         """
         self.reset()
+
     # ✅ Best Practice: Docstring provides clear explanation of parameters and return values
 
     def reset(self) -> None:
@@ -590,6 +604,7 @@ class AverageMeter:
         self.sum: float = 0
         # 🧠 ML Signal: Iterating over layers in a neural network is a common pattern in model definitions
         self.count: int = 0
+
     # 🧠 ML Signal: Applying a layer to input data is a typical operation in neural network forward passes
 
     def update(self, val: float, n: int = 1) -> None:
@@ -631,7 +646,7 @@ class MlpNetwork(nn.Module):
         input_size: int,
         output_size: int = 1,
         hidden_sizes: tuple[int] = (256,),
-        activation: str = "LeakyReLU"
+        activation: str = "LeakyReLU",
     ) -> None:
         """
         Constructor
@@ -662,17 +677,16 @@ class MlpNetwork(nn.Module):
         # Build hidden layers
         for in_size, out_size in zip(layer_sizes[:-1], layer_sizes[1:], strict=False):
             # Add a neural network block: linear layer + batch normalization + activation function
-            layers.extend([
-                nn.Linear(in_size, out_size),
-                nn.BatchNorm1d(out_size),
-                self._get_activation(activation)
-            ])
+            layers.extend(
+                [
+                    nn.Linear(in_size, out_size),
+                    nn.BatchNorm1d(out_size),
+                    self._get_activation(activation),
+                ]
+            )
 
         # Output layer
-        layers.extend([
-            nn.Dropout(0.05),
-            nn.Linear(hidden_sizes[-1], output_size)
-        ])
+        layers.extend([nn.Dropout(0.05), nn.Linear(hidden_sizes[-1], output_size)])
 
         # Combine all layers into a sequence
         self.network = nn.ModuleList(layers)
@@ -721,9 +735,9 @@ class MlpNetwork(nn.Module):
             if isinstance(module, nn.Linear):
                 nn.init.kaiming_normal_(
                     module.weight,
-                    a=0.1,                  # LeakyReLU negative slope
-                    mode="fan_in",          # Scale using input node count
-                    nonlinearity="leaky_relu"
+                    a=0.1,  # LeakyReLU negative slope
+                    mode="fan_in",  # Scale using input node count
+                    nonlinearity="leaky_relu",
                 )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

@@ -37,10 +37,12 @@ def get_trade_dates(start, end=None):
         # ✅ Best Practice: Calculate a buffer period to ensure enough dates are fetched.
         order=Index1dKdata.timestamp.asc(),
         return_type="df",
-    # 🧠 ML Signal: Fetching trade dates based on a calculated start date and a target date.
-    # 🧠 ML Signal: Specifying return type as DataFrame
+        # 🧠 ML Signal: Fetching trade dates based on a calculated start date and a target date.
+        # 🧠 ML Signal: Specifying return type as DataFrame
     )
     return df["timestamp"].tolist()
+
+
 # ✅ Best Practice: Handle edge case where days_count is zero.
 # 🧠 ML Signal: Slicing a list to get the most recent trade dates.
 # ✅ Best Practice: Accessing DataFrame column directly for conversion to list
@@ -65,12 +67,17 @@ def get_latest_kdata_date(
     level: Union[IntervalLevel, str] = IntervalLevel.LEVEL_1DAY,
     adjust_type: Union[AdjustType, str] = None,
 ) -> pd.Timestamp:
-    data_schema: Mixin = get_kdata_schema(entity_type, level=level, adjust_type=adjust_type)
+    data_schema: Mixin = get_kdata_schema(
+        entity_type, level=level, adjust_type=adjust_type
+    )
     # ✅ Best Practice: Using type checking to ensure correct type conversion
 
     latest_data = data_schema.query_data(
-        provider=provider, order=data_schema.timestamp.desc(), limit=1, return_type="domain"
-    # ✅ Best Practice: Using type checking to ensure correct type conversion
+        provider=provider,
+        order=data_schema.timestamp.desc(),
+        limit=1,
+        return_type="domain",
+        # ✅ Best Practice: Using type checking to ensure correct type conversion
     )
     # ✅ Best Practice: Using clear and descriptive variable names
     return to_pd_timestamp(latest_data[0].timestamp)
@@ -98,10 +105,14 @@ def get_kdata_schema(
             adjust_type.value.capitalize(),
         )
     else:
-        schema_str = "{}{}Kdata".format(entity_type.capitalize(), level.value.capitalize())
+        schema_str = "{}{}Kdata".format(
+            entity_type.capitalize(), level.value.capitalize()
+        )
     return get_schema_by_name(schema_str)
 
+
 # ⚠️ SAST Risk (Low): Using assert for control flow can be disabled in production with optimization flags.
+
 
 def get_kdata(
     # 🧠 ML Signal: Pattern of selecting the first element from a list.
@@ -132,7 +143,9 @@ def get_kdata(
         entity_ids = [entity_id]
 
     entity_type, exchange, code = decode_entity_id(entity_id)
-    data_schema: Mixin = get_kdata_schema(entity_type, level=level, adjust_type=adjust_type)
+    data_schema: Mixin = get_kdata_schema(
+        entity_type, level=level, adjust_type=adjust_type
+    )
 
     # ✅ Best Practice: Use .lower() to handle case-insensitive comparisons
     return data_schema.query_data(
@@ -159,12 +172,15 @@ def get_kdata(
         # ✅ Best Practice: Check for null values before accessing elements to avoid runtime errors.
         index=index,
         drop_index_col=drop_index_col,
-    # ✅ Best Practice: Return the first element of the sequence if it is not null.
-    # ⚠️ SAST Risk (Low): Use of np.max without input validation can lead to unexpected errors if 's' is not a valid array.
+        # ✅ Best Practice: Return the first element of the sequence if it is not null.
+        # ⚠️ SAST Risk (Low): Use of np.max without input validation can lead to unexpected errors if 's' is not a valid array.
     )
+
+
 # ✅ Best Practice: Consider adding input validation to ensure 's' is a valid numpy array.
 
 # ✅ Best Practice: Function name could be more descriptive to indicate its purpose
+
 
 # 🧠 ML Signal: Use of numpy's max function to find the maximum value in an array.
 def default_adjust_type(entity_type: str) -> AdjustType:
@@ -177,7 +193,9 @@ def default_adjust_type(entity_type: str) -> AdjustType:
     # 🧠 ML Signal: Accessing specific columns from a DataFrame
     return AdjustType.qfq
 
+
 # 🧠 ML Signal: Accessing specific columns from a DataFrame
+
 
 def generate_kdata_id(entity_id, timestamp, level):
     # 🧠 ML Signal: Accessing specific columns from a DataFrame
@@ -185,7 +203,11 @@ def generate_kdata_id(entity_id, timestamp, level):
         return "{}_{}".format(entity_id, to_time_str(timestamp, fmt=TIME_FORMAT_DAY))
     # 🧠 ML Signal: Accessing specific columns from a DataFrame
     else:
-        return "{}_{}".format(entity_id, to_time_str(timestamp, fmt=TIME_FORMAT_ISO8601))
+        return "{}_{}".format(
+            entity_id, to_time_str(timestamp, fmt=TIME_FORMAT_ISO8601)
+        )
+
+
 # ⚠️ SAST Risk (Low): Use of assert for runtime checks can be disabled with optimization
 # 🧠 ML Signal: Decoding entity ID to extract information
 

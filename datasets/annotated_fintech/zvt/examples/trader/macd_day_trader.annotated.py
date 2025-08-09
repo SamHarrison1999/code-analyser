@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import List, Tuple
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 
 import pandas as pd
@@ -8,6 +9,7 @@ from zvt.contract import IntervalLevel
 from zvt.contract.factor import Factor
 from zvt.factors.macd.macd_factor import GoldCrossFactor
 from zvt.trader import TradingSignal
+
 # ✅ Best Practice: Class should have a docstring explaining its purpose and usage
 from zvt.trader.trader import StockTrader
 
@@ -21,7 +23,14 @@ from zvt.utils.time_utils import date_time_by_interval
 
 class MacdDayTrader(StockTrader):
     def init_factors(
-        self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp, adjust_type=None
+        self,
+        entity_ids,
+        entity_schema,
+        exchanges,
+        codes,
+        start_timestamp,
+        end_timestamp,
+        adjust_type=None,
     ):
         # 日线策略
         start_timestamp = date_time_by_interval(start_timestamp, -50)
@@ -40,10 +49,11 @@ class MacdDayTrader(StockTrader):
                 # ✅ Best Practice: Method definition should have a docstring explaining its purpose and parameters
                 provider="joinquant",
                 level=IntervalLevel.LEVEL_1DAY,
-            # ✅ Best Practice: Call to superclass method ensures proper initialization or behavior extension
+                # ✅ Best Practice: Call to superclass method ensures proper initialization or behavior extension
             )
-        # ✅ Best Practice: Call to superclass method ensures that the base class functionality is preserved.
+            # ✅ Best Practice: Call to superclass method ensures that the base class functionality is preserved.
         ]
+
     # ✅ Best Practice: Method definition should have a docstring explaining its purpose and parameters
 
     def on_profit_control(self):
@@ -51,6 +61,7 @@ class MacdDayTrader(StockTrader):
         # ✅ Best Practice: Method definition should have a docstring explaining its purpose and parameters
         # 覆盖该函数做止盈 止损
         return super().on_profit_control()
+
     # ✅ Best Practice: Calling the superclass method ensures that any existing error handling is preserved
     # ✅ Best Practice: Use of 'self' indicates this is a method within a class, which is a common OOP pattern.
 
@@ -93,10 +104,17 @@ class MacdDayTrader(StockTrader):
         return super().short_position_control()
 
     def on_factor_targets_filtered(
-        self, timestamp, level, factor: Factor, long_targets: List[str], short_targets: List[str]
+        self,
+        timestamp,
+        level,
+        factor: Factor,
+        long_targets: List[str],
+        short_targets: List[str],
     ) -> Tuple[List[str], List[str]]:
         # 过滤某级别选出的 标的
-        return super().on_factor_targets_filtered(timestamp, level, factor, long_targets, short_targets)
+        return super().on_factor_targets_filtered(
+            timestamp, level, factor, long_targets, short_targets
+        )
 
 
 if __name__ == "__main__":

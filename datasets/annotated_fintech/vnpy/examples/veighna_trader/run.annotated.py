@@ -4,6 +4,7 @@ from vnpy.trader.engine import MainEngine
 from vnpy.trader.ui import MainWindow, create_qapp
 
 from vnpy_ctp import CtpGateway
+
 # from vnpy_ctptest import CtptestGateway
 # from vnpy_mini import MiniGateway
 # 🧠 ML Signal: Importing specific modules from a trading library indicates usage patterns in financial applications
@@ -32,6 +33,7 @@ from vnpy_ctp import CtpGateway
 # from vnpy_paperaccount import PaperAccountApp
 from vnpy_ctastrategy import CtaStrategyApp
 from vnpy_ctabacktester import CtaBacktesterApp
+
 # from vnpy_spreadtrading import SpreadTradingApp
 # from vnpy_algotrading import AlgoTradingApp
 # from vnpy_optionmaster import OptionMasterApp
@@ -41,6 +43,7 @@ from vnpy_ctabacktester import CtaBacktesterApp
 # from vnpy_rpcservice import RpcServiceApp
 # from vnpy_excelrtd import ExcelRtdApp
 from vnpy_datamanager import DataManagerApp
+
 # from vnpy_datarecorder import DataRecorderApp
 # from vnpy_riskmanager import RiskManagerApp
 # from vnpy_webtrader import WebTraderApp

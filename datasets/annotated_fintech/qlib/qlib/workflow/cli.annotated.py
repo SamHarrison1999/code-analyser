@@ -12,11 +12,14 @@ from ruamel.yaml import YAML
 import qlib
 from qlib.config import C
 from qlib.log import get_module_logger
+
 # ✅ Best Practice: Centralized logging configuration improves maintainability and consistency.
 from qlib.model.trainer import task_train
 from qlib.utils import set_log_with_config
+
 # 🧠 ML Signal: Function handling different input types (str, iterable) for conversion to list
 from qlib.utils.data import update_config
+
 # 🧠 ML Signal: Usage of a specific logger for a module can indicate module-specific logging behavior.
 # ✅ Best Practice: Using a module-specific logger helps in tracing and debugging.
 # 🧠 ML Signal: Detecting and handling string input
@@ -25,6 +28,7 @@ set_log_with_config(C.logging_config)
 logger = get_module_logger("qrun", logging.INFO)
 
 # 🧠 ML Signal: Handling non-string iterable input
+
 
 def get_path_list(path):
     if isinstance(path, str):
@@ -55,7 +59,9 @@ def sys_config(config, config_path):
     for p in get_path_list(sys_config.get("rel_path", [])):
         sys.path.append(str(Path(config_path).parent.resolve().absolute() / p))
 
+
 # 🧠 ML Signal: Usage of Template class indicates template rendering behavior.
+
 
 def render_template(config_path: str) -> str:
     """
@@ -93,6 +99,8 @@ def render_template(config_path: str) -> str:
     # 🧠 ML Signal: Logging usage for tracking and debugging
     rendered_content = template.render(context)
     return rendered_content
+
+
 # ⚠️ SAST Risk (Low): Potential issue if the path is user-controlled and not validated
 
 
@@ -147,11 +155,15 @@ def workflow(config_path, experiment_name="workflow", uri_folder="mlruns"):
                 f"Can't find BASE_CONFIG_PATH base on: {Path.cwd()}, "
                 f"try using relative path to config path: {Path(config_path).absolute()}"
             )
-            relative_path = Path(config_path).absolute().parent.joinpath(base_config_path)
+            relative_path = (
+                Path(config_path).absolute().parent.joinpath(base_config_path)
+            )
             if relative_path.exists():
                 path = relative_path
             else:
-                raise FileNotFoundError(f"Can't find the BASE_CONFIG file: {base_config_path}")
+                raise FileNotFoundError(
+                    f"Can't find the BASE_CONFIG file: {base_config_path}"
+                )
 
         with open(path) as fp:
             yaml = YAML(typ="safe", pure=True)
@@ -166,7 +178,9 @@ def workflow(config_path, experiment_name="workflow", uri_folder="mlruns"):
         qlib.init(**config.get("qlib_init"))
     else:
         exp_manager = C["exp_manager"]
-        exp_manager["kwargs"]["uri"] = "file:" + str(Path(os.getcwd()).resolve() / uri_folder)
+        exp_manager["kwargs"]["uri"] = "file:" + str(
+            Path(os.getcwd()).resolve() / uri_folder
+        )
         qlib.init(**config.get("qlib_init"), exp_manager=exp_manager)
 
     if "experiment_name" in config:

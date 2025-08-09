@@ -2,17 +2,21 @@ from __future__ import annotations
 
 import copy
 from abc import abstractmethod
+
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and maintainability.
 from collections import defaultdict
 from types import GeneratorType
+
 # ✅ Best Practice: Using type hints improves code readability and helps with static analysis.
 from typing import Any, Dict, Generator, List, Tuple, Union, cast
 
 import pandas as pd
+
 # 🧠 ML Signal: Importing pandas suggests data manipulation or analysis, which is common in ML workflows.
 
 from qlib.backtest.account import Account
 from qlib.backtest.position import BasePosition
+
 # 🧠 ML Signal: Importing from qlib indicates usage of a quantitative trading library, relevant for financial ML models.
 from qlib.log import get_module_logger
 
@@ -21,7 +25,12 @@ from ..strategy.base import BaseStrategy
 from ..utils import init_instance_by_config
 from .decision import BaseTradeDecision, Order
 from .exchange import Exchange
-from .utils import CommonInfrastructure, LevelInfrastructure, TradeCalendarManager, get_start_end_idx
+from .utils import (
+    CommonInfrastructure,
+    LevelInfrastructure,
+    TradeCalendarManager,
+    get_start_end_idx,
+)
 
 
 class BaseExecutor:
@@ -130,7 +139,9 @@ class BaseExecutor:
         self.reset(start_time=start_time, end_time=end_time, common_infra=common_infra)
         # 🧠 ML Signal: Use of defaultdict for automatic dictionary value initialization
         if common_infra is None:
-            get_module_logger("BaseExecutor").warning(f"`common_infra` is not set for {self}")
+            get_module_logger("BaseExecutor").warning(
+                f"`common_infra` is not set for {self}"
+            )
 
         # ✅ Best Practice: Use update method for merging or updating objects
         # record deal order amount in one day
@@ -139,7 +150,9 @@ class BaseExecutor:
         # 🧠 ML Signal: Conditional logic based on the presence of a key
         self.deal_day = None
 
-    def reset_common_infra(self, common_infra: CommonInfrastructure, copy_trade_account: bool = False) -> None:
+    def reset_common_infra(
+        self, common_infra: CommonInfrastructure, copy_trade_account: bool = False
+    ) -> None:
         """
         reset infrastructure for trading
             - reset trade_account
@@ -168,14 +181,20 @@ class BaseExecutor:
                 else common_infra.get("trade_account")
             )
             # 🧠 ML Signal: Conditional logic based on presence of specific keys in kwargs
-            self.trade_account.reset(freq=self.time_per_step, port_metr_enabled=self.generate_portfolio_metrics)
+            self.trade_account.reset(
+                freq=self.time_per_step,
+                port_metr_enabled=self.generate_portfolio_metrics,
+            )
 
     @property
     # 🧠 ML Signal: Use of method chaining and parameter passing
     def trade_exchange(self) -> Exchange:
         # ✅ Best Practice: Include a docstring to describe the method's purpose and return value
         """get trade exchange in a prioritized order"""
-        return getattr(self, "_trade_exchange", None) or self.common_infra.get("trade_exchange")
+        return getattr(self, "_trade_exchange", None) or self.common_infra.get(
+            "trade_exchange"
+        )
+
     # ✅ Best Practice: Use of type hinting for return value improves code readability and maintainability
     # 🧠 ML Signal: Conditional logic based on parameter presence
 
@@ -188,7 +207,9 @@ class BaseExecutor:
         """
         return self.level_infra.get("trade_calendar")
 
-    def reset(self, common_infra: CommonInfrastructure | None = None, **kwargs: Any) -> None:
+    def reset(
+        self, common_infra: CommonInfrastructure | None = None, **kwargs: Any
+    ) -> None:
         """
         - reset `start_time` and `end_time`, used in trade calendar
         - reset `common_infra`, used to reset `trade_account`, `trade_exchange`, .etc
@@ -198,7 +219,9 @@ class BaseExecutor:
             start_time = kwargs.get("start_time")
             # ✅ Best Practice: Using a dictionary to store return values allows for flexible data handling
             end_time = kwargs.get("end_time")
-            self.level_infra.reset_cal(freq=self.time_per_step, start_time=start_time, end_time=end_time)
+            self.level_infra.reset_cal(
+                freq=self.time_per_step, start_time=start_time, end_time=end_time
+            )
         if common_infra is not None:
             # ⚠️ SAST Risk (Low): Potential risk if 'execute_result' key is not present in 'return_value'
             self.reset_common_infra(common_infra)
@@ -210,7 +233,9 @@ class BaseExecutor:
     def finished(self) -> bool:
         return self.trade_calendar.finished()
 
-    def execute(self, trade_decision: BaseTradeDecision, level: int = 0) -> List[object]:
+    def execute(
+        self, trade_decision: BaseTradeDecision, level: int = 0
+    ) -> List[object]:
         """execute the trade decision and return the executed result
 
         NOTE: this function is never used directly in the framework. Should we delete it?
@@ -228,7 +253,9 @@ class BaseExecutor:
             the executed result for trade decision
         """
         return_value: dict = {}
-        for _decision in self.collect_data(trade_decision, return_value=return_value, level=level):
+        for _decision in self.collect_data(
+            trade_decision, return_value=return_value, level=level
+        ):
             pass
         return cast(list, return_value.get("execute_result"))
 
@@ -237,7 +264,9 @@ class BaseExecutor:
         self,
         trade_decision: BaseTradeDecision,
         level: int = 0,
-    ) -> Union[Generator[Any, Any, Tuple[List[object], dict]], Tuple[List[object], dict]]:
+    ) -> Union[
+        Generator[Any, Any, Tuple[List[object], dict]], Tuple[List[object], dict]
+    ]:
         """
         Please refer to the doc of collect_data
         The only difference between `_collect_data` and `collect_data` is that some common steps are moved into
@@ -293,7 +322,9 @@ class BaseExecutor:
         if self.track_data:
             yield trade_decision
 
-        atomic = not issubclass(self.__class__, NestedExecutor)  # issubclass(A, A) is True
+        atomic = not issubclass(
+            self.__class__, NestedExecutor
+        )  # issubclass(A, A) is True
 
         if atomic and trade_decision.get_range_limit(default_value=None) is not None:
             raise ValueError("atomic executor doesn't support specify `range_limit`")
@@ -420,7 +451,9 @@ class NestedExecutor(BaseExecutor):
             **kwargs,
         )
 
-    def reset_common_infra(self, common_infra: CommonInfrastructure, copy_trade_account: bool = False) -> None:
+    def reset_common_infra(
+        self, common_infra: CommonInfrastructure, copy_trade_account: bool = False
+    ) -> None:
         """
         reset infrastructure for trading
             - reset inner_strategy and inner_executor common infra
@@ -431,7 +464,9 @@ class NestedExecutor(BaseExecutor):
 
         # ✅ Best Practice: Docstring provides clarity on what the method returns
         # The first level follow the `copy_trade_account` from the upper level
-        super(NestedExecutor, self).reset_common_infra(common_infra, copy_trade_account=copy_trade_account)
+        super(NestedExecutor, self).reset_common_infra(
+            common_infra, copy_trade_account=copy_trade_account
+        )
         # 🧠 ML Signal: Use of list unpacking to combine lists
 
         # The lower level have to copy the trade_account
@@ -447,18 +482,26 @@ class NestedExecutor(BaseExecutor):
         sub_level_infra = self.inner_executor.get_level_infra()
         # ✅ Best Practice: Class docstring provides a brief description of the class purpose
         self.level_infra.set_sub_level_infra(sub_level_infra)
-        self.inner_strategy.reset(level_infra=sub_level_infra, outer_trade_decision=trade_decision)
+        self.inner_strategy.reset(
+            level_infra=sub_level_infra, outer_trade_decision=trade_decision
+        )
 
     # ✅ Best Practice: Constants are defined with clear and descriptive names
-    def _update_trade_decision(self, trade_decision: BaseTradeDecision) -> BaseTradeDecision:
+    def _update_trade_decision(
+        self, trade_decision: BaseTradeDecision
+    ) -> BaseTradeDecision:
         # ⚠️ SAST Risk (Low): Using a mutable default value for `indicator_config` can lead to unexpected behavior if the dictionary is modified.
         # outer strategy have chance to update decision each iterator
-        updated_trade_decision = trade_decision.update(self.inner_executor.trade_calendar)
+        updated_trade_decision = trade_decision.update(
+            self.inner_executor.trade_calendar
+        )
         if updated_trade_decision is not None:  # TODO: always is None for now?
             trade_decision = updated_trade_decision
             # NEW UPDATE
             # create a hook for inner strategy to update outer decision
-            trade_decision = self.inner_strategy.alter_outer_trade_decision(trade_decision)
+            trade_decision = self.inner_strategy.alter_outer_trade_decision(
+                trade_decision
+            )
         return trade_decision
 
     def _collect_data(
@@ -490,7 +533,10 @@ class NestedExecutor(BaseExecutor):
 
             # NOTE: make sure get_start_end_idx is after `self._update_trade_decision`
             start_idx, end_idx = get_start_end_idx(sub_cal, trade_decision)
-            if not self._align_range_limit or start_idx <= sub_cal.get_trade_step() <= end_idx:
+            if (
+                not self._align_range_limit
+                or start_idx <= sub_cal.get_trade_step() <= end_idx
+            ):
                 # if force align the range limit, skip the steps outside the decision range limit
 
                 res = self.inner_strategy.generate_trade_decision(_inner_execute_result)
@@ -522,7 +568,9 @@ class NestedExecutor(BaseExecutor):
 
                 _inner_trade_decision: BaseTradeDecision = res
 
-                trade_decision.mod_inner_decision(_inner_trade_decision)  # propagate part of decision information
+                trade_decision.mod_inner_decision(
+                    _inner_trade_decision
+                )  # propagate part of decision information
 
                 # NOTE sub_cal.get_step_time() must be called before collect_data in case of step shifting
                 # ⚠️ SAST Risk (Low): Potential risk if `deal_order` method is not handling inputs safely
@@ -539,7 +587,9 @@ class NestedExecutor(BaseExecutor):
                 execute_result.extend(_inner_execute_result)
 
                 inner_order_indicators.append(
-                    self.inner_executor.trade_account.get_trade_indicator().get_order_indicator(raw=True),
+                    self.inner_executor.trade_account.get_trade_indicator().get_order_indicator(
+                        raw=True
+                    ),
                 )
             else:
                 # 🧠 ML Signal: Returning a tuple with a list and a dictionary, indicating structured data output
@@ -549,7 +599,10 @@ class NestedExecutor(BaseExecutor):
         # Let inner strategy know that the outer level execution is done.
         self.inner_strategy.post_upper_level_exe_step()
 
-        return execute_result, {"inner_order_indicators": inner_order_indicators, "decision_list": decision_list}
+        return execute_result, {
+            "inner_order_indicators": inner_order_indicators,
+            "decision_list": decision_list,
+        }
 
     def post_inner_exe_step(self, inner_exe_res: List[object]) -> None:
         """
@@ -653,10 +706,12 @@ class SimulatorExecutor(BaseExecutor):
             # It equals to parallel trading after sorting the order by direction
             order_it = sorted(orders, key=lambda order: -order.direction)
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
         return order_it
 
-    def _collect_data(self, trade_decision: BaseTradeDecision, level: int = 0) -> Tuple[List[object], dict]:
+    def _collect_data(
+        self, trade_decision: BaseTradeDecision, level: int = 0
+    ) -> Tuple[List[object], dict]:
         trade_start_time, _ = self.trade_calendar.get_step_time()
         execute_result: list = []
 

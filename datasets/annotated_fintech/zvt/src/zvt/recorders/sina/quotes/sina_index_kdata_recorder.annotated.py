@@ -6,12 +6,15 @@ import pandas as pd
 import requests
 
 from zvt.api.kdata import generate_kdata_id, get_kdata_schema
+
 # 🧠 ML Signal: Class definition with inheritance, useful for understanding class hierarchies and relationships
 from zvt.contract import IntervalLevel, AdjustType
 from zvt.contract.recorder import FixedCycleDataRecorder
+
 # 🧠 ML Signal: Class attribute definition, useful for understanding default configurations
 from zvt.domain import Index, IndexKdataCommon
 from zvt.utils.time_utils import get_year_quarters, is_same_date
+
 # 🧠 ML Signal: Class attribute definition, useful for understanding default configurations
 
 
@@ -56,7 +59,9 @@ class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
         self.adjust_type = AdjustType.qfq
         self.entity_type = self.entity_schema.__name__.lower()
 
-        self.data_schema = get_kdata_schema(entity_type=self.entity_type, level=level, adjust_type=self.adjust_type)
+        self.data_schema = get_kdata_schema(
+            entity_type=self.entity_type, level=level, adjust_type=self.adjust_type
+        )
 
         super().__init__(
             force_update,
@@ -89,7 +94,9 @@ class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
 
     def generate_domain_id(self, entity, original_data):
         # ⚠️ SAST Risk (Medium): Potentially unsafe external URL request without timeout
-        return generate_kdata_id(entity.id, timestamp=original_data["timestamp"], level=self.level)
+        return generate_kdata_id(
+            entity.id, timestamp=original_data["timestamp"], level=self.level
+        )
 
     def record(self, entity, start, end, size, timestamps):
         # ⚠️ SAST Risk (Low): Potentially unsafe HTML parsing
@@ -97,7 +104,11 @@ class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
         if not is_same_date(entity.timestamp, start) and len(the_quarters) > 1:
             the_quarters = the_quarters[1:]
 
-        param = {"security_item": entity, "quarters": the_quarters, "level": self.level.value}
+        param = {
+            "security_item": entity,
+            "quarters": the_quarters,
+            "level": self.level.value,
+        }
         # ✅ Best Practice: Consider using a backoff strategy instead of fixed sleep
 
         security_item = param["security_item"]
@@ -115,7 +126,9 @@ class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
                 # 🧠 ML Signal: Usage of pandas for data manipulation
                 dfs = pd.read_html(response.text)
             except ValueError as error:
-                self.logger.error(f"skip ({year}-{quarter:02d}){security_item.code}{security_item.name}({error})")
+                self.logger.error(
+                    f"skip ({year}-{quarter:02d}){security_item.code}{security_item.name}({error})"
+                )
                 # 🧠 ML Signal: Usage of pandas for data concatenation
                 time.sleep(10.0)
                 continue
@@ -131,7 +144,15 @@ class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
 
             df = dfs[4].copy()
             df = df.iloc[1:]
-            df.columns = ["timestamp", "open", "high", "close", "low", "volume", "turnover"]
+            df.columns = [
+                "timestamp",
+                "open",
+                "high",
+                "close",
+                "low",
+                "volume",
+                "turnover",
+            ]
             df["name"] = security_item.name
             df["level"] = level
             df["timestamp"] = pd.to_datetime(df["timestamp"])
@@ -139,7 +160,9 @@ class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
 
             result_df = pd.concat([result_df, df])
 
-            self.logger.info(f"({security_item.code}{security_item.name})({year}-{quarter:02d})")
+            self.logger.info(
+                f"({security_item.code}{security_item.name})({year}-{quarter:02d})"
+            )
             time.sleep(10.0)
 
         result_df = result_df.sort_values(by="timestamp")

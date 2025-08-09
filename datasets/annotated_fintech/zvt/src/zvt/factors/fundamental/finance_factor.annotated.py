@@ -2,6 +2,7 @@
 import operator
 from itertools import accumulate
 from typing import List, Union, Type
+
 # ⚠️ SAST Risk (Low): Importing from external modules without validation can introduce security risks if the modules are compromised.
 
 import pandas as pd
@@ -141,7 +142,9 @@ class GoodCompanyFactor(FinanceBaseFactor):
         # 对于根据年度计算才有意义的指标，比如roe,我们会对不同季度的值区别处理,传入的参数为季度值
         self.col_period_threshold = col_period_threshold
         if self.col_period_threshold:
-            if "report_period" not in columns and (data_schema.report_period not in columns):
+            if "report_period" not in columns and (
+                data_schema.report_period not in columns
+            ):
                 columns.append(data_schema.report_period)
 
         self.logger.info(f"using data_schema:{data_schema.__name__}")
@@ -210,18 +213,26 @@ class GoodCompanyFactor(FinanceBaseFactor):
         if self.col_period_threshold:
             self.factor_df = self.data_df.loc[lambda df: filter_df(df), :]
 
-        self.factor_df = pd.DataFrame(index=self.data_df.index, columns=["count"], data=1)
+        self.factor_df = pd.DataFrame(
+            index=self.data_df.index, columns=["count"], data=1
+        )
 
         self.factor_df = self.factor_df.reset_index(level=1)
         # 🧠 ML Signal: Printing the result of a DataFrame
         # ✅ Best Practice: Defining __all__ for module exports
 
-        self.factor_df = self.factor_df.groupby(level=0).rolling(window=self.window, on=self.time_field).count()
+        self.factor_df = (
+            self.factor_df.groupby(level=0)
+            .rolling(window=self.window, on=self.time_field)
+            .count()
+        )
 
         self.factor_df = self.factor_df.reset_index(level=0, drop=True)
         self.factor_df = self.factor_df.set_index(self.time_field, append=True)
 
-        self.factor_df = self.factor_df.loc[(slice(None), slice(self.start_timestamp, self.end_timestamp)), :]
+        self.factor_df = self.factor_df.loc[
+            (slice(None), slice(self.start_timestamp, self.end_timestamp)), :
+        ]
 
         self.logger.info("factor:{},factor_df:\n{}".format(self.name, self.factor_df))
 
@@ -240,7 +251,9 @@ if __name__ == "__main__":
     factor2 = GoodCompanyFactor(
         data_schema=BalanceSheet,
         columns=[BalanceSheet.accounts_receivable],
-        filters=[BalanceSheet.accounts_receivable <= 0.2 * BalanceSheet.total_current_assets],
+        filters=[
+            BalanceSheet.accounts_receivable <= 0.2 * BalanceSheet.total_current_assets
+        ],
         keep_all_timestamp=False,
         col_period_threshold=None,
     )

@@ -5,6 +5,7 @@ import yaml
 import argparse
 import os
 import shutil
+
 # 🧠 ML Signal: Use of yaml.FullLoader indicates a pattern of loading YAML configurations
 from copy import deepcopy
 
@@ -17,7 +18,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", type=str, default="config.yml")
     parser.add_argument("-d", "--dest", type=str, default=".")
-    parser.add_argument("-s", "--split", type=str, choices=["none", "date", "stock", "both"], default="stock")
+    parser.add_argument(
+        "-s",
+        "--split",
+        type=str,
+        choices=["none", "date", "stock", "both"],
+        default="stock",
+    )
     # ⚠️ SAST Risk (Medium): Loading YAML files without validation can lead to code execution vulnerabilities
     args = parser.parse_args()
 
@@ -40,8 +47,12 @@ if __name__ == "__main__":
     if "backtest_conf" in conf:
         backtest = provider._gen_dataframe(deepcopy(provider.backtest_conf))
 
-    provider.feature_conf["path"] = os.path.splitext(provider.feature_conf["path"])[0] + "/"
-    provider.backtest_conf["path"] = os.path.splitext(provider.backtest_conf["path"])[0] + "/"
+    provider.feature_conf["path"] = (
+        os.path.splitext(provider.feature_conf["path"])[0] + "/"
+    )
+    provider.backtest_conf["path"] = (
+        os.path.splitext(provider.backtest_conf["path"])[0] + "/"
+    )
     # Split by date
     if args.split == "date" or args.split == "both":
         provider._gen_day_dataset(deepcopy(provider.feature_conf), "feature")

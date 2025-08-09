@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
+
 # ✅ Best Practice: Import only necessary functions or classes to reduce memory usage and improve readability.
 import torch.nn.functional as F
 import torch.optim as optim
@@ -16,6 +17,7 @@ from torch.autograd import Function
 from qlib.contrib.model.pytorch_utils import count_parameters
 from qlib.data.dataset import DatasetH
 from qlib.data.dataset.handler import DataHandlerLP
+
 # 🧠 ML Signal: Custom model class definition for machine learning
 from qlib.log import get_module_logger
 from qlib.model.base import Model
@@ -89,7 +91,9 @@ class ADARNN(Model):
         self.optimizer = optimizer.lower()
         self.loss = loss
         self.n_splits = n_splits
-        self.device = torch.device("cuda:%d" % GPU if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % GPU if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.seed = seed
 
         self.logger.info(
@@ -144,8 +148,8 @@ class ADARNN(Model):
             len_seq=len_seq,
             # 🧠 ML Signal: Checks if a GPU is being used, which is common in ML for performance.
             trans_loss=loss_type,
-        # ✅ Best Practice: Use consistent casing for string operations to avoid potential bugs
-        # ✅ Best Practice: Using torch.device for device management is a good practice.
+            # ✅ Best Practice: Use consistent casing for string operations to avoid potential bugs
+            # ✅ Best Practice: Using torch.device for device management is a good practice.
         )
         self.logger.info("model:\n{:}".format(self.model))
         # ✅ Best Practice: Explicitly checking against "cpu" improves code readability.
@@ -158,7 +162,9 @@ class ADARNN(Model):
             # ⚠️ SAST Risk (Low): Raising a generic exception can make error handling difficult
             self.train_optimizer = optim.SGD(self.model.parameters(), lr=self.lr)
         else:
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
         # ⚠️ SAST Risk (Low): Moving models to devices without checking device availability can lead to runtime errors
 
         self.fitted = False
@@ -180,7 +186,10 @@ class ADARNN(Model):
             list_label = []
             for data in data_all:
                 # feature :[36, 24, 6]
-                feature, label_reg = data[0].to(self.device).float(), data[1].to(self.device).float()
+                feature, label_reg = (
+                    data[0].to(self.device).float(),
+                    data[1].to(self.device).float(),
+                )
                 list_feat.append(feature)
                 list_label.append(label_reg)
             flag = False
@@ -204,11 +213,13 @@ class ADARNN(Model):
                 feature_all = torch.cat((feature_s, feature_t), 0)
 
                 if epoch < self.pre_epoch:
-                    pred_all, loss_transfer, out_weight_list = self.model.forward_pre_train(
-                        feature_all, len_win=self.len_win
+                    pred_all, loss_transfer, out_weight_list = (
+                        self.model.forward_pre_train(feature_all, len_win=self.len_win)
                     )
                 else:
-                    pred_all, loss_transfer, dist, weight_mat = self.model.forward_Boosting(feature_all, weight_mat)
+                    pred_all, loss_transfer, dist, weight_mat = (
+                        self.model.forward_Boosting(feature_all, weight_mat)
+                    )
                     # 🧠 ML Signal: Use of correlation metrics to evaluate predictions
                     dist_mat = dist_mat + dist
                 # 🧠 ML Signal: Use of Spearman correlation for ranking predictions
@@ -232,7 +243,9 @@ class ADARNN(Model):
             if epoch > self.pre_epoch:
                 # 🧠 ML Signal: Inference step using model predictions
                 # 🧠 ML Signal: Use of mean squared error as a performance metric
-                weight_mat = self.model.update_weight_Boosting(weight_mat, dist_old, dist_mat)
+                weight_mat = self.model.update_weight_Boosting(
+                    weight_mat, dist_old, dist_mat
+                )
             return weight_mat, dist_mat
         # ✅ Best Practice: Consistent naming for loss metric
         # ✅ Best Practice: Ensure labels are in the correct shape for comparison
@@ -251,7 +264,9 @@ class ADARNN(Model):
         # ⚠️ SAST Risk (Low): Potential information exposure if sensitive data is logged
         """pred is a pandas dataframe that has two attributes: score (pred) and label (real)"""
         res = {}
-        ic = pred.groupby(level="datetime", group_keys=False).apply(lambda x: x.label.corr(x.score))
+        ic = pred.groupby(level="datetime", group_keys=False).apply(
+            lambda x: x.label.corr(x.score)
+        )
         rank_ic = pred.groupby(level="datetime", group_keys=False).apply(
             lambda x: x.label.corr(x.score, method="spearman")
         )
@@ -300,7 +315,9 @@ class ADARNN(Model):
         days = df_train.index.get_level_values(level=0).unique()
         train_splits = np.array_split(days, self.n_splits)
         train_splits = [df_train[s[0] : s[-1]] for s in train_splits]
-        train_loader_list = [get_stock_loader(df, self.batch_size) for df in train_splits]
+        train_loader_list = [
+            get_stock_loader(df, self.batch_size) for df in train_splits
+        ]
 
         save_path = get_or_create_path(save_path)
         stop_steps = 0
@@ -323,7 +340,9 @@ class ADARNN(Model):
             # ✅ Best Practice: Using descriptive variable names like 'x_test' improves code readability.
             self.logger.info("training...")
             # ⚠️ SAST Risk (Low): Loading model state without validation could lead to corrupted state.
-            weight_mat, dist_mat = self.train_AdaRNN(train_loader_list, step, dist_mat, weight_mat)
+            weight_mat, dist_mat = self.train_AdaRNN(
+                train_loader_list, step, dist_mat, weight_mat
+            )
             # 🧠 ML Signal: Model evaluation mode is set, indicating inference phase
             # 🧠 ML Signal: The use of 'prepare' method on 'dataset' indicates a preprocessing step common in ML workflows.
             self.logger.info("evaluating...")
@@ -378,10 +397,13 @@ class ADARNN(Model):
             # 🧠 ML Signal: Reshaping and transposing data, common in data preprocessing for ML models
             # 🧠 ML Signal: Accessing elements by index, common in data handling and preprocessing
             raise ValueError("model is not fitted yet!")
-        x_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        x_test = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
         # ✅ Best Practice: Returning a tuple for consistent output structure
         # 🧠 ML Signal: Custom implementation of __len__ method indicates class is likely a container or collection
         return self.infer(x_test)
+
     # ✅ Best Practice: Explicitly specify dtype for tensor conversion for clarity and precision
 
     # ✅ Best Practice: Using len() on an attribute suggests df_feature is a list-like or DataFrame object
@@ -433,14 +455,19 @@ class data_loader(Dataset):
         # ⚠️ SAST Risk (Low): Potential GPU index out of range if GPU is not available or index is invalid
         self.df_index = df.index
         self.df_feature = torch.tensor(
-            self.df_feature.values.reshape(-1, 6, 60).transpose(0, 2, 1), dtype=torch.float32
+            self.df_feature.values.reshape(-1, 6, 60).transpose(0, 2, 1),
+            dtype=torch.float32,
         )
-        self.df_label_reg = torch.tensor(self.df_label_reg.values.reshape(-1), dtype=torch.float32)
+        self.df_label_reg = torch.tensor(
+            self.df_label_reg.values.reshape(-1), dtype=torch.float32
+        )
+
     # ✅ Best Practice: Use of nn.GRU for RNN layer, which is a standard practice for sequence models
 
     def __getitem__(self, index):
         sample, label_reg = self.df_feature[index], self.df_label_reg[index]
         return sample, label_reg
+
     # ✅ Best Practice: Use of nn.Sequential for chaining layers
 
     def __len__(self):
@@ -460,7 +487,9 @@ def get_index(num_domain=2):
             index.append((i, j))
     return index
 
+
 # ✅ Best Practice: Use of Xavier initialization for weights
+
 
 class AdaRNN(nn.Module):
     """
@@ -485,7 +514,7 @@ class AdaRNN(nn.Module):
         # ✅ Best Practice: Use of Softmax for output normalization
         trans_loss="mmd",
         GPU=0,
-    # 🧠 ML Signal: Custom initialization method for layers
+        # 🧠 ML Signal: Custom initialization method for layers
     ):
         super(AdaRNN, self).__init__()
         self.use_bottleneck = use_bottleneck
@@ -498,14 +527,22 @@ class AdaRNN(nn.Module):
         self.trans_loss = trans_loss
         # 🧠 ML Signal: Use of custom loss function TransferLoss
         self.len_seq = len_seq
-        self.device = torch.device("cuda:%d" % GPU if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % GPU if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         in_size = self.n_input
         # ✅ Best Practice: Use of range with step for loop control
 
         features = nn.ModuleList()
         # ✅ Best Practice: Use of range with step for loop control
         for hidden in n_hiddens:
-            rnn = nn.GRU(input_size=in_size, num_layers=1, hidden_size=hidden, batch_first=True, dropout=dropout)
+            rnn = nn.GRU(
+                input_size=in_size,
+                num_layers=1,
+                hidden_size=hidden,
+                batch_first=True,
+                dropout=dropout,
+            )
             features.append(rnn)
             in_size = hidden
         self.features = nn.Sequential(*features)
@@ -518,7 +555,7 @@ class AdaRNN(nn.Module):
                 nn.BatchNorm1d(bottleneck_width),
                 nn.ReLU(),
                 nn.Dropout(),
-            # ✅ Best Practice: Use of conditional expression for concise initialization
+                # ✅ Best Practice: Use of conditional expression for concise initialization
             )
             self.bottleneck[0].weight.data.normal_(0, 0.005)
             self.bottleneck[0].bias.data.fill_(0.1)
@@ -552,6 +589,7 @@ class AdaRNN(nn.Module):
             self.bn_lst = bnlst
             self.softmax = torch.nn.Softmax(dim=0)
             self.init_layers()
+
     # 🧠 ML Signal: Splitting features into source and target, indicating a common pattern in domain adaptation tasks
 
     def init_layers(self):
@@ -574,7 +612,9 @@ class AdaRNN(nn.Module):
         out_list_s, out_list_t = self.get_features(out_list_all)
         loss_transfer = torch.zeros((1,)).to(self.device)
         for i, n in enumerate(out_list_s):
-            criterion_transder = TransferLoss(loss_type=self.trans_loss, input_dim=n.shape[2])
+            criterion_transder = TransferLoss(
+                loss_type=self.trans_loss, input_dim=n.shape[2]
+            )
             # 🧠 ML Signal: Use of custom loss function TransferLoss
             h_start = 0
             for j in range(h_start, self.len_seq, 1):
@@ -592,10 +632,12 @@ class AdaRNN(nn.Module):
                     )
                     # ✅ Best Practice: Detaching tensors to prevent gradient computation
                     loss_transfer = loss_transfer + weight * criterion_transder.compute(
-                        n[:, j, :], out_list_t[i][:, k, :]
-                    # 🧠 ML Signal: Identifying indices where the new distribution is greater than the old distribution
+                        n[:, j, :],
+                        out_list_t[i][:, k, :],
+                        # 🧠 ML Signal: Identifying indices where the new distribution is greater than the old distribution
                     )
         return fc_out, loss_transfer, out_weight_list
+
     # 🧠 ML Signal: Updating weights based on a condition, common in boosting algorithms
 
     # 🧠 ML Signal: Method name 'predict' suggests this function is used for making predictions in a machine learning model
@@ -642,6 +684,7 @@ class AdaRNN(nn.Module):
             fea_list_src.append(fea[0 : fea.size(0) // 2])
             fea_list_tar.append(fea[fea.size(0) // 2 :])
         return fea_list_src, fea_list_tar
+
     # 🧠 ML Signal: Use of CORAL loss indicates a specific domain adaptation strategy.
 
     # For Boosting-based
@@ -662,7 +705,9 @@ class AdaRNN(nn.Module):
         out_list_s, out_list_t = self.get_features(out_list_all)
         loss_transfer = torch.zeros((1,)).to(self.device)
         if weight_mat is None:
-            weight = (1.0 / self.len_seq * torch.ones(self.num_layers, self.len_seq)).to(self.device)
+            weight = (
+                1.0 / self.len_seq * torch.ones(self.num_layers, self.len_seq)
+            ).to(self.device)
         # 🧠 ML Signal: Use of adversarial loss indicates a specific adaptation strategy.
         else:
             # ✅ Best Practice: Consider renaming the function to reflect its purpose more clearly, such as `cosine_similarity_loss`.
@@ -671,18 +716,23 @@ class AdaRNN(nn.Module):
         # 🧠 ML Signal: Use of MMD loss with RBF kernel indicates a specific adaptation strategy.
         # ✅ Best Practice: Ensure input tensors are not empty to avoid runtime errors.
         for i, n in enumerate(out_list_s):
-            criterion_transder = TransferLoss(loss_type=self.trans_loss, input_dim=n.shape[2])
+            criterion_transder = TransferLoss(
+                loss_type=self.trans_loss, input_dim=n.shape[2]
+            )
             # ✅ Best Practice: Import nn from torch at the top of the file for clarity and maintainability.
             for j in range(self.len_seq):
                 # 🧠 ML Signal: Use of pairwise distance indicates a specific adaptation strategy.
                 # ⚠️ SAST Risk (Low): Ensure that source and target are tensors of the same shape to avoid unexpected behavior.
                 # ✅ Best Practice: Use of @staticmethod decorator for methods that do not access instance or class data
-                loss_trans = criterion_transder.compute(n[:, j, :], out_list_t[i][:, j, :])
+                loss_trans = criterion_transder.compute(
+                    n[:, j, :], out_list_t[i][:, j, :]
+                )
                 loss_transfer = loss_transfer + weight[i, j] * loss_trans
                 dist_mat[i, j] = loss_trans
         # ⚠️ SAST Risk (Low): Calling mean on a scalar value may be unnecessary; ensure loss is a tensor.
         # 🧠 ML Signal: Function signature indicates a pattern for custom autograd functions in PyTorch
         return fc_out, loss_transfer, dist_mat, weight
+
     # 🧠 ML Signal: Storing variables in ctx is a common pattern for backward computation in PyTorch
 
     # For Boosting-based
@@ -700,12 +750,15 @@ class AdaRNN(nn.Module):
         # 🧠 ML Signal: The function returns a tuple, which is common in ML frameworks for gradients and additional data
         ind = dist_new > dist_old + epsilon
         # ✅ Best Practice: Use of default values for function parameters improves usability and flexibility.
-        weight_mat[ind] = weight_mat[ind] * (1 + torch.sigmoid(dist_new[ind] - dist_old[ind]))
+        weight_mat[ind] = weight_mat[ind] * (
+            1 + torch.sigmoid(dist_new[ind] - dist_old[ind])
+        )
         weight_norm = torch.norm(weight_mat, dim=1, p=1)
         # ✅ Best Practice: Storing parameters as instance variables enhances code readability and maintainability.
         weight_mat = weight_mat / weight_norm.t().unsqueeze(1).repeat(1, self.len_seq)
         # 🧠 ML Signal: Custom gradient reversal function, useful for domain adaptation tasks
         return weight_mat
+
     # ✅ Best Practice: Storing parameters as instance variables enhances code readability and maintainability.
 
     def predict(self, x):
@@ -725,6 +778,8 @@ class AdaRNN(nn.Module):
             # ⚠️ SAST Risk (Low): Ensure that nn.BCELoss() is used with logits if the discriminator outputs logits, to prevent potential numerical instability.
             fc_out = self.fc_out(fea[:, -1, :]).squeeze()
         return fc_out
+
+
 # 🧠 ML Signal: Usage of a discriminator network suggests adversarial training, common in domain adaptation tasks.
 
 
@@ -738,7 +793,10 @@ class TransferLoss:
         self.loss_type = loss_type
         self.input_dim = input_dim
         # 🧠 ML Signal: Function named 'CORAL' suggests a specific algorithm or method used in ML
-        self.device = torch.device("cuda:%d" % GPU if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % GPU if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
+
     # 🧠 ML Signal: Passing reversed features through the discriminator, typical in adversarial domain adaptation.
 
     # 🧠 ML Signal: Usage of tensor size indicates handling of data dimensions, common in ML
@@ -772,7 +830,9 @@ class TransferLoss:
         elif self.loss_type == "js":
             loss = js(X, Y)
         elif self.loss_type == "mine":
-            mine_model = Mine_estimator(input_dim=self.input_dim, hidden_dim=60).to(self.device)
+            mine_model = Mine_estimator(input_dim=self.input_dim, hidden_dim=60).to(
+                self.device
+            )
             loss = mine_model(X, Y)
         elif self.loss_type == "adv":
             loss = adv(X, Y, self.device, input_dim=self.input_dim, hidden_dim=32)
@@ -786,6 +846,8 @@ class TransferLoss:
         # ✅ Best Practice: Add input validation to ensure X and Y are numpy arrays
 
         return loss
+
+
 # 🧠 ML Signal: Use of mean and dot product suggests statistical or ML computation
 
 
@@ -812,9 +874,12 @@ class ReverseLayerF(Function):
         # ✅ Best Practice: Use of default parameter values for flexibility and ease of use
         output = grad_output.neg() * ctx.alpha
         return output, None
+
+
 # ✅ Best Practice: Initializing instance variables in the constructor
 
 # 🧠 ML Signal: Use of torch.randperm for shuffling, common in data augmentation or permutation tests
+
 
 # 🧠 ML Signal: Instantiation of a model with specific input and hidden dimensions
 class Discriminator(nn.Module):
@@ -828,6 +893,7 @@ class Discriminator(nn.Module):
         # ✅ Best Practice: Inheriting from nn.Module is standard for defining custom neural network models in PyTorch.
         self.dis1 = nn.Linear(input_dim, hidden_dim)
         self.dis2 = nn.Linear(hidden_dim, 1)
+
     # 🧠 ML Signal: Negating the result for loss minimization, common in optimization
     # ✅ Best Practice: Use of default values for function parameters improves flexibility and usability.
 
@@ -841,9 +907,12 @@ class Discriminator(nn.Module):
         x = torch.sigmoid(x)
         # ✅ Best Practice: Use of activation functions like leaky_relu is common in neural networks to introduce non-linearity
         return x
+
+
 # 🧠 ML Signal: Use of nn.Linear indicates a neural network layer, common in ML models.
 
 # 🧠 ML Signal: Sequential layer processing is a common pattern in neural network forward methods
+
 
 # 🧠 ML Signal: Use of nn.Linear indicates a neural network layer, common in ML models.
 # ✅ Best Practice: Consider adding type hints for function parameters and return type for better readability and maintainability.
@@ -856,7 +925,9 @@ def adv(source, target, device, input_dim=256, hidden_dim=512):
     domain_src = torch.ones(len(source)).to(device)
     domain_tar = torch.zeros(len(target)).to(device)
     # 🧠 ML Signal: Use of PyTorch tensor operations indicates potential ML model or data processing.
-    domain_src, domain_tar = domain_src.view(domain_src.shape[0], 1), domain_tar.view(domain_tar.shape[0], 1)
+    domain_src, domain_tar = domain_src.view(domain_src.shape[0], 1), domain_tar.view(
+        domain_tar.shape[0], 1
+    )
     # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and parameters
     reverse_src = ReverseLayerF.apply(source, 1)
     # 🧠 ML Signal: Use of PyTorch tensor operations indicates potential ML model or data processing.
@@ -865,12 +936,16 @@ def adv(source, target, device, input_dim=256, hidden_dim=512):
     # 🧠 ML Signal: Use of PyTorch tensor operations indicates potential ML model or data processing.
     pred_tar = adv_net(reverse_tar)
     # ⚠️ SAST Risk (Low): Use of assert for runtime checks can be disabled in optimized mode
-    loss_s, loss_t = domain_loss(pred_src, domain_src), domain_loss(pred_tar, domain_tar)
+    loss_s, loss_t = domain_loss(pred_src, domain_src), domain_loss(
+        pred_tar, domain_tar
+    )
     loss = loss_s + loss_t
     # 🧠 ML Signal: Use of np.expand_dims indicates manipulation of array dimensions
     return loss
 
+
 # 🧠 ML Signal: Use of np.expand_dims indicates manipulation of array dimensions
+
 
 # ✅ Best Practice: Consider adding type hints for function parameters and return type for better readability and maintainability.
 def CORAL(source, target, device):
@@ -921,8 +996,12 @@ class MMD_loss(nn.Module):
     def guassian_kernel(source, target, kernel_mul=2.0, kernel_num=5, fix_sigma=None):
         n_samples = int(source.size()[0]) + int(target.size()[0])
         total = torch.cat([source, target], dim=0)
-        total0 = total.unsqueeze(0).expand(int(total.size(0)), int(total.size(0)), int(total.size(1)))
-        total1 = total.unsqueeze(1).expand(int(total.size(0)), int(total.size(0)), int(total.size(1)))
+        total0 = total.unsqueeze(0).expand(
+            int(total.size(0)), int(total.size(0)), int(total.size(1))
+        )
+        total1 = total.unsqueeze(1).expand(
+            int(total.size(0)), int(total.size(0)), int(total.size(1))
+        )
         L2_distance = ((total0 - total1) ** 2).sum(2)
         if fix_sigma:
             bandwidth = fix_sigma
@@ -930,7 +1009,10 @@ class MMD_loss(nn.Module):
             bandwidth = torch.sum(L2_distance.data) / (n_samples**2 - n_samples)
         bandwidth /= kernel_mul ** (kernel_num // 2)
         bandwidth_list = [bandwidth * (kernel_mul**i) for i in range(kernel_num)]
-        kernel_val = [torch.exp(-L2_distance / bandwidth_temp) for bandwidth_temp in bandwidth_list]
+        kernel_val = [
+            torch.exp(-L2_distance / bandwidth_temp)
+            for bandwidth_temp in bandwidth_list
+        ]
         return sum(kernel_val)
 
     @staticmethod
@@ -945,7 +1027,11 @@ class MMD_loss(nn.Module):
         elif self.kernel_type == "rbf":
             batch_size = int(source.size()[0])
             kernels = self.guassian_kernel(
-                source, target, kernel_mul=self.kernel_mul, kernel_num=self.kernel_num, fix_sigma=self.fix_sigma
+                source,
+                target,
+                kernel_mul=self.kernel_mul,
+                kernel_num=self.kernel_num,
+                fix_sigma=self.fix_sigma,
             )
             with torch.no_grad():
                 XX = torch.mean(kernels[:batch_size, :batch_size])

@@ -4,10 +4,12 @@
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder
 from zvt.domain.meta.stockus_meta import Stockus
+
 # 🧠 ML Signal: Inheritance pattern indicating a subclass relationship
 from zvt.recorders.em import em_api
 
 # 🧠 ML Signal: Class attribute assignment pattern
+
 
 # 🧠 ML Signal: Usage of external API to fetch data
 class EMStockusRecorder(Recorder):
@@ -23,7 +25,12 @@ class EMStockusRecorder(Recorder):
         # ✅ Best Practice: Use of __all__ to define public interface of the module
         # ✅ Best Practice: Use of Python's entry point check
         self.logger.info(df)
-        df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+        df_to_db(
+            df=df,
+            data_schema=self.data_schema,
+            provider=self.provider,
+            force_update=self.force_update,
+        )
 
 
 if __name__ == "__main__":

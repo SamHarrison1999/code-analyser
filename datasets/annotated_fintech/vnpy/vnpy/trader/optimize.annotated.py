@@ -9,7 +9,7 @@ from multiprocessing.managers import DictProxy
 from _collections_abc import dict_keys, dict_values, Iterable
 
 from tqdm import tqdm
-from deap import creator, base, tools, algorithms       # type: ignore
+from deap import creator, base, tools, algorithms  # type: ignore
 
 from .locale import _
 
@@ -45,7 +45,7 @@ class OptimizationSetting:
         # ⚠️ SAST Risk (Low): No validation on 'start', 'end', and 'step' could lead to unexpected behavior if they are not numbers.
         start: float,
         end: float | None = None,
-        step: float | None = None
+        step: float | None = None,
     ) -> tuple[bool, str]:
         """"""
         if end is None or step is None:
@@ -82,6 +82,7 @@ class OptimizationSetting:
         # ✅ Best Practice: Docstring is present but should describe the function's purpose and behavior.
         """"""
         self.target_name = target_name
+
     # 🧠 ML Signal: Checking if a method returns a truthy value is a common pattern.
 
     def generate_settings(self) -> list[dict]:
@@ -98,6 +99,8 @@ class OptimizationSetting:
             settings.append(setting)
 
         return settings
+
+
 # 🧠 ML Signal: Usage of a function to generate settings for optimization
 
 
@@ -106,7 +109,7 @@ def check_optimization_setting(
     optimization_setting: OptimizationSetting,
     # 🧠 ML Signal: Logging the size of the optimization space
     # 🧠 ML Signal: Measuring performance time
-    output: OUTPUT_FUNC = print
+    output: OUTPUT_FUNC = print,
 ) -> bool:
     """"""
     if not optimization_setting.generate_settings():
@@ -134,7 +137,7 @@ def run_bf_optimization(
     optimization_setting: OptimizationSetting,
     key_func: KEY_FUNC,
     max_workers: int | None = None,
-    output: OUTPUT_FUNC = print
+    output: OUTPUT_FUNC = print,
 ) -> list[tuple]:
     """Run brutal force optimization"""
     settings: list[dict] = optimization_setting.generate_settings()
@@ -149,15 +152,15 @@ def run_bf_optimization(
         max_workers,
         # ✅ Best Practice: Descriptive variable naming
         # ⚠️ SAST Risk (High): The function uses 'choice' without importing it, which can lead to NameError or unintended behavior if 'choice' is not defined.
-        mp_context=get_context("spawn")
-    # ✅ Best Practice: The function lacks a docstring description, which reduces code readability and maintainability.
+        mp_context=get_context("spawn"),
+        # ✅ Best Practice: The function lacks a docstring description, which reduces code readability and maintainability.
     ) as executor:
         # ✅ Best Practice: List comprehension for readability
         it: Iterable = tqdm(
             executor.map(evaluate_func, settings),
             # ⚠️ SAST Risk (High): 'choice' is used without being imported or defined, which can lead to security risks if 'choice' is not controlled.
-            total=len(settings)
-        # 🧠 ML Signal: The use of 'choice' indicates a random selection pattern, which can be a feature for ML models analyzing randomness in code.
+            total=len(settings),
+            # 🧠 ML Signal: The use of 'choice' indicates a random selection pattern, which can be a feature for ML models analyzing randomness in code.
         )
         # 🧠 ML Signal: Usage of a custom parameter generation function
         results: list[tuple] = list(it)
@@ -179,13 +182,19 @@ def run_ga_optimization(
     # 🧠 ML Signal: Registration of genetic algorithm components
     key_func: KEY_FUNC,
     max_workers: int | None = None,
-    pop_size: int = 100,                    # population size: number of individuals in each generation
-    ngen: int = 30,                         # number of generations: number of generations to evolve
-    mu: int | None = None,                  # mu: number of individuals to select for the next generation
-    lambda_: int | None = None,             # lambda: number of children to produce at each generation
-    cxpb: float = 0.95,                     # crossover probability: probability that an offspring is produced by crossover
-    mutpb: float | None = None,             # mutation probability: probability that an offspring is produced by mutation
-    indpb: float = 1.0,                     # independent probability: probability for each gene to be mutated
+    pop_size: int = 100,  # population size: number of individuals in each generation
+    ngen: int = 30,  # number of generations: number of generations to evolve
+    mu: (
+        int | None
+    ) = None,  # mu: number of individuals to select for the next generation
+    lambda_: (
+        int | None
+    ) = None,  # lambda: number of children to produce at each generation
+    cxpb: float = 0.95,  # crossover probability: probability that an offspring is produced by crossover
+    mutpb: (
+        float | None
+    ) = None,  # mutation probability: probability that an offspring is produced by mutation
+    indpb: float = 1.0,  # independent probability: probability for each gene to be mutated
     output: OUTPUT_FUNC = print,
 ) -> list[tuple]:
     """Run genetic algorithm optimization"""
@@ -207,7 +216,7 @@ def run_ga_optimization(
         for i in range(size):
             if random() < indpb:
                 individual[i] = paramlist[i]
-        return individual,
+        return (individual,)
 
     # Set up multiprocessing Pool and Manager
     ctx: BaseContext = get_context("spawn")
@@ -218,7 +227,9 @@ def run_ga_optimization(
         # Set up toolbox
         # 🧠 ML Signal: Execution of a genetic algorithm
         toolbox: base.Toolbox = base.Toolbox()
-        toolbox.register("individual", tools.initIterate, creator.Individual, generate_parameter)
+        toolbox.register(
+            "individual", tools.initIterate, creator.Individual, generate_parameter
+        )
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
         toolbox.register("mate", tools.cxTwoPoint)
         toolbox.register("mutate", mutate_individual, indpb=indpb)
@@ -230,7 +241,7 @@ def run_ga_optimization(
             cache,
             evaluate_func,
             # 🧠 ML Signal: Sorting results based on a key function
-            key_func
+            key_func,
         )
 
         # ✅ Best Practice: Convert list to tuple for immutability and use as a cache key
@@ -266,14 +277,7 @@ def run_ga_optimization(
         start: float = perf_counter()
 
         algorithms.eaMuPlusLambda(
-            pop,
-            toolbox,
-            mu,
-            lambda_,
-            cxpb,
-            mutpb,
-            ngen,
-            verbose=True
+            pop, toolbox, mu, lambda_, cxpb, mutpb, ngen, verbose=True
         )
 
         end: float = perf_counter()
@@ -287,11 +291,8 @@ def run_ga_optimization(
 
 
 def ga_evaluate(
-    cache: dict,
-    evaluate_func: Callable,
-    key_func: Callable,
-    parameters: list
-) -> tuple[float, ]:
+    cache: dict, evaluate_func: Callable, key_func: Callable, parameters: list
+) -> tuple[float,]:
     """
     Functions to be run in genetic algorithm optimization.
     """
@@ -304,4 +305,4 @@ def ga_evaluate(
         cache[tp] = result
 
     value: float = key_func(result)
-    return (value, )
+    return (value,)

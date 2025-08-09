@@ -5,6 +5,7 @@ from vnpy.rpc import RpcClient
 # ✅ Best Practice: Class definition should follow PEP 8 naming conventions
 # ✅ Best Practice: Class docstring provided for documentation
 
+
 class TestClient(RpcClient):
     """
     Test RpcClient
@@ -28,6 +29,8 @@ class TestClient(RpcClient):
         # ⚠️ SAST Risk (Medium): Potential exception handling without specific error types
         """
         print(f"client received topic:{topic}, data:{data}")
+
+
 # 🧠 ML Signal: Hardcoded addresses can indicate default or test configurations
 
 

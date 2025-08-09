@@ -11,12 +11,18 @@ from zvt.contract import Mixin
 from zvt.contract import zvt_context, IntervalLevel
 from zvt.contract.api import get_entities, get_schema_by_name, get_schema_columns
 from zvt.contract.drawer import StackedDrawer
-from zvt.trader.trader_info_api import AccountStatsReader, OrderReader, get_order_securities
+from zvt.trader.trader_info_api import (
+    AccountStatsReader,
+    OrderReader,
+    get_order_securities,
+)
 from zvt.trader.trader_info_api import get_trader_info
 from zvt.trader.trader_schemas import TraderInfo
+
 # ✅ Best Practice: Initialize lists to store account and order readers for later use
 from zvt.ui import zvt_app
 from zvt.ui.components.dcc_components import get_account_stats_figure
+
 # ✅ Best Practice: Initialize lists to store account and order readers for later use
 from zvt.utils.pd_utils import pd_is_not_null
 
@@ -43,6 +49,8 @@ def order_type_flag(order_type):
     # 🧠 ML Signal: Returns a different color code for other conditions
     else:
         return "S"
+
+
 # 🧠 ML Signal: Function call with specific parameter value, indicating a pattern of usage.
 
 
@@ -52,6 +60,8 @@ def order_type_color(order_type):
         return "#ec0000"
     else:
         return "#00da3c"
+
+
 # ✅ Best Practice: Using list comprehension for readability and efficiency.
 
 
@@ -65,9 +75,15 @@ def load_traders():
     account_readers.clear()
     order_readers.clear()
     for trader in traders:
-        account_readers.append(AccountStatsReader(level=trader.level, trader_names=[trader.trader_name]))
+        account_readers.append(
+            AccountStatsReader(level=trader.level, trader_names=[trader.trader_name])
+        )
         order_readers.append(
-            OrderReader(start_timestamp=trader.start_timestamp, level=trader.level, trader_names=[trader.trader_name])
+            OrderReader(
+                start_timestamp=trader.start_timestamp,
+                level=trader.level,
+                trader_names=[trader.trader_name],
+            )
         )
 
     trader_names = [item.trader_name for item in traders]
@@ -93,7 +109,10 @@ def factor_layout():
                                     dcc.Dropdown(
                                         id="trader-selector",
                                         placeholder="select the trader",
-                                        options=[{"label": item, "value": i} for i, item in enumerate(trader_names)],
+                                        options=[
+                                            {"label": item, "value": i}
+                                            for i, item in enumerate(trader_names)
+                                        ],
                                     ),
                                 ],
                             ),
@@ -119,7 +138,10 @@ def factor_layout():
                                 className="padding-top-bot",
                                 children=[
                                     html.H6("select entity provider:"),
-                                    dcc.Dropdown(id="entity-provider-selector", placeholder="select entity provider"),
+                                    dcc.Dropdown(
+                                        id="entity-provider-selector",
+                                        placeholder="select entity provider",
+                                    ),
                                 ],
                             ),
                             # select entity
@@ -127,7 +149,10 @@ def factor_layout():
                                 className="padding-top-bot",
                                 children=[
                                     html.H6("select entity:"),
-                                    dcc.Dropdown(id="entity-selector", placeholder="select entity"),
+                                    dcc.Dropdown(
+                                        id="entity-selector",
+                                        placeholder="select entity",
+                                    ),
                                 ],
                             ),
                             # select levels
@@ -139,7 +164,10 @@ def factor_layout():
                                         id="levels-selector",
                                         options=[
                                             {"label": level.name, "value": level.value}
-                                            for level in (IntervalLevel.LEVEL_1WEEK, IntervalLevel.LEVEL_1DAY)
+                                            for level in (
+                                                IntervalLevel.LEVEL_1WEEK,
+                                                IntervalLevel.LEVEL_1DAY,
+                                            )
                                         ],
                                         value="1d",
                                         multi=True,
@@ -181,16 +209,23 @@ def factor_layout():
                                                     "padding": "8px",
                                                 },
                                             ),
-                                        # ⚠️ SAST Risk (Low): Ensure that the callback function properly handles all input values to prevent potential security issues.
+                                            # ⚠️ SAST Risk (Low): Ensure that the callback function properly handles all input values to prevent potential security issues.
                                         ],
                                     ),
-                                    dcc.Dropdown(id="data-selector", placeholder="schema"),
+                                    dcc.Dropdown(
+                                        id="data-selector", placeholder="schema"
+                                    ),
                                 ],
                                 style={"padding-top": "12px"},
                             ),
                             # select properties
                             html.Div(
-                                children=[dcc.Dropdown(id="schema-column-selector", placeholder="properties")],
+                                children=[
+                                    dcc.Dropdown(
+                                        id="schema-column-selector",
+                                        placeholder="properties",
+                                    )
+                                ],
                                 style={"padding-top": "6px"},
                             ),
                         ],
@@ -207,11 +242,11 @@ def factor_layout():
                     html.Div(
                         id="trader-details",
                         className="bg-white",
-                    # 🧠 ML Signal: Creating a list of dictionaries for options
+                        # 🧠 ML Signal: Creating a list of dictionaries for options
                     ),
                     html.Div(id="factor-details"),
-                # 🧠 ML Signal: Function call with keyword argument
-                # 🧠 ML Signal: Accessing a dictionary with a method call
+                    # 🧠 ML Signal: Function call with keyword argument
+                    # 🧠 ML Signal: Accessing a dictionary with a method call
                 ],
             ),
         ]
@@ -219,8 +254,10 @@ def factor_layout():
 
     return layout
 
+
 # 🧠 ML Signal: List comprehension to create options
 # 🧠 ML Signal: Function call with keyword argument
+
 
 @zvt_app.callback(
     [
@@ -252,7 +289,9 @@ def update_trader_details(trader_index, entity_type, entity_provider):
         # ✅ Best Practice: Use of conditional logic to determine which schemas to use based on 'related'.
         # 🧠 ML Signal: Function call with multiple keyword arguments
         # account stats
-        account_stats = get_account_stats_figure(account_stats_reader=account_readers[trader_index])
+        account_stats = get_account_stats_figure(
+            account_stats_reader=account_readers[trader_index]
+        )
         # 🧠 ML Signal: Accessing a dictionary to retrieve schemas based on entity type.
 
         providers = zvt_context.tradable_schema_map.get(entity_type).providers
@@ -280,12 +319,21 @@ def update_trader_details(trader_index, entity_type, entity_provider):
             index="entity_id",
         )
         entity_options = [
-            {"label": f'{entity_id}({entity["name"]})', "value": entity_id} for entity_id, entity in df.iterrows()
+            {"label": f'{entity_id}({entity["name"]})', "value": entity_id}
+            for entity_id, entity in df.iterrows()
         ]
 
-        return account_stats, entity_type_options, entity_provider_options, entity_options
+        return (
+            account_stats,
+            entity_type_options,
+            entity_provider_options,
+            entity_options,
+        )
     else:
-        entity_type_options = [{"label": name, "value": name} for name in zvt_context.tradable_schema_map.keys()]
+        entity_type_options = [
+            {"label": name, "value": name}
+            for name in zvt_context.tradable_schema_map.keys()
+        ]
         account_stats = None
         # ✅ Best Practice: Decorator used to define a callback, improving code organization and readability
         # 🧠 ML Signal: Output definition for a callback, indicating a pattern of UI updates
@@ -293,19 +341,31 @@ def update_trader_details(trader_index, entity_type, entity_provider):
         providers = zvt_context.tradable_schema_map.get(entity_type).providers
         entity_provider_options = [{"label": name, "value": name} for name in providers]
         df = get_entities(
-            provider=entity_provider, entity_type=entity_type, columns=["entity_id", "code", "name"], index="entity_id"
+            provider=entity_provider,
+            entity_type=entity_type,
+            columns=["entity_id", "code", "name"],
+            index="entity_id",
         )
         # ✅ Best Practice: Convert single string to list for consistent processing
         entity_options = [
-            {"label": f'{entity_id}({entity["name"]})', "value": entity_id} for entity_id, entity in df.iterrows()
-        # 🧠 ML Signal: State used in a callback, indicating a pattern of maintaining state across events
+            {"label": f'{entity_id}({entity["name"]})', "value": entity_id}
+            for entity_id, entity in df.iterrows()
+            # 🧠 ML Signal: State used in a callback, indicating a pattern of maintaining state across events
         ]
-        return account_stats, entity_type_options, entity_provider_options, entity_options
+        return (
+            account_stats,
+            entity_type_options,
+            entity_provider_options,
+            entity_options,
+        )
+
+
 # 🧠 ML Signal: Querying data based on dynamic schema and columns
 
 
 @zvt_app.callback(
-    Output("data-selector", "options"), [Input("entity-type-selector", "value"), Input("data-switch", "on")]
+    Output("data-selector", "options"),
+    [Input("entity-type-selector", "value"), Input("data-switch", "on")],
 )
 # 🧠 ML Signal: Copying data for further processing
 def update_entity_selector(entity_type, related):
@@ -316,12 +376,18 @@ def update_entity_selector(entity_type, related):
         else:
             # 🧠 ML Signal: Creating new columns based on existing data
             schemas = zvt_context.schemas
-        return [{"label": schema.__name__, "value": schema.__name__} for schema in schemas]
+        return [
+            {"label": schema.__name__, "value": schema.__name__} for schema in schemas
+        ]
     raise dash.PreventUpdate()
+
 
 # ✅ Best Practice: Debugging or logging output
 
-@zvt_app.callback(Output("schema-column-selector", "options"), [Input("data-selector", "value")])
+
+@zvt_app.callback(
+    Output("schema-column-selector", "options"), [Input("data-selector", "value")]
+)
 def update_column_selector(schema_name):
     if schema_name:
         schema = get_schema_by_name(name=schema_name)
@@ -344,9 +410,11 @@ def update_column_selector(schema_name):
         Input("schema-column-selector", "value"),
     ],
     [State("trader-selector", "value"), State("data-selector", "value")],
-# 🧠 ML Signal: Dynamic instantiation of classes based on registry
+    # 🧠 ML Signal: Dynamic instantiation of classes based on registry
 )
-def update_factor_details(factor, entity_type, entity, levels, columns, trader_index, schema_name):
+def update_factor_details(
+    factor, entity_type, entity, levels, columns, trader_index, schema_name
+):
     # 🧠 ML Signal: Adding supplementary data to drawer
     # 🧠 ML Signal: Assigning processed data for annotation
     # ⚠️ SAST Risk (Low): Raising an exception without additional context
@@ -368,8 +436,12 @@ def update_factor_details(factor, entity_type, entity, levels, columns, trader_i
             annotation_df = annotation_df[annotation_df.entity_id == entity].copy()
             if pd_is_not_null(annotation_df):
                 annotation_df["value"] = annotation_df["order_price"]
-                annotation_df["flag"] = annotation_df["order_type"].apply(lambda x: order_type_flag(x))
-                annotation_df["color"] = annotation_df["order_type"].apply(lambda x: order_type_color(x))
+                annotation_df["flag"] = annotation_df["order_type"].apply(
+                    lambda x: order_type_flag(x)
+                )
+                annotation_df["color"] = annotation_df["order_type"].apply(
+                    lambda x: order_type_color(x)
+                )
             print(annotation_df.tail())
 
         if type(levels) is list and len(levels) >= 2:
@@ -378,12 +450,17 @@ def update_factor_details(factor, entity_type, entity, levels, columns, trader_i
             for level in levels:
                 drawers.append(
                     zvt_context.factor_cls_registry[factor](
-                        entity_schema=zvt_context.tradable_schema_map[entity_type], level=level, entity_ids=[entity]
+                        entity_schema=zvt_context.tradable_schema_map[entity_type],
+                        level=level,
+                        entity_ids=[entity],
                     ).drawer()
                 )
             stacked = StackedDrawer(*drawers)
 
-            return dcc.Graph(id=f"{factor}-{entity_type}-{entity}", figure=stacked.draw_kline(show=False, height=900))
+            return dcc.Graph(
+                id=f"{factor}-{entity_type}-{entity}",
+                figure=stacked.draw_kline(show=False, height=900),
+            )
         else:
             if type(levels) is list:
                 level = levels[0]
@@ -400,5 +477,8 @@ def update_factor_details(factor, entity_type, entity, levels, columns, trader_i
             if pd_is_not_null(annotation_df):
                 drawer.annotation_df = annotation_df
 
-            return dcc.Graph(id=f"{factor}-{entity_type}-{entity}", figure=drawer.draw_kline(show=False, height=800))
+            return dcc.Graph(
+                id=f"{factor}-{entity_type}-{entity}",
+                figure=drawer.draw_kline(show=False, height=800),
+            )
     raise dash.PreventUpdate()

@@ -9,16 +9,25 @@ from xtquant.xttype import StockAccount, XtPosition
 
 from zvt.broker.qmt.errors import QmtError, PositionOverflowError
 from zvt.broker.qmt.qmt_quote import _to_qmt_code
+
 # 🧠 ML Signal: Use of logging for tracking and debugging
 from zvt.common.trading_models import BuyParameter, PositionType, SellParameter
+
 # 🧠 ML Signal: Function for mapping order types to constants
-from zvt.trader import AccountService, TradingSignal, OrderType, trading_signal_type_to_order_type
+from zvt.trader import (
+    AccountService,
+    TradingSignal,
+    OrderType,
+    trading_signal_type_to_order_type,
+)
 from zvt.utils.time_utils import now_pd_timestamp, to_pd_timestamp
+
 # 🧠 ML Signal: Checking for specific order type
 
 logger = logging.getLogger(__name__)
 
 # 🧠 ML Signal: Checking for specific order type
+
 
 # 🧠 ML Signal: Logging connection events can be used to train models on system usage patterns
 # ✅ Best Practice: Class definition should include a docstring to describe its purpose and usage.
@@ -34,9 +43,12 @@ def _to_qmt_order_type(order_type: OrderType):
     elif order_type == OrderType.order_close_long:
         # ✅ Best Practice: Use of logging for tracking and debugging
         return xtconstant.STOCK_SELL
+
+
 # ⚠️ SAST Risk (Low): Logging the entire response object may expose sensitive information.
 
 # 🧠 ML Signal: Logging response data can be used to analyze system behavior
+
 
 # ⚠️ SAST Risk (Low): Potential exposure of sensitive information in logs
 class MyXtQuantTraderCallback(XtQuantTraderCallback):
@@ -55,7 +67,7 @@ class MyXtQuantTraderCallback(XtQuantTraderCallback):
         连接断开
         :return:
         """
-        logger.info(f"qmt on_disconnected")
+        logger.info("qmt on_disconnected")
 
     def on_stock_order(self, order):
         """
@@ -73,6 +85,7 @@ class MyXtQuantTraderCallback(XtQuantTraderCallback):
         :return:
         """
         logger.info(f"qmt on_stock_asset: {vars(asset)}")
+
     # 🧠 ML Signal: Logging of function input for monitoring or debugging
 
     # ⚠️ SAST Risk (Low): Potential exposure of sensitive information in logs
@@ -84,6 +97,7 @@ class MyXtQuantTraderCallback(XtQuantTraderCallback):
         """
         # 🧠 ML Signal: Logging of error information can be used to train models for error prediction or classification
         logger.info(f"qmt on_stock_trade: {vars(trade)}")
+
     # ⚠️ SAST Risk (Low): Potential exposure of sensitive information in logs
 
     def on_stock_position(self, position):
@@ -95,6 +109,7 @@ class MyXtQuantTraderCallback(XtQuantTraderCallback):
         """
         # 🧠 ML Signal: Logging error information can be used to identify patterns in error occurrences.
         logger.info(f"qmt on_stock_position: {vars(position)}")
+
     # 🧠 ML Signal: Function definition with a specific naming pattern indicating an event handler
 
     def on_order_error(self, order_error):
@@ -125,6 +140,7 @@ class MyXtQuantTraderCallback(XtQuantTraderCallback):
         # 🧠 ML Signal: Creating a StockAccount with account_id and account_type
         """
         logger.info(f"qmt on_order_stock_async_response: {vars(response)}")
+
     # 🧠 ML Signal: Registering a callback for the trader
 
     def on_account_status(self, status):
@@ -135,7 +151,9 @@ class MyXtQuantTraderCallback(XtQuantTraderCallback):
         """
         logger.info(status.account_id, status.account_type, status.status)
 
+
 # ⚠️ SAST Risk (Low): Logging error with connection result
+
 
 # 🧠 ML Signal: Method definition in a class, useful for understanding class behavior
 class QmtStockAccount(AccountService):
@@ -148,7 +166,9 @@ class QmtStockAccount(AccountService):
         # 🧠 ML Signal: Returning a value from a method, useful for understanding data flow
         self.trader_name = trader_name
         # 🧠 ML Signal: Conversion function usage pattern for entity_id
-        logger.info(f"path: {path}, account: {account_id}, trader_name: {trader_name}, session: {session_id}")
+        logger.info(
+            f"path: {path}, account: {account_id}, trader_name: {trader_name}, session: {session_id}"
+        )
         # ⚠️ SAST Risk (Low): Logging error with subscription result
 
         # 🧠 ML Signal: Method that queries and returns stock asset information
@@ -198,6 +218,7 @@ class QmtStockAccount(AccountService):
         # 🧠 ML Signal: Mapping trading signal type to order type can indicate trading strategy
         # 🧠 ML Signal: Error handling pattern with additional context
         logger.info("账号订阅成功！")
+
     # ✅ Best Practice: Use of logging for tracking order results
 
     # 🧠 ML Signal: Trading level usage can indicate risk appetite or strategy
@@ -210,15 +231,19 @@ class QmtStockAccount(AccountService):
         stock_code = _to_qmt_code(entity_id=entity_id)
         # 根据股票代码查询对应持仓
         return self.xt_trader.query_stock_position(self.account, stock_code)
+
     # ⚠️ SAST Risk (Medium): External data source used without validation
 
     def get_current_account(self):
         asset = self.xt_trader.query_stock_asset(self.account)
         # 🧠 ML Signal: Using ask price for long orders can indicate trading strategy
         return asset
+
     # 🧠 ML Signal: Using bid price for closing long orders can indicate trading strategy
 
-    def order_by_amount(self, entity_id, order_price, order_timestamp, order_type, order_amount):
+    def order_by_amount(
+        self, entity_id, order_price, order_timestamp, order_type, order_amount
+    ):
         stock_code = _to_qmt_code(entity_id=entity_id)
         fix_result_order_id = self.xt_trader.order_stock(
             account=self.account,
@@ -250,12 +275,16 @@ class QmtStockAccount(AccountService):
                 # ⚠️ SAST Risk (Low): Potential issue if query_stock_position returns None or unexpected data
                 # ⚠️ SAST Risk (Medium): Ensure order_volume calculation does not result in unintended zero or negative values
                 logger.exception(e)
-                self.on_trading_error(timestamp=trading_signal.happen_timestamp, error=e)
+                self.on_trading_error(
+                    timestamp=trading_signal.happen_timestamp, error=e
+                )
 
     def handle_trading_signal(self, trading_signal: TradingSignal):
         entity_id = trading_signal.entity_id
         happen_timestamp = trading_signal.happen_timestamp
-        order_type = trading_signal_type_to_order_type(trading_signal.trading_signal_type)
+        order_type = trading_signal_type_to_order_type(
+            trading_signal.trading_signal_type
+        )
         trading_level = trading_signal.trading_level.value
         # askPrice	多档委卖价
         # bidPrice	多档委买价
@@ -267,7 +296,9 @@ class QmtStockAccount(AccountService):
             )
             # ✅ Best Practice: Logging order result for traceability
             return
-        quote = xtdata.get_l2_quote(stock_code=_to_qmt_code(entity_id=entity_id), start_time=happen_timestamp)
+        quote = xtdata.get_l2_quote(
+            stock_code=_to_qmt_code(entity_id=entity_id), start_time=happen_timestamp
+        )
         if order_type == OrderType.order_long:
             price = quote["askPrice"]
         elif order_type == OrderType.order_close_long:
@@ -288,6 +319,7 @@ class QmtStockAccount(AccountService):
 
     def on_trading_close(self, timestamp):
         pass
+
     # ⚠️ SAST Risk (Medium): Potential division by zero if try_price is zero
 
     # 🧠 ML Signal: Pattern of placing stock orders
@@ -315,7 +347,9 @@ class QmtStockAccount(AccountService):
         # yesterday_volume	int	昨夜拥股
         # avg_price	float	成本价
         # direction	int	多空方向，股票不适用；参见数据字典
-        stock_codes = [_to_qmt_code(entity_id) for entity_id in position_strategy.entity_ids]
+        stock_codes = [
+            _to_qmt_code(entity_id) for entity_id in position_strategy.entity_ids
+        ]
         for i, stock_code in enumerate(stock_codes):
             pct = position_strategy.sell_pcts[i]
             position = self.xt_trader.query_stock_position(self.account, stock_code)
@@ -350,15 +384,21 @@ class QmtStockAccount(AccountService):
             if buy_parameter.position_type == PositionType.normal:
                 current_pct = round(acc.market_value / acc.total_asset, 2)
                 if current_pct >= buy_parameter.position_pct:
-                    raise PositionOverflowError(f"目前仓位为{current_pct}, 已超过请求的仓位: {buy_parameter.position_pct}")
+                    raise PositionOverflowError(
+                        f"目前仓位为{current_pct}, 已超过请求的仓位: {buy_parameter.position_pct}"
+                    )
 
-                money_to_use = acc.total_asset * (buy_parameter.position_pct - current_pct)
+                money_to_use = acc.total_asset * (
+                    buy_parameter.position_pct - current_pct
+                )
             elif buy_parameter.position_type == PositionType.cash:
                 money_to_use = acc.cash * buy_parameter.position_pct
             else:
                 assert False
 
-        stock_codes = [_to_qmt_code(entity_id) for entity_id in buy_parameter.entity_ids]
+        stock_codes = [
+            _to_qmt_code(entity_id) for entity_id in buy_parameter.entity_ids
+        ]
         ticks = xtdata.get_full_tick(code_list=stock_codes)
 
         if not buy_parameter.weights:
@@ -366,7 +406,9 @@ class QmtStockAccount(AccountService):
             money_for_stocks = [round(money_to_use / stocks_count)] * stocks_count
         else:
             weights_sum = sum(buy_parameter.weights)
-            money_for_stocks = [round(weight / weights_sum) for weight in buy_parameter.weights]
+            money_for_stocks = [
+                round(weight / weights_sum) for weight in buy_parameter.weights
+            ]
 
         for i, stock_code in enumerate(stock_codes):
             try_price = ticks[stock_code]["askPrice"][3]

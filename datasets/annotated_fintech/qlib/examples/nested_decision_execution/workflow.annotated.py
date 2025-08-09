@@ -113,6 +113,7 @@ import pandas as pd
 from qlib.constant import REG_CN
 from qlib.config import HIGH_FREQ_CONFIG
 from qlib.data import D
+
 # 🧠 ML Signal: Class definition for a workflow, indicating a structured approach to model execution
 from qlib.utils import exists_qlib_data, init_instance_by_config, flatten_dict
 from qlib.workflow import R
@@ -230,7 +231,7 @@ class NestedDecisionExecutionWorkflow:
                 "close_cost": 0.0015,
                 "min_cost": 5,
             },
-        # ⚠️ SAST Risk (Low): Use of external configuration without validation can lead to misconfigurations.
+            # ⚠️ SAST Risk (Low): Use of external configuration without validation can lead to misconfigurations.
         },
     }
 
@@ -241,18 +242,27 @@ class NestedDecisionExecutionWorkflow:
         # ✅ Best Practice: Using a dictionary to map different configurations improves code clarity.
         # 🧠 ML Signal: Logging parameters for experiment tracking
         provider_uri_day = "~/.qlib/qlib_data/cn_data"  # target_dir
-        GetData().qlib_data(target_dir=provider_uri_day, region=REG_CN, version="v2", exists_skip=True)
+        GetData().qlib_data(
+            target_dir=provider_uri_day, region=REG_CN, version="v2", exists_skip=True
+        )
         # 🧠 ML Signal: Initialization of qlib with specific configurations could indicate usage patterns.
         # 🧠 ML Signal: Model fitting on dataset
         provider_uri_1min = HIGH_FREQ_CONFIG.get("provider_uri")
         GetData().qlib_data(
             # ⚠️ SAST Risk (Low): Saving model objects without specifying a secure path
-            target_dir=provider_uri_1min, interval="1min", region=REG_CN, version="v2", exists_skip=True
+            target_dir=provider_uri_1min,
+            interval="1min",
+            region=REG_CN,
+            version="v2",
+            exists_skip=True,
         )
         # ✅ Best Practice: Initialize necessary components before use
         # 🧠 ML Signal: Use of a recorder for tracking experiments
         provider_uri_map = {"1min": provider_uri_1min, "day": provider_uri_day}
-        qlib.init(provider_uri=provider_uri_map, dataset_cache=None, expression_cache=None)
+        qlib.init(
+            provider_uri=provider_uri_map, dataset_cache=None, expression_cache=None
+        )
+
     # 🧠 ML Signal: Model initialization from configuration
     # 🧠 ML Signal: SignalRecord usage for model and dataset
 
@@ -288,9 +298,9 @@ class NestedDecisionExecutionWorkflow:
                 "topk": 50,
                 # 🧠 ML Signal: Initializing model and dataset from configuration, indicating a pattern of dynamic model and dataset usage
                 "n_drop": 5,
-            # 🧠 ML Signal: Portfolio analysis record creation
+                # 🧠 ML Signal: Portfolio analysis record creation
             },
-        # 🧠 ML Signal: Initializing model and dataset from configuration, indicating a pattern of dynamic model and dataset usage
+            # 🧠 ML Signal: Initializing model and dataset from configuration, indicating a pattern of dynamic model and dataset usage
         }
         self.port_analysis_config["strategy"] = strategy_config
         self.port_analysis_config["backtest"]["benchmark"] = self.benchmark
@@ -307,11 +317,11 @@ class NestedDecisionExecutionWorkflow:
             par.generate()
 
     # 🧠 ML Signal: Using model and dataset as part of strategy configuration, indicating a pattern of strategy customization
-        # user could use following methods to analysis the position
-        # report_normal_df = recorder.load_object("portfolio_analysis/report_normal_1day.pkl")
-        # from qlib.contrib.report import analysis_position
+    # user could use following methods to analysis the position
+    # report_normal_df = recorder.load_object("portfolio_analysis/report_normal_1day.pkl")
+    # from qlib.contrib.report import analysis_position
     # ✅ Best Practice: Consider adding a docstring to describe the purpose and functionality of the method.
-        # analysis_position.report_graph(report_normal_df)
+    # analysis_position.report_graph(report_normal_df)
     # ⚠️ SAST Risk (Medium): Potential risk if `collect_data` function is not properly validated or sanitized
 
     # ✅ Best Practice: Ensure that _init_qlib is defined elsewhere in the class to avoid runtime errors.
@@ -342,7 +352,9 @@ class NestedDecisionExecutionWorkflow:
                 "n_drop": 5,
             },
         }
-        data_generator = collect_data(executor=executor_config, strategy=strategy_config, **backtest_config)
+        data_generator = collect_data(
+            executor=executor_config, strategy=strategy_config, **backtest_config
+        )
         for trade_decision in data_generator:
             print(trade_decision)
 
@@ -358,13 +370,17 @@ class NestedDecisionExecutionWorkflow:
     def check_diff_freq(self):
         self._init_qlib()
         exp = R.get_exp(experiment_name="backtest")
-        rec = next(iter(exp.list_recorders().values()))  # assuming this will get the latest recorder
+        rec = next(
+            iter(exp.list_recorders().values())
+        )  # assuming this will get the latest recorder
         for check_key in "account", "total_turnover", "total_cost":
             check_key = "total_cost"
 
             acc_dict = {}
             for freq in ["30minute", "5minute", "1day"]:
-                acc_dict[freq] = rec.load_object(f"portfolio_analysis/report_normal_{freq}.pkl")[check_key]
+                acc_dict[freq] = rec.load_object(
+                    f"portfolio_analysis/report_normal_{freq}.pkl"
+                )[check_key]
             acc_df = pd.DataFrame(acc_dict)
             acc_resam = acc_df.resample("1d").last().dropna()
             assert (acc_resam["30minute"] == acc_resam["1day"]).all()

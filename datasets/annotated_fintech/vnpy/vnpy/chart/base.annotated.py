@@ -1,4 +1,5 @@
 from vnpy.trader.ui import QtGui
+
 # ✅ Best Practice: Use descriptive constant names for color values to improve readability and maintainability
 
 

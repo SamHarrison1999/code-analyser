@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 # ✅ Best Practice: Grouping imports from the same module together improves readability and maintainability.
 from sqlalchemy import Column, Float, String, Boolean, Integer
+
 # 🧠 ML Signal: Class definition with multiple attributes can be used to train models on class structure and attribute usage
 
 from zvt.contract import Mixin
+
 # ✅ Best Practice: Importing specific classes or functions is preferred over wildcard imports for clarity.
 # 🧠 ML Signal: Use of SQLAlchemy Column to define database schema
 
 # ⚠️ SAST Risk (Low): Potential risk if user input is directly mapped to these columns without validation
+
 
 class ZenFactorCommon(Mixin):
     # 🧠 ML Signal: Use of SQLAlchemy Column to define database schema

@@ -6,24 +6,30 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+
 # ✅ Best Practice: Use of relative imports for internal modules improves maintainability and clarity.
 import numpy as np
 import pandas as pd
+
 # ✅ Best Practice: Use of relative imports for internal modules improves maintainability and clarity.
 from typing import Text, Union
 import urllib.request
 import copy
 from ...utils import get_or_create_path
 from ...log import get_module_logger
+
 # ✅ Best Practice: Use of relative imports for internal modules improves maintainability and clarity.
 import torch
 import torch.nn as nn
+
 # ✅ Best Practice: Use of relative imports for internal modules improves maintainability and clarity.
 import torch.optim as optim
 from .pytorch_utils import count_parameters
+
 # ✅ Best Practice: Use of relative imports for internal modules improves maintainability and clarity.
 # ✅ Best Practice: Class docstring provides a clear description of the class and its parameters
 from ...model.base import Model
+
 # ✅ Best Practice: Use of relative imports for internal modules improves maintainability and clarity.
 from ...data.dataset import DatasetH
 from ...data.dataset.handler import DataHandlerLP
@@ -91,7 +97,9 @@ class HIST(Model):
         self.model_path = model_path
         self.stock2concept = stock2concept
         self.stock_index = stock_index
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.seed = seed
 
         self.logger.info(
@@ -148,13 +156,15 @@ class HIST(Model):
             # 🧠 ML Signal: Function for calculating mean squared error, a common loss function in ML
             # ⚠️ SAST Risk (Low): Potential for incorrect device comparison if `self.device` is not properly initialized.
             base_model=self.base_model,
-        # ✅ Best Practice: Consider handling cases where `self.device` might not be set or is None.
+            # ✅ Best Practice: Consider handling cases where `self.device` might not be set or is None.
         )
         # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported optimizers
         # ✅ Best Practice: Use descriptive variable names for clarity
         self.logger.info("model:\n{:}".format(self.HIST_model))
         # 🧠 ML Signal: Custom loss function implementation
-        self.logger.info("model size: {:.4f} MB".format(count_parameters(self.HIST_model)))
+        self.logger.info(
+            "model size: {:.4f} MB".format(count_parameters(self.HIST_model))
+        )
         # 🧠 ML Signal: Use of torch.mean indicates integration with PyTorch, a popular ML library
         if optimizer.lower() == "adam":
             # ✅ Best Practice: Handle NaN values in labels to avoid computation errors
@@ -165,12 +175,15 @@ class HIST(Model):
         else:
             # 🧠 ML Signal: Use of torch.isfinite to create a mask for valid values in label
             # 🧠 ML Signal: Use of mean squared error for loss calculation
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
 
         # 🧠 ML Signal: Conditional logic based on self.metric value
         # ⚠️ SAST Risk (Low): Potential for unhandled loss types leading to exceptions
         self.fitted = False
         self.HIST_model.to(self.device)
+
     # 🧠 ML Signal: Masking pred and label tensors
 
     @property
@@ -183,6 +196,7 @@ class HIST(Model):
         loss = (pred - label) ** 2
         # 🧠 ML Signal: Use of groupby operation on a DataFrame, indicating data aggregation pattern
         return torch.mean(loss)
+
     # 🧠 ML Signal: Handling of different metric types
 
     # 🧠 ML Signal: Use of numpy operations for array manipulation
@@ -213,7 +227,9 @@ class HIST(Model):
             vx = x - torch.mean(x)
             vy = y - torch.mean(y)
             # 🧠 ML Signal: Shuffling data for training
-            return torch.sum(vx * vy) / (torch.sqrt(torch.sum(vx**2)) * torch.sqrt(torch.sum(vy**2)))
+            return torch.sum(vx * vy) / (
+                torch.sqrt(torch.sum(vx**2)) * torch.sqrt(torch.sum(vy**2))
+            )
 
         if self.metric == ("", "loss"):
             return -self.loss_fn(pred[mask], label[mask])
@@ -239,6 +255,7 @@ class HIST(Model):
             # ✅ Best Practice: Gradient clipping to prevent exploding gradients
             daily_index, daily_count = zip(*daily_shuffle)
         return daily_index, daily_count
+
     # 🧠 ML Signal: Optimizer step to update model parameters
 
     # 🧠 ML Signal: Using a method to get daily intervals suggests a time-series or sequential data processing pattern.
@@ -260,7 +277,11 @@ class HIST(Model):
         for idx, count in zip(daily_index, daily_count):
             batch = slice(idx, idx + count)
             feature = torch.from_numpy(x_train_values[batch]).float().to(self.device)
-            concept_matrix = torch.from_numpy(stock2concept_matrix[stock_index[batch]]).float().to(self.device)
+            concept_matrix = (
+                torch.from_numpy(stock2concept_matrix[stock_index[batch]])
+                .float()
+                .to(self.device)
+            )
             label = torch.from_numpy(y_train_values[batch]).float().to(self.device)
             pred = self.HIST_model(feature, concept_matrix)
             # ✅ Best Practice: Returning the mean of losses and scores provides a summary metric for evaluation.
@@ -292,7 +313,11 @@ class HIST(Model):
         for idx, count in zip(daily_index, daily_count):
             batch = slice(idx, idx + count)
             feature = torch.from_numpy(x_values[batch]).float().to(self.device)
-            concept_matrix = torch.from_numpy(stock2concept_matrix[stock_index[batch]]).float().to(self.device)
+            concept_matrix = (
+                torch.from_numpy(stock2concept_matrix[stock_index[batch]])
+                .float()
+                .to(self.device)
+            )
             label = torch.from_numpy(y_values[batch]).float().to(self.device)
             with torch.no_grad():
                 pred = self.HIST_model(feature, concept_matrix)
@@ -317,7 +342,9 @@ class HIST(Model):
             data_key=DataHandlerLP.DK_L,
         )
         if df_train.empty or df_valid.empty:
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
 
         if not os.path.exists(self.stock2concept):
             url = "https://github.com/SunsetWolf/qlib_dataset/releases/download/v0/qlib_csi300_stock2concept.npy"
@@ -325,13 +352,25 @@ class HIST(Model):
 
         stock_index = np.load(self.stock_index, allow_pickle=True).item()
         df_train["stock_index"] = 733
-        df_train["stock_index"] = df_train.index.get_level_values("instrument").map(stock_index)
+        df_train["stock_index"] = df_train.index.get_level_values("instrument").map(
+            stock_index
+        )
         df_valid["stock_index"] = 733
         # 🧠 ML Signal: Deep copying model state for best parameters is a common pattern in model training.
-        df_valid["stock_index"] = df_valid.index.get_level_values("instrument").map(stock_index)
+        df_valid["stock_index"] = df_valid.index.get_level_values("instrument").map(
+            stock_index
+        )
 
-        x_train, y_train, stock_index_train = df_train["feature"], df_train["label"], df_train["stock_index"]
-        x_valid, y_valid, stock_index_valid = df_valid["feature"], df_valid["label"], df_valid["stock_index"]
+        x_train, y_train, stock_index_train = (
+            df_train["feature"],
+            df_train["label"],
+            df_train["stock_index"],
+        )
+        x_valid, y_valid, stock_index_valid = (
+            df_valid["feature"],
+            df_valid["label"],
+            df_valid["stock_index"],
+        )
 
         save_path = get_or_create_path(save_path)
         # ⚠️ SAST Risk (Low): No check for dataset being None or invalid type
@@ -363,8 +402,10 @@ class HIST(Model):
 
         model_dict = self.HIST_model.state_dict()
         pretrained_dict = {
-            k: v for k, v in pretrained_model.state_dict().items() if k in model_dict  # pylint: disable=E1135
-        # 🧠 ML Signal: Usage of custom method to get daily intervals
+            k: v
+            for k, v in pretrained_model.state_dict().items()
+            if k in model_dict  # pylint: disable=E1135
+            # 🧠 ML Signal: Usage of custom method to get daily intervals
         }
         model_dict.update(pretrained_dict)
         # 🧠 ML Signal: Custom model class definition for PyTorch
@@ -385,7 +426,9 @@ class HIST(Model):
             self.train_epoch(x_train, y_train, stock_index_train)
 
             self.logger.info("evaluating...")
-            train_loss, train_score = self.test_epoch(x_train, y_train, stock_index_train)
+            train_loss, train_score = self.test_epoch(
+                x_train, y_train, stock_index_train
+            )
             # 🧠 ML Signal: Conditional logic to select model architecture
             val_loss, val_score = self.test_epoch(x_valid, y_valid, stock_index_valid)
             self.logger.info("train %.6f, valid %.6f" % (train_score, val_score))
@@ -409,6 +452,7 @@ class HIST(Model):
         self.logger.info("best score: %.6lf @ %d" % (best_score, best_epoch))
         self.HIST_model.load_state_dict(best_param)
         torch.save(best_param, save_path)
+
     # ✅ Best Practice: Use of Xavier initialization for weights
 
     def predict(self, dataset: DatasetH, segment: Union[Text, slice] = "test"):
@@ -419,10 +463,14 @@ class HIST(Model):
         stock2concept_matrix = np.load(self.stock2concept)
         # ✅ Best Practice: Use of Xavier initialization for weights
         stock_index = np.load(self.stock_index, allow_pickle=True).item()
-        df_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        df_test = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
         df_test["stock_index"] = 733
         # ✅ Best Practice: Use of Xavier initialization for weights
-        df_test["stock_index"] = df_test.index.get_level_values("instrument").map(stock_index)
+        df_test["stock_index"] = df_test.index.get_level_values("instrument").map(
+            stock_index
+        )
         stock_index_test = df_test["stock_index"].values
         stock_index_test[np.isnan(stock_index_test)] = 733
         # ✅ Best Practice: Use of Xavier initialization for weights
@@ -450,7 +498,11 @@ class HIST(Model):
             # ⚠️ SAST Risk (Low): Adding a small constant (1e-6) to prevent division by zero, but consider handling edge cases more explicitly.
             x_batch = torch.from_numpy(x_values[batch]).float().to(self.device)
             # ✅ Best Practice: Reshape operation for better data manipulation
-            concept_matrix = torch.from_numpy(stock2concept_matrix[stock_index_test[batch]]).float().to(self.device)
+            concept_matrix = (
+                torch.from_numpy(stock2concept_matrix[stock_index_test[batch]])
+                .float()
+                .to(self.device)
+            )
 
             # ✅ Best Practice: Permute operation for changing tensor dimensions
             with torch.no_grad():
@@ -461,11 +513,15 @@ class HIST(Model):
 
         return pd.Series(np.concatenate(preds), index=index)
 
+
 # ✅ Best Practice: Summing and reshaping for broadcasting
+
 
 # ✅ Best Practice: Element-wise multiplication for matrix operations
 class HISTModel(nn.Module):
-    def __init__(self, d_feat=6, hidden_size=64, num_layers=2, dropout=0.0, base_model="GRU"):
+    def __init__(
+        self, d_feat=6, hidden_size=64, num_layers=2, dropout=0.0, base_model="GRU"
+    ):
         # ✅ Best Practice: Adding a tensor of ones for numerical stability
         super().__init__()
 
@@ -483,7 +539,7 @@ class HISTModel(nn.Module):
                 # 🧠 ML Signal: Use of cosine similarity for measuring similarity between vectors
                 batch_first=True,
                 dropout=dropout,
-            # 🧠 ML Signal: Use of softmax for probability distribution
+                # 🧠 ML Signal: Use of softmax for probability distribution
             )
         elif base_model == "LSTM":
             self.rnn = nn.LSTM(
@@ -562,7 +618,11 @@ class HISTModel(nn.Module):
 
         stock_to_concept = concept_matrix
 
-        stock_to_concept_sum = torch.sum(stock_to_concept, 0).reshape(1, -1).repeat(stock_to_concept.shape[0], 1)
+        stock_to_concept_sum = (
+            torch.sum(stock_to_concept, 0)
+            .reshape(1, -1)
+            .repeat(stock_to_concept.shape[0], 1)
+        )
         stock_to_concept_sum = stock_to_concept_sum.mul(concept_matrix)
 
         stock_to_concept_sum = stock_to_concept_sum + (
@@ -589,14 +649,18 @@ class HISTModel(nn.Module):
         i_stock_to_concept = self.cal_cos_similarity(i_shared_info, hidden)
         dim = i_stock_to_concept.shape[0]
         diag = i_stock_to_concept.diagonal(0)
-        i_stock_to_concept = i_stock_to_concept * (torch.ones(dim, dim) - torch.eye(dim)).to(device)
+        i_stock_to_concept = i_stock_to_concept * (
+            torch.ones(dim, dim) - torch.eye(dim)
+        ).to(device)
         row = torch.linspace(0, dim - 1, dim).to(device).long()
         column = i_stock_to_concept.max(1)[1].long()
         value = i_stock_to_concept.max(1)[0]
         i_stock_to_concept[row, column] = 10
         i_stock_to_concept[i_stock_to_concept != 10] = 0
         i_stock_to_concept[row, column] = value
-        i_stock_to_concept = i_stock_to_concept + torch.diag_embed((i_stock_to_concept.sum(0) != 0).float() * diag)
+        i_stock_to_concept = i_stock_to_concept + torch.diag_embed(
+            (i_stock_to_concept.sum(0) != 0).float() * diag
+        )
         hidden = torch.t(i_shared_info).mm(i_stock_to_concept).t()
         hidden = hidden[hidden.sum(1) != 0]
 

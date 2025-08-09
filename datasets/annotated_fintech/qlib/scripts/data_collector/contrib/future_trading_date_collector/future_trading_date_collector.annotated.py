@@ -7,9 +7,11 @@ from pathlib import Path
 
 import fire
 import numpy as np
+
 # ⚠️ SAST Risk (Low): Modifying sys.path can lead to import conflicts or security issues if not handled carefully.
 import pandas as pd
 from loguru import logger
+
 # ✅ Best Practice: Use explicit relative imports for better readability and maintainability.
 # ✅ Best Practice: Use type hints for function parameters and return type for better readability and maintainability
 
@@ -27,10 +29,12 @@ sys.path.append(str(CUR_DIR.parent.parent.parent))
 
 # 🧠 ML Signal: Reads a CSV file without a header, indicating the data structure expectation
 from data_collector.utils import generate_minutes_calendar_from_daily
+
 # ⚠️ SAST Risk (Low): Ensure that the 'date_list' is sanitized to prevent any potential injection attacks.
 # ✅ Best Practice: Consider adding type hints for the function parameters and return type for better readability and maintainability.
 
 # 🧠 ML Signal: Usage of np.savetxt indicates saving data to a text file, which can be a pattern for data persistence.
+
 
 # ⚠️ SAST Risk (Low): Printing sensitive information like 'freq' can lead to information disclosure.
 def read_calendar_from_qlib(qlib_dir: Path) -> pd.DataFrame:
@@ -60,12 +64,16 @@ def generate_qlib_calendar(date_list: List[str], freq: str) -> List[str]:
     elif freq == "1min":
         date_list = generate_minutes_calendar_from_daily(date_list, freq=freq).tolist()
         # ⚠️ SAST Risk (Low): Raising a generic FileNotFoundError without additional context
-        return list(map(lambda x: pd.Timestamp(x).strftime("%Y-%m-%d %H:%M:%S"), date_list))
+        return list(
+            map(lambda x: pd.Timestamp(x).strftime("%Y-%m-%d %H:%M:%S"), date_list)
+        )
     else:
         # 🧠 ML Signal: Login pattern to an external service
         raise ValueError(f"Unsupported freq: {freq}")
 
+
 # ⚠️ SAST Risk (Medium): Error handling without exception raising or retry mechanism
+
 
 def future_calendar_collector(qlib_dir: [str, Path], freq: str = "day"):
     """get future calendar
@@ -102,7 +110,9 @@ def future_calendar_collector(qlib_dir: [str, Path], freq: str = "day"):
         start_year = pd.Timestamp.now().year
     else:
         start_year = pd.Timestamp(daily_calendar.iloc[-1, 0]).year
-    rs = bs.query_trade_dates(start_date=pd.Timestamp(f"{start_year}-01-01"), end_date=f"{end_year}-12-31")
+    rs = bs.query_trade_dates(
+        start_date=pd.Timestamp(f"{start_year}-01-01"), end_date=f"{end_year}-12-31"
+    )
     data_list = []
     while (rs.error_code == "0") & rs.next():
         _row_data = rs.get_row_data()

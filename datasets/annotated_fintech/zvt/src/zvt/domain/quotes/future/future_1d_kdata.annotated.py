@@ -7,6 +7,7 @@ from sqlalchemy.orm import declarative_base
 # ✅ Best Practice: Class definition should be followed by a docstring explaining its purpose and usage.
 from zvt.contract.register import register_schema
 from zvt.domain.quotes import FutureKdataCommon
+
 # 🧠 ML Signal: Use of dunder (double underscore) variable to define a table name in an ORM context.
 
 # 🧠 ML Signal: Function call pattern for registering a schema, indicating a setup or configuration step.
@@ -19,7 +20,12 @@ class Future1dKdata(KdataBase, FutureKdataCommon):
     __tablename__ = "future_1d_kdata"
 
 
-register_schema(providers=["em"], db_name="future_1d_kdata", schema_base=KdataBase, entity_type="future")
+register_schema(
+    providers=["em"],
+    db_name="future_1d_kdata",
+    schema_base=KdataBase,
+    entity_type="future",
+)
 
 
 # the __all__ is generated

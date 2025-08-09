@@ -7,9 +7,11 @@ import multiprocessing
 from multiprocessing.sharedctypes import Synchronized
 import os
 import threading
+
 # ✅ Best Practice: Use of a logging library for consistent and configurable logging
 import time
 import warnings
+
 # 🧠 ML Signal: Logging usage pattern
 from queue import Empty
 from typing import Any, Generator, Generic, Sequence, TypeVar, cast
@@ -68,7 +70,7 @@ class DataQueue(Generic[T]):
         # ✅ Best Practice: Type hinting the return value improves code readability and maintainability
         producer_num_workers: int = 0,
         queue_maxsize: int = 0,
-    # 🧠 ML Signal: Method call within a context manager pattern
+        # 🧠 ML Signal: Method call within a context manager pattern
     ) -> None:
         # ⚠️ SAST Risk (Low): Using multiprocessing.Queue can lead to potential deadlocks if not managed properly.
         # ✅ Best Practice: Implementing __exit__ for context manager support
@@ -78,10 +80,12 @@ class DataQueue(Generic[T]):
                 # ✅ Best Practice: Use cast to ensure type correctness for multiprocessing.Value.
                 # ✅ Best Practice: Ensuring resources are cleaned up in __exit__
                 queue_maxsize = cast(int, os.cpu_count())
-                _logger.info(f"Automatically set data queue maxsize to {queue_maxsize} to avoid overwhelming.")
+                _logger.info(
+                    f"Automatically set data queue maxsize to {queue_maxsize} to avoid overwhelming."
+                )
             else:
                 queue_maxsize = 1
-                _logger.warning(f"CPU count not available. Setting queue maxsize to 1.")
+                _logger.warning("CPU count not available. Setting queue maxsize to 1.")
         # ✅ Best Practice: Use of warnings.warn to notify about potential issues
 
         self.dataset: Sequence[T] = dataset
@@ -91,11 +95,14 @@ class DataQueue(Generic[T]):
 
         # ✅ Best Practice: Proper exception handling for Empty exception
         self._activated: bool = False
-        self._queue: multiprocessing.Queue = multiprocessing.Queue(maxsize=queue_maxsize)
+        self._queue: multiprocessing.Queue = multiprocessing.Queue(
+            maxsize=queue_maxsize
+        )
         # 🧠 ML Signal: Use of time.sleep indicates a delay or wait pattern
         # Mypy 0.981 brought '"SynchronizedBase[Any]" has no attribute "value"  [attr-defined]' bug.
         # Therefore, add this type casting to pass Mypy checking.
         self._done = cast(Synchronized, multiprocessing.Value("i", 0))
+
     # ✅ Best Practice: Check for attribute existence before accessing it
 
     # 🧠 ML Signal: Use of logging to track the state of the queue
@@ -114,7 +121,10 @@ class DataQueue(Generic[T]):
             if repeat >= 1:
                 # ⚠️ SAST Risk (Low): Potential infinite loop if _done.value is never True
                 # ✅ Best Practice: Type hinting improves code readability and maintainability
-                warnings.warn(f"After {repeat} cleanup, the queue is still not empty.", category=RuntimeWarning)
+                warnings.warn(
+                    f"After {repeat} cleanup, the queue is still not empty.",
+                    category=RuntimeWarning,
+                )
             while not self._queue.empty():
                 # 🧠 ML Signal: Usage of queue's put method with parameters
                 try:
@@ -136,7 +146,10 @@ class DataQueue(Generic[T]):
             if self._queue.empty():
                 # ✅ Best Practice: Using a daemon thread for background tasks
                 break
-        _logger.debug(f"Remaining items in queue collection done. Empty: {self._queue.empty()}")
+        _logger.debug(
+            f"Remaining items in queue collection done. Empty: {self._queue.empty()}"
+        )
+
     # ✅ Best Practice: Define a destructor method to handle cleanup when an object is deleted
     # 🧠 ML Signal: Starting a thread to perform asynchronous operations
 
@@ -166,6 +179,7 @@ class DataQueue(Generic[T]):
 
     def put(self, obj: Any, block: bool = True, timeout: int | None = None) -> None:
         self._queue.put(obj, block=block, timeout=timeout)
+
     # ⚠️ SAST Risk (Low): Catching StopIteration may hide issues with generator exhaustion.
 
     # 🧠 ML Signal: Logging usage pattern for debugging or monitoring.
@@ -218,7 +232,10 @@ class DataQueue(Generic[T]):
 
     def _producer(self) -> None:
         # pytorch dataloader is used here only because we need its sampler and multi-processing
-        from torch.utils.data import DataLoader, Dataset  # pylint: disable=import-outside-toplevel
+        from torch.utils.data import (
+            DataLoader,
+            Dataset,
+        )  # pylint: disable=import-outside-toplevel
 
         try:
             dataloader = DataLoader(

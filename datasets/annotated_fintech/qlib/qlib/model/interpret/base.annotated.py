@@ -7,6 +7,7 @@ Interfaces to interpret models
 # ✅ Best Practice: Use of abstract method indicates this class is intended to be subclassed
 
 import pandas as pd
+
 # ✅ Best Practice: Method docstring provides a clear description of the method's purpose and return value
 from abc import abstractmethod
 
@@ -45,7 +46,8 @@ class LightGBMFInt(FeatureInt):
             https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.Booster.html?highlight=feature_importance#lightgbm.Booster.feature_importance
         """
         return pd.Series(
-            self.model.feature_importance(*args, **kwargs), index=self.model.feature_name()
+            self.model.feature_importance(*args, **kwargs),
+            index=self.model.feature_name(),
         ).sort_values(  # pylint: disable=E1101
             ascending=False
         )

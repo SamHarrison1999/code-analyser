@@ -8,11 +8,18 @@ from zvt.api.utils import china_stock_code_to_id
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimestampsDataRecorder
 from zvt.domain import Stock
+
 # ✅ Best Practice: Function name is prefixed with an underscore, indicating intended private use.
 from zvt.domain.emotion.emotion import LimitUpInfo, LimitDownInfo, Emotion
 from zvt.recorders.jqka import jqka_api
+
 # ✅ Best Practice: Checks for None or empty string input.
-from zvt.utils.time_utils import to_time_str, date_time_by_interval, current_date, to_pd_timestamp
+from zvt.utils.time_utils import (
+    to_time_str,
+    date_time_by_interval,
+    current_date,
+    to_pd_timestamp,
+)
 
 
 # ✅ Best Practice: Use of raw string for regex pattern.
@@ -26,9 +33,12 @@ def _get_high_days_count(high_days_str: str):
     # ✅ Best Practice: Clear association of schema with the entity
     result = re.findall(pattern, high_days_str)
     return int(result[-1])
+
+
 # ✅ Best Practice: Use of class attributes for configuration and metadata
 
 # 🧠 ML Signal: Initialization of a list with a specific object type
+
 
 # ✅ Best Practice: Clear association of schema with the data
 # ✅ Best Practice: Use of a method to initialize or reset class attributes
@@ -46,6 +56,7 @@ class JqkaLimitUpRecorder(TimestampsDataRecorder):
     def init_entities(self):
         # fake entity to for trigger run
         self.entities = [Stock(id="stock_sz_000001")]
+
     # 🧠 ML Signal: Usage of a function to calculate a date based on an interval.
     # 🧠 ML Signal: Iterating over a list of timestamps to perform operations
 
@@ -53,8 +64,11 @@ class JqkaLimitUpRecorder(TimestampsDataRecorder):
         # 🧠 ML Signal: Conversion of timestamp to string format
         # 🧠 ML Signal: Usage of pandas to generate a date range.
         latest_infos = LimitUpInfo.query_data(
-            provider=self.provider, order=LimitUpInfo.timestamp.desc(), limit=1, return_type="domain"
-        # 🧠 ML Signal: Logging information with dynamic content
+            provider=self.provider,
+            order=LimitUpInfo.timestamp.desc(),
+            limit=1,
+            return_type="domain",
+            # 🧠 ML Signal: Logging information with dynamic content
         )
         if latest_infos and not self.force_update:
             # 🧠 ML Signal: API call to fetch data based on a date
@@ -67,7 +81,9 @@ class JqkaLimitUpRecorder(TimestampsDataRecorder):
             # 🧠 ML Signal: Creating a dictionary to represent a record
             # 最近一年的数据
             start_date = date_time_by_interval(current_date(), -360)
-        return pd.date_range(start=start_date, end=pd.Timestamp.now(), freq="B").tolist()
+        return pd.date_range(
+            start=start_date, end=pd.Timestamp.now(), freq="B"
+        ).tolist()
 
     def record(self, entity, start, end, size, timestamps):
         for timestamp in timestamps:
@@ -91,8 +107,12 @@ class JqkaLimitUpRecorder(TimestampsDataRecorder):
                         # ⚠️ SAST Risk (Low): Assumes data["first_limit_up_time"] is a valid integer
                         "open_count": data["open_num"] if data["open_num"] else 0,
                         # ⚠️ SAST Risk (Low): Assumes data["last_limit_up_time"] is a valid integer
-                        "first_limit_up_time": pd.Timestamp.fromtimestamp(int(data["first_limit_up_time"])),
-                        "last_limit_up_time": pd.Timestamp.fromtimestamp(int(data["last_limit_up_time"])),
+                        "first_limit_up_time": pd.Timestamp.fromtimestamp(
+                            int(data["first_limit_up_time"])
+                        ),
+                        "last_limit_up_time": pd.Timestamp.fromtimestamp(
+                            int(data["last_limit_up_time"])
+                        ),
                         "limit_up_type": data["limit_up_type"],
                         "order_amount": data["order_amount"],
                         "success_rate": data["limit_up_suc_rate"],
@@ -105,7 +125,7 @@ class JqkaLimitUpRecorder(TimestampsDataRecorder):
                         # ✅ Best Practice: Use of class attributes for configuration and metadata
                         "high_days": data["high_days"],
                         "high_days_count": _get_high_days_count(data["high_days"]),
-                    # ✅ Best Practice: Use of class attributes for configuration and metadata
+                        # ✅ Best Practice: Use of class attributes for configuration and metadata
                     }
                     # 🧠 ML Signal: Function call to process high_days data
                     records.append(record)
@@ -127,7 +147,7 @@ class JqkaLimitUpRecorder(TimestampsDataRecorder):
                     # 🧠 ML Signal: Storing DataFrame to a database
                     # ⚠️ SAST Risk (Low): Hardcoded stock ID may lead to inflexibility or errors if the ID changes
                     drop_duplicates=True,
-                # ⚠️ SAST Risk (Low): Potential risk if 'latest_infos' is not validated for expected structure or content.
+                    # ⚠️ SAST Risk (Low): Potential risk if 'latest_infos' is not validated for expected structure or content.
                 )
 
 
@@ -149,20 +169,26 @@ class JqkaLimitDownRecorder(TimestampsDataRecorder):
         # 🧠 ML Signal: API call to fetch data for a specific date
         # fake entity to for trigger run
         self.entities = [Stock(id="stock_sz_000001")]
+
     # 🧠 ML Signal: Conversion of stock code to entity ID
     # ✅ Best Practice: Initializing an empty list before appending records
     # 🧠 ML Signal: Enumerating over API response data
 
     def init_timestamps(self, entity_item) -> List[pd.Timestamp]:
         latest_infos = LimitDownInfo.query_data(
-            provider=self.provider, order=LimitDownInfo.timestamp.desc(), limit=1, return_type="domain"
+            provider=self.provider,
+            order=LimitDownInfo.timestamp.desc(),
+            limit=1,
+            return_type="domain",
         )
         if latest_infos and not self.force_update:
             start_date = latest_infos[0].timestamp
         else:
             # 最近一年的数据
             start_date = date_time_by_interval(current_date(), -360)
-        return pd.date_range(start=start_date, end=pd.Timestamp.now(), freq="B").tolist()
+        return pd.date_range(
+            start=start_date, end=pd.Timestamp.now(), freq="B"
+        ).tolist()
 
     # 🧠 ML Signal: Conversion of date string to timestamp
     # ✅ Best Practice: Using dictionary comprehension for record creation
@@ -197,7 +223,7 @@ class JqkaLimitDownRecorder(TimestampsDataRecorder):
                         # ✅ Best Practice: Enforcing data update and duplicate handling
                         # ⚠️ SAST Risk (Low): Assumes 'height' and 'number' keys exist in every dictionary item, which may lead to KeyError.
                         "turnover_rate": data["turnover_rate"] / 100,
-                    # 🧠 ML Signal: Use of class attributes for configuration
+                        # 🧠 ML Signal: Use of class attributes for configuration
                     }
                     # ✅ Best Practice: Returning multiple values as a tuple.
                     records.append(record)
@@ -219,7 +245,9 @@ class JqkaLimitDownRecorder(TimestampsDataRecorder):
                     drop_duplicates=True,
                 )
 
+
 # ✅ Best Practice: Checking for conditions before proceeding with logic is a good practice.
+
 
 def _cal_power_and_max_height(continuous_limit_up: dict):
     # 🧠 ML Signal: Accessing the timestamp attribute of the latest information.
@@ -235,6 +263,8 @@ def _cal_power_and_max_height(continuous_limit_up: dict):
         # ✅ Best Practice: Using pandas date_range for generating a list of dates is efficient and readable.
         power = power + item["height"] * item["number"]
     return max_height, power
+
+
 # 🧠 ML Signal: Fetching limit stats for a specific date
 
 
@@ -257,14 +287,19 @@ class JqkaEmotionRecorder(TimestampsDataRecorder):
         latest_infos = Emotion.query_data(
             # 🧠 ML Signal: Creating a record dictionary with financial statistics
             # ✅ Best Practice: Convert date string to pandas timestamp for consistency
-            provider=self.provider, order=Emotion.timestamp.desc(), limit=1, return_type="domain"
+            provider=self.provider,
+            order=Emotion.timestamp.desc(),
+            limit=1,
+            return_type="domain",
         )
         if latest_infos and not self.force_update:
             start_date = latest_infos[0].timestamp
         else:
             # 最近一年的数据
             start_date = date_time_by_interval(current_date(), -365)
-        return pd.date_range(start=start_date, end=pd.Timestamp.now(), freq="B").tolist()
+        return pd.date_range(
+            start=start_date, end=pd.Timestamp.now(), freq="B"
+        ).tolist()
 
     def record(self, entity, start, end, size, timestamps):
         # 🧠 ML Signal: Creating a DataFrame from the record for database insertion
@@ -277,7 +312,9 @@ class JqkaEmotionRecorder(TimestampsDataRecorder):
             self.logger.info(f"record {self.data_schema} to {the_date}")
             limit_stats = jqka_api.get_limit_stats(date=the_date)
             continuous_limit_up = jqka_api.get_continuous_limit_up(date=the_date)
-            max_height, continuous_power = _cal_power_and_max_height(continuous_limit_up=continuous_limit_up)
+            max_height, continuous_power = _cal_power_and_max_height(
+                continuous_limit_up=continuous_limit_up
+            )
 
             if limit_stats:
                 # 大盘
@@ -287,11 +324,19 @@ class JqkaEmotionRecorder(TimestampsDataRecorder):
                     "entity_id": entity_id,
                     "timestamp": to_pd_timestamp(the_date),
                     "limit_up_count": limit_stats["limit_up_count"]["today"]["num"],
-                    "limit_up_open_count": limit_stats["limit_up_count"]["today"]["open_num"],
-                    "limit_up_success_rate": limit_stats["limit_up_count"]["today"]["rate"],
+                    "limit_up_open_count": limit_stats["limit_up_count"]["today"][
+                        "open_num"
+                    ],
+                    "limit_up_success_rate": limit_stats["limit_up_count"]["today"][
+                        "rate"
+                    ],
                     "limit_down_count": limit_stats["limit_down_count"]["today"]["num"],
-                    "limit_down_open_count": limit_stats["limit_down_count"]["today"]["open_num"],
-                    "limit_down_success_rate": limit_stats["limit_down_count"]["today"]["rate"],
+                    "limit_down_open_count": limit_stats["limit_down_count"]["today"][
+                        "open_num"
+                    ],
+                    "limit_down_success_rate": limit_stats["limit_down_count"]["today"][
+                        "rate"
+                    ],
                     "max_height": max_height,
                     "continuous_power": continuous_power,
                 }
@@ -307,7 +352,9 @@ class JqkaEmotionRecorder(TimestampsDataRecorder):
 
 if __name__ == "__main__":
     # JqkaLimitDownRecorder().run()
-    LimitDownInfo.record_data(start_timestamp="2024-02-02", end_timestamp="2024-02-16", force_update=True)
+    LimitDownInfo.record_data(
+        start_timestamp="2024-02-02", end_timestamp="2024-02-16", force_update=True
+    )
 
 
 # the __all__ is generated

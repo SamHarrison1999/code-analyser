@@ -2,15 +2,18 @@
 # Licensed under the MIT License.
 
 import abc
+
 # ✅ Best Practice: Importing specific functions or classes can improve code readability and maintainability.
 from typing import Union, Text, Optional
 import numpy as np
 import pandas as pd
+
 # ✅ Best Practice: Grouping related imports together improves code organization.
 
 from qlib.utils.data import robust_zscore, zscore
 from ...constant import EPS
 from .utils import fetch_df_by_index
+
 # ✅ Best Practice: Include type hints for function parameters and return type for better readability and maintainability.
 from ...utils.serial import Serializable
 from ...utils.paral import datetime_groupby_apply
@@ -48,6 +51,7 @@ class Processor(Serializable):
             processor, i.e. `df`.
 
         """
+
     # ✅ Best Practice: Method docstring provides a clear explanation of the method's purpose and return value
 
     # ⚠️ SAST Risk (Medium): In-place modification of input data can lead to unintended side effects
@@ -91,6 +95,7 @@ class Processor(Serializable):
         """
         # ✅ Best Practice: Class definition should include a docstring to describe its purpose and usage.
         return False
+
     # ✅ Best Practice: Use of default parameter values improves function usability and flexibility.
 
     # ✅ Best Practice: Method docstring provides a clear explanation of the method's purpose
@@ -129,13 +134,16 @@ class DropnaProcessor(Processor):
     def readonly(self):
         return True
 
+
 # ✅ Best Practice: Use of numpy set operations for efficient column difference calculation
+
 
 class DropnaLabel(DropnaProcessor):
     # ✅ Best Practice: Use of numpy union operation for efficient list merging
     def __init__(self, fields_group="label"):
         # ✅ Best Practice: Method should have a docstring explaining its purpose
         super().__init__(fields_group=fields_group)
+
     # ✅ Best Practice: Use of pandas isin for boolean indexing
 
     # ✅ Best Practice: Consider adding type hints for the return value
@@ -146,12 +154,15 @@ class DropnaLabel(DropnaProcessor):
         # 🧠 ML Signal: Use of __call__ method indicates the object is intended to be used as a callable, which is a specific design pattern.
         return False
 
+
 # 🧠 ML Signal: Use of column filtering based on string matching
+
 
 class DropCol(Processor):
     # ⚠️ SAST Risk (Low): Potential for KeyError if 'df' is not defined in the current scope
     def __init__(self, col_list=[]):
         self.col_list = col_list
+
     # ⚠️ SAST Risk (Low): Potential for KeyError if 'df' is not defined in the current scope
 
     def __call__(self, df):
@@ -165,6 +176,7 @@ class DropCol(Processor):
             mask = df.columns.isin(self.col_list)
         # ⚠️ SAST Risk (Low): Potential for NameError if 'df' is not defined in the current scope
         return df.loc[:, ~mask]
+
     # 🧠 ML Signal: Iterating over DataFrame columns to process each one individually
 
     def readonly(self):
@@ -178,6 +190,7 @@ class FilterCol(Processor):
         # ✅ Best Practice: Sorting DataFrame by index for consistent ordering
         self.fields_group = fields_group
         self.col_list = col_list
+
     # ✅ Best Practice: Class docstring provides a brief description of the class purpose
 
     # ⚠️ SAST Risk (Low): Undefined function 'replace_inf' used, potential NameError
@@ -186,7 +199,9 @@ class FilterCol(Processor):
         cols = get_group_columns(df, self.fields_group)
         all_cols = df.columns
         # 🧠 ML Signal: Method overloading with __call__ indicates a pattern for callable objects
-        diff_cols = np.setdiff1d(all_cols.get_level_values(-1), cols.get_level_values(-1))
+        diff_cols = np.setdiff1d(
+            all_cols.get_level_values(-1), cols.get_level_values(-1)
+        )
         # ⚠️ SAST Risk (Low): In-place modification of input data can lead to unintended side effects
         self.col_list = np.union1d(diff_cols, self.col_list)
         mask = df.columns.get_level_values(-1).isin(self.col_list)
@@ -195,12 +210,15 @@ class FilterCol(Processor):
     # ⚠️ SAST Risk (Low): In-place modification of input data can lead to unintended side effects
     def readonly(self):
         return True
+
+
 # ✅ Best Practice: Initialize instance variables in the constructor for clarity and maintainability
 
 
 # 🧠 ML Signal: Usage of time-related variables may indicate time series data processing
 class TanhProcess(Processor):
     """Use tanh to process noise data"""
+
     # 🧠 ML Signal: Optional parameters like fields_group can indicate flexible data processing
     # ✅ Best Practice: Use of default parameter value for df allows for flexibility in function calls.
 
@@ -220,12 +238,15 @@ class TanhProcess(Processor):
         # 🧠 ML Signal: Use of __call__ method indicates the object is intended to be used as a function
         # ⚠️ SAST Risk (Low): Direct comparison of floating-point numbers can lead to precision issues.
         return tanh_denoise(df)
+
+
 # ✅ Best Practice: Consider adding type hints for function parameters and return type for better readability and maintainability.
 
 
 # ⚠️ SAST Risk (Low): Potential division by zero if max_val equals min_val.
 class ProcessInf(Processor):
     """Process infinity"""
+
     # ✅ Best Practice: Setting default min and max values for ignored columns ensures consistent data scaling.
     # 🧠 ML Signal: Usage of DataFrame and column selection indicates data preprocessing, common in ML pipelines.
 
@@ -240,18 +261,24 @@ class ProcessInf(Processor):
                     # 🧠 ML Signal: Tracking initialization of time-related variables could be useful for time-series analysis models.
                     # FIXME: Such behavior is very weird
                     # 🧠 ML Signal: Method for fitting a model to a DataFrame, common in ML workflows
-                    df[col] = df[col].replace([np.inf, -np.inf], df[col][~np.isinf(df[col])].mean())
+                    df[col] = df[col].replace(
+                        [np.inf, -np.inf], df[col][~np.isinf(df[col])].mean()
+                    )
                 # 🧠 ML Signal: Optional parameters like fields_group can indicate feature selection or grouping in ML models.
                 return df
+
             # ✅ Best Practice: Use of slicing to filter DataFrame by time range
 
             data = datetime_groupby_apply(data, process_inf)
             # 🧠 ML Signal: Extracting group columns, a common preprocessing step
             data.sort_index(inplace=True)
             return data
+
         # 🧠 ML Signal: Calculation of mean, a common feature scaling step
 
         return replace_inf(df)
+
+
 # 🧠 ML Signal: Calculation of standard deviation, a common feature scaling step
 
 
@@ -267,6 +294,7 @@ class Fillna(Processor):
         # 🧠 ML Signal: Normalization is a common preprocessing step in ML pipelines
         self.fields_group = fields_group
         self.fill_value = fill_value
+
     # 🧠 ML Signal: Use of DataFrame and .loc indicates data manipulation, common in data preprocessing for ML
 
     # 🧠 ML Signal: Storing column names for later use
@@ -280,6 +308,8 @@ class Fillna(Processor):
             df[self.fields_group] = df[self.fields_group].fillna(self.fill_value)
         # ✅ Best Practice: Class docstring provides a clear explanation of the class functionality and reference.
         return df
+
+
 # ✅ Best Practice: Initialize instance variables in the constructor for clarity and maintainability
 
 
@@ -292,11 +322,14 @@ class MinMaxNorm(Processor):
         # 🧠 ML Signal: Fetching a specific slice of data for training
         self.fit_end_time = fit_end_time
         self.fields_group = fields_group
+
     # 🧠 ML Signal: Dynamic selection of columns based on a group
 
     def fit(self, df: pd.DataFrame = None):
         # 🧠 ML Signal: Extracting values from a DataFrame for model training
-        df = fetch_df_by_index(df, slice(self.fit_start_time, self.fit_end_time), level="datetime")
+        df = fetch_df_by_index(
+            df, slice(self.fit_start_time, self.fit_end_time), level="datetime"
+        )
         cols = get_group_columns(df, self.fields_group)
         # 🧠 ML Signal: Calculation of median for normalization
         # 🧠 ML Signal: Method for data preprocessing, common in ML pipelines
@@ -321,6 +354,7 @@ class MinMaxNorm(Processor):
                 # 🧠 ML Signal: Assigning processed data back to DataFrame, common in ML data transformations
                 self.max_val[_i] = 1
         self.cols = cols
+
     # ✅ Best Practice: Use of if-elif-else for method selection
 
     def __call__(self, df):
@@ -347,7 +381,9 @@ class ZScoreNorm(Processor):
         self.fields_group = fields_group
 
     def fit(self, df: pd.DataFrame = None):
-        df = fetch_df_by_index(df, slice(self.fit_start_time, self.fit_end_time), level="datetime")
+        df = fetch_df_by_index(
+            df, slice(self.fit_start_time, self.fit_end_time), level="datetime"
+        )
         cols = get_group_columns(df, self.fields_group)
         self.mean_train = np.nanmean(df[cols].values, axis=0)
         self.std_train = np.nanstd(df[cols].values, axis=0)
@@ -363,6 +399,7 @@ class ZScoreNorm(Processor):
                 # 🧠 ML Signal: Method is designed to be used as a callable object, indicating a pattern for flexible object usage.
                 self.mean_train[_i] = 0
         self.cols = cols
+
     # ⚠️ SAST Risk (Low): Potential risk if get_group_columns does not handle unexpected input properly.
 
     # 🧠 ML Signal: Dynamic column selection based on group fields, indicating a pattern for flexible data processing.
@@ -370,6 +407,7 @@ class ZScoreNorm(Processor):
         def normalize(x, mean_train=self.mean_train, std_train=self.std_train):
             # 🧠 ML Signal: Use of groupby and rank operations, indicating a pattern for data transformation.
             return (x - mean_train) / std_train
+
         # ✅ Best Practice: Class docstring provides a brief description of the class functionality
 
         # 🧠 ML Signal: Data normalization pattern by centering around zero.
@@ -377,10 +415,13 @@ class ZScoreNorm(Processor):
         # ✅ Best Practice: Method docstring provides a brief description of the method functionality
         # ✅ Best Practice: Use of default mutable arguments (None) to avoid shared state issues
         return df
+
+
 # 🧠 ML Signal: Scaling data, indicating a pattern for data transformation.
 
 # 🧠 ML Signal: Storing a parameter as an instance attribute
 # ✅ Best Practice: Consider adding type hints for the function parameters and return type for better readability and maintainability.
+
 
 # ⚠️ SAST Risk (Low): Directly modifying the input DataFrame, which could lead to unintended side effects.
 class RobustZScoreNorm(Processor):
@@ -394,7 +435,9 @@ class RobustZScoreNorm(Processor):
         https://en.wikipedia.org/wiki/Median_absolute_deviation.
     """
 
-    def __init__(self, fit_start_time, fit_end_time, fields_group=None, clip_outlier=True):
+    def __init__(
+        self, fit_start_time, fit_end_time, fields_group=None, clip_outlier=True
+    ):
         # NOTE: correctly set the `fit_start_time` and `fit_end_time` is very important !!!
         # `fit_end_time` **must not** include any information from the test data!!!
         self.fit_start_time = fit_start_time
@@ -404,7 +447,9 @@ class RobustZScoreNorm(Processor):
 
     def fit(self, df: pd.DataFrame = None):
         # ✅ Best Practice: Docstring provides clear parameter descriptions
-        df = fetch_df_by_index(df, slice(self.fit_start_time, self.fit_end_time), level="datetime")
+        df = fetch_df_by_index(
+            df, slice(self.fit_start_time, self.fit_end_time), level="datetime"
+        )
         self.cols = get_group_columns(df, self.fields_group)
         X = df[self.cols].values
         self.mean_train = np.nanmedian(X, axis=0)
@@ -428,6 +473,7 @@ class RobustZScoreNorm(Processor):
 
 class CSZScoreNorm(Processor):
     """Cross Sectional ZScore Normalization"""
+
     # ⚠️ SAST Risk (Low): Potential for NoneType comparison if df.index.min() returns None
 
     # ⚠️ SAST Risk (Low): Potential for NoneType comparison if df.index.max() returns None
@@ -439,7 +485,7 @@ class CSZScoreNorm(Processor):
         elif method == "robust":
             self.zscore_func = robust_zscore
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
 
     def __call__(self, df):
         # try not modify original dataframe
@@ -451,7 +497,11 @@ class CSZScoreNorm(Processor):
         with pd.option_context("mode.chained_assignment", None):
             for g in self.fields_group:
                 cols = get_group_columns(df, g)
-                df[cols] = df[cols].groupby("datetime", group_keys=False).apply(self.zscore_func)
+                df[cols] = (
+                    df[cols]
+                    .groupby("datetime", group_keys=False)
+                    .apply(self.zscore_func)
+                )
         return df
 
 
@@ -499,7 +549,11 @@ class CSZFillna(Processor):
 
     def __call__(self, df):
         cols = get_group_columns(df, self.fields_group)
-        df[cols] = df[cols].groupby("datetime", group_keys=False).apply(lambda x: x.fillna(x.mean()))
+        df[cols] = (
+            df[cols]
+            .groupby("datetime", group_keys=False)
+            .apply(lambda x: x.fillna(x.mean()))
+        )
         return df
 
 

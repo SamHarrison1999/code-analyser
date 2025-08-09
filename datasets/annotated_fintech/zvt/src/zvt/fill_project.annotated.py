@@ -1,9 +1,11 @@
 # script to auto generate some files
 # 🧠 ML Signal: Importing specific functions from a module indicates usage patterns and dependencies
 from zvt.autocode.generator import gen_kdata_schema, gen_exports
+
 # ✅ Best Practice: Group imports from the same module on a single line for readability
 from zvt.contract import AdjustType
 from zvt.contract import IntervalLevel
+
 # 🧠 ML Signal: Importing specific classes from a module indicates usage patterns and dependencies
 
 
@@ -19,7 +21,9 @@ def gen_kdata_schemas():
         entity_type="stock",
         levels=[
             # 🧠 ML Signal: Repeated pattern of calling gen_kdata_schema with different parameters
-            level for level in IntervalLevel if level not in (IntervalLevel.LEVEL_L2_QUOTE, IntervalLevel.LEVEL_TICK)
+            level
+            for level in IntervalLevel
+            if level not in (IntervalLevel.LEVEL_L2_QUOTE, IntervalLevel.LEVEL_TICK)
         ],
         adjust_types=[None, AdjustType.hfq],
         entity_in_submodule=True,
@@ -66,7 +70,11 @@ def gen_kdata_schemas():
         pkg="zvt",
         providers=["em"],
         entity_type="block",
-        levels=[IntervalLevel.LEVEL_1DAY, IntervalLevel.LEVEL_1WEEK, IntervalLevel.LEVEL_1MON],
+        levels=[
+            IntervalLevel.LEVEL_1DAY,
+            IntervalLevel.LEVEL_1WEEK,
+            IntervalLevel.LEVEL_1MON,
+        ],
         entity_in_submodule=True,
     )
 
@@ -83,12 +91,20 @@ def gen_kdata_schemas():
 
     # etf行情
     gen_kdata_schema(
-        pkg="zvt", providers=["sina"], entity_type="etf", levels=[IntervalLevel.LEVEL_1DAY], entity_in_submodule=True
+        pkg="zvt",
+        providers=["sina"],
+        entity_type="etf",
+        levels=[IntervalLevel.LEVEL_1DAY],
+        entity_in_submodule=True,
     )
 
     # currency行情
     gen_kdata_schema(
-        pkg="zvt", providers=["em"], entity_type="currency", levels=[IntervalLevel.LEVEL_1DAY], entity_in_submodule=True
+        pkg="zvt",
+        providers=["em"],
+        entity_type="currency",
+        levels=[IntervalLevel.LEVEL_1DAY],
+        entity_in_submodule=True,
     )
 
 

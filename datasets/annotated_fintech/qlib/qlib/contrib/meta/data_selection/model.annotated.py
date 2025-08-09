@@ -6,30 +6,38 @@ import numpy as np
 import torch
 from torch import nn
 from torch import optim
+
 # ⚠️ SAST Risk (Low): Relative imports can lead to issues if the module structure changes
 from tqdm.auto import tqdm
 import copy
+
 # ⚠️ SAST Risk (Low): Relative imports can lead to issues if the module structure changes
 from typing import Union, List
 
 # ⚠️ SAST Risk (Low): Relative imports can lead to issues if the module structure changes
 from ....model.meta.dataset import MetaTaskDataset
 from ....model.meta.model import MetaTaskModel
+
 # ⚠️ SAST Risk (Low): Relative imports can lead to issues if the module structure changes
 from ....workflow import R
 from .utils import ICLoss
+
 # ⚠️ SAST Risk (Low): Relative imports can lead to issues if the module structure changes
 from .dataset import MetaDatasetDS
 
 # ⚠️ SAST Risk (Low): Importing from qlib.log can expose sensitive logging information
 # ✅ Best Practice: Class definition should include a docstring to describe its purpose and usage
 from qlib.log import get_module_logger
+
 # 🧠 ML Signal: Use of class constructor to initialize instance variables
 from qlib.model.meta.task import MetaTask
+
 # ⚠️ SAST Risk (Low): Relative imports can lead to issues if the module structure changes
 from qlib.data.dataset.weight import Reweighter
+
 # ✅ Best Practice: Storing input parameter as an instance variable
 from qlib.contrib.meta.data_selection.net import PredNet
+
 # ✅ Best Practice: Initialize w_s with a default weight of 1.0 for all indices
 # ⚠️ SAST Risk (Low): Importing from qlib.data.dataset.weight can expose sensitive data handling logic
 
@@ -121,7 +129,9 @@ class MetaModelDS(MetaTaskModel):
                 try:
                     loss = criterion(pred, meta_input["y_test"], meta_input["test_idx"])
                 except ValueError as e:
-                    get_module_logger("MetaModelDS").warning(f"Exception `{e}` when calculating IC loss")
+                    get_module_logger("MetaModelDS").warning(
+                        f"Exception `{e}` when calculating IC loss"
+                    )
                     continue
             else:
                 raise ValueError(f"Unknown criterion: {self.criterion}")
@@ -140,8 +150,13 @@ class MetaModelDS(MetaTaskModel):
                 pd.DataFrame(
                     {
                         # 🧠 ML Signal: Logging metrics is a common practice in ML for monitoring training progress
-                        "pred": pd.Series(pred.detach().cpu().numpy(), index=meta_input["test_idx"]),
-                        "label": pd.Series(meta_input["y_test"].detach().cpu().numpy(), index=meta_input["test_idx"]),
+                        "pred": pd.Series(
+                            pred.detach().cpu().numpy(), index=meta_input["test_idx"]
+                        ),
+                        "label": pd.Series(
+                            meta_input["y_test"].detach().cpu().numpy(),
+                            index=meta_input["test_idx"],
+                        ),
                     }
                 )
             )
@@ -154,8 +169,7 @@ class MetaModelDS(MetaTaskModel):
         ic = (
             pred_y_all.groupby("datetime", group_keys=False)
             # 🧠 ML Signal: Preparing tasks for different phases of training
-            .apply(lambda df: df["pred"].corr(df["label"], method="spearman"))
-            .mean()
+            .apply(lambda df: df["pred"].corr(df["label"], method="spearman")).mean()
         )
 
         # 🧠 ML Signal: Initializing a predictive network with specific parameters
@@ -176,7 +190,17 @@ class MetaModelDS(MetaTaskModel):
 
         if not self.fitted:
             # 🧠 ML Signal: Running initial training epochs without weights
-            for k in set(["lr", "step", "hist_step_n", "clip_method", "clip_weight", "criterion", "max_epoch"]):
+            for k in set(
+                [
+                    "lr",
+                    "step",
+                    "hist_step_n",
+                    "clip_method",
+                    "clip_weight",
+                    "criterion",
+                    "max_epoch",
+                ]
+            ):
                 R.log_params(**{k: getattr(self, k)})
         # 🧠 ML Signal: Running initial training epochs with weights
 
@@ -191,9 +215,13 @@ class MetaModelDS(MetaTaskModel):
             # 🧠 ML Signal: Running training epochs and collecting loss
             # 🧠 ML Signal: Conversion of tensor to numpy array for further processing
             R.log_params(
-                **dict(proxy_test_begin=meta_tasks_l[1][0].task["dataset"]["kwargs"]["segments"]["test"])
-            # ✅ Best Practice: Use of copy to avoid mutating the original task object
-            # 🧠 ML Signal: Saving model state after each epoch
+                **dict(
+                    proxy_test_begin=meta_tasks_l[1][0].task["dataset"]["kwargs"][
+                        "segments"
+                    ]["test"]
+                )
+                # ✅ Best Practice: Use of copy to avoid mutating the original task object
+                # 🧠 ML Signal: Saving model state after each epoch
             )  # debug: record when the test phase starts
         # ✅ Best Practice: Initialize an empty list to store results
 
@@ -214,7 +242,9 @@ class MetaModelDS(MetaTaskModel):
 
         # run weight with no weight
         for phase, task_list in zip(phases, meta_tasks_l):
-            self.run_epoch(f"{phase}_noweight", task_list, 0, opt, {}, ignore_weight=True)
+            self.run_epoch(
+                f"{phase}_noweight", task_list, 0, opt, {}, ignore_weight=True
+            )
             self.run_epoch(f"{phase}_init", task_list, 0, opt, {})
 
         # run training
@@ -229,7 +259,9 @@ class MetaModelDS(MetaTaskModel):
         meta_ipt = task.get_meta_input()
         weights = self.tn.twm(meta_ipt["time_perf"])
 
-        weight_s = pd.Series(weights.detach().cpu().numpy(), index=task.meta_info.columns)
+        weight_s = pd.Series(
+            weights.detach().cpu().numpy(), index=task.meta_info.columns
+        )
         task = copy.copy(task.task)  # NOTE: this is a shallow copy.
         task["reweighter"] = TimeReweighter(weight_s)
         return task

@@ -5,12 +5,15 @@
 from __future__ import division
 from __future__ import print_function
 from collections import defaultdict
+
 # ✅ Best Practice: Use of type hints improves code readability and maintainability.
 
 import os
+
 # 🧠 ML Signal: Use of sklearn metrics indicates model evaluation, useful for ML model training.
 import gc
 import numpy as np
+
 # 🧠 ML Signal: Use of PyTorch indicates deep learning model training, useful for ML model training.
 import pandas as pd
 from typing import Callable, Optional, Text, Union
@@ -75,7 +78,9 @@ class DNNModelPytorch(Model):
         weight_decay=0.0,
         data_parall=False,
         # ✅ Best Practice: Using a logger for information and debugging
-        scheduler: Optional[Union[Callable]] = "default",  # when it is Callable, it accept one argument named optimizer
+        scheduler: Optional[
+            Union[Callable]
+        ] = "default",  # when it is Callable, it accept one argument named optimizer
         init_model=None,
         eval_train_metric=False,
         pt_model_uri="qlib.contrib.model.pytorch_nn.Net",
@@ -86,7 +91,7 @@ class DNNModelPytorch(Model):
         # ✅ Best Practice: Converting optimizer to lowercase for consistency
         valid_key=DataHandlerLP.DK_L,
         # TODO: Infer Key is a more reasonable key. But it requires more detailed processing on label processing
-    # ⚠️ SAST Risk (Low): Potentially unsafe handling of GPU device strings
+        # ⚠️ SAST Risk (Low): Potentially unsafe handling of GPU device strings
     ):
         # Set logger.
         self.logger = get_module_logger("DNNModelPytorch")
@@ -104,7 +109,9 @@ class DNNModelPytorch(Model):
         if isinstance(GPU, str):
             self.device = torch.device(GPU)
         else:
-            self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+            self.device = torch.device(
+                "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+            )
         self.seed = seed
         self.weight_decay = weight_decay
         self.data_parall = data_parall
@@ -133,7 +140,7 @@ class DNNModelPytorch(Model):
             f"\nenable data parall : {self.data_parall}"
             f"\npt_model_uri: {pt_model_uri}"
             f"\npt_model_kwargs: {pt_model_kwargs}"
-        # 🧠 ML Signal: Dynamic model initialization based on configuration
+            # 🧠 ML Signal: Dynamic model initialization based on configuration
         )
 
         # 🧠 ML Signal: Use of DataParallel for model parallelism
@@ -148,7 +155,9 @@ class DNNModelPytorch(Model):
         self._scorer = mean_squared_error if loss == "mse" else roc_auc_score
 
         if init_model is None:
-            self.dnn_model = init_instance_by_config({"class": pt_model_uri, "kwargs": pt_model_kwargs})
+            self.dnn_model = init_instance_by_config(
+                {"class": pt_model_uri, "kwargs": pt_model_kwargs}
+            )
 
             if self.data_parall:
                 self.dnn_model = DataParallel(self.dnn_model).to(self.device)
@@ -156,16 +165,24 @@ class DNNModelPytorch(Model):
             self.dnn_model = init_model
 
         self.logger.info("model:\n{:}".format(self.dnn_model))
-        self.logger.info("model size: {:.4f} MB".format(count_parameters(self.dnn_model)))
+        self.logger.info(
+            "model size: {:.4f} MB".format(count_parameters(self.dnn_model))
+        )
         # ⚠️ SAST Risk (Low): Raises exception for unsupported optimizers
         # ⚠️ SAST Risk (Low): Version-dependent behavior for scheduler
 
         if optimizer.lower() == "adam":
-            self.train_optimizer = optim.Adam(self.dnn_model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+            self.train_optimizer = optim.Adam(
+                self.dnn_model.parameters(), lr=self.lr, weight_decay=self.weight_decay
+            )
         elif optimizer.lower() == "gd":
-            self.train_optimizer = optim.SGD(self.dnn_model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+            self.train_optimizer = optim.SGD(
+                self.dnn_model.parameters(), lr=self.lr, weight_decay=self.weight_decay
+            )
         else:
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
 
         if scheduler == "default":
             # In torch version 2.7.0, the verbose parameter has been removed. Reference Link:
@@ -230,12 +247,18 @@ class DNNModelPytorch(Model):
             if seg in dataset.segments:
                 # df_train df_valid
                 df = dataset.prepare(
-                    seg, col_set=["feature", "label"], data_key=self.valid_key if seg == "valid" else DataHandlerLP.DK_L
+                    seg,
+                    col_set=["feature", "label"],
+                    data_key=self.valid_key if seg == "valid" else DataHandlerLP.DK_L,
                 )
                 all_df["x"][seg] = df["feature"]
-                all_df["y"][seg] = df["label"].copy()  # We have to use copy to remove the reference to release mem
+                all_df["y"][seg] = df[
+                    "label"
+                ].copy()  # We have to use copy to remove the reference to release mem
                 if reweighter is None:
-                    all_df["w"][seg] = pd.DataFrame(np.ones_like(all_df["y"][seg].values), index=df.index)
+                    all_df["w"][seg] = pd.DataFrame(
+                        np.ones_like(all_df["y"][seg].values), index=df.index
+                    )
                 elif isinstance(reweighter, Reweighter):
                     all_df["w"][seg] = pd.DataFrame(reweighter.reweight(df))
                 else:
@@ -245,7 +268,9 @@ class DNNModelPytorch(Model):
                 for v in vars:
                     all_t[v][seg] = torch.from_numpy(all_df[v][seg].values).float()
                     # if seg == "valid": # accelerate the eval of validation
-                    all_t[v][seg] = all_t[v][seg].to(self.device)  # This will consume a lot of memory !!!!
+                    all_t[v][seg] = all_t[v][seg].to(
+                        self.device
+                    )  # This will consume a lot of memory !!!!
 
                 evals_result[seg] = []
                 # free memory
@@ -298,11 +323,18 @@ class DNNModelPytorch(Model):
 
                         # forward
                         preds = self._nn_predict(all_t["x"]["valid"], return_cpu=False)
-                        cur_loss_val = self.get_loss(preds, all_t["w"]["valid"], all_t["y"]["valid"], self.loss_type)
+                        cur_loss_val = self.get_loss(
+                            preds,
+                            all_t["w"]["valid"],
+                            all_t["y"]["valid"],
+                            self.loss_type,
+                        )
                         loss_val = cur_loss_val.item()
                         metric_val = (
                             self.get_metric(
-                                preds.reshape(-1), all_t["y"]["valid"].reshape(-1), all_df["y"]["valid"].index
+                                preds.reshape(-1),
+                                all_t["y"]["valid"].reshape(-1),
+                                all_df["y"]["valid"].index,
                             )
                             .detach()
                             .cpu()
@@ -320,7 +352,9 @@ class DNNModelPytorch(Model):
                             metric_train = (
                                 # 🧠 ML Signal: Use of mean squared error (MSE) loss, common in regression tasks
                                 self.get_metric(
-                                    self._nn_predict(all_t["x"]["train"], return_cpu=False),
+                                    self._nn_predict(
+                                        all_t["x"]["train"], return_cpu=False
+                                    ),
                                     # 🧠 ML Signal: Weighted loss calculation, indicates handling of imbalanced data
                                     all_t["y"]["train"].reshape(-1),
                                     all_df["y"]["train"].index,
@@ -332,7 +366,7 @@ class DNNModelPytorch(Model):
                                 # ⚠️ SAST Risk (Low): Potential misuse if 'w' is not properly validated as a weight tensor
                                 .numpy()
                                 .item()
-                            # 🧠 ML Signal: The function is likely used for evaluating model performance
+                                # 🧠 ML Signal: The function is likely used for evaluating model performance
                             )
                             # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported loss types, could expose internal logic
                             # ⚠️ SAST Risk (Low): Ensure ICLoss is properly defined and does not introduce security risks
@@ -355,7 +389,7 @@ class DNNModelPytorch(Model):
                                 "\tvalid loss update from {:.6f} to {:.6f}, save checkpoint.".format(
                                     best_loss, loss_val
                                 )
-                            # 🧠 ML Signal: Sets the model to evaluation mode, a common practice in ML for inference
+                                # 🧠 ML Signal: Sets the model to evaluation mode, a common practice in ML for inference
                             )
                         best_loss = loss_val
                         # 🧠 ML Signal: Disables gradient calculation, optimizing inference performance
@@ -369,7 +403,9 @@ class DNNModelPytorch(Model):
                     # 🧠 ML Signal: Performs model prediction and detaches the result from the computation graph
                     # ✅ Best Practice: Check if the model is fitted before making predictions
                     if self.scheduler is not None:
-                        auto_filter_kwargs(self.scheduler.step, warning=False)(metrics=cur_loss_val, epoch=step)
+                        auto_filter_kwargs(self.scheduler.step, warning=False)(
+                            metrics=cur_loss_val, epoch=step
+                        )
                     R.log_metrics(lr=self.get_lr(), step=step)
                 # 🧠 ML Signal: Converts predictions to numpy array, often used for further analysis or storage
                 # 🧠 ML Signal: Usage of dataset preparation method for prediction
@@ -387,7 +423,9 @@ class DNNModelPytorch(Model):
             # restore the optimal parameters after training
             # ⚠️ SAST Risk (Low): Ensure that the filename and model_dir are validated to prevent path traversal vulnerabilities.
             # ✅ Best Practice: Using a context manager to ensure resources are properly managed and released.
-            self.dnn_model.load_state_dict(torch.load(save_path, map_location=self.device))
+            self.dnn_model.load_state_dict(
+                torch.load(save_path, map_location=self.device)
+            )
         # 🧠 ML Signal: Saving model state_dict indicates a pattern of model persistence.
         # ✅ Best Practice: Using list comprehension for filtering files, which is more readable and concise.
         if self.use_gpu:
@@ -416,6 +454,7 @@ class DNNModelPytorch(Model):
         # ✅ Best Practice: Consider adding type hints for function parameters and return type
         else:
             raise NotImplementedError("loss {} is not supported!".format(loss_type))
+
     # ✅ Best Practice: Ensure 'self.sum' is initialized before use
 
     def get_metric(self, pred, target, index):
@@ -423,6 +462,7 @@ class DNNModelPytorch(Model):
         # 🧠 ML Signal: Definition of a neural network class, common in ML model training
         # NOTE: the order of the index must follow <datetime, instrument> sorted order
         return -ICLoss()(pred, target, index)  # pylint: disable=E1130
+
     # ✅ Best Practice: Call to super() ensures proper initialization of the parent class
     # ✅ Best Practice: Ensure 'self.count' is not zero before division to avoid ZeroDivisionError
 
@@ -455,6 +495,7 @@ class DNNModelPytorch(Model):
             # 🧠 ML Signal: Use of batch normalization for training stability
             preds = torch.cat(preds, axis=0)
         return preds
+
     # 🧠 ML Signal: Use of sequential container to organize layers
     # 🧠 ML Signal: Custom weight initialization for neural network layers
 
@@ -465,12 +506,15 @@ class DNNModelPytorch(Model):
             raise ValueError("model is not fitted yet!")
         # 🧠 ML Signal: Use of Kaiming normal initialization for linear layers
         # 🧠 ML Signal: Iterating over layers in a neural network model
-        x_test_pd = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        x_test_pd = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
         # ✅ Best Practice: Use of specific initialization method for better training convergence
         preds = self._nn_predict(x_test_pd)
         # 🧠 ML Signal: Use of fully connected layers in a neural network
         # 🧠 ML Signal: Enumerating over layers for processing input through a neural network
         return pd.Series(preds.reshape(-1), index=x_test_pd.index)
+
     # 🧠 ML Signal: Use of ModuleList to store layers
     # ✅ Best Practice: Explicit weight initialization function call
     # 🧠 ML Signal: Passing data through a layer in a neural network
@@ -485,12 +529,16 @@ class DNNModelPytorch(Model):
     def load(self, buffer, **kwargs):
         with unpack_archive_with_buffer(buffer) as model_dir:
             # Get model name
-            _model_name = os.path.splitext(list(filter(lambda x: x.startswith("model.bin"), os.listdir(model_dir)))[0])[
-                0
-            ]
+            _model_name = os.path.splitext(
+                list(
+                    filter(lambda x: x.startswith("model.bin"), os.listdir(model_dir))
+                )[0]
+            )[0]
             _model_path = os.path.join(model_dir, _model_name)
             # Load model
-            self.dnn_model.load_state_dict(torch.load(_model_path, map_location=self.device))
+            self.dnn_model.load_state_dict(
+                torch.load(_model_path, map_location=self.device)
+            )
         self.fitted = True
 
 
@@ -529,7 +577,7 @@ class Net(nn.Module):
             elif act == "SiLU":
                 activation = nn.SiLU()
             else:
-                raise NotImplementedError(f"This type of input is not supported")
+                raise NotImplementedError("This type of input is not supported")
             bn = nn.BatchNorm1d(hidden_units)
             seq = nn.Sequential(fc, bn, activation)
             dnn_layers.append(seq)
@@ -544,7 +592,9 @@ class Net(nn.Module):
     def _weight_init(self):
         for m in self.modules():
             if isinstance(m, nn.Linear):
-                nn.init.kaiming_normal_(m.weight, a=0.1, mode="fan_in", nonlinearity="leaky_relu")
+                nn.init.kaiming_normal_(
+                    m.weight, a=0.1, mode="fan_in", nonlinearity="leaky_relu"
+                )
 
     def forward(self, x):
         cur_output = x

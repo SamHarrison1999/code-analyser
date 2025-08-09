@@ -4,8 +4,10 @@
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Naming convention for classes should typically be CamelCase.
 from zvt.domain.quotes import StockKdataCommon
+
 # ✅ Best Practice: Define __tablename__ for ORM to specify the database table name
 
 KdataBase = declarative_base()
@@ -14,12 +16,16 @@ KdataBase = declarative_base()
 # 🧠 ML Signal: Usage of register_schema function indicates schema registration pattern
 # ✅ Best Practice: Use of register_schema function to register the schema with multiple providers
 
+
 class Stock5mKdata(KdataBase, StockKdataCommon):
     __tablename__ = "stock_5m_kdata"
 
 
 register_schema(
-    providers=["em", "qmt", "joinquant"], db_name="stock_5m_kdata", schema_base=KdataBase, entity_type="stock"
+    providers=["em", "qmt", "joinquant"],
+    db_name="stock_5m_kdata",
+    schema_base=KdataBase,
+    entity_type="stock",
 )
 
 

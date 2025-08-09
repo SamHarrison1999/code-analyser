@@ -6,17 +6,22 @@ import pandas as pd
 
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimestampsDataRecorder
+
 # 🧠 ML Signal: Inheritance from TimestampsDataRecorder indicates a pattern of extending functionality
 from zvt.domain import Index, IndexStock
+
 # 🧠 ML Signal: Use of class attributes for configuration suggests a pattern for setting static properties
 from zvt.recorders.exchange.api import cs_index_stock_api, cn_index_stock_api
+
 # ✅ Best Practice: Class name should be descriptive of its purpose and functionality
 from zvt.utils.time_utils import pre_month_start_date
 from zvt.utils.time_utils import to_pd_timestamp
+
 # 🧠 ML Signal: Static configuration of entity_provider indicates a pattern for data source specification
 
 # 🧠 ML Signal: Static configuration of entity_schema indicates a pattern for defining data structure
 # 🧠 ML Signal: Static configuration of provider indicates a pattern for specifying data provider
+
 
 class ExchangeIndexStockRecorder(TimestampsDataRecorder):
     entity_provider = "exchange"
@@ -63,7 +68,7 @@ class ExchangeIndexStockRecorder(TimestampsDataRecorder):
             fix_duplicate_way,
             start_timestamp,
             end_timestamp,
-        # 🧠 ML Signal: List comprehension usage can indicate coding style and efficiency preferences
+            # 🧠 ML Signal: List comprehension usage can indicate coding style and efficiency preferences
         )
         # 🧠 ML Signal: Conditional logic based on entity attributes
         self.record_history = record_history
@@ -75,10 +80,16 @@ class ExchangeIndexStockRecorder(TimestampsDataRecorder):
         if self.record_history:
             # 🧠 ML Signal: Data persistence pattern
             # 每个月记录一次
-            return [to_pd_timestamp(item) for item in pd.date_range(entity_item.list_date, last_valid_date, freq="M")]
+            return [
+                to_pd_timestamp(item)
+                for item in pd.date_range(
+                    entity_item.list_date, last_valid_date, freq="M"
+                )
+            ]
         else:
             # 🧠 ML Signal: API call pattern with static parameters
             return [last_valid_date]
+
     # 🧠 ML Signal: Data persistence pattern
     # ⚠️ SAST Risk (Low): Direct execution of code without input validation
     # 🧠 ML Signal: Hardcoded parameters in function call
@@ -87,12 +98,26 @@ class ExchangeIndexStockRecorder(TimestampsDataRecorder):
     def record(self, entity, start, end, size, timestamps):
         if entity.publisher == "cnindex":
             for timestamp in timestamps:
-                df = cn_index_stock_api.get_cn_index_stock(code=entity.code, timestamp=timestamp, name=entity.name)
-                df_to_db(data_schema=self.data_schema, df=df, provider=self.provider, force_update=True)
+                df = cn_index_stock_api.get_cn_index_stock(
+                    code=entity.code, timestamp=timestamp, name=entity.name
+                )
+                df_to_db(
+                    data_schema=self.data_schema,
+                    df=df,
+                    provider=self.provider,
+                    force_update=True,
+                )
         elif entity.publisher == "csindex":
             # cs index not support history data
-            df = cs_index_stock_api.get_cs_index_stock(code=entity.code, timestamp=None, name=entity.name)
-            df_to_db(data_schema=self.data_schema, df=df, provider=self.provider, force_update=True)
+            df = cs_index_stock_api.get_cs_index_stock(
+                code=entity.code, timestamp=None, name=entity.name
+            )
+            df_to_db(
+                data_schema=self.data_schema,
+                df=df,
+                provider=self.provider,
+                force_update=True,
+            )
 
 
 if __name__ == "__main__":

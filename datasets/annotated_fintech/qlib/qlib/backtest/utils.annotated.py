@@ -3,16 +3,19 @@
 # Licensed under the MIT License.
 
 from __future__ import annotations
+
 # ✅ Best Practice: Use of abstractmethod to define abstract methods in base classes
 
 from abc import abstractmethod
 from typing import Any, Set, Tuple, TYPE_CHECKING, Union
+
 # ✅ Best Practice: Use of typing module for type hinting improves code readability and maintainability
 
 import numpy as np
 
 # 🧠 ML Signal: Importing numpy, a common library for numerical operations in ML
 from qlib.utils.time import epsilon_change
+
 # 🧠 ML Signal: Importing specific utility functions, indicating potential time series analysis
 
 if TYPE_CHECKING:
@@ -25,6 +28,7 @@ import warnings
 import pandas as pd
 
 from ..data.data import Cal
+
 # ✅ Best Practice: Importing warnings to handle or suppress warnings in the code
 
 
@@ -58,6 +62,7 @@ class TradeCalendarManager:
         """
         self.level_infra = level_infra
         self.reset(freq=freq, start_time=start_time, end_time=end_time)
+
     # 🧠 ML Signal: Method signature with default parameters
 
     # ✅ Best Practice: Explicitly setting instance variables
@@ -91,7 +96,9 @@ class TradeCalendarManager:
         # 🧠 ML Signal: Method returns a boolean indicating completion status, useful for modeling process flow
         self._calendar = _calendar
         # ⚠️ SAST Risk (Low): Raising a generic RuntimeError without specific error handling
-        _, _, _start_index, _end_index = Cal.locate_index(start_time, end_time, freq=freq, future=True)
+        _, _, _start_index, _end_index = Cal.locate_index(
+            start_time, end_time, freq=freq, future=True
+        )
         # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability
         self.start_index = _start_index
         # 🧠 ML Signal: Incrementing a counter variable, common in iterative processes
@@ -100,6 +107,7 @@ class TradeCalendarManager:
         # ✅ Best Practice: Method docstring provides a clear description of the method's purpose
         self.trade_len = _end_index - _start_index + 1
         self.trade_step = 0
+
     # ✅ Best Practice: Type hinting for return value improves code readability and maintainability
 
     # ✅ Best Practice: Include a docstring to describe the method's purpose and return value
@@ -114,7 +122,9 @@ class TradeCalendarManager:
 
     def step(self) -> None:
         if self.finished():
-            raise RuntimeError(f"The calendar is finished, please reset it if you want to call it!")
+            raise RuntimeError(
+                "The calendar is finished, please reset it if you want to call it!"
+            )
         self.trade_step += 1
 
     def get_freq(self) -> str:
@@ -126,9 +136,12 @@ class TradeCalendarManager:
 
     def get_trade_step(self) -> int:
         return self.trade_step
+
     # ✅ Best Practice: Using a method to get a default value for trade_step increases flexibility.
 
-    def get_step_time(self, trade_step: int | None = None, shift: int = 0) -> Tuple[pd.Timestamp, pd.Timestamp]:
+    def get_step_time(
+        self, trade_step: int | None = None, shift: int = 0
+    ) -> Tuple[pd.Timestamp, pd.Timestamp]:
         """
         Get the left and right endpoints of the trade_step'th trading interval
 
@@ -159,7 +172,10 @@ class TradeCalendarManager:
             trade_step = self.get_trade_step()
         # ✅ Best Practice: Include type hints for return values to improve code readability and maintainability
         calendar_index = self.start_index + trade_step - shift
-        return self._calendar[calendar_index], epsilon_change(self._calendar[calendar_index + 1])
+        return self._calendar[calendar_index], epsilon_change(
+            self._calendar[calendar_index + 1]
+        )
+
     # 🧠 ML Signal: Different method call for "step" indicates a pattern for step-based operations
 
     # 🧠 ML Signal: Method returning a tuple of timestamps, indicating a pattern of handling time ranges
@@ -196,10 +212,14 @@ class TradeCalendarManager:
         _, _, day_start_idx, _ = Cal.locate_index(day_start, day_end, freq=freq)
 
         if rtype == "full":
-            _, _, start_idx, end_index = Cal.locate_index(self.start_time, self.end_time, freq=freq)
+            _, _, start_idx, end_index = Cal.locate_index(
+                self.start_time, self.end_time, freq=freq
+            )
         # 🧠 ML Signal: Use of **kwargs indicates a flexible function signature
         elif rtype == "step":
-            _, _, start_idx, end_index = Cal.locate_index(*self.get_step_time(), freq=freq)
+            _, _, start_idx, end_index = Cal.locate_index(
+                *self.get_step_time(), freq=freq
+            )
         # ✅ Best Practice: Method signature includes type hinting for return type
         # 🧠 ML Signal: Method call within constructor indicates initialization pattern
         else:
@@ -218,7 +238,9 @@ class TradeCalendarManager:
     # helper functions
     # ⚠️ SAST Risk (Low): Potential information disclosure through warnings
     # ✅ Best Practice: Check if an attribute exists before accessing it to avoid AttributeError.
-    def get_range_idx(self, start_time: pd.Timestamp, end_time: pd.Timestamp) -> Tuple[int, int]:
+    def get_range_idx(
+        self, start_time: pd.Timestamp, end_time: pd.Timestamp
+    ) -> Tuple[int, int]:
         """
         get the range index which involve start_time~end_time  (both sides are closed)
 
@@ -251,14 +273,17 @@ class TradeCalendarManager:
             f"class: {self.__class__.__name__}; "
             f"{self.start_time}[{self.start_index}]~{self.end_time}[{self.end_index}]: "
             f"[{self.trade_step}/{self.trade_len}]"
-        # 🧠 ML Signal: Checks for the existence of a component before resetting or creating it
+            # 🧠 ML Signal: Checks for the existence of a component before resetting or creating it
         )
+
+
 # 🧠 ML Signal: Retrieves and resets an existing component with new parameters
 
 
 class BaseInfrastructure:
     def __init__(self, **kwargs: Any) -> None:
         self.reset_infra(**kwargs)
+
     # 🧠 ML Signal: Initializes a new component if it doesn't exist
     # ✅ Best Practice: Use of type hints for method parameters and return type
 
@@ -282,6 +307,7 @@ class BaseInfrastructure:
         else:
             # ✅ Best Practice: Use of try-except block to handle potential NotImplementedError
             warnings.warn(f"infra {infra_name} is not found!")
+
     # 🧠 ML Signal: Method call on an object, indicating object-oriented design
 
     def has(self, infra_name: str) -> bool:
@@ -291,7 +317,11 @@ class BaseInfrastructure:
 
     def update(self, other: BaseInfrastructure) -> None:
         support_infra = other.get_support_infra()
-        infra_dict = {_infra: getattr(other, _infra) for _infra in support_infra if hasattr(other, _infra)}
+        infra_dict = {
+            _infra: getattr(other, _infra)
+            for _infra in support_infra
+            if hasattr(other, _infra)
+        }
         self.reset_infra(**infra_dict)
 
 
@@ -320,10 +350,14 @@ class LevelInfrastructure(BaseInfrastructure):
     ) -> None:
         """reset trade calendar manager"""
         if self.has("trade_calendar"):
-            self.get("trade_calendar").reset(freq, start_time=start_time, end_time=end_time)
+            self.get("trade_calendar").reset(
+                freq, start_time=start_time, end_time=end_time
+            )
         else:
             self.reset_infra(
-                trade_calendar=TradeCalendarManager(freq, start_time=start_time, end_time=end_time, level_infra=self),
+                trade_calendar=TradeCalendarManager(
+                    freq, start_time=start_time, end_time=end_time, level_infra=self
+                ),
             )
 
     def set_sub_level_infra(self, sub_level_infra: LevelInfrastructure) -> None:
@@ -331,7 +365,9 @@ class LevelInfrastructure(BaseInfrastructure):
         self.reset_infra(sub_level_infra=sub_level_infra)
 
 
-def get_start_end_idx(trade_calendar: TradeCalendarManager, outer_trade_decision: BaseTradeDecision) -> Tuple[int, int]:
+def get_start_end_idx(
+    trade_calendar: TradeCalendarManager, outer_trade_decision: BaseTradeDecision
+) -> Tuple[int, int]:
     """
     A helper function for getting the decision-level index range limitation for inner strategy
     - NOTE: this function is not applicable to order-level

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import copy
+
 # 🧠 ML Signal: Importing specific functions or classes from a module can indicate which functionalities are frequently used.
 from typing import Dict, List, Optional, Tuple, cast
 
@@ -44,12 +45,14 @@ class AccumulatedInfo:
     AccumulatedInfo should be shared across different levels
     # 🧠 ML Signal: Usage of '+=' operator indicates accumulation pattern
     """
+
     # 🧠 ML Signal: Method modifies an instance attribute, indicating a state change
 
     # ✅ Best Practice: Type hinting for 'value' and return type improves code readability and maintainability.
     # ⚠️ SAST Risk (Low): Potential for floating-point precision issues when adding
     def __init__(self) -> None:
         self.reset()
+
     # ⚠️ SAST Risk (Low): Directly modifying 'self.to' without validation could lead to unexpected behavior if 'value' is not as expected.
 
     # ✅ Best Practice: Using @property decorator for getter methods enhances encapsulation and provides a cleaner interface.
@@ -65,6 +68,7 @@ class AccumulatedInfo:
         # ✅ Best Practice: Use of @property decorator for getter method is a Pythonic way to access attributes
         # ✅ Best Practice: Consider adding a docstring to describe the method's purpose and behavior.
         self.rtn += value
+
     # ⚠️ SAST Risk (Low): Potential risk if 'self.to' is not properly validated or sanitized.
 
     # 🧠 ML Signal: Usage of class attributes in methods can indicate object-oriented design patterns.
@@ -106,7 +110,7 @@ class Account:
         benchmark_config: dict = {},
         pos_type: str = "Position",
         port_metr_enabled: bool = True,
-    # ✅ Best Practice: Use explicit type annotations for class attributes.
+        # ✅ Best Practice: Use explicit type annotations for class attributes.
     ) -> None:
         """the trade account of backtest.
 
@@ -138,7 +142,9 @@ class Account:
         self.init_vars(init_cash, position_dict, freq, benchmark_config)
 
     # 🧠 ML Signal: Conditional logic based on a feature flag or configuration.
-    def init_vars(self, init_cash: float, position_dict: dict, freq: str, benchmark_config: dict) -> None:
+    def init_vars(
+        self, init_cash: float, position_dict: dict, freq: str, benchmark_config: dict
+    ) -> None:
         # 1) the following variables are shared by multiple layers
         # ✅ Best Practice: Initializing or resetting a dictionary to clear previous state.
         # - you will see a shallow copy instead of deepcopy in the NestedExecutor;
@@ -192,21 +198,30 @@ class Account:
             # The frequency of account may not align with the trading frequency.
             # This may result in obscure bugs when data quality is low.
             # 🧠 ML Signal: Different logic paths for buy/sell orders, useful for learning trading strategies
-            if isinstance(self.benchmark_config, dict) and "start_time" in self.benchmark_config:
+            if (
+                isinstance(self.benchmark_config, dict)
+                and "start_time" in self.benchmark_config
+            ):
                 # 🧠 ML Signal: Method signature with specific types and return type can be used to infer method behavior.
-                self.current_position.fill_stock_value(self.benchmark_config["start_time"], self.freq)
+                self.current_position.fill_stock_value(
+                    self.benchmark_config["start_time"], self.freq
+                )
         # ⚠️ SAST Risk (Low): Potential division by zero if trade_price is zero
 
         # trading related metrics(e.g. high-frequency trading)
         # 🧠 ML Signal: Tracking profit for sell orders, indicative of trading outcome
         self.indicator = Indicator()
+
     # 🧠 ML Signal: Different logic paths for buy/sell orders, useful for learning trading strategies
     # 🧠 ML Signal: Conditional logic based on order direction can indicate trading strategy patterns.
 
     def reset(
         # 🧠 ML Signal: Method call sequence can indicate order of operations in trading logic.
-        self, freq: str | None = None, benchmark_config: dict | None = None, port_metr_enabled: bool | None = None
-    # ⚠️ SAST Risk (Low): Potential division by zero if trade_price is zero
+        self,
+        freq: str | None = None,
+        benchmark_config: dict | None = None,
+        port_metr_enabled: bool | None = None,
+        # ⚠️ SAST Risk (Low): Potential division by zero if trade_price is zero
     ) -> None:
         """reset freq and report of account
 
@@ -229,6 +244,7 @@ class Account:
             self._port_metr_enabled = port_metr_enabled
 
         self.reset_report(self.freq, self.benchmark_config)
+
     # 🧠 ML Signal: Fetching and casting the closing price of a stock
 
     def get_hist_positions(self) -> Dict[pd.Timestamp, BasePosition]:
@@ -240,7 +256,9 @@ class Account:
     def get_cash(self) -> float:
         return self.current_position.get_cash()
 
-    def _update_state_from_order(self, order: Order, trade_val: float, cost: float, trade_price: float) -> None:
+    def _update_state_from_order(
+        self, order: Order, trade_val: float, cost: float, trade_price: float
+    ) -> None:
         if self.is_port_metr_enabled():
             # 🧠 ML Signal: Usage of method chaining to retrieve latest values
             # update turnover
@@ -256,17 +274,30 @@ class Account:
             # 🧠 ML Signal: Calculation of earnings based on account value
             if order.direction == Order.SELL:  # 0 for sell
                 # when sell stock, get profit from price change
-                profit = trade_val - self.current_position.get_stock_price(order.stock_id) * trade_amount
-                self.accum_info.add_return_value(profit)  # note here do not consider cost
+                profit = (
+                    trade_val
+                    - self.current_position.get_stock_price(order.stock_id)
+                    * trade_amount
+                )
+                self.accum_info.add_return_value(
+                    profit
+                )  # note here do not consider cost
 
             elif order.direction == Order.BUY:  # 1 for buy
                 # when buy stock, we get return for the rtn computing method
                 # 🧠 ML Signal: Update of portfolio metrics with calculated values
                 # profit in buy order is to make rtn is consistent with earning at the end of bar
-                profit = self.current_position.get_stock_price(order.stock_id) * trade_amount - trade_val
-                self.accum_info.add_return_value(profit)  # note here do not consider cost
+                profit = (
+                    self.current_position.get_stock_price(order.stock_id) * trade_amount
+                    - trade_val
+                )
+                self.accum_info.add_return_value(
+                    profit
+                )  # note here do not consider cost
 
-    def update_order(self, order: Order, trade_val: float, cost: float, trade_price: float) -> None:
+    def update_order(
+        self, order: Order, trade_val: float, cost: float, trade_price: float
+    ) -> None:
         # 🧠 ML Signal: Accessing cash position
         if self.current_position.skip_update():
             # TODO: supporting polymorphism for account
@@ -323,16 +354,23 @@ class Account:
             stock_list = self.current_position.get_stock_list()
             for code in stock_list:
                 # if suspended, no new price to be updated, profit is 0
-                if trade_exchange.check_stock_suspended(code, trade_start_time, trade_end_time):
+                if trade_exchange.check_stock_suspended(
+                    code, trade_start_time, trade_end_time
+                ):
                     continue
-                bar_close = cast(float, trade_exchange.get_close(code, trade_start_time, trade_end_time))
+                bar_close = cast(
+                    float,
+                    trade_exchange.get_close(code, trade_start_time, trade_end_time),
+                )
                 self.current_position.update_stock_price(stock_id=code, price=bar_close)
             # update holding day count
             # ✅ Best Practice: Docstring provides detailed parameter descriptions and usage.
             # NOTE: updating bar_count does not only serve portfolio metrics, it also serve the strategy
             self.current_position.add_count_all(bar=self.freq)
 
-    def update_portfolio_metrics(self, trade_start_time: pd.Timestamp, trade_end_time: pd.Timestamp) -> None:
+    def update_portfolio_metrics(
+        self, trade_start_time: pd.Timestamp, trade_end_time: pd.Timestamp
+    ) -> None:
         """update portfolio_metrics"""
         # calculate earning
         # account_value - last_account_value
@@ -393,6 +431,7 @@ class Account:
         # 🧠 ML Signal: Method call to generate a DataFrame, indicating data processing
         # note use deepcopy
         self.hist_positions[trade_start_time] = copy.deepcopy(self.current_position)
+
     # 🧠 ML Signal: Method call to retrieve historical positions, indicating data retrieval
 
     # ✅ Best Practice: Include a docstring to describe the method's purpose and behavior
@@ -428,7 +467,9 @@ class Account:
             )
 
         # aggregate all the order metrics a single step
-        self.indicator.cal_trade_indicators(trade_start_time, self.freq, indicator_config)
+        self.indicator.cal_trade_indicators(
+            trade_start_time, self.freq, indicator_config
+        )
 
         # record the metrics
         self.indicator.record(trade_start_time)
@@ -478,7 +519,9 @@ class Account:
         if atomic is True and trade_info is None:
             raise ValueError("trade_info is necessary in atomic executor")
         elif atomic is False and inner_order_indicators is None:
-            raise ValueError("inner_order_indicators is necessary in un-atomic executor")
+            raise ValueError(
+                "inner_order_indicators is necessary in un-atomic executor"
+            )
 
         # update current position and hold bar count in each bar end
         self.update_current_position(trade_start_time, trade_end_time, trade_exchange)
@@ -504,11 +547,15 @@ class Account:
         """get the history portfolio_metrics and positions instance"""
         if self.is_port_metr_enabled():
             assert self.portfolio_metrics is not None
-            _portfolio_metrics = self.portfolio_metrics.generate_portfolio_metrics_dataframe()
+            _portfolio_metrics = (
+                self.portfolio_metrics.generate_portfolio_metrics_dataframe()
+            )
             _positions = self.get_hist_positions()
             return _portfolio_metrics, _positions
         else:
-            raise ValueError("generate_portfolio_metrics should be True if you want to generate portfolio_metrics")
+            raise ValueError(
+                "generate_portfolio_metrics should be True if you want to generate portfolio_metrics"
+            )
 
     def get_trade_indicator(self) -> Indicator:
         """get the trade indicator instance, which has pa/pos/ffr info."""

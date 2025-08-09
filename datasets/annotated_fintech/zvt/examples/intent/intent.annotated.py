@@ -2,12 +2,14 @@
 # 🧠 ML Signal: Importing specific functions or classes indicates usage patterns and dependencies
 from zvt.api.intent import compare
 from zvt.domain import Indexus1dKdata, Index, Indexus, Index1dKdata, Currency1dKdata
+
 # 🧠 ML Signal: Importing specific classes from a module indicates which data models are being used
 # 🧠 ML Signal: Function definition with a specific name indicating a comparison between China and US stock indices
 from zvt.domain import TreasuryYield
 
 # 🧠 ML Signal: Importing specific classes from a module indicates which data models are being used
 # 🧠 ML Signal: Method call to record data, indicating a pattern of data collection
+
 
 def china_vs_us_stock():
     # 🧠 ML Signal: Method call to record data, indicating a pattern of data collection
@@ -22,7 +24,11 @@ def china_vs_us_stock():
     # 🧠 ML Signal: The use of a fixed start timestamp can indicate a consistent analysis period.
     # ✅ Best Practice: Use of named parameters improves code readability and maintainability.
     Indexus1dKdata.record_data(entity_id="indexus_us_SPX")
-    compare(entity_ids=["index_sh_000001", "indexus_us_SPX"], start_timestamp="2000-01-01", scale_value=100)
+    compare(
+        entity_ids=["index_sh_000001", "indexus_us_SPX"],
+        start_timestamp="2000-01-01",
+        scale_value=100,
+    )
 
 
 def us_yield_and_stock():
@@ -37,8 +43,13 @@ def us_yield_and_stock():
         start_timestamp="1990-01-01",
         scale_value=None,
         # ✅ Best Practice: Use of named parameters improves code readability
-        schema_map_columns={TreasuryYield: ["yield_2", "yield_5"], Indexus1dKdata: ["close"]},
+        schema_map_columns={
+            TreasuryYield: ["yield_2", "yield_5"],
+            Indexus1dKdata: ["close"],
+        },
     )
+
+
 # 🧠 ML Signal: Function definition with a specific name pattern
 
 
@@ -53,9 +64,9 @@ def commodity_and_stock():
         # 🧠 ML Signal: Function definition with a specific purpose, useful for understanding code intent
         start_timestamp="2005-01-01",
         scale_value=100,
-    # 🧠 ML Signal: Function call with multiple parameters, indicating a pattern of usage
-    # 🧠 ML Signal: Use of a list to store multiple entity IDs
-    # ✅ Best Practice: Use of named parameters for clarity
+        # 🧠 ML Signal: Function call with multiple parameters, indicating a pattern of usage
+        # 🧠 ML Signal: Use of a list to store multiple entity IDs
+        # ✅ Best Practice: Use of named parameters for clarity
     )
 
 

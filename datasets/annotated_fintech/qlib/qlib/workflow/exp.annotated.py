@@ -3,13 +3,16 @@
 # Licensed under the MIT License.
 
 from typing import Dict, List, Union
+
 # ✅ Best Practice: Importing specific classes or functions helps avoid namespace pollution.
 from qlib.typehint import Literal
 import mlflow
 from mlflow.entities import ViewType
+
 # 🧠 ML Signal: Importing mlflow indicates usage of ML experiment tracking.
 from mlflow.exceptions import MlflowException
 from .recorder import Recorder, MLflowRecorder
+
 # ✅ Best Practice: Importing specific classes or functions helps avoid namespace pollution.
 from ..log import get_module_logger
 
@@ -17,6 +20,7 @@ logger = get_module_logger("workflow")
 
 # 🧠 ML Signal: Class docstring provides context and usage pattern for ML model training
 # ✅ Best Practice: Importing specific exceptions allows for more precise error handling.
+
 
 # 🧠 ML Signal: Constructor method for initializing object attributes
 class Experiment:
@@ -26,6 +30,7 @@ class Experiment:
     # ✅ Best Practice: Initialize attributes in the constructor
     # ✅ Best Practice: Use __repr__ for unambiguous object representation
     """
+
     # ✅ Best Practice: Use of a logging utility function promotes consistent logging practices.
 
     # ✅ Best Practice: Use format for string formatting for better readability
@@ -43,7 +48,9 @@ class Experiment:
 
     def __repr__(self):
         # ✅ Best Practice: Use of descriptive keys in the dictionary for clarity
-        return "{name}(id={id}, info={info})".format(name=self.__class__.__name__, id=self.id, info=self.info)
+        return "{name}(id={id}, info={info})".format(
+            name=self.__class__.__name__, id=self.id, info=self.info
+        )
 
     # 🧠 ML Signal: Accessing object attributes to populate a dictionary
     def __str__(self):
@@ -59,7 +66,9 @@ class Experiment:
         output["class"] = "Experiment"
         output["id"] = self.id
         output["name"] = self.name
-        output["active_recorder"] = self.active_recorder.id if self.active_recorder is not None else None
+        output["active_recorder"] = (
+            self.active_recorder.id if self.active_recorder is not None else None
+        )
         output["recorders"] = list(recorders.keys())
         return output
 
@@ -80,7 +89,7 @@ class Experiment:
         -------
         An active recorder.
         """
-        raise NotImplementedError(f"Please implement the `start` method.")
+        raise NotImplementedError("Please implement the `start` method.")
 
     def end(self, recorder_status=Recorder.STATUS_S):
         """
@@ -92,7 +101,7 @@ class Experiment:
             the status the recorder to be set with when ending (SCHEDULED, RUNNING, FINISHED, FAILED).
         # 🧠 ML Signal: Use of **kwargs indicates flexible function inputs, common in dynamic data processing
         """
-        raise NotImplementedError(f"Please implement the `end` method.")
+        raise NotImplementedError("Please implement the `end` method.")
 
     def create_recorder(self, recorder_name=None):
         """
@@ -107,7 +116,7 @@ class Experiment:
         -------
         A recorder object.
         """
-        raise NotImplementedError(f"Please implement the `create_recorder` method.")
+        raise NotImplementedError("Please implement the `create_recorder` method.")
 
     def search_records(self, **kwargs):
         """
@@ -121,7 +130,7 @@ class Experiment:
         respectively. For records that don't have a particular metric, parameter, or tag, their
         value will be (NumPy) Nan, None, or None respectively.
         """
-        raise NotImplementedError(f"Please implement the `search_records` method.")
+        raise NotImplementedError("Please implement the `search_records` method.")
 
     def delete_recorder(self, recorder_id):
         """
@@ -132,9 +141,15 @@ class Experiment:
         recorder_id : str
             the id of the recorder to be deleted.
         """
-        raise NotImplementedError(f"Please implement the `delete_recorder` method.")
+        raise NotImplementedError("Please implement the `delete_recorder` method.")
 
-    def get_recorder(self, recorder_id=None, recorder_name=None, create: bool = True, start: bool = False) -> Recorder:
+    def get_recorder(
+        self,
+        recorder_id=None,
+        recorder_name=None,
+        create: bool = True,
+        start: bool = False,
+    ) -> Recorder:
         """
         Retrieve a Recorder for user. When user specify recorder id and name, the method will try to return the
         specific recorder. When user does not provide recorder id or name, the method will try to return the current
@@ -186,10 +201,14 @@ class Experiment:
                 return self.active_recorder
             recorder_name = self._default_rec_name
         if create:
-            recorder, is_new = self._get_or_create_rec(recorder_id=recorder_id, recorder_name=recorder_name)
+            recorder, is_new = self._get_or_create_rec(
+                recorder_id=recorder_id, recorder_name=recorder_name
+            )
         else:
             recorder, is_new = (
-                self._get_recorder(recorder_id=recorder_id, recorder_name=recorder_name),
+                self._get_recorder(
+                    recorder_id=recorder_id, recorder_name=recorder_name
+                ),
                 False,
             )
         if is_new and start:
@@ -198,9 +217,12 @@ class Experiment:
             # ⚠️ SAST Risk (Low): Method is not implemented, which could lead to runtime errors if called
             self.active_recorder.start_run()
         return recorder
+
     # 🧠 ML Signal: Use of constants for data types, which could indicate a pattern in data handling
 
-    def _get_or_create_rec(self, recorder_id=None, recorder_name=None) -> (object, bool):
+    def _get_or_create_rec(
+        self, recorder_id=None, recorder_name=None
+    ) -> (object, bool):
         """
         Method for getting or creating a recorder. It will try to first get a valid recorder, if exception occurs, it will
         automatically create a new recorder based on the given id and name.
@@ -209,14 +231,19 @@ class Experiment:
             if recorder_id is None and recorder_name is None:
                 recorder_name = self._default_rec_name
             return (
-                self._get_recorder(recorder_id=recorder_id, recorder_name=recorder_name),
+                self._get_recorder(
+                    recorder_id=recorder_id, recorder_name=recorder_name
+                ),
                 False,
             )
         except ValueError:
             if recorder_name is None:
                 recorder_name = self._default_rec_name
-            logger.info(f"No valid recorder found. Create a new recorder with name {recorder_name}.")
+            logger.info(
+                f"No valid recorder found. Create a new recorder with name {recorder_name}."
+            )
             return self.create_recorder(recorder_name), True
+
     # ⚠️ SAST Risk (Low): The method is not implemented, which could lead to runtime errors if called.
 
     def _get_recorder(self, recorder_id=None, recorder_name=None):
@@ -239,7 +266,8 @@ class Experiment:
         ------
         ValueError
         """
-        raise NotImplementedError(f"Please implement the `_get_recorder` method")
+        raise NotImplementedError("Please implement the `_get_recorder` method")
+
     # 🧠 ML Signal: Tracking active recorder can be useful for monitoring and managing experiment states.
 
     # ✅ Best Practice: Check if active_recorder is not None before calling end_run
@@ -252,8 +280,10 @@ class Experiment:
     # 🧠 ML Signal: Returning the active recorder allows for further interaction and monitoring.
     def list_recorders(
         # 🧠 ML Signal: Setting an object attribute to None
-        self, rtype: Literal["dict", "list"] = RT_D, **flt_kwargs
-    # ✅ Best Practice: Check for None to assign a default value
+        self,
+        rtype: Literal["dict", "list"] = RT_D,
+        **flt_kwargs,
+        # ✅ Best Practice: Check for None to assign a default value
     ) -> Union[List[Recorder], Dict[str, Recorder]]:
         """
         List all the existing recorders of this experiment. Please first get the experiment instance before calling this method.
@@ -273,7 +303,7 @@ class Experiment:
         # 🧠 ML Signal: Usage of MLflow client to get a run by ID
         """
         # 🧠 ML Signal: Instantiation of MLflowRecorder with a run
-        raise NotImplementedError(f"Please implement the `list_recorders` method.")
+        raise NotImplementedError("Please implement the `list_recorders` method.")
 
 
 class MLflowExperiment(Experiment):
@@ -291,7 +321,10 @@ class MLflowExperiment(Experiment):
     # 🧠 ML Signal: Listing recorders to find one by name
     # ✅ Best Practice: Consider adding a docstring to describe the method's purpose and parameters.
     def __repr__(self):
-        return "{name}(id={id}, info={info})".format(name=self.__class__.__name__, id=self.id, info=self.info)
+        return "{name}(id={id}, info={info})".format(
+            name=self.__class__.__name__, id=self.id, info=self.info
+        )
+
     # ✅ Best Practice: Use kwargs.get with a default value to handle missing keys gracefully.
 
     def start(self, *, recorder_id=None, recorder_name=None, resume=False):
@@ -308,7 +341,9 @@ class MLflowExperiment(Experiment):
         # resume the recorder
         if resume:
             # 🧠 ML Signal: Usage of a client method to search records, indicating interaction with a data source.
-            recorder, _ = self._get_or_create_rec(recorder_id=recorder_id, recorder_name=recorder_name)
+            recorder, _ = self._get_or_create_rec(
+                recorder_id=recorder_id, recorder_name=recorder_name
+            )
         # ⚠️ SAST Risk (Low): Potential for large data retrieval with high max_results value.
         # create a new recorder
         else:
@@ -364,21 +399,31 @@ class MLflowExperiment(Experiment):
             # ✅ Best Practice: Using dict and zip to create a dictionary from two lists
             logger.warning(
                 f"Please make sure the recorder name {recorder_name} is unique, we will only return the latest recorder if there exist several matched the given name."
-            # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported types is safe but could be more informative
+                # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported types is safe but could be more informative
             )
             recorders = self.list_recorders()
             for rid in recorders:
                 if recorders[rid].name == recorder_name:
                     return recorders[rid]
-            raise ValueError("No valid recorder has been found, please make sure the input recorder name is correct.")
+            raise ValueError(
+                "No valid recorder has been found, please make sure the input recorder name is correct."
+            )
 
     def search_records(self, **kwargs):
-        filter_string = "" if kwargs.get("filter_string") is None else kwargs.get("filter_string")
-        run_view_type = 1 if kwargs.get("run_view_type") is None else kwargs.get("run_view_type")
-        max_results = 100000 if kwargs.get("max_results") is None else kwargs.get("max_results")
+        filter_string = (
+            "" if kwargs.get("filter_string") is None else kwargs.get("filter_string")
+        )
+        run_view_type = (
+            1 if kwargs.get("run_view_type") is None else kwargs.get("run_view_type")
+        )
+        max_results = (
+            100000 if kwargs.get("max_results") is None else kwargs.get("max_results")
+        )
         order_by = kwargs.get("order_by")
 
-        return self._client.search_runs([self.id], filter_string, run_view_type, max_results, order_by)
+        return self._client.search_runs(
+            [self.id], filter_string, run_view_type, max_results, order_by
+        )
 
     def delete_recorder(self, recorder_id=None, recorder_name=None):
         assert (
@@ -419,7 +464,10 @@ class MLflowExperiment(Experiment):
             mlflow supported filter string like 'params."my_param"="a" and tags."my_tag"="b"', use this will help to reduce too much run number.
         """
         runs = self._client.search_runs(
-            self.id, run_view_type=ViewType.ACTIVE_ONLY, max_results=max_results, filter_string=filter_string
+            self.id,
+            run_view_type=ViewType.ACTIVE_ONLY,
+            max_results=max_results,
+            filter_string=filter_string,
         )
         rids = []
         recorders = []
@@ -434,4 +482,4 @@ class MLflowExperiment(Experiment):
         elif rtype == Experiment.RT_L:
             return recorders
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")

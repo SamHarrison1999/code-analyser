@@ -1,12 +1,15 @@
 import os
+
 # ✅ Best Practice: Group standard library imports at the top
 
 import numpy as np
 import pandas as pd
+
 # ✅ Best Practice: Group third-party library imports separately
 from qlib.data.dataset.processor import Processor
 from qlib.data.dataset.utils import fetch_df_by_index
 from typing import Dict
+
 # 🧠 ML Signal: Inheritance from a class named Processor, indicating a design pattern or specific architecture
 # ✅ Best Practice: Use of type hints for function parameters improves code readability and maintainability
 # ✅ Best Practice: Group project-specific imports separately
@@ -18,6 +21,7 @@ from typing import Dict
 class HighFreqTrans(Processor):
     def __init__(self, dtype: str = "bool"):
         self.dtype = dtype
+
     # 🧠 ML Signal: Use of __call__ method indicates the object is intended to be callable like a function
 
     # 🧠 ML Signal: Conditional logic based on dtype suggests dynamic behavior based on input data type
@@ -52,10 +56,15 @@ class HighFreqNorm(Processor):
         self.norm_groups = norm_groups
 
     def fit(self, df_features) -> None:
-        if os.path.exists(self.feature_save_dir) and len(os.listdir(self.feature_save_dir)) != 0:
+        if (
+            os.path.exists(self.feature_save_dir)
+            and len(os.listdir(self.feature_save_dir)) != 0
+        ):
             return
         os.makedirs(self.feature_save_dir)
-        fetch_df = fetch_df_by_index(df_features, slice(self.fit_start_time, self.fit_end_time), level="datetime")
+        fetch_df = fetch_df_by_index(
+            df_features, slice(self.fit_start_time, self.fit_end_time), level="datetime"
+        )
         del df_features
         index = 0
         # 🧠 ML Signal: Handling of specific feature types (e.g., volume)
@@ -110,5 +119,7 @@ class HighFreqNorm(Processor):
                 df_values[:, name_val] = np.log1p(df_values[:, name_val])
             df_values[:, name_val] -= feature_mean
             df_values[:, name_val] /= feature_std
-        df_features = pd.DataFrame(data=df_values, index=df_features.index, columns=df_features.columns)
+        df_features = pd.DataFrame(
+            data=df_values, index=df_features.index, columns=df_features.columns
+        )
         return df_features.fillna(0)

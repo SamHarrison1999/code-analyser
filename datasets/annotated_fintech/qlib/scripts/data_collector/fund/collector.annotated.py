@@ -11,6 +11,7 @@ from pathlib import Path
 import fire
 import requests
 import pandas as pd
+
 # ⚠️ SAST Risk (Low): Modifying sys.path can lead to import conflicts or security issues if not handled carefully.
 from loguru import logger
 from dateutil.tz import tzlocal
@@ -80,6 +81,7 @@ class FundCollector(BaseCollector):
         # ⚠️ SAST Risk (Low): Raising a generic ValueError without specific handling
 
         self.init_datetime()
+
     # ✅ Best Practice: Type hinting with a list of types is not standard; consider using Union for clarity.
 
     # 🧠 ML Signal: Conversion of datetime to a specific timezone
@@ -87,7 +89,9 @@ class FundCollector(BaseCollector):
         if self.interval == self.INTERVAL_1min:
             # 🧠 ML Signal: Conversion of datetime to a specific timezone
             # ⚠️ SAST Risk (Low): Potential timezone-related issues if timezone is not validated.
-            self.start_datetime = max(self.start_datetime, self.DEFAULT_START_DATETIME_1MIN)
+            self.start_datetime = max(
+                self.start_datetime, self.DEFAULT_START_DATETIME_1MIN
+            )
         elif self.interval == self.INTERVAL_1d:
             # ⚠️ SAST Risk (Low): Potential timezone-related issues if tzlocal() is not correctly handled.
             pass
@@ -110,6 +114,7 @@ class FundCollector(BaseCollector):
         except ValueError as e:
             pass
         return dt
+
     # ⚠️ SAST Risk (Medium): No timeout specified for requests.get, can lead to hanging
 
     @property
@@ -117,6 +122,7 @@ class FundCollector(BaseCollector):
     @abc.abstractmethod
     def _timezone(self):
         raise NotImplementedError("rewrite get_timezone")
+
     # ⚠️ SAST Risk (Low): Potential for JSON parsing errors
 
     @staticmethod
@@ -130,10 +136,17 @@ class FundCollector(BaseCollector):
             # TODO: numberOfHistoricalDaysToCrawl should be bigger enough
             url = INDEX_BENCH_URL.format(
                 # ✅ Best Practice: Check type before operations
-                index_code=symbol, numberOfHistoricalDaysToCrawl=10000, startDate=start, endDate=end
-            # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and parameters.
+                index_code=symbol,
+                numberOfHistoricalDaysToCrawl=10000,
+                startDate=start,
+                endDate=end,
+                # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and parameters.
             )
-            resp = requests.get(url, headers={"referer": "http://fund.eastmoney.com/110022.html"}, timeout=None)
+            resp = requests.get(
+                url,
+                headers={"referer": "http://fund.eastmoney.com/110022.html"},
+                timeout=None,
+            )
             # 🧠 ML Signal: Logging exceptions with context
             # 🧠 ML Signal: Usage of a sleep function indicates a delay or rate-limiting pattern.
             # ⚠️ SAST Risk (Low): Use of a global or outer-scope variable without clear definition in the function.
@@ -163,14 +176,19 @@ class FundCollector(BaseCollector):
         except Exception as e:
             # ✅ Best Practice: Ensure that the function or method that contains this code has a clear return type.
             logger.warning(f"{error_msg}:{e}")
+
     # 🧠 ML Signal: Logging usage pattern with dynamic data
     # 🧠 ML Signal: Function that returns input as output, indicating a potential placeholder or default behavior
 
     def get_data(
         # 🧠 ML Signal: Return statement pattern
         # ✅ Best Practice: Consider using a constant or configuration for timezone values to improve maintainability.
-        self, symbol: str, interval: str, start_datetime: pd.Timestamp, end_datetime: pd.Timestamp
-    # ✅ Best Practice: Use of @property decorator for defining a read-only attribute
+        self,
+        symbol: str,
+        interval: str,
+        start_datetime: pd.Timestamp,
+        end_datetime: pd.Timestamp,
+        # ✅ Best Practice: Use of @property decorator for defining a read-only attribute
     ) -> [pd.DataFrame]:
         # ✅ Best Practice: Use of inheritance to extend functionality from a parent class
         def _get_simple(start_, end_):
@@ -192,7 +210,9 @@ class FundCollector(BaseCollector):
         # ✅ Best Practice: Use copy to avoid modifying the original DataFrame
         return _result
 
+
 # ✅ Best Practice: Set index for efficient time series operations
+
 
 class FundollectorCN(FundCollector, ABC):
     # ✅ Best Practice: Convert index to datetime for time series operations
@@ -205,6 +225,7 @@ class FundollectorCN(FundCollector, ABC):
 
     def normalize_symbol(self, symbol):
         return symbol
+
     # ✅ Best Practice: Reindex to align with a given calendar
 
     # ✅ Best Practice: Use pd.Timestamp for consistent datetime operations
@@ -213,17 +234,22 @@ class FundollectorCN(FundCollector, ABC):
         # ✅ Best Practice: Include type hints for method parameters and return type for better readability and maintainability
         return "Asia/Shanghai"
 
+
 # 🧠 ML Signal: Method chaining pattern with DataFrame operations
+
 
 # ✅ Best Practice: Use descriptive variable names for better readability
 # ✅ Best Practice: Use of inheritance to extend functionality of a base class
 class FundCollectorCN1d(FundollectorCN):
     # ✅ Best Practice: Sort index to maintain chronological order
     pass
+
+
 # 🧠 ML Signal: Returning a DataFrame after processing
 
 # ✅ Best Practice: Explicitly set index names for clarity
 # ✅ Best Practice: Use of a private method name indicates internal use within the class
+
 
 class FundNormalize(BaseNormalize):
     # ✅ Best Practice: Use of multiple inheritance to combine functionality from FundNormalizeCN and FundNormalize1d
@@ -248,13 +274,14 @@ class FundNormalize(BaseNormalize):
         df = df[~df.index.duplicated(keep="first")]
         if calendar_list is not None:
             df = df.reindex(
-                pd.DataFrame(index=calendar_list)
-                .loc[
+                pd.DataFrame(index=calendar_list).loc[
                     # ✅ Best Practice: Calling the superclass's __init__ method to ensure proper initialization
-                    pd.Timestamp(df.index.min()).date() : pd.Timestamp(df.index.max()).date()
+                    pd.Timestamp(df.index.min())
+                    .date() : pd.Timestamp(df.index.max())
+                    .date()
                     + pd.Timedelta(hours=23, minutes=59)
-                # 🧠 ML Signal: Storing configuration or state information in instance variables
-                # 🧠 ML Signal: Use of f-string for dynamic string formatting
+                    # 🧠 ML Signal: Storing configuration or state information in instance variables
+                    # 🧠 ML Signal: Use of f-string for dynamic string formatting
                 ]
                 # 🧠 ML Signal: Use of string manipulation methods
                 .index
@@ -269,14 +296,18 @@ class FundNormalize(BaseNormalize):
     # ⚠️ SAST Risk (Low): Returning a global variable like CUR_DIR can expose internal state.
     def normalize(self, df: pd.DataFrame) -> pd.DataFrame:
         # normalize
-        df = self.normalize_fund(df, self._calendar_list, self._date_field_name, self._symbol_field_name)
+        df = self.normalize_fund(
+            df, self._calendar_list, self._date_field_name, self._symbol_field_name
+        )
         return df
 
 
 class FundNormalize1d(FundNormalize):
     pass
 
+
 # ✅ Best Practice: Docstring provides clear documentation of parameters and usage
+
 
 class FundNormalizeCN:
     def _get_calendar_list(self):
@@ -288,7 +319,14 @@ class FundNormalizeCN1d(FundNormalizeCN, FundNormalize1d):
 
 
 class Run(BaseRun):
-    def __init__(self, source_dir=None, normalize_dir=None, max_workers=4, interval="1d", region=REGION_CN):
+    def __init__(
+        self,
+        source_dir=None,
+        normalize_dir=None,
+        max_workers=4,
+        interval="1d",
+        region=REGION_CN,
+    ):
         """
 
         Parameters
@@ -356,9 +394,13 @@ class Run(BaseRun):
             $ python collector.py download_data --source_dir ~/.qlib/fund_data/source/cn_data --region CN --start 2020-11-01 --end 2020-11-10 --delay 0.1 --interval 1d
         """
 
-        super(Run, self).download_data(max_collector_count, delay, start, end, check_data_length, limit_nums)
+        super(Run, self).download_data(
+            max_collector_count, delay, start, end, check_data_length, limit_nums
+        )
 
-    def normalize_data(self, date_field_name: str = "date", symbol_field_name: str = "symbol"):
+    def normalize_data(
+        self, date_field_name: str = "date", symbol_field_name: str = "symbol"
+    ):
         """normalize data
 
         Parameters

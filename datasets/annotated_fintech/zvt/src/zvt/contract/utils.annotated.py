@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 import math
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 
 import pandas as pd
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 # 🧠 ML Signal: Function definition with specific parameter types indicates usage patterns
 
 from zvt.contract import IntervalLevel
+
 # 🧠 ML Signal: Conversion function usage indicates data normalization pattern
 from zvt.utils.time_utils import to_pd_timestamp
 
 # 🧠 ML Signal: Conversion function usage indicates data normalization pattern
+
 
 def is_in_same_interval(t1: pd.Timestamp, t2: pd.Timestamp, level: IntervalLevel):
     # ✅ Best Practice: Use of enum for level improves code readability and maintainability
@@ -29,7 +33,10 @@ def is_in_same_interval(t1: pd.Timestamp, t2: pd.Timestamp, level: IntervalLevel
 
 
 def evaluate_size_from_timestamp(
-    start_timestamp, level: IntervalLevel, one_day_trading_minutes, end_timestamp: pd.Timestamp = None
+    start_timestamp,
+    level: IntervalLevel,
+    one_day_trading_minutes,
+    end_timestamp: pd.Timestamp = None,
 ):
     """
     given from timestamp,level,one_day_trading_minutes,this func evaluate size of kdata to current.
@@ -80,10 +87,15 @@ def evaluate_size_from_timestamp(
         return int(math.ceil(seconds / level.to_second())) + 1
     else:
         seconds = time_delta.total_seconds()
-        return min(int(math.ceil(seconds / level.to_second())) + 1, one_day_trading_seconds / level.to_second() + 1)
+        return min(
+            int(math.ceil(seconds / level.to_second())) + 1,
+            one_day_trading_seconds / level.to_second() + 1,
+        )
 
 
-def next_timestamp_on_level(current_timestamp: pd.Timestamp, level: IntervalLevel) -> pd.Timestamp:
+def next_timestamp_on_level(
+    current_timestamp: pd.Timestamp, level: IntervalLevel
+) -> pd.Timestamp:
     current_timestamp = to_pd_timestamp(current_timestamp)
     return current_timestamp + pd.Timedelta(seconds=level.to_second())
 

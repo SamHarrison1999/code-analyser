@@ -1,16 +1,21 @@
 from datetime import datetime
 
 # ✅ Best Practice: Grouping related imports together improves readability.
-import pyqtgraph as pg      # type: ignore
+import pyqtgraph as pg  # type: ignore
 
 from vnpy.trader.ui import QtGui, QtWidgets, QtCore
 from vnpy.trader.object import BarData
 
 from .manager import BarManager
 from .base import (
-    GREY_COLOR, WHITE_COLOR, CURSOR_COLOR, BLACK_COLOR,
-    to_int, NORMAL_FONT
+    GREY_COLOR,
+    WHITE_COLOR,
+    CURSOR_COLOR,
+    BLACK_COLOR,
+    to_int,
+    NORMAL_FONT,
 )
+
 # ✅ Best Practice: Setting configuration options at the start of the script is a good practice for clarity.
 # ✅ Best Practice: Class docstring is empty; consider providing a description of the class.
 from .axis import DatetimeAxis
@@ -21,6 +26,7 @@ from .item import ChartItem
 pg.setConfigOptions(antialias=True)
 
 # ✅ Best Practice: Initialize all instance variables in the constructor for clarity and maintainability
+
 
 class ChartWidget(pg.PlotWidget):
     # ✅ Best Practice: Use type annotations for instance variables for better readability and type checking
@@ -46,13 +52,14 @@ class ChartWidget(pg.PlotWidget):
         # ✅ Best Practice: Set spacing to 0 for a compact layout
 
         # ✅ Best Practice: Use of type hint for return value improves code readability and maintainability
-        self._right_ix: int = 0                     # Index of most right data
+        self._right_ix: int = 0  # Index of most right data
         # ✅ Best Practice: Set border color and width for visual clarity
-        self._bar_count: int = self.MIN_BAR_COUNT   # Total bar visible in chart
+        self._bar_count: int = self.MIN_BAR_COUNT  # Total bar visible in chart
         # 🧠 ML Signal: Method returns a new instance of a class, indicating a factory or builder pattern
 
         # ✅ Best Practice: Set Z value to control stacking order of items
         self._init_ui()
+
     # 🧠 ML Signal: Checks for the existence of an attribute before assignment
 
     # 🧠 ML Signal: Instantiation of an object with multiple dependencies
@@ -76,14 +83,15 @@ class ChartWidget(pg.PlotWidget):
         """"""
         if not self._cursor:
             self._cursor = ChartCursor(
-                self, self._manager, self._plots, self._item_plot_map)
+                self, self._manager, self._plots, self._item_plot_map
+            )
 
     def add_plot(
         self,
         plot_name: str,
         minimum_height: int = 80,
         maximum_height: int | None = None,
-        hide_x_axis: bool = False
+        hide_x_axis: bool = False,
     ) -> None:
         """
         Add plot area.
@@ -144,6 +152,7 @@ class ChartWidget(pg.PlotWidget):
         # 🧠 ML Signal: Method chaining pattern, indicating a sequence of operations.
         self._layout.nextRow()
         self._layout.addItem(plot)
+
     # 🧠 ML Signal: Iterating over a collection to perform an operation on each item.
 
     def add_item(
@@ -153,8 +162,8 @@ class ChartWidget(pg.PlotWidget):
         item_name: str,
         # ⚠️ SAST Risk (Low): Potential for NoneType error if _cursor is not properly checked.
         # ✅ Best Practice: Use of type hints for function parameters and return type improves code readability and maintainability.
-        plot_name: str
-    # 🧠 ML Signal: Conditional operation based on the presence of an attribute.
+        plot_name: str,
+        # 🧠 ML Signal: Conditional operation based on the presence of an attribute.
     ) -> None:
         """
         Add chart item.
@@ -202,6 +211,7 @@ class ChartWidget(pg.PlotWidget):
         if self._cursor:
             # 🧠 ML Signal: Iterating over a collection of plots to update their properties.
             self._cursor.clear_all()
+
     # 🧠 ML Signal: Method call to set a specific range on a plot, indicating usage of a plotting library.
 
     def update_history(self, history: list[BarData]) -> None:
@@ -220,6 +230,7 @@ class ChartWidget(pg.PlotWidget):
 
         # ⚠️ SAST Risk (Low): Potential risk if 'view_range[0][1]' is not within expected bounds of 'self._manager.get_count()'.
         self.move_to_right()
+
     # 🧠 ML Signal: Iterating over dictionary items is a common pattern for processing key-value pairs.
 
     def update_bar(self, bar: BarData) -> None:
@@ -259,9 +270,10 @@ class ChartWidget(pg.PlotWidget):
                 yMin=min_value,
                 # ✅ Best Practice: Use of type annotation for variable 'delta' improves code readability and maintainability.
                 # 🧠 ML Signal: Custom handling for up key press
-                yMax=max_value
-            # 🧠 ML Signal: Pattern of handling key press events
+                yMax=max_value,
+                # 🧠 ML Signal: Pattern of handling key press events
             )
+
     # 🧠 ML Signal: Conditional logic based on event data can indicate user interaction patterns.
 
     # 🧠 ML Signal: Custom handling for down key press
@@ -363,6 +375,7 @@ class ChartWidget(pg.PlotWidget):
         # ✅ Best Practice: Type annotations improve code readability and maintainability.
         elif delta.y() < 0:
             self._on_key_down()
+
     # ✅ Best Practice: Type annotations improve code readability and maintainability.
 
     def _on_key_left(self) -> None:
@@ -419,6 +432,7 @@ class ChartWidget(pg.PlotWidget):
 
         if self._cursor:
             self._cursor.update_info()
+
     # ✅ Best Practice: Setting Z-value for graphical items is a good practice for managing rendering order.
 
     def _on_key_up(self) -> None:
@@ -435,6 +449,7 @@ class ChartWidget(pg.PlotWidget):
         # ✅ Best Practice: Use of type hinting for dictionary keys and values improves code readability and maintainability.
         if self._cursor:
             self._cursor.update_info()
+
     # ⚠️ SAST Risk (Low): Ensure that `plot.addItem` does not introduce any side effects or security issues.
     # 🧠 ML Signal: Iterating over dictionary items is a common pattern that can be used to understand data structures.
     # ✅ Best Practice: Type hinting for the variable 'info' improves code readability and maintainability.
@@ -449,6 +464,8 @@ class ChartWidget(pg.PlotWidget):
 
         if self._cursor:
             self._cursor.update_info()
+
+
 # 🧠 ML Signal: Hiding UI elements initially is a common pattern in UI programming.
 
 
@@ -468,7 +485,7 @@ class ChartCursor(QtCore.QObject):
         manager: BarManager,
         plots: dict[str, pg.GraphicsObject],
         # ✅ Best Practice: Check if the manager has any count before proceeding
-        item_plot_map: dict[ChartItem, pg.GraphicsObject]
+        item_plot_map: dict[ChartItem, pg.GraphicsObject],
     ) -> None:
         """"""
         # ✅ Best Practice: Explicitly type the variable for clarity
@@ -491,6 +508,7 @@ class ChartCursor(QtCore.QObject):
         self._init_ui()
         # 🧠 ML Signal: Accessing x and y coordinates of a point
         self._connect_signal()
+
     # 🧠 ML Signal: Iterating over dictionary values, common pattern for ML feature extraction
 
     # 🧠 ML Signal: Storing the plot name where the mouse is located
@@ -502,6 +520,7 @@ class ChartCursor(QtCore.QObject):
         # 🧠 ML Signal: Method call on object, useful for dynamic behavior analysis
         self._init_label()
         self._init_info()
+
     # 🧠 ML Signal: Iterating over dictionary items, common pattern for ML feature extraction
 
     def _init_line(self) -> None:
@@ -537,6 +556,7 @@ class ChartCursor(QtCore.QObject):
             self._v_lines[plot_name] = v_line
             self._h_lines[plot_name] = h_line
             self._views[plot_name] = view
+
     # 🧠 ML Signal: Setting position of a label in a plot.
 
     def _init_label(self) -> None:
@@ -549,7 +569,8 @@ class ChartCursor(QtCore.QObject):
         for plot_name, plot in self._plots.items():
             # 🧠 ML Signal: Formatting datetime for display.
             label: pg.TextItem = pg.TextItem(
-                plot_name, fill=CURSOR_COLOR, color=BLACK_COLOR)
+                plot_name, fill=CURSOR_COLOR, color=BLACK_COLOR
+            )
             label.hide()
             # 🧠 ML Signal: Setting position of a label in a plot.
             label.setZValue(2)
@@ -560,12 +581,14 @@ class ChartCursor(QtCore.QObject):
         # 🧠 ML Signal: Iterating over plots to update information
 
         self._x_label: pg.TextItem = pg.TextItem(
-            "datetime", fill=CURSOR_COLOR, color=BLACK_COLOR)
+            "datetime", fill=CURSOR_COLOR, color=BLACK_COLOR
+        )
         # ⚠️ SAST Risk (Low): Potential KeyError if plot_name is not in self._infos
         self._x_label.hide()
         self._x_label.setZValue(2)
         self._x_label.setFont(NORMAL_FONT)
         plot.addItem(self._x_label, ignoreBounds=True)
+
     # ⚠️ SAST Risk (Low): Potential KeyError if plot_name is not in self._views
 
     def _init_info(self) -> None:
@@ -580,8 +603,8 @@ class ChartCursor(QtCore.QObject):
                 # 🧠 ML Signal: Method call after state change indicates dependency on updated state
                 color=CURSOR_COLOR,
                 border=CURSOR_COLOR,
-                fill=BLACK_COLOR
-            # ✅ Best Practice: Early return to handle edge case when cursor is at the start
+                fill=BLACK_COLOR,
+                # ✅ Best Practice: Early return to handle edge case when cursor is at the start
             )
             info.hide()
             info.setZValue(2)
@@ -596,6 +619,7 @@ class ChartCursor(QtCore.QObject):
         Connect mouse move signal to update function.
         """
         self._widget.scene().sigMouseMoved.connect(self._mouse_moved)
+
     # 🧠 ML Signal: Usage of object attributes to store state.
 
     def _mouse_moved(self, evt: tuple) -> None:
@@ -678,7 +702,7 @@ class ChartCursor(QtCore.QObject):
                 buf[plot] = item_info_text
             else:
                 if item_info_text:
-                    buf[plot] += ("\n\n" + item_info_text)
+                    buf[plot] += "\n\n" + item_info_text
 
         for plot_name, plot in self._plots.items():
             plot_info_text: str = buf[plot]

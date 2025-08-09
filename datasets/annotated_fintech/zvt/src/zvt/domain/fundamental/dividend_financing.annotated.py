@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, DateTime, Float
+
 # ✅ Best Practice: Grouping related imports together improves readability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Mixin
+
 # ✅ Best Practice: Naming convention for base classes should be consistent and descriptive.
 from zvt.contract.register import register_schema
 
@@ -11,6 +13,7 @@ from zvt.contract.register import register_schema
 DividendFinancingBase = declarative_base()
 
 # 🧠 ML Signal: Use of SQLAlchemy ORM for database interaction
+
 
 class DividendFinancing(DividendFinancingBase, Mixin):
     # 🧠 ML Signal: Use of SQLAlchemy ORM for database interaction
@@ -47,9 +50,12 @@ class DividendFinancing(DividendFinancingBase, Mixin):
     rights_issues = Column(Float)
     # ✅ Best Practice: Use of Column with String type for provider, ensuring consistent data type.
     rights_raising_fund = Column(Float)
+
+
 # 🧠 ML Signal: Usage of SQLAlchemy's Column to define database schema.
 
 # ✅ Best Practice: Use of Column with String type for code, ensuring consistent data type.
+
 
 class DividendDetail(DividendFinancingBase, Mixin):
     # ✅ Best Practice: Use of Column with Float type for spo_issues, ensuring consistent data type.
@@ -102,7 +108,10 @@ class RightsIssueDetail(DividendFinancingBase, Mixin):
 
 
 register_schema(
-    providers=["eastmoney"], db_name="dividend_financing", schema_base=DividendFinancingBase, entity_type="stock"
+    providers=["eastmoney"],
+    db_name="dividend_financing",
+    schema_base=DividendFinancingBase,
+    entity_type="stock",
 )
 
 

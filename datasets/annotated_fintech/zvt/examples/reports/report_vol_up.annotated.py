@@ -8,6 +8,7 @@ from examples.report_utils import report_targets, inform
 from zvt import init_log
 from zvt.api.kdata import get_latest_kdata_date
 from zvt.contract import AdjustType
+
 # ✅ Best Practice: Use of a logger for the module to handle logging
 from zvt.factors.top_stocks import get_top_stocks
 from zvt.informer import EmailInformer
@@ -29,7 +30,9 @@ email_informer = EmailInformer()
 def report_vol_up_stocks():
     provider = "em"
     entity_type = "stock"
-    target_date = get_latest_kdata_date(provider=provider, entity_type=entity_type, adjust_type=AdjustType.hfq)
+    target_date = get_latest_kdata_date(
+        provider=provider, entity_type=entity_type, adjust_type=AdjustType.hfq
+    )
     selected = get_top_stocks(target_date=target_date, return_type="small_vol_up")
 
     inform(

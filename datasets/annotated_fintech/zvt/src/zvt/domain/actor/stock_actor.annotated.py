@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, DateTime, Float, Boolean, Integer
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Using declarative_base() to create a base class for declarative class definitions is a standard practice in SQLAlchemy.
 from zvt.contract.schema import TradableMeetActor
+
 # ✅ Best Practice: Use of class variable for table name ensures consistency and easy maintenance
 
 StockActorBase = declarative_base()
@@ -34,9 +37,12 @@ class StockTopTenFreeHolder(StockActorBase, TradableMeetActor):
     #: 持股市值
     # ✅ Best Practice: Use Float for numerical fields that may have decimal values
     holding_values = Column(Float)
+
+
 # 🧠 ML Signal: Use of SQLAlchemy ORM for database interaction is a common pattern.
 
 # ✅ Best Practice: Use Float for numerical fields that may have decimal values
+
 
 # ✅ Best Practice: Specifying length for String type improves database schema design.
 class StockTopTenHolder(StockActorBase, TradableMeetActor):
@@ -102,8 +108,18 @@ class StockActorSummary(StockActorBase, TradableMeetActor):
     holding_values = Column(Float)
 
 
-register_schema(providers=["em"], db_name="stock_actor", schema_base=StockActorBase, entity_type="stock")
+register_schema(
+    providers=["em"],
+    db_name="stock_actor",
+    schema_base=StockActorBase,
+    entity_type="stock",
+)
 
 
 # the __all__ is generated
-__all__ = ["StockTopTenFreeHolder", "StockTopTenHolder", "StockInstitutionalInvestorHolder", "StockActorSummary"]
+__all__ = [
+    "StockTopTenFreeHolder",
+    "StockTopTenHolder",
+    "StockInstitutionalInvestorHolder",
+    "StockActorSummary",
+]

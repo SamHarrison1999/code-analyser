@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 
 from __future__ import annotations
+
 # ✅ Best Practice: Imports from typing module improve code readability and maintainability.
 
 from typing import TYPE_CHECKING, Generic, Optional, TypeVar
@@ -11,6 +12,7 @@ from typing import TYPE_CHECKING, Generic, Optional, TypeVar
 from qlib.typehint import final
 
 from .simulator import StateType
+
 # ✅ Best Practice: Type hinting for class attributes improves code readability and maintainability.
 # ✅ Best Practice: Explicit relative import clarifies module structure and dependencies.
 

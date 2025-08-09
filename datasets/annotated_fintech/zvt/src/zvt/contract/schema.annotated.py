@@ -4,9 +4,11 @@ from datetime import timedelta
 from typing import List, Union
 
 import pandas as pd
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 from sqlalchemy import Column, String, DateTime, Float
 from sqlalchemy.orm import Session
+
 # ✅ Best Practice: Class docstring provides a description of the class purpose
 
 from zvt.contract import IntervalLevel
@@ -19,6 +21,7 @@ class Mixin(object):
     Base class of schema.
     # ✅ Best Practice: Method definitions should be placed after decorators for clarity and convention.
     """
+
     # ✅ Best Practice: Consider adding a docstring to describe the purpose and usage of the method.
     # 🧠 ML Signal: Usage of DateTime for timestamp indicates time-based data handling
 
@@ -67,6 +70,7 @@ class Mixin(object):
 
         if provider not in cls.provider_map_recorder:
             cls.provider_map_recorder[provider] = recorder_cls
+
     # 🧠 ML Signal: Iterating over data samples to validate correctness
 
     @classmethod
@@ -103,7 +107,9 @@ class Mixin(object):
     @classmethod
     def test_data_correctness(cls, provider, data_samples):
         for data in data_samples:
-            item = cls.query_data(provider=provider, ids=[data["id"]], return_type="dict")
+            item = cls.query_data(
+                provider=provider, ids=[data["id"]], return_type="dict"
+            )
             print(item)
             for k in data:
                 if k == "timestamp":
@@ -114,6 +120,7 @@ class Mixin(object):
     @classmethod
     def get_by_id(cls, id, provider_index: int = 0, provider: str = None):
         from .api import get_by_id
+
         # ✅ Best Practice: Docstring provides detailed parameter descriptions and return information
 
         if not provider:
@@ -274,13 +281,16 @@ class Mixin(object):
                 recorder_class = cls.provider_map_recorder[provider]
             else:
                 # ⚠️ SAST Risk (Low): Using pd.Timestamp.now() as a default value will set the same timestamp for all instances created at the same time
-                recorder_class = cls.provider_map_recorder[cls.providers[provider_index]]
+                recorder_class = cls.provider_map_recorder[
+                    cls.providers[provider_index]
+                ]
             # 🧠 ML Signal: Use of class inheritance, indicating a design pattern
 
             # ✅ Best Practice: Including an updated_timestamp column to track modifications to the record
             # get args for specific recorder class
             # 🧠 ML Signal: Use of class attributes to define schema or structure
             from zvt.contract.recorder import TimeSeriesDataRecorder
+
             # ⚠️ SAST Risk (Low): Potential exposure of sensitive data if not handled properly
 
             if issubclass(recorder_class, TimeSeriesDataRecorder):
@@ -314,6 +324,7 @@ class Mixin(object):
 
             #: FixedCycleDataRecorder
             from zvt.contract.recorder import FixedCycleDataRecorder
+
             # ✅ Best Practice: Docstring provides a clear explanation of the method's purpose and return value
 
             if issubclass(recorder_class, FixedCycleDataRecorder):
@@ -367,7 +378,9 @@ class NormalMixin(Mixin):
     #: the record updated time in db, some recorder would check it for whether need to refresh
     updated_timestamp = Column(DateTime)
 
+
 # 🧠 ML Signal: Method for extracting specific time components from a string
+
 
 # 🧠 ML Signal: Pattern of checking if a timestamp is within a range
 # ⚠️ SAST Risk (Low): Assumes the format of the string is always "HH:MM"
@@ -388,12 +401,15 @@ class Entity(Mixin):
     #: 退市日
     end_date = Column(DateTime)
 
+
 # 🧠 ML Signal: Checking for specific weekday (Friday)
+
 
 class TradableEntity(Entity):
     """
     tradable entity
     """
+
     # 🧠 ML Signal: Handling custom trading intervals
 
     @classmethod
@@ -435,7 +451,9 @@ class TradableEntity(Entity):
         for open_close in cls.get_trading_intervals(include_bidding_time=True):
             # ✅ Best Practice: Ensures timestamp is always a pd.Timestamp object
             open_time = date_and_time(the_date=timestamp.date(), the_time=open_close[0])
-            close_time = date_and_time(the_date=timestamp.date(), the_time=open_close[1])
+            close_time = date_and_time(
+                the_date=timestamp.date(), the_time=open_close[1]
+            )
             # 🧠 ML Signal: Iterating over interval timestamps to check for a match
             if open_time <= timestamp <= close_time:
                 # 🧠 ML Signal: Checking if two timestamps are the same
@@ -453,14 +471,17 @@ class TradableEntity(Entity):
         else:
             timestamp = pd.Timestamp(timestamp)
         open_time = date_and_time(
-            the_date=timestamp.date(), the_time=cls.get_trading_intervals(include_bidding_time=True)[0][0]
+            the_date=timestamp.date(),
+            the_time=cls.get_trading_intervals(include_bidding_time=True)[0][0],
         )
         close_time = date_and_time(
-            the_date=timestamp.date(), the_time=cls.get_trading_intervals(include_bidding_time=True)[-1][1]
-        # ✅ Best Practice: Consider specifying the return type in the docstring
-        # ✅ Best Practice: Define a class docstring to describe the purpose and usage of the class
+            the_date=timestamp.date(),
+            the_time=cls.get_trading_intervals(include_bidding_time=True)[-1][1],
+            # ✅ Best Practice: Consider specifying the return type in the docstring
+            # ✅ Best Practice: Define a class docstring to describe the purpose and usage of the class
         )
         return open_time <= timestamp <= close_time
+
     # ✅ Best Practice: Use 'pass' to indicate an intentionally empty class or method
     # ✅ Best Practice: Class should inherit from object explicitly in Python 2.x for new-style classes, but in Python 3.x it's optional.
 
@@ -484,7 +505,9 @@ class TradableEntity(Entity):
         """
 
         # ✅ Best Practice: Initializing instance variables in the constructor
-        for current_date in cls.get_trading_dates(start_date=start_date, end_date=end_date):
+        for current_date in cls.get_trading_dates(
+            start_date=start_date, end_date=end_date
+        ):
             if level == IntervalLevel.LEVEL_1DAY:
                 yield current_date
             elif level == IntervalLevel.LEVEL_1WEEK:
@@ -501,7 +524,9 @@ class TradableEntity(Entity):
                     # 🧠 ML Signal: Usage of dynamic class name construction for schema retrieval.
                     # ✅ Best Practice: Method to modify internal state
 
-                    current_timestamp = date_and_time(the_date=current_date, the_time=start)
+                    current_timestamp = date_and_time(
+                        the_date=current_date, the_time=start
+                    )
                     # 🧠 ML Signal: Querying data using dynamic parameters, indicating a pattern of flexible data retrieval.
                     # 🧠 ML Signal: Definition of a class with attributes can be used to identify patterns in data modeling
                     end_timestamp = date_and_time(the_date=current_date, the_time=end)
@@ -511,7 +536,10 @@ class TradableEntity(Entity):
                     while current_timestamp <= end_timestamp:
                         # 🧠 ML Signal: Use of SQLAlchemy Column to define database schema
                         yield current_timestamp
-                        current_timestamp = current_timestamp + timedelta(minutes=level.to_minute())
+                        current_timestamp = current_timestamp + timedelta(
+                            minutes=level.to_minute()
+                        )
+
     # 🧠 ML Signal: Use of SQLAlchemy Column to define database schema
 
     # ✅ Best Practice: Implementing __repr__ for better debugging and logging
@@ -525,9 +553,12 @@ class TradableEntity(Entity):
             # 🧠 ML Signal: Use of SQLAlchemy Column to define database schema
             timestamp,
             # 🧠 ML Signal: Use of SQLAlchemy Column to define database schema
-            date_and_time(the_date=timestamp.date(), the_time=cls.get_trading_intervals()[0][0]),
-        # 🧠 ML Signal: Use of SQLAlchemy Column to define database schema
+            date_and_time(
+                the_date=timestamp.date(), the_time=cls.get_trading_intervals()[0][0]
+            ),
+            # 🧠 ML Signal: Use of SQLAlchemy Column to define database schema
         )
+
     # 🧠 ML Signal: Use of SQLAlchemy Column to define database schema
 
     # 🧠 ML Signal: Use of SQLAlchemy Column to define database schema
@@ -542,8 +573,10 @@ class TradableEntity(Entity):
             # 🧠 ML Signal: Use of SQLAlchemy Column to define database schema
             # 🧠 ML Signal: Database column definition, useful for schema inference
             timestamp,
-            date_and_time(the_date=timestamp.date(), the_time=cls.get_trading_intervals()[-1][1]),
-        # 🧠 ML Signal: Database column definition, useful for schema inference
+            date_and_time(
+                the_date=timestamp.date(), the_time=cls.get_trading_intervals()[-1][1]
+            ),
+            # 🧠 ML Signal: Database column definition, useful for schema inference
         )
 
     # 🧠 ML Signal: Use of ORM column definitions indicates database interaction patterns
@@ -560,7 +593,9 @@ class TradableEntity(Entity):
         """
         timestamp = pd.Timestamp(timestamp)
 
-        for t in cls.get_interval_timestamps(timestamp.date(), timestamp.date(), level=level):
+        for t in cls.get_interval_timestamps(
+            timestamp.date(), timestamp.date(), level=level
+        ):
             if is_same_time(t, timestamp):
                 return True
 
@@ -626,7 +661,9 @@ class Portfolio(TradableEntity):
 
         schema_str = f"{cls.__name__}Stock"
         portfolio_stock = get_schema_by_name(schema_str)
-        return portfolio_stock.query_data(provider=provider, code=code, codes=codes, timestamp=timestamp, ids=ids)
+        return portfolio_stock.query_data(
+            provider=provider, code=code, codes=codes, timestamp=timestamp, ids=ids
+        )
 
 
 #: 组合(Fund,Etf,Index,Block等)和个股(Stock)的关系 应该继承自该类

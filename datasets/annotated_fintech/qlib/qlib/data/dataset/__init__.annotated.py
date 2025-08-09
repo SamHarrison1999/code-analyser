@@ -1,5 +1,6 @@
 from ...utils.serial import Serializable
 from typing import Callable, Union, List, Tuple, Dict, Text, Optional
+
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local can improve readability.
 from ...utils import init_instance_by_config, np_ffill, time_to_slc_point
 from ...log import get_module_logger
@@ -13,6 +14,7 @@ from ...utils import lazy_sort_index
 from .utils import get_level_index
 
 # ✅ Best Practice: Class docstring provides a clear description of the class purpose.
+
 
 class Dataset(Serializable):
     """
@@ -35,6 +37,7 @@ class Dataset(Serializable):
         self.setup_data(**kwargs)
         # ✅ Best Practice: Calling the superclass method ensures proper inheritance behavior
         super().__init__()
+
     # 🧠 ML Signal: Function designed to handle data setup, indicating a pattern for data preprocessing in ML workflows
 
     def config(self, **kwargs):
@@ -121,7 +124,9 @@ class DatasetH(Dataset):
                         'outsample': ("2017-01-01", "2020-08-01",),
                     }
         """
-        self.handler: DataHandler = init_instance_by_config(handler, accept_types=DataHandler)
+        self.handler: DataHandler = init_instance_by_config(
+            handler, accept_types=DataHandler
+        )
         self.segments = segments.copy()
         self.fetch_kwargs = copy(fetch_kwargs)
         super().__init__(**kwargs)
@@ -189,6 +194,7 @@ class DatasetH(Dataset):
             return self.handler.fetch(slc, **kwargs, **self.fetch_kwargs)
         else:
             return self.handler.fetch(slc, **kwargs)
+
     # 🧠 ML Signal: Handling of list or tuple types for 'segments'
 
     def prepare(
@@ -251,8 +257,12 @@ class DatasetH(Dataset):
             return self._prepare_seg(self.segments[segments], **seg_kwargs)
 
         # 1.2) fetch multiple splits like ["train", "valid"] ["train", "valid", "test"]
-        if isinstance(segments, (list, tuple)) and all(seg in self.segments for seg in segments):
-            return [self._prepare_seg(self.segments[seg], **seg_kwargs) for seg in segments]
+        if isinstance(segments, (list, tuple)) and all(
+            seg in self.segments for seg in segments
+        ):
+            return [
+                self._prepare_seg(self.segments[seg], **seg_kwargs) for seg in segments
+            ]
 
         # 2) Use pass it directly to prepare a single seg
         return self._prepare_seg(segments, **seg_kwargs)
@@ -262,6 +272,7 @@ class DatasetH(Dataset):
     def get_min_time(segments):
         # 🧠 ML Signal: Use of numpy and pandas for data manipulation, common in data science and ML workflows
         return DatasetH._get_extrema(segments, 0, (lambda a, b: a > b))
+
     # ✅ Best Practice: Type annotations for class attributes improve code readability and maintainability
 
     @staticmethod
@@ -375,7 +386,7 @@ class TSDataSampler:
         fillna_type: str = "none",
         dtype=None,
         flt_data=None,
-    # 🧠 ML Signal: Use of dictionary get method with default value
+        # 🧠 ML Signal: Use of dictionary get method with default value
     ):
         """
         Build a dataset which looks like torch.data.utils.Dataset.
@@ -420,7 +431,9 @@ class TSDataSampler:
         if dtype is not None:
             kwargs["dtype"] = dtype
 
-        self.data_arr = np.array(**kwargs)  # Get index from numpy.array will much faster than DataFrame.values!
+        self.data_arr = np.array(
+            **kwargs
+        )  # Get index from numpy.array will much faster than DataFrame.values!
         # NOTE:
         # ✅ Best Practice: Use of pd.Series with range and index for efficient index creation
         # - append last line with full NaN for better performance in `__getitem__`
@@ -433,7 +446,9 @@ class TSDataSampler:
             axis=0,
         )
         # ✅ Best Practice: Enumerate is used for both index and value, improving readability
-        self.nan_idx = len(self.data_arr) - 1  # The last line is all NaN; setting it to -1 can cause bug #1716
+        self.nan_idx = (
+            len(self.data_arr) - 1
+        )  # The last line is all NaN; setting it to -1 can cause bug #1716
 
         # the data type will be changed
         # ⚠️ SAST Risk (Low): Use of np.isnan without type checking could lead to unexpected behavior
@@ -458,13 +473,20 @@ class TSDataSampler:
         self.idx_map = self.idx_map2arr(self.idx_map)
         # ✅ Best Practice: Use of max function to ensure non-negative index
         self.idx_map, self.data_index = self.slice_idx_map_and_data_index(
-            self.idx_map, self.idx_df, self.data_index, start, end
-        # ✅ Best Practice: Check and handle case where indices length is less than step_len
+            self.idx_map,
+            self.idx_df,
+            self.data_index,
+            start,
+            end,
+            # ✅ Best Practice: Check and handle case where indices length is less than step_len
         )
 
         # ✅ Best Practice: Use of np.full to create an array of NaNs
-        self.idx_arr = np.array(self.idx_df.values, dtype=np.float64)  # for better performance
+        self.idx_arr = np.array(
+            self.idx_df.values, dtype=np.float64
+        )  # for better performance
         del self.data  # save memory
+
     # 🧠 ML Signal: Conditional logic based on self.fillna_type
 
     @staticmethod
@@ -483,9 +505,13 @@ class TSDataSampler:
             len(idx_map) == data_index.shape[0]
         )  # make sure idx_map and data_index is same so index of idx_map can be used on data_index
 
-        start_row_idx, end_row_idx = idx_df.index.slice_locs(start=time_to_slc_point(start), end=time_to_slc_point(end))
+        start_row_idx, end_row_idx = idx_df.index.slice_locs(
+            start=time_to_slc_point(start), end=time_to_slc_point(end)
+        )
 
-        time_flter_idx = (idx_map[:, 0] < end_row_idx) & (idx_map[:, 0] >= start_row_idx)
+        time_flter_idx = (idx_map[:, 0] < end_row_idx) & (
+            idx_map[:, 0] >= start_row_idx
+        )
         return idx_map[time_flter_idx], data_index[time_flter_idx]
 
     @staticmethod
@@ -524,6 +550,7 @@ class TSDataSampler:
                 new_idx_map[idx] = idx_map[i]
                 idx += 1
         return new_idx_map
+
     # 🧠 ML Signal: Use of numpy's concatenate function.
 
     def get_index(self):
@@ -532,7 +559,9 @@ class TSDataSampler:
         - Special sampler will be used (e.g. user want to sample day by day)
         """
         # 🧠 ML Signal: Use of numpy's diff and all functions for condition checking.
-        return self.data_index.swaplevel()  # to align the order of multiple index of original data received by __init__
+        return (
+            self.data_index.swaplevel()
+        )  # to align the order of multiple index of original data received by __init__
 
     # ✅ Best Practice: Implementing __len__ allows the object to be used with len(), enhancing usability.
     # 🧠 ML Signal: Slicing numpy arrays.
@@ -618,7 +647,9 @@ class TSDataSampler:
         indices = self.idx_arr[max(row - self.step_len + 1, 0) : row + 1, col]
 
         if len(indices) < self.step_len:
-            indices = np.concatenate([np.full((self.step_len - len(indices),), np.nan), indices])
+            indices = np.concatenate(
+                [np.full((self.step_len - len(indices),), np.nan), indices]
+            )
 
         if self.fillna_type == "ffill":
             indices = np_ffill(indices)
@@ -646,7 +677,9 @@ class TSDataSampler:
         if isinstance(idx, (int, np.integer)):
             real_idx = idx
             if 0 <= real_idx < len(self.idx_map):
-                i, j = self.idx_map[real_idx]  # TODO: The performance of this line is not good
+                i, j = self.idx_map[
+                    real_idx
+                ]  # TODO: The performance of this line is not good
             else:
                 raise KeyError(f"{real_idx} is out of [0, {len(self.idx_map)})")
         elif isinstance(idx, tuple):
@@ -657,7 +690,7 @@ class TSDataSampler:
             # NOTE: This relies on the idx_df columns sorted in `__init__`
             j = bisect.bisect_left(self.idx_df.columns, inst)
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
         return i, j
 
     def __getitem__(self, idx: Union[int, Tuple[object, str], List[int]]):
@@ -689,9 +722,13 @@ class TSDataSampler:
         # 1) for better performance, use the last nan line for padding the lost date
         # 2) In case of precision problems. We use np.float64. # TODO: I'm not sure if whether np.float64 will result in
         # precision problems. It will not cause any problems in my tests at least
-        indices = np.nan_to_num(indices.astype(np.float64), nan=self.nan_idx).astype(int)
+        indices = np.nan_to_num(indices.astype(np.float64), nan=self.nan_idx).astype(
+            int
+        )
 
-        if (np.diff(indices) == 1).all():  # slicing instead of indexing for speeding up.
+        if (
+            np.diff(indices) == 1
+        ).all():  # slicing instead of indexing for speeding up.
             data = self.data_arr[indices[0] : indices[-1] + 1]
         else:
             data = self.data_arr[indices]
@@ -726,7 +763,9 @@ class TSDatasetH(DatasetH):
 
     DEFAULT_STEP_LEN = 30
 
-    def __init__(self, step_len=DEFAULT_STEP_LEN, flt_col: Optional[str] = None, **kwargs):
+    def __init__(
+        self, step_len=DEFAULT_STEP_LEN, flt_col: Optional[str] = None, **kwargs
+    ):
         self.step_len = step_len
         self.flt_col = flt_col
         super().__init__(**kwargs)
@@ -739,7 +778,11 @@ class TSDatasetH(DatasetH):
     def setup_data(self, **kwargs):
         super().setup_data(**kwargs)
         # make sure the calendar is updated to latest when loading data from new config
-        cal = self.handler.fetch(col_set=self.handler.CS_RAW).index.get_level_values("datetime").unique()
+        cal = (
+            self.handler.fetch(col_set=self.handler.CS_RAW)
+            .index.get_level_values("datetime")
+            .unique()
+        )
         self.cal = sorted(cal)
 
     @staticmethod

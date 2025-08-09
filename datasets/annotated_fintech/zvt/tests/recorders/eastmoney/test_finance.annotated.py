@@ -7,12 +7,22 @@ init_test_context()
 
 from zvt.consts import SAMPLE_STOCK_CODES
 
-from zvt.recorders.eastmoney.finance.eastmoney_finance_factor_recorder import ChinaStockFinanceFactorRecorder
+from zvt.recorders.eastmoney.finance.eastmoney_finance_factor_recorder import (
+    ChinaStockFinanceFactorRecorder,
+)
+
 # 🧠 ML Signal: Usage of a specific class (ChinaStockFinanceFactorRecorder) with parameters
-from zvt.recorders.eastmoney.finance.eastmoney_cash_flow_recorder import ChinaStockCashFlowRecorder
-from zvt.recorders.eastmoney.finance.eastmoney_balance_sheet_recorder import ChinaStockBalanceSheetRecorder
+from zvt.recorders.eastmoney.finance.eastmoney_cash_flow_recorder import (
+    ChinaStockCashFlowRecorder,
+)
+from zvt.recorders.eastmoney.finance.eastmoney_balance_sheet_recorder import (
+    ChinaStockBalanceSheetRecorder,
+)
+
 # 🧠 ML Signal: Method invocation pattern (run method on recorder object)
-from zvt.recorders.eastmoney.finance.eastmoney_income_statement_recorder import ChinaStockIncomeStatementRecorder
+from zvt.recorders.eastmoney.finance.eastmoney_income_statement_recorder import (
+    ChinaStockIncomeStatementRecorder,
+)
 
 
 # 🧠 ML Signal: Function definition for testing, indicating a test pattern
@@ -26,6 +36,8 @@ def test_finance_factor_recorder():
     except:
         # 🧠 ML Signal: Method invocation on an object
         assert False
+
+
 # 🧠 ML Signal: Function definition for testing, indicating a test pattern
 
 
@@ -40,10 +52,13 @@ def test_cash_flow_recorder():
     # 🧠 ML Signal: Function definition for testing, indicating a test pattern
     except:
         assert False
+
+
 # ⚠️ SAST Risk (Low): Bare except can catch unexpected exceptions, making debugging difficult
 # 🧠 ML Signal: Instantiation of a class with specific parameters
 
 # ✅ Best Practice: Use specific exception types in except blocks
+
 
 def test_balance_sheet_recorder():
     # 🧠 ML Signal: Method invocation on an object

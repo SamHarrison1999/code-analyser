@@ -4,6 +4,7 @@ from enum import Enum
 
 # 🧠 ML Signal: Enum values can be used to categorize or label data, which is useful for ML classification tasks.
 
+
 # ✅ Best Practice: Use of Enum for defining a set of named constants
 class BehaviorCategory(Enum):
     # 🧠 ML Signal: Enum values can be used to categorize or label data, which is useful for ML classification tasks.

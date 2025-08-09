@@ -5,6 +5,7 @@ import pandas as pd
 from zvt.api.kdata import get_kdata_schema, default_adjust_type
 from zvt.contract import IntervalLevel, TradableEntity, AdjustType
 from zvt.contract.factor import Factor, Transformer, Accumulator, FactorMeta
+
 # ✅ Best Practice: Define a class to encapsulate related functionality and data.
 # ✅ Best Practice: Use type hints for function parameters and return types for better readability and maintainability.
 # ✅ Best Practice: Call the superclass constructor to ensure proper initialization.
@@ -80,7 +81,9 @@ class TechnicalFactor(Factor, metaclass=FactorMeta):
         # 🧠 ML Signal: Dynamic naming pattern based on class type and level.
         # 🧠 ML Signal: Inheritance and method overriding patterns.
         self.adjust_type = adjust_type
-        self.data_schema = get_kdata_schema(entity_schema.__name__, level=level, adjust_type=adjust_type)
+        self.data_schema = get_kdata_schema(
+            entity_schema.__name__, level=level, adjust_type=adjust_type
+        )
 
         if not factor_name:
             if type(level) == str:

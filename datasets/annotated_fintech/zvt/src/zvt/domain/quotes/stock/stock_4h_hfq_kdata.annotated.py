@@ -5,8 +5,10 @@ from sqlalchemy.orm import declarative_base
 
 # ✅ Best Practice: Using declarative_base() is a standard way to define a base class for ORM models in SQLAlchemy.
 from zvt.contract.register import register_schema
+
 # 🧠 ML Signal: Inheritance from multiple base classes, indicating a pattern of code reuse and polymorphism
 from zvt.domain.quotes import StockKdataCommon
+
 # 🧠 ML Signal: Use of class attribute to define table name, indicating ORM usage pattern
 
 KdataBase = declarative_base()
@@ -14,12 +16,16 @@ KdataBase = declarative_base()
 # ✅ Best Practice: Use of __all__ to define public API of the module
 # 🧠 ML Signal: Registration of schema with multiple providers, indicating extensibility and integration pattern
 
+
 class Stock4hHfqKdata(KdataBase, StockKdataCommon):
     __tablename__ = "stock_4h_hfq_kdata"
 
 
 register_schema(
-    providers=["em", "qmt", "joinquant"], db_name="stock_4h_hfq_kdata", schema_base=KdataBase, entity_type="stock"
+    providers=["em", "qmt", "joinquant"],
+    db_name="stock_4h_hfq_kdata",
+    schema_base=KdataBase,
+    entity_type="stock",
 )
 
 

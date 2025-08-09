@@ -1,21 +1,27 @@
 from time import sleep
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 
 from vnpy.event import EventEngine, Event
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from vnpy.trader.engine import MainEngine
 from vnpy.trader.ui import MainWindow, create_qapp
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from vnpy.trader.event import EVENT_LOG
 from vnpy.trader.object import LogData
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from vnpy_ctp import CtpGateway
 from vnpy_rpcservice import RpcServiceApp
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from vnpy_rpcservice.rpc_service.engine import RpcEngine, EVENT_RPC_LOG
 
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 # 🧠 ML Signal: Function initializes and sets up main UI components
+
 
 def main_ui() -> None:
     # 🧠 ML Signal: Event-driven architecture pattern
@@ -47,7 +53,9 @@ def main_ui() -> None:
     # 🧠 ML Signal: Initialization of an event-driven architecture
     qapp.exec()
 
+
 # 🧠 ML Signal: Registration of event handlers
+
 
 def process_log_event(event: Event) -> None:
     # 🧠 ML Signal: Registration of event handlers
@@ -85,7 +93,7 @@ def main_terminal() -> None:
         "行情服务器": "180.168.146.187:10111",
         "产品名称": "simnow_client_test",
         "授权编码": "0000000000000000",
-        "产品信息": ""
+        "产品信息": "",
     }
     main_engine.connect(setting, "CTP")
     sleep(10)

@@ -5,18 +5,23 @@ from typing import Dict, Union, List, Optional
 # ✅ Best Practice: Importing specific functions or classes from a module improves code readability and avoids potential namespace conflicts.
 from pydantic import field_validator, Field
 from pydantic_core.core_schema import ValidationInfo
+
 # ✅ Best Practice: Importing specific functions or classes from a module improves code readability and avoids potential namespace conflicts.
 
 # 🧠 ML Signal: Definition of a data model class, useful for understanding data structures
 from zvt.contract.model import MixinModel, CustomModel
+
 # ✅ Best Practice: Importing specific functions or classes from a module improves code readability and avoids potential namespace conflicts.
 from zvt.tag.common import StockPoolType, TagType, TagStatsQueryType, InsertMode
+
 # 🧠 ML Signal: Usage of type annotations for class attributes
 from zvt.tag.tag_utils import get_stock_pool_names
+
 # ✅ Best Practice: Importing specific functions or classes from a module improves code readability and avoids potential namespace conflicts.
 
 # 🧠 ML Signal: Use of Optional type hint indicating nullable fields
 # ✅ Best Practice: Class should inherit from a base model to ensure consistent behavior and structure
+
 
 # ✅ Best Practice: Use of Field with default value for optional fields
 class TagInfoModel(MixinModel):
@@ -28,15 +33,20 @@ class TagInfoModel(MixinModel):
     # ✅ Best Practice: Use of Field with default value for optional fields
     # 🧠 ML Signal: Use of class attributes to define data model fields
     main_tag: Optional[str] = Field(default=None)
+
+
 # ✅ Best Practice: Use of Field with default value for optional fields
 
 # 🧠 ML Signal: Use of class attributes to define data model fields
+
 
 class CreateTagInfoModel(CustomModel):
     # 🧠 ML Signal: Use of class attributes to define data model fields
     # ✅ Best Practice: Type annotations improve code readability and maintainability.
     tag: str
     tag_reason: Optional[str] = Field(default=None)
+
+
 # ✅ Best Practice: Type annotations improve code readability and maintainability.
 # ✅ Best Practice: Class should inherit from a base class to ensure consistent behavior and attributes
 
@@ -51,6 +61,8 @@ class IndustryInfoModel(MixinModel):
     # related main tag
     # 🧠 ML Signal: Use of Optional and Union types indicates handling of nullable fields
     main_tag: str
+
+
 # 🧠 ML Signal: Usage of type annotations for class attributes
 # ✅ Best Practice: Use of Optional for fields that can be None improves code readability
 
@@ -60,6 +72,8 @@ class MainTagIndustryRelation(CustomModel):
     # ✅ Best Practice: Use of Optional for fields that can be None improves code readability
     main_tag: str
     industry_list: List[str]
+
+
 # 🧠 ML Signal: Use of Dict type indicates key-value storage pattern
 
 
@@ -69,16 +83,21 @@ class MainTagSubTagRelation(CustomModel):
     main_tag: str
     # 🧠 ML Signal: Use of a custom model class, indicating a pattern for model definition
     sub_tag_list: List[str]
+
+
 # 🧠 ML Signal: Use of Optional and Union types indicates handling of nullable fields
 
 # 🧠 ML Signal: Use of entity_id as a string, common pattern for unique identifiers
 # ✅ Best Practice: Use of Optional for fields that can be None improves code readability
+
 
 class ChangeMainTagModel(CustomModel):
     # 🧠 ML Signal: Use of Union type indicates handling of multiple possible types
     # 🧠 ML Signal: Use of name as a string, common pattern for naming entities
     current_main_tag: str
     new_main_tag: str
+
+
 # 🧠 ML Signal: Use of Union type indicates handling of multiple possible types
 # 🧠 ML Signal: Use of Optional and default values, indicating nullable fields
 
@@ -110,10 +129,13 @@ class StockTagsModel(MixinModel):
     # 🧠 ML Signal: List of entity IDs indicates batch processing
     hidden_tags: Union[Dict[str, str], None]
     set_by_user: bool = False
+
+
 # 🧠 ML Signal: Use of Optional and default values, indicating nullable fields
 # 🧠 ML Signal: Single tag applied to multiple entities
 
 # 🧠 ML Signal: Use of a custom model class indicates a pattern for data modeling
+
 
 # 🧠 ML Signal: Use of Optional and default values, indicating nullable fields
 # ✅ Best Practice: Use of Optional for fields that can be None
@@ -140,26 +162,34 @@ class SimpleStockTagsModel(CustomModel):
     controlling_holder_parent: Optional[str] = Field(default=None)
     # 🧠 ML Signal: Optional fields with default values indicate nullable or optional data patterns
     top_ten_ratio: Optional[float] = Field(default=None)
+
+
 # 🧠 ML Signal: Use of Optional fields indicates nullable or optional data handling
 
 # ✅ Best Practice: Use of Optional for fields that can be None improves code clarity
 # ✅ Best Practice: Inheriting from CustomModel suggests a structured approach, likely using a framework like Pydantic for data validation.
+
 
 class QueryStockTagsModel(CustomModel):
     # 🧠 ML Signal: Use of List to define a collection of items
     # 🧠 ML Signal: The use of 'entity_id' as a string identifier can be a common pattern in data models.
     entity_ids: List[str]
 
+
 # 🧠 ML Signal: Use of List to define a collection of items
 # 🧠 ML Signal: 'main_tag' indicates a primary categorization, useful for classification tasks.
+
 
 class QuerySimpleStockTagsModel(CustomModel):
     # 🧠 ML Signal: Use of List to define a collection of items
     # ✅ Best Practice: Using Optional and default values improves model flexibility and usability.
     entity_ids: List[str]
+
+
 # ✅ Best Practice: Class should inherit from object explicitly in Python 2 for clarity, though optional in Python 3
 
 # ✅ Best Practice: Using Optional and default values improves model flexibility and usability.
+
 
 # ✅ Best Practice: Type hinting improves code readability and maintainability
 class BatchSetStockTagsModel(CustomModel):
@@ -174,11 +204,14 @@ class BatchSetStockTagsModel(CustomModel):
     # 🧠 ML Signal: 'active_hidden_tags' as a dictionary can indicate dynamic or additional metadata, useful for feature engineering.
     # ✅ Best Practice: Type annotations improve code readability and maintainability
     tag_type: TagType
+
+
 # 🧠 ML Signal: Use of custom data types for model fields
 
 # 🧠 ML Signal: Use of standard data types for model fields
 # 🧠 ML Signal: Use of type annotations, useful for type inference and model training
 # ✅ Best Practice: Type annotations improve code readability and maintainability
+
 
 class TagParameter(CustomModel):
     main_tag: str
@@ -194,8 +227,10 @@ class TagParameter(CustomModel):
     # 🧠 ML Signal: Definition of a class, which could be used to identify class-based patterns
     hidden_tag_reason: Optional[str] = Field(default=None)
 
+
 # 🧠 ML Signal: Use of type annotations, which can be used to infer data types and structures
 # 🧠 ML Signal: Return statements can indicate function output patterns
+
 
 # ✅ Best Practice: Inheriting from a custom model class suggests a structured approach to data modeling
 class StockTagOptions(CustomModel):
@@ -226,51 +261,56 @@ class SetStockTagsModel(CustomModel):
     # 🧠 ML Signal: Use of kwargs to dynamically access other fields
     active_hidden_tags: Optional[Dict[str, str]] = Field(default=None)
 
+
 # ⚠️ SAST Risk (Low): Potential for logic error if field names change or are incorrect
-    # @field_validator("main_tag")
-    # @classmethod
-    # def main_tag_must_be_in(cls, v: str) -> str:
-    #     if v not in get_main_tags():
-    #         raise ValueError(f"main_tag: {v} must be created at main_tag_info at first")
-    #     return v
+# @field_validator("main_tag")
+# @classmethod
+# def main_tag_must_be_in(cls, v: str) -> str:
+#     if v not in get_main_tags():
+#         raise ValueError(f"main_tag: {v} must be created at main_tag_info at first")
+#     return v
 # ✅ Best Practice: Use of field_validator decorator for validation logic
 # ✅ Best Practice: Check if the input value is not None or empty before proceeding
-    #
-    # @field_validator("sub_tag")
+#
+# @field_validator("sub_tag")
 # ✅ Best Practice: Use of classmethod for validation logic that requires class context
 # 🧠 ML Signal: Pattern of checking membership in a list or collection
-    # @classmethod
+# @classmethod
 # ⚠️ SAST Risk (Low): Potential for a runtime error if get_stock_pool_names() returns a non-iterable
-    # def sub_tag_must_be_in(cls, v: str) -> str:
+# def sub_tag_must_be_in(cls, v: str) -> str:
 # 🧠 ML Signal: Use of Optional fields indicates handling of missing or nullable data
-    #     if v and (v not in get_sub_tags()):
+#     if v and (v not in get_sub_tags()):
 # ⚠️ SAST Risk (Low): Error message may expose sensitive information about valid stock pool names
 # 🧠 ML Signal: Use of Union type indicates handling of multiple data types
-    #         raise ValueError(f"sub_tag: {v} must be created at sub_tag_info at first")
+#         raise ValueError(f"sub_tag: {v} must be created at sub_tag_info at first")
 # ✅ Best Practice: Use of type annotations improves code readability and maintainability
-    #     return v
+#     return v
 # ✅ Best Practice: Use of Field with default values provides clarity on default behavior
-    #
-    # @field_validator("active_hidden_tags")
-    # @classmethod
-    # def hidden_tag_must_be_in(cls, v: Union[Dict[str, str], None]) -> Union[Dict[str, str], None]:
-    #     if v:
-    #         for item in v.keys():
-    #             if item not in get_hidden_tags():
-    #                 raise ValueError(f"hidden_tag: {v} must be created at hidden_tag_info at first")
-    #     return v
+#
+# @field_validator("active_hidden_tags")
+# @classmethod
+# def hidden_tag_must_be_in(cls, v: Union[Dict[str, str], None]) -> Union[Dict[str, str], None]:
+#     if v:
+#         for item in v.keys():
+#             if item not in get_hidden_tags():
+#                 raise ValueError(f"hidden_tag: {v} must be created at hidden_tag_info at first")
+#     return v
 
 
 class StockPoolModel(MixinModel):
     stock_pool_name: str
     entity_ids: List[str]
 
+
 # ✅ Best Practice: Class definition should inherit from a base class for consistency and potential shared functionality
+
 
 class StockPoolInfoModel(MixinModel):
     # ✅ Best Practice: Type annotations improve code readability and help with static analysis
     stock_pool_type: StockPoolType
     stock_pool_name: str
+
+
 # ✅ Best Practice: Use of Optional and default values for fields increases flexibility and robustness
 
 
@@ -321,7 +361,9 @@ class QueryStockTagStatsModel(CustomModel):
 
     @field_validator("stock_pool_name", "entity_ids")
     @classmethod
-    def phone_or_mobile_must_set_only_one(cls, v, validation_info: ValidationInfo, **kwargs):
+    def phone_or_mobile_must_set_only_one(
+        cls, v, validation_info: ValidationInfo, **kwargs
+    ):
         if validation_info.field_name == "stock_pool_name":
             other_field = "entity_ids"
         else:
@@ -330,7 +372,9 @@ class QueryStockTagStatsModel(CustomModel):
         other_value = kwargs.get(other_field)
 
         if v and other_value:
-            raise ValueError(f"Only one of 'stock_pool_name' or 'entity_ids' should be set.")
+            raise ValueError(
+                "Only one of 'stock_pool_name' or 'entity_ids' should be set."
+            )
         elif not v and not other_value:
             raise ValueError("Either 'stock_pool_name' or 'entity_ids' must be set.")
 

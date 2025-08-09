@@ -35,6 +35,7 @@ TIME_FORMAT_MINUTE2 = "YYYY-MM-DD HH:mm:ss"
 
 # ✅ Best Practice: Function name 'to_timestamp' is descriptive of its purpose
 
+
 # ms(int) or second(float) or str
 # 🧠 ML Signal: Function to get current timestamp in milliseconds
 # 🧠 ML Signal: Conversion to integer timestamp is a common pattern
@@ -67,11 +68,14 @@ def to_pd_timestamp(the_time) -> pd.Timestamp:
     # 🧠 ML Signal: Function returns a specific data type (pd.Timestamp), which can be used to infer the expected output type in ML models.
 
     return pd.Timestamp(the_time)
+
+
 # 🧠 ML Signal: Returning a transformed date value
 # 🧠 ML Signal: Use of 'today().date()' indicates a pattern of obtaining the current date, which can be used to identify date-related operations in ML models.
 # ⚠️ SAST Risk (Low): Catching a broad Exception can mask other issues and make debugging difficult.
 
 # ✅ Best Practice: Consider catching specific exceptions to handle known error cases.
+
 
 # 🧠 ML Signal: Usage of try-except block indicates error handling pattern.
 def get_local_timezone():
@@ -81,18 +85,25 @@ def get_local_timezone():
     local_tz = local_now.tzinfo
     # 🧠 ML Signal: Function with default parameter usage
     return local_tz
+
+
 # ✅ Best Practice: Use of descriptive function name for clarity
 # 🧠 ML Signal: Function calculates a date one year in the past
 
 # ✅ Best Practice: Use of default parameter to provide flexibility
 # ✅ Best Practice: Function name is descriptive of its purpose
 
+
 # ✅ Best Practice: Consider adding type hints for the_time parameter for better readability and type checking
 def to_timestamp(the_time):
     # 🧠 ML Signal: Function call pattern with specific arguments
     # 🧠 ML Signal: Uses current date to calculate a past date
     # ✅ Best Practice: Consider using more descriptive variable names for better readability
-    return int(to_pd_timestamp(the_time).tz_localize(get_local_timezone()).timestamp() * 1000)
+    return int(
+        to_pd_timestamp(the_time).tz_localize(get_local_timezone()).timestamp() * 1000
+    )
+
+
 # ✅ Best Practice: Uses a helper function to get the current date
 
 
@@ -109,8 +120,10 @@ def today() -> pd.Timestamp:
     # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and parameters.
     return pd.Timestamp.today()
 
+
 # 🧠 ML Signal: Usage of datetime operations can indicate time-based data processing
 # 🧠 ML Signal: Default parameter value is a function call, indicating dynamic default behavior.
+
 
 def current_date() -> pd.Timestamp:
     # ✅ Best Practice: Ensure the input is converted to a consistent type.
@@ -133,14 +146,19 @@ def to_time_str(the_time, fmt=TIME_FORMAT_DAY):
     except Exception as e:
         # 🧠 ML Signal: Function to convert input to a specific type (timestamp)
         return the_time
+
+
 # 🧠 ML Signal: Chaining function calls
 
 # 🧠 ML Signal: Pattern of resetting a date to the start of the month
+
 
 # ✅ Best Practice: Using replace to modify specific components of a date
 # ✅ Best Practice: Consider adding type hints for the function parameters and return type for better readability and maintainability.
 def now_time_str(fmt=TIME_FORMAT_DAY):
     return to_time_str(the_time=now_pd_timestamp(), fmt=fmt)
+
+
 # 🧠 ML Signal: Conversion to a specific type (timestamp) indicates a pattern of data normalization.
 
 
@@ -148,11 +166,14 @@ def now_time_str(fmt=TIME_FORMAT_DAY):
 # ✅ Best Practice: Consider importing necessary libraries at the beginning of the file
 def recent_year_date():
     return date_time_by_interval(current_date(), -365)
+
+
 # 🧠 ML Signal: Usage of pd.date_range to generate a range of dates
 # 🧠 ML Signal: Usage of date manipulation functions can indicate patterns in time series data processing.
 
 # ✅ Best Practice: Consider adding type hints for function parameters and return type for better readability and maintainability.
 # ⚠️ SAST Risk (Low): Assumes pd is already imported as pandas, which may not be the case
+
 
 def date_time_by_interval(the_time, interval=1, unit: TimeUnit = TimeUnit.day):
     # 🧠 ML Signal: List comprehension used to create a list of tuples
@@ -184,6 +205,8 @@ def date_time_by_interval(the_time, interval=1, unit: TimeUnit = TimeUnit.day):
     # 🧠 ML Signal: Function call to another function
 
     return to_pd_timestamp(the_time) + time_delta
+
+
 # 🧠 ML Signal: List comprehension usage
 
 
@@ -202,6 +225,8 @@ def pre_month(t=now_pd_timestamp()):
     last_valid_date = t.replace(year=year, month=month)
     # 🧠 ML Signal: Nested list comprehension usage
     return last_valid_date
+
+
 # ✅ Best Practice: Using format method for string formatting improves readability and maintainability.
 
 
@@ -209,12 +234,16 @@ def pre_month(t=now_pd_timestamp()):
 # 🧠 ML Signal: Conversion of input to pandas timestamp indicates handling of date/time data
 def pre_month_start_date(t=current_date()):
     return month_start_date(pre_month(t))
+
+
 # ⚠️ SAST Risk (Low): Generic exception raised without specific error type
 # 🧠 ML Signal: Conversion of input to pandas timestamp indicates handling of date/time data
 
 
 def pre_month_end_date(t=current_date()):
     return month_end_date(pre_month(t))
+
+
 # ✅ Best Practice: Use of min function to ensure interval_end does not exceed end
 
 
@@ -234,6 +263,8 @@ def month_end_date(the_date):
     # 🧠 ML Signal: Conversion to pandas timestamp for month-end date handling
     _, day = calendar.monthrange(the_date.year, the_date.month)
     return the_date.replace(day=day)
+
+
 # 🧠 ML Signal: Use of pd.date_range indicates generation of date ranges
 # 🧠 ML Signal: Calculation of date difference
 
@@ -270,7 +301,10 @@ def get_year_quarters(start, end=pd.Timestamp.now()):
     start_year_quarter = get_year_quarter(start)
     current_year_quarter = get_year_quarter(end)
     if current_year_quarter[0] == start_year_quarter[0]:
-        return [(current_year_quarter[0], x) for x in range(start_year_quarter[1], current_year_quarter[1] + 1)]
+        return [
+            (current_year_quarter[0], x)
+            for x in range(start_year_quarter[1], current_year_quarter[1] + 1)
+        ]
     elif current_year_quarter[0] - start_year_quarter[0] == 1:
         return [(start_year_quarter[0], x) for x in range(start_year_quarter[1], 5)] + [
             (current_year_quarter[0], x) for x in range(1, current_year_quarter[1] + 1)
@@ -278,8 +312,15 @@ def get_year_quarters(start, end=pd.Timestamp.now()):
     elif current_year_quarter[0] - start_year_quarter[0] > 1:
         return (
             [(start_year_quarter[0], x) for x in range(start_year_quarter[1], 5)]
-            + [(x, y) for x in range(start_year_quarter[0] + 1, current_year_quarter[0]) for y in range(1, 5)]
-            + [(current_year_quarter[0], x) for x in range(1, current_year_quarter[1] + 1)]
+            + [
+                (x, y)
+                for x in range(start_year_quarter[0] + 1, current_year_quarter[0])
+                for y in range(1, 5)
+            ]
+            + [
+                (current_year_quarter[0], x)
+                for x in range(1, current_year_quarter[1] + 1)
+            ]
         )
     else:
         raise Exception("wrong start time:{}".format(start))
@@ -304,7 +345,9 @@ def split_time_interval(start, end, method=None, interval=30, freq="D"):
         while start <= end:
             _, day = calendar.monthrange(start.year, start.month)
 
-            interval_end = min(to_pd_timestamp(f"{start.year}-{start.month}-{day}"), end)
+            interval_end = min(
+                to_pd_timestamp(f"{start.year}-{start.month}-{day}"), end
+            )
             yield pd.date_range(start=start, end=interval_end, freq=freq)
             start = date_time_by_interval(interval_end, 1)
 

@@ -18,7 +18,7 @@ if __name__ == "__main__":
         interval=Interval.MINUTE,
         start=datetime(2019, 7, 1),
         # 🧠 ML Signal: Initialization of a chart widget for data visualization
-        end=datetime(2019, 7, 17)
+        end=datetime(2019, 7, 17),
     )
     # ✅ Best Practice: Explicitly naming plots for clarity
 

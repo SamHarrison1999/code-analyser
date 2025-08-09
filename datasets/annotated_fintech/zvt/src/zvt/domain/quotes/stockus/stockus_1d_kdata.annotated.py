@@ -4,8 +4,10 @@
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Naming convention for classes should follow CamelCase.
 from zvt.domain.quotes import StockusKdataCommon
+
 # 🧠 ML Signal: Use of class inheritance to extend functionality
 
 # ✅ Best Practice: Define class attributes for ORM mapping
@@ -19,7 +21,12 @@ class Stockus1dKdata(KdataBase, StockusKdataCommon):
     __tablename__ = "stockus_1d_kdata"
 
 
-register_schema(providers=["em"], db_name="stockus_1d_kdata", schema_base=KdataBase, entity_type="stockus")
+register_schema(
+    providers=["em"],
+    db_name="stockus_1d_kdata",
+    schema_base=KdataBase,
+    entity_type="stockus",
+)
 
 
 # the __all__ is generated

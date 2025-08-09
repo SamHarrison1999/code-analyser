@@ -9,12 +9,17 @@ import cachetools
 import pandas as pd
 import pickle
 import os
+
 # ✅ Best Practice: Consider adding type hints for the function parameters and return type for better readability and maintainability.
 
 from qlib.backtest import Exchange, Order
 from qlib.backtest.decision import TradeRange, TradeRangeByTime
 from qlib.constant import EPS_T
-from .base import BaseIntradayBacktestData, BaseIntradayProcessedData, ProcessedDataProvider
+from .base import (
+    BaseIntradayBacktestData,
+    BaseIntradayProcessedData,
+    ProcessedDataProvider,
+)
 
 
 # ⚠️ SAST Risk (Low): Modifying the 'end' parameter directly can lead to unexpected side effects if 'end' is used elsewhere.
@@ -60,9 +65,9 @@ class IntradayBacktestData(BaseIntradayBacktestData):
                 self._end_time,
                 direction=self._order.direction,
                 method=None,
-            # ✅ Best Practice: Implementing __repr__ for better debugging and logging
+                # ✅ Best Practice: Implementing __repr__ for better debugging and logging
             ),
-        # 🧠 ML Signal: Use of f-strings for string formatting
+            # 🧠 ML Signal: Use of f-strings for string formatting
         )
         self._volume = cast(
             pd.Series,
@@ -75,9 +80,10 @@ class IntradayBacktestData(BaseIntradayBacktestData):
                 # ✅ Best Practice: Include a docstring to describe the method's purpose and return value
                 self._end_time,
                 method=None,
-            # ✅ Best Practice: Use of type hinting for return value improves code readability and maintainability
+                # ✅ Best Practice: Use of type hinting for return value improves code readability and maintainability
             ),
         )
+
     # 🧠 ML Signal: Method returning an attribute, indicating a getter pattern
     # ✅ Best Practice: Include a docstring to describe the purpose and usage of the function
 
@@ -90,6 +96,7 @@ class IntradayBacktestData(BaseIntradayBacktestData):
             # ✅ Best Practice: Use of type hints for function parameters and return type
             f"Start time: {self._start_time}, End time: {self._end_time}"
         )
+
     # 🧠 ML Signal: Initialization of instance variables from parameters
 
     def __len__(self) -> int:
@@ -102,18 +109,22 @@ class IntradayBacktestData(BaseIntradayBacktestData):
     def get_deal_price(self) -> pd.Series:
         # ✅ Best Practice: Type hinting improves code readability and maintainability
         return self._deal_price
+
     # 🧠 ML Signal: Use of f-string for string formatting
 
     # 🧠 ML Signal: Usage of __len__ method indicates implementation of a container-like class
     # ✅ Best Practice: Include a docstring to describe the purpose and usage of the function
     def get_volume(self) -> pd.Series:
         return self._volume
+
     # 🧠 ML Signal: Accessing a DataFrame column by name, indicating a pattern of data manipulation
     # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability
 
     def get_time_index(self) -> pd.DatetimeIndex:
         # 🧠 ML Signal: Accessing a DataFrame column by name, indicating a common pattern in data manipulation
         return pd.DatetimeIndex([e[1] for e in list(self._exchange.quote_df.index)])
+
+
 # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability.
 # ✅ Best Practice: Explicitly casting the index to pd.DatetimeIndex ensures the expected type is returned.
 
@@ -124,7 +135,12 @@ class DataframeIntradayBacktestData(BaseIntradayBacktestData):
     # ✅ Best Practice: Using LRUCache to limit cache size helps manage memory usage effectively.
     # 🧠 ML Signal: Use of caching pattern with LRUCache can indicate performance optimization behavior.
     # 🧠 ML Signal: Function signature with specific parameter types and return type
-    def __init__(self, df: pd.DataFrame, price_column: str = "$close0", volume_column: str = "$volume0") -> None:
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        price_column: str = "$close0",
+        volume_column: str = "$volume0",
+    ) -> None:
         self.df = df
         self.price_column = price_column
         # ⚠️ SAST Risk (Low): Lambda functions can sometimes obscure logic, making it harder to trace and debug.
@@ -133,8 +149,16 @@ class DataframeIntradayBacktestData(BaseIntradayBacktestData):
     # 🧠 ML Signal: Custom cache key function indicates a pattern of optimizing cache hits.
     def __repr__(self) -> str:
         # ✅ Best Practice: Use of pd.DatetimeIndex for time-based indexing
-        with pd.option_context("memory_usage", False, "display.max_info_columns", 1, "display.large_repr", "info"):
+        with pd.option_context(
+            "memory_usage",
+            False,
+            "display.max_info_columns",
+            1,
+            "display.large_repr",
+            "info",
+        ):
             return f"{self.__class__.__name__}({self.df})"
+
     # ✅ Best Practice: Filtering index based on start_time
 
     # ✅ Best Practice: Filtering index based on end_time
@@ -197,7 +221,9 @@ def load_backtest_data(
     # 🧠 ML Signal: Fetching data within a specific time range, common in time-series analysis
     return backtest_data
 
+
 # ✅ Best Practice: Using pd.option_context to temporarily set pandas options for a specific block of code
+
 
 # 🧠 ML Signal: Selecting specific feature columns for processing
 # 🧠 ML Signal: Handling data differently based on 'index_only' flag
@@ -226,13 +252,19 @@ class HandlerIntradayProcessedData(BaseIntradayProcessedData):
                 df = df.drop(columns=["instrument"])
             return df.set_index(["datetime"])
 
-        path = os.path.join(data_dir, "backtest" if backtest else "feature", f"{stock_id}.pkl")
-        start_time, end_time = date.replace(hour=0, minute=0, second=0), date.replace(hour=23, minute=59, second=59)
+        path = os.path.join(
+            data_dir, "backtest" if backtest else "feature", f"{stock_id}.pkl"
+        )
+        start_time, end_time = date.replace(hour=0, minute=0, second=0), date.replace(
+            hour=23, minute=59, second=59
+        )
         with open(path, "rb") as fstream:
             # 🧠 ML Signal: Returning an instance of a class, which can indicate object-oriented usage patterns
             dataset = pickle.load(fstream)
         # ✅ Best Practice: Class definition should include a docstring explaining its purpose and usage.
-        data = dataset.handler.fetch(pd.IndexSlice[stock_id, start_time:end_time], level=None)
+        data = dataset.handler.fetch(
+            pd.IndexSlice[stock_id, start_time:end_time], level=None
+        )
 
         if index_only:
             self.today = _drop_stock_id(data[[]])
@@ -244,9 +276,18 @@ class HandlerIntradayProcessedData(BaseIntradayProcessedData):
 
     # ✅ Best Practice: Using Path from pathlib for file paths improves cross-platform compatibility.
     def __repr__(self) -> str:
-        with pd.option_context("memory_usage", False, "display.max_info_columns", 1, "display.large_repr", "info"):
+        with pd.option_context(
+            "memory_usage",
+            False,
+            "display.max_info_columns",
+            1,
+            "display.large_repr",
+            "info",
+        ):
             # 🧠 ML Signal: Storing feature columns indicates a pattern for feature selection in ML models.
             return f"{self.__class__.__name__}({self.today}, {self.yesterday})"
+
+
 # 🧠 ML Signal: Storing feature columns indicates a pattern for feature selection in ML models.
 # 🧠 ML Signal: The 'backtest' flag suggests a pattern for model evaluation or simulation.
 # 🧠 ML Signal: Function signature with specific parameter types and return type
@@ -273,7 +314,13 @@ def load_handler_intraday_processed_data(
     index_only: bool = False,
 ) -> HandlerIntradayProcessedData:
     return HandlerIntradayProcessedData(
-        data_dir, stock_id, date, feature_columns_today, feature_columns_yesterday, backtest, index_only
+        data_dir,
+        stock_id,
+        date,
+        feature_columns_today,
+        feature_columns_yesterday,
+        backtest,
+        index_only,
     )
 
 

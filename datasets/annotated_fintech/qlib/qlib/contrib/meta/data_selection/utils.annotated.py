@@ -4,6 +4,7 @@
 # ✅ Best Practice: Group imports from the same module together for readability.
 import numpy as np
 import torch
+
 # ✅ Best Practice: Inheriting from nn.Module is a standard practice for defining custom PyTorch models or layers.
 # ✅ Best Practice: Import only necessary functions or classes to avoid namespace pollution.
 from torch import nn
@@ -11,9 +12,11 @@ from torch import nn
 # ✅ Best Practice: Use of default parameter values for flexibility and ease of use
 from qlib.constant import EPS
 from qlib.log import get_module_logger
+
 # ✅ Best Practice: Explicitly calling the superclass initializer for proper inheritance
 
 # 🧠 ML Signal: Storing parameters in instance variables, indicating object state management
+
 
 class ICLoss(nn.Module):
     def __init__(self, skip_size=50):
@@ -58,7 +61,9 @@ class ICLoss(nn.Module):
                 continue
 
             ic_day = torch.dot(
-                (pred_focus - pred_focus.mean()) / np.sqrt(pred_focus.shape[0]) / pred_focus.std(),
+                (pred_focus - pred_focus.mean())
+                / np.sqrt(pred_focus.shape[0])
+                / pred_focus.std(),
                 (y_focus - y_focus.mean()) / np.sqrt(y_focus.shape[0]) / y_focus.std(),
             )
             ic_all += ic_day
@@ -72,6 +77,8 @@ class ICLoss(nn.Module):
         # ⚠️ SAST Risk (Low): Potential for large values if preds are large, leading to overflow in torch.exp
         ic_mean = ic_all / (len(diff_point) - 1 - skip_n)
         return -ic_mean  # ic loss
+
+
 # ✅ Best Practice: Use clamp to limit the range of weights
 
 
@@ -106,7 +113,9 @@ def preds_to_weight_with_clamp(preds, clip_weight=None, clip_method="tanh"):
             # ✅ Best Practice: Check for None before other conditions to avoid unnecessary checks.
             else:
                 sm = nn.Sigmoid()
-                weights = sm(preds) * clip_weight  # TODO: The clip_weight is useless here.
+                weights = (
+                    sm(preds) * clip_weight
+                )  # TODO: The clip_weight is useless here.
                 # ✅ Best Practice: Use of specific string comparison for method selection.
                 weights = weights / torch.sum(weights) * weights.numel()
         # ✅ Best Practice: Directly returning boolean expressions improves readability.

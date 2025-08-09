@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import List, Union, Type, Optional
+
 # ✅ Best Practice: Grouping imports by standard, third-party, and local can improve readability.
 
 import pandas as pd
@@ -8,30 +9,38 @@ from zvt.contract import IntervalLevel, TradableEntity, AdjustType
 from zvt.contract.api import get_schema_by_name
 from zvt.contract.factor import Accumulator
 from zvt.domain import Stock
+
 # 🧠 ML Signal: Function with default parameter value
 from zvt.factors.algorithm import live_or_dead
 from zvt.factors.technical_factor import TechnicalFactor
+
 # ✅ Best Practice: Use isinstance() instead of type() for type checking
 from zvt.utils.pd_utils import pd_is_not_null
 
 
 # ✅ Best Practice: Use f-string for better readability and performance
 # ✅ Best Practice: Class definition should follow PEP 8 naming conventions, which this does.
-def get_ma_stats_factor_schema(entity_type: str, level: Union[IntervalLevel, str] = IntervalLevel.LEVEL_1DAY):
+def get_ma_stats_factor_schema(
+    entity_type: str, level: Union[IntervalLevel, str] = IntervalLevel.LEVEL_1DAY
+):
     if type(level) == str:
         # ✅ Best Practice: Use of type hints for function parameters and return type
         # 🧠 ML Signal: Function call with dynamic string argument
         level = IntervalLevel(level)
 
     # ✅ Best Practice: Explicitly calling the superclass's __init__ method
-    schema_str = "{}{}MaStatsFactor".format(entity_type.capitalize(), level.value.capitalize())
+    schema_str = "{}{}MaStatsFactor".format(
+        entity_type.capitalize(), level.value.capitalize()
+    )
 
     # 🧠 ML Signal: Storing parameters in instance variables
     # 🧠 ML Signal: Logging usage pattern for tracking function execution
     return get_schema_by_name(schema_str)
 
+
 # 🧠 ML Signal: Storing parameters in instance variables
 # ⚠️ SAST Risk (Low): Potential issue if pd_is_not_null is not defined or imported
+
 
 class MaStatsAccumulator(Accumulator):
     def __init__(self, acc_window: int = 250, windows=None, vol_windows=None) -> None:
@@ -40,9 +49,12 @@ class MaStatsAccumulator(Accumulator):
         self.windows = windows
         # 🧠 ML Signal: Logging usage pattern for tracking data processing
         self.vol_windows = vol_windows
+
     # ✅ Best Practice: Using pd.concat for DataFrame concatenation
 
-    def acc_one(self, entity_id, df: pd.DataFrame, acc_df: pd.DataFrame, state: dict) -> (pd.DataFrame, dict):
+    def acc_one(
+        self, entity_id, df: pd.DataFrame, acc_df: pd.DataFrame, state: dict
+    ) -> (pd.DataFrame, dict):
         self.logger.info(f"acc_one:{entity_id}")
         if pd_is_not_null(acc_df):
             # 🧠 ML Signal: Logging usage pattern for conditional branches
@@ -68,7 +80,9 @@ class MaStatsAccumulator(Accumulator):
             acc_df[col] = ma_df
 
         # ✅ Best Practice: Using groupby and cumcount for sequence counting
-        acc_df["live"] = (acc_df["ma5"] > acc_df["ma10"]).apply(lambda x: live_or_dead(x))
+        acc_df["live"] = (acc_df["ma5"] > acc_df["ma10"]).apply(
+            lambda x: live_or_dead(x)
+        )
         # ✅ Best Practice: Class definition should follow the naming convention of using CamelCase.
         acc_df["distance"] = (acc_df["ma5"] - acc_df["ma10"]) / acc_df["close"]
         # 🧠 ML Signal: Tracking indicators being appended
@@ -78,7 +92,9 @@ class MaStatsAccumulator(Accumulator):
         # ✅ Best Practice: Using rolling mean for moving average calculation
 
         live = acc_df["live"]
-        acc_df["count"] = live * (live.groupby((live != live.shift()).cumsum()).cumcount() + 1)
+        acc_df["count"] = live * (
+            live.groupby((live != live.shift()).cumsum()).cumcount() + 1
+        )
 
         acc_df["bulk"] = (live != live.shift()).cumsum()
         area_df = acc_df[["distance", "bulk"]]
@@ -88,7 +104,11 @@ class MaStatsAccumulator(Accumulator):
             col = "vol_ma{}".format(vol_window)
             self.indicators.append(col)
 
-            vol_ma_df = acc_df["turnover"].rolling(window=vol_window, min_periods=vol_window).mean()
+            vol_ma_df = (
+                acc_df["turnover"]
+                .rolling(window=vol_window, min_periods=vol_window)
+                .mean()
+            )
             acc_df[col] = vol_ma_df
 
         acc_df = acc_df.set_index("timestamp", drop=False)
@@ -132,7 +152,9 @@ class MaStatsFactor(TechnicalFactor):
         vol_windows=None,
     ) -> None:
         if need_persist:
-            self.factor_schema = get_ma_stats_factor_schema(entity_type=entity_schema.__name__, level=level)
+            self.factor_schema = get_ma_stats_factor_schema(
+                entity_type=entity_schema.__name__, level=level
+            )
 
         if not windows:
             windows = [5, 10, 34, 55, 89, 144, 120, 250]
@@ -142,9 +164,21 @@ class MaStatsFactor(TechnicalFactor):
             vol_windows = [30]
         self.vol_windows = vol_windows
 
-        columns: List = ["id", "entity_id", "timestamp", "level", "open", "close", "high", "low", "turnover"]
+        columns: List = [
+            "id",
+            "entity_id",
+            "timestamp",
+            "level",
+            "open",
+            "close",
+            "high",
+            "low",
+            "turnover",
+        ]
 
-        accumulator: Accumulator = MaStatsAccumulator(windows=self.windows, vol_windows=self.vol_windows)
+        accumulator: Accumulator = MaStatsAccumulator(
+            windows=self.windows, vol_windows=self.vol_windows
+        )
 
         super().__init__(
             entity_schema,
@@ -263,4 +297,9 @@ if __name__ == "__main__":
 
 
 # the __all__ is generated
-__all__ = ["get_ma_stats_factor_schema", "MaStatsAccumulator", "MaStatsFactor", "TFactor"]
+__all__ = [
+    "get_ma_stats_factor_schema",
+    "MaStatsAccumulator",
+    "MaStatsFactor",
+    "TFactor",
+]

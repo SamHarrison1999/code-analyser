@@ -1,4 +1,5 @@
 import fire
+
 # 🧠 ML Signal: Importing specific modules can indicate the functionality or domain of the application.
 from qlib import auto_init
 from qlib.contrib.rolling.base import Rolling

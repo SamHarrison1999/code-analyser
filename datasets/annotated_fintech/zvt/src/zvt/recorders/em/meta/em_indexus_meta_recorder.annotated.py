@@ -2,12 +2,16 @@
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 
 from zvt.contract.api import df_to_db
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.contract.recorder import Recorder
+
 # 🧠 ML Signal: Class definition with inheritance, useful for understanding class hierarchies and relationships
 from zvt.domain.meta.indexus_meta import Indexus
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.recorders.em import em_api
+
 # 🧠 ML Signal: Class attribute definition, useful for understanding default values and configurations
 
 
@@ -25,7 +29,12 @@ class EMIndexusRecorder(Recorder):
         # ✅ Best Practice: Standard Python entry point check
         # 🧠 ML Signal: Instantiation and execution of a class method
         self.logger.info(df)
-        df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+        df_to_db(
+            df=df,
+            data_schema=self.data_schema,
+            provider=self.provider,
+            force_update=self.force_update,
+        )
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@ from joblib import Parallel, delayed
 
 class Group:
     """Group the objects based on dict"""
+
     # ✅ Best Practice: Use of descriptive variable names improves code readability.
 
     def __init__(self, group_func=None, ens: Ensemble = None):
@@ -55,7 +56,7 @@ class Group:
         if isinstance(getattr(self, "_group_func", None), Callable):
             return self._group_func(*args, **kwargs)
         else:
-            raise NotImplementedError(f"Please specify valid `group_func`.")
+            raise NotImplementedError("Please specify valid `group_func`.")
 
     def reduce(self, *args, **kwargs) -> dict:
         """
@@ -72,9 +73,11 @@ class Group:
         # 🧠 ML Signal: Usage of Parallel processing with n_jobs and verbose parameters.
         else:
             # ✅ Best Practice: Class docstring provides a brief description of the class purpose
-            raise NotImplementedError(f"Please specify valid `_ens_func`.")
+            raise NotImplementedError("Please specify valid `_ens_func`.")
 
-    def __call__(self, ungrouped_dict: dict, n_jobs: int = 1, verbose: int = 0, *args, **kwargs) -> dict:
+    def __call__(
+        self, ungrouped_dict: dict, n_jobs: int = 1, verbose: int = 0, *args, **kwargs
+    ) -> dict:
         """
         Group the ungrouped_dict into different groups.
 

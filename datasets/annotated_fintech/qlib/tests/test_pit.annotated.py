@@ -7,6 +7,7 @@ import qlib
 import shutil
 import unittest
 import pytest
+
 # 🧠 ML Signal: Modifying sys.path to include specific directories for module imports
 import pandas as pd
 from pathlib import Path
@@ -18,11 +19,15 @@ from qlib.tests.data import GetData
 # ✅ Best Practice: Setting display options for pandas to improve readability of DataFrame outputs
 sys.path.append(str(Path(__file__).resolve().parent.parent.joinpath("scripts")))
 from dump_pit import DumpPitData
+
 # ✅ Best Practice: Setting display options for pandas to improve readability of DataFrame outputs
 
-sys.path.append(str(Path(__file__).resolve().parent.parent.joinpath("scripts/data_collector/pit")))
+sys.path.append(
+    str(Path(__file__).resolve().parent.parent.joinpath("scripts/data_collector/pit"))
+)
 # 🧠 ML Signal: Using Path to manage file system paths
 from collector import Run
+
 # 🧠 ML Signal: Using Path to manage file system paths
 # ✅ Best Practice: Use of @classmethod for setup that applies to all test methods
 
@@ -59,12 +64,22 @@ class TestPIT(unittest.TestCase):
         pit_normalized_dir = str(SOURCE_DIR.joinpath("pit_normalized").resolve())
         # ✅ Best Practice: Method name 'setUp' follows the naming convention for setup methods in test cases
         GetData().qlib_data(
-            name="qlib_data_simple", target_dir=cn_data_dir, region="cn", delete_old=False, exists_skip=True
-        # 🧠 ML Signal: Dumping data with specific parameters, indicating a pattern for data output.
-        # 🧠 ML Signal: Usage of pathlib for path operations
+            name="qlib_data_simple",
+            target_dir=cn_data_dir,
+            region="cn",
+            delete_old=False,
+            exists_skip=True,
+            # 🧠 ML Signal: Dumping data with specific parameters, indicating a pattern for data output.
+            # 🧠 ML Signal: Usage of pathlib for path operations
         )
         # ✅ Best Practice: Method name 'to_str' suggests conversion to string, which aligns with the method's functionality.
-        GetData().qlib_data(name="qlib_data", target_dir=pit_dir, region="pit", delete_old=False, exists_skip=True)
+        GetData().qlib_data(
+            name="qlib_data",
+            target_dir=pit_dir,
+            region="pit",
+            delete_old=False,
+            exists_skip=True,
+        )
         # 🧠 ML Signal: Initialization of a library with a specific provider URI
 
         # ✅ Best Practice: Method name should be more descriptive to indicate its purpose
@@ -113,7 +128,13 @@ class TestPIT(unittest.TestCase):
         # ⚠️ SAST Risk (Low): Overwriting data column with a constant value
         # Mao Tai published 2019Q2 report at 2019-07-13 & 2019-07-18
         # - http://www.cninfo.com.cn/new/commonUrl/pageOfSearch?url=disclosure/list/search&lastPage=index
-        data = D.features(instruments, fields, start_time="2019-01-01", end_time="2019-07-19", freq="day")
+        data = D.features(
+            instruments,
+            fields,
+            start_time="2019-01-01",
+            end_time="2019-07-19",
+            freq="day",
+        )
         res = """
                P($$roewa_q)  P($$yoyni_q)
         count    133.000000    133.000000
@@ -137,6 +158,7 @@ class TestPIT(unittest.TestCase):
                    2019-07-19      0.175322      0.252650
         """
         self.check_same(data.tail(), res)
+
     # 🧠 ML Signal: Usage of specific financial expressions in fields
 
     def test_no_exist_data(self):
@@ -144,7 +166,13 @@ class TestPIT(unittest.TestCase):
         # 🧠 ML Signal: Usage of specific instrument identifiers
         # 🧠 ML Signal: Usage of date ranges and frequency in data retrieval
         fields = ["P($$roewa_q)", "P($$yoyni_q)", "$close"]
-        data = D.features(["sh600519", "sh601988"], fields, start_time="2019-01-01", end_time="2019-07-19", freq="day")
+        data = D.features(
+            ["sh600519", "sh601988"],
+            fields,
+            start_time="2019-01-01",
+            end_time="2019-07-19",
+            freq="day",
+        )
         data["$close"] = 1  # in case of different dataset gives different values
         expect = """
                                P($$roewa_q)  P($$yoyni_q)  $close
@@ -175,7 +203,13 @@ class TestPIT(unittest.TestCase):
             "P((Ref($$roewa_q, 1) +$$roewa_q) / 2)",
         ]
         instruments = ["sh600519"]
-        data = D.features(instruments, fields, start_time="2019-01-01", end_time="2019-07-19", freq="day")
+        data = D.features(
+            instruments,
+            fields,
+            start_time="2019-01-01",
+            end_time="2019-07-19",
+            freq="day",
+        )
         expect = """
                                P(Mean($$roewa_q, 1))  P($$roewa_q)  P(Mean($$roewa_q, 2))  P(Ref($$roewa_q, 1))  P((Ref($$roewa_q, 1) +$$roewa_q) / 2)
         instrument datetime
@@ -202,7 +236,9 @@ class TestPIT(unittest.TestCase):
         fields = ["P($$roewa_q)"]
         instruments = ["sh600519"]
         _ = D.features(instruments, fields, freq="day")  # this should not raise error
-        data = D.features(instruments, fields, end_time="2020-01-01", freq="day")  # this should not raise error
+        data = D.features(
+            instruments, fields, end_time="2020-01-01", freq="day"
+        )  # this should not raise error
         s = data.iloc[:, 0]
         # You can check the expected value based on the content in `docs/advanced/PIT.rst`
         expect = """
@@ -282,7 +318,13 @@ class TestPIT(unittest.TestCase):
         fields += ["P(($$roewa_q / $$yoyni_q) / Ref($$roewa_q / $$yoyni_q, 1) - 1)"]
         fields += ["P(Sum($$yoyni_q, 4))"]
         fields += ["$close", "P($$roewa_q) * $close"]
-        data = D.features(instruments, fields, start_time="2019-01-01", end_time="2020-01-01", freq="day")
+        data = D.features(
+            instruments,
+            fields,
+            start_time="2019-01-01",
+            end_time="2020-01-01",
+            freq="day",
+        )
         except_data = """
                                        P($$roewa_q)  P($$yoyni_q)  P(($$roewa_q / $$yoyni_q) / Ref($$roewa_q / $$yoyni_q, 1) - 1)  P(Sum($$yoyni_q, 4))      $close  P($$roewa_q) * $close
         instrument datetime
@@ -310,7 +352,13 @@ class TestPIT(unittest.TestCase):
             "P($$roewa_q)",
             "P($$roewa_q) / PRef($$roewa_q, 201801)",
         ]
-        data = D.features(instruments, fields, start_time="2018-04-28", end_time="2019-07-19", freq="day")
+        data = D.features(
+            instruments,
+            fields,
+            start_time="2018-04-28",
+            end_time="2019-07-19",
+            freq="day",
+        )
         except_data = """
                                PRef($$roewa_q, 201902)  PRef($$yoyni_q, 201801)  P($$roewa_q)  P($$roewa_q) / PRef($$roewa_q, 201801)
         instrument datetime

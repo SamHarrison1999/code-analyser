@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import importlib
+
 # ✅ Best Practice: Group related imports together for better readability
 from qlib.data.ops import ElemOperator, PairOperator
 from qlib.config import C
@@ -9,6 +10,7 @@ from qlib.data.data import Cal
 from qlib.contrib.ops.high_freq import get_calendar_day
 
 # ✅ Best Practice: Class docstring provides a clear description of the class and its parameters.
+
 
 class DayLast(ElemOperator):
     """DayLast Operator
@@ -23,6 +25,7 @@ class DayLast(ElemOperator):
     feature:
         a series of that each value equals the last value of its day
     """
+
     # 🧠 ML Signal: Loading a series of data using a feature's load method
 
     # ✅ Best Practice: Class docstring provides a clear description of the class and its parameters.
@@ -30,7 +33,9 @@ class DayLast(ElemOperator):
     def _load_internal(self, instrument, start_index, end_index, freq):
         _calendar = get_calendar_day(freq=freq)
         series = self.feature.load(instrument, start_index, end_index, freq)
-        return series.groupby(_calendar[series.index], group_keys=False).transform("last")
+        return series.groupby(_calendar[series.index], group_keys=False).transform(
+            "last"
+        )
 
 
 class FFillNan(ElemOperator):
@@ -51,7 +56,9 @@ class FFillNan(ElemOperator):
         series = self.feature.load(instrument, start_index, end_index, freq)
         return series.ffill()
 
+
 # ✅ Best Practice: Consider adding a docstring to describe the method's purpose and parameters
+
 
 class BFillNan(ElemOperator):
     """BFillNan Operator
@@ -72,10 +79,13 @@ class BFillNan(ElemOperator):
         series = self.feature.load(instrument, start_index, end_index, freq)
         # 🧠 ML Signal: Loading data based on a frequency parameter indicates time-series data processing.
         return series.bfill()
+
+
 # ✅ Best Practice: Class docstring provides a clear description of the class and its parameters
 
 # ✅ Best Practice: Method docstring provides a clear description of the method's parameters and return value
 # 🧠 ML Signal: Returning a pandas Series suggests usage of pandas for data manipulation, common in data science workflows.
+
 
 class Date(ElemOperator):
     """Date Operator
@@ -120,8 +130,12 @@ class Select(PairOperator):
     """
 
     def _load_internal(self, instrument, start_index, end_index, freq):
-        series_condition = self.feature_left.load(instrument, start_index, end_index, freq)
-        series_feature = self.feature_right.load(instrument, start_index, end_index, freq)
+        series_condition = self.feature_left.load(
+            instrument, start_index, end_index, freq
+        )
+        series_feature = self.feature_right.load(
+            instrument, start_index, end_index, freq
+        )
         return series_feature.loc[series_condition]
 
 
@@ -139,12 +153,15 @@ class IsNull(ElemOperator):
         A series indicating whether the feature is nan
     # 🧠 ML Signal: Slicing a DataFrame using iloc, which is a common pattern in data manipulation
     """
+
     # ✅ Best Practice: Using a default value for None with a conditional expression
 
     def _load_internal(self, instrument, start_index, end_index, freq):
         # ✅ Best Practice: Using a default value for None with a conditional expression
         series = self.feature.load(instrument, start_index, end_index, freq)
         return series.isnull()
+
+
 # 🧠 ML Signal: Calls a method on a feature object, indicating a pattern of feature manipulation
 # ✅ Best Practice: Returns a tuple, which is a clear and efficient way to return multiple values
 # 🧠 ML Signal: Adjusts window size based on internal state, a common pattern in time series processing

@@ -16,15 +16,17 @@ import traceback
 
 from arctic import Arctic, chunkstore
 import arctic
-from arctic import Arctic, CHUNK_STORE
+from arctic import CHUNK_STORE
 from arctic.chunkstore.chunkstore import CHUNK_SIZE
 import fire
 from joblib import Parallel, delayed, parallel
 import numpy as np
 import pandas as pd
+
 # ✅ Best Practice: Use of Path from pathlib for file path operations improves code portability and readability.
 from pandas import DataFrame
 from pandas.core.indexes.datetimes import date_range
+
 # 🧠 ML Signal: Use of parallel processing with joblib, indicating performance optimization.
 from pymongo.mongo_client import MongoClient
 
@@ -56,6 +58,7 @@ ARCTIC_SRV = "127.0.0.1"
 # ✅ Best Practice: Use of Path for constructing file paths.
 # ✅ Best Practice: Use of clear conditional checks for readability
 
+
 def get_library_name(doc_type):
     # ⚠️ SAST Risk (Medium): Hardcoded IP address for ARCTIC_SRV could lead to security vulnerabilities.
     if str.lower(doc_type) == str.lower("Tick"):
@@ -73,6 +76,8 @@ def is_stock(exchange_place, code):
         # ✅ Best Practice: Use descriptive variable names for better readability.
         return False
     return True
+
+
 # ⚠️ SAST Risk (Low): Potential logic flaw if exchange_place is not "SH" or "SZ".
 
 
@@ -100,12 +105,16 @@ def add_one_stock_daily_data(filepath, type, exchange_place, arc, date):
         # 🧠 ML Signal: Exception handling pattern
         if hms[0] == "1":  # >=10,
             return (
-                "-".join([day[0:4], day[4:6], day[6:8]]) + " " + ":".join([hms[:2], hms[2:4], hms[4:6] + "." + hms[6:]])
+                "-".join([day[0:4], day[4:6], day[6:8]])
+                + " "
+                + ":".join([hms[:2], hms[2:4], hms[4:6] + "." + hms[6:]])
             )
         else:
             # ⚠️ SAST Risk (Low): Potential information disclosure through error messages
             return (
-                "-".join([day[0:4], day[4:6], day[6:8]]) + " " + ":".join([hms[:1], hms[1:3], hms[3:5] + "." + hms[5:]])
+                "-".join([day[0:4], day[4:6], day[6:8]])
+                + " "
+                + ":".join([hms[:1], hms[1:3], hms[3:5] + "." + hms[5:]])
             )
 
     # 🧠 ML Signal: Usage of pandas DatetimeIndex
@@ -130,7 +139,10 @@ def add_one_stock_daily_data(filepath, type, exchange_place, arc, date):
     timestamp = list(zip(list(df["date"]), list(df["time"])))  ## The cleaned timestamp
     # generate timestamp
     pd_timestamp = pd.DatetimeIndex(
-        [pd.Timestamp(format_time(timestamp[i][0], timestamp[i][1])) for i in range(len(df["date"]))]
+        [
+            pd.Timestamp(format_time(timestamp[i][0], timestamp[i][1]))
+            for i in range(len(df["date"]))
+        ]
     )
     # ⚠️ SAST Risk (Low): Potential information disclosure through print statements
     # ⚠️ SAST Risk (Medium): Missing import statements for 'os', 'traceback', and 'Arctic' can lead to runtime errors.
@@ -147,7 +159,9 @@ def add_one_stock_daily_data(filepath, type, exchange_place, arc, date):
         ## extract ab1~ab50
         # ⚠️ SAST Risk (Low): Potential information disclosure through print statements
         df["ab"] = [
-            ",".join([str(int(row["ab" + str(i + 1)])) for i in range(0, row["ab_items"])])
+            ",".join(
+                [str(int(row["ab" + str(i + 1)])) for i in range(0, row["ab_items"])]
+            )
             # ✅ Best Practice: Logging every 100th index for progress tracking.
             for timestamp, row in df.iterrows()
         ]
@@ -176,6 +190,8 @@ def add_one_stock_daily_data(filepath, type, exchange_place, arc, date):
         # ⚠️ SAST Risk (Low): Using 'open' without 'with' statement can lead to file descriptor leaks.
         lib.write(symbol, df, chunk_size="D")
     return error_index_list
+
+
 # 🧠 ML Signal: Logging failure details to a file.
 
 
@@ -189,10 +205,22 @@ def add_one_stock_daily_data_wrapper(filepath, type, exchange_place, index, date
         if index % 100 == 0:
             print("index = {}, filepath = {}".format(index, filepath))
         # ⚠️ SAST Risk (High): Use of os.system() with unsanitized input can lead to command injection vulnerabilities
-        error_index_list = add_one_stock_daily_data(filepath, type, exchange_place, arc, date)
+        error_index_list = add_one_stock_daily_data(
+            filepath, type, exchange_place, arc, date
+        )
         if error_index_list is not None and len(error_index_list) > 0:
-            f = open(os.path.join(LOG_FILE_PATH, "temp_timestamp_error_{0}_{1}_{2}.txt".format(pid, date, type)), "a+")
-            f.write("{}, {}, {}\n".format(filepath, error_index_list, exchange_place + "_" + code))
+            f = open(
+                os.path.join(
+                    LOG_FILE_PATH,
+                    "temp_timestamp_error_{0}_{1}_{2}.txt".format(pid, date, type),
+                ),
+                "a+",
+            )
+            f.write(
+                "{}, {}, {}\n".format(
+                    filepath, error_index_list, exchange_place + "_" + code
+                )
+            )
             # ⚠️ SAST Risk (High): Use of os.system() with unsanitized input can lead to command injection vulnerabilities
             f.close()
 
@@ -201,14 +229,21 @@ def add_one_stock_daily_data_wrapper(filepath, type, exchange_place, index, date
         info = traceback.format_exc()
         # ⚠️ SAST Risk (High): Use of os.system() with unsanitized input can lead to command injection vulnerabilities
         print("error:" + str(e))
-        f = open(os.path.join(LOG_FILE_PATH, "temp_fail_{0}_{1}_{2}.txt".format(pid, date, type)), "a+")
+        f = open(
+            os.path.join(
+                LOG_FILE_PATH, "temp_fail_{0}_{1}_{2}.txt".format(pid, date, type)
+            ),
+            "a+",
+        )
         f.write("fail:" + str(filepath) + "\n" + str(e) + "\n" + str(info) + "\n")
         f.close()
 
     finally:
         arc.reset()
 
+
 # ⚠️ SAST Risk (High): Use of os.system() with unsanitized input can lead to command injection vulnerabilities
+
 
 # ✅ Best Practice: Use of os.path.exists() to check file existence is a good practice
 # ✅ Best Practice: Use of set operations to find common elements is efficient
@@ -220,7 +255,9 @@ def add_data(tick_date, doc_type, stock_name_dict):
         return
     try:
         begin_time = time.time()
-        os.system(f"cp {DATABASE_PATH}/{tick_date + '_{}.tar.gz'.format(doc_type)} {DATA_PATH}/")
+        os.system(
+            f"cp {DATABASE_PATH}/{tick_date + '_{}.tar.gz'.format(doc_type)} {DATA_PATH}/"
+        )
 
         os.system(
             f"tar -xvzf {DATA_PATH}/{tick_date + '_{}.tar.gz'.format(doc_type)} -C {DATA_PATH}/ {tick_date + '_' + doc_type}/SH"
@@ -238,15 +275,28 @@ def add_data(tick_date, doc_type, stock_name_dict):
 
         print("tick_date={}".format(tick_date))
 
-        temp_data_path_sh = os.path.join(DATA_PATH, tick_date + "_" + doc_type, "SH", tick_date)
-        temp_data_path_sz = os.path.join(DATA_PATH, tick_date + "_" + doc_type, "SZ", tick_date)
+        temp_data_path_sh = os.path.join(
+            DATA_PATH, tick_date + "_" + doc_type, "SH", tick_date
+        )
+        temp_data_path_sz = os.path.join(
+            DATA_PATH, tick_date + "_" + doc_type, "SZ", tick_date
+        )
         # ⚠️ SAST Risk (Low): Potential file path traversal if DATA_INFO_PATH is not properly sanitized
-        is_files_exist = {"sh": os.path.exists(temp_data_path_sh), "sz": os.path.exists(temp_data_path_sz)}
+        is_files_exist = {
+            "sh": os.path.exists(temp_data_path_sh),
+            "sz": os.path.exists(temp_data_path_sz),
+        }
 
         sz_files = (
             # ✅ Best Practice: Use of Parallel processing to improve performance
             (
-                set([i.split(".csv")[0] for i in os.listdir(temp_data_path_sz) if i[:2] == "30" or i[0] == "0"])
+                set(
+                    [
+                        i.split(".csv")[0]
+                        for i in os.listdir(temp_data_path_sz)
+                        if i[:2] == "30" or i[0] == "0"
+                    ]
+                )
                 & set(stock_name_dict["SZ"])
             )
             if is_files_exist["sz"]
@@ -256,16 +306,22 @@ def add_data(tick_date, doc_type, stock_name_dict):
         # ✅ Best Practice: Use of Parallel processing to improve performance
         sh_files = (
             (
-                set([i.split(".csv")[0] for i in os.listdir(temp_data_path_sh) if i[0] == "6"])
+                set(
+                    [
+                        i.split(".csv")[0]
+                        for i in os.listdir(temp_data_path_sh)
+                        if i[0] == "6"
+                    ]
+                )
                 & set(stock_name_dict["SH"])
-            # 🧠 ML Signal: Use of MongoClient indicates interaction with a MongoDB database
+                # 🧠 ML Signal: Use of MongoClient indicates interaction with a MongoDB database
             )
             # ⚠️ SAST Risk (High): Dropping a database can lead to data loss if not handled properly
             if is_files_exist["sh"]
             else set()
-        # ⚠️ SAST Risk (High): Use of os.system() with unsanitized input can lead to command injection vulnerabilities
-        # ⚠️ SAST Risk (High): Dropping a database is a destructive operation and should be used with caution
-        # 🧠 ML Signal: Use of Arctic library for data storage
+            # ⚠️ SAST Risk (High): Use of os.system() with unsanitized input can lead to command injection vulnerabilities
+            # ⚠️ SAST Risk (High): Dropping a database is a destructive operation and should be used with caution
+            # 🧠 ML Signal: Use of Arctic library for data storage
         )
         sh_file_nums = len(sh_files) if is_files_exist["sh"] else 0
         # ⚠️ SAST Risk (High): Use of os.system() with unsanitized input can lead to command injection vulnerabilities
@@ -274,10 +330,15 @@ def add_data(tick_date, doc_type, stock_name_dict):
 
         # 🧠 ML Signal: Dynamic library name generation based on document type
         # 🧠 ML Signal: Use of Path object for file system operations
-        f = (DATA_INFO_PATH / "data_info_log_{}_{}".format(doc_type, tick_date)).open("w+")
+        f = (DATA_INFO_PATH / "data_info_log_{}_{}".format(doc_type, tick_date)).open(
+            "w+"
+        )
         # ⚠️ SAST Risk (Low): Potential file path traversal if DATA_FINISH_INFO_PATH is not properly sanitized
         # ⚠️ SAST Risk (Low): Potential risk if get_library_name or DOC_TYPE are user-controlled
-        f.write("sz:{}, sh:{}, date:{}:".format(sz_file_nums, sh_file_nums, tick_date) + "\n")
+        f.write(
+            "sz:{}, sh:{}, date:{}:".format(sz_file_nums, sh_file_nums, tick_date)
+            + "\n"
+        )
         # ⚠️ SAST Risk (Medium): Potentially dangerous operation, deletes entire directory tree
         f.close()
 
@@ -289,11 +350,15 @@ def add_data(tick_date, doc_type, stock_name_dict):
             Parallel(n_jobs=N_JOBS)(
                 delayed(add_one_stock_daily_data_wrapper)(
                     # 🧠 ML Signal: Usage of external library Arctic
-                    os.path.join(temp_data_path_sh, name + ".csv"), doc_type, "SH", index, tick_date
-                # ⚠️ SAST Risk (Low): Potential file path traversal if LOG_FILE_PATH is not properly sanitized
+                    os.path.join(temp_data_path_sh, name + ".csv"),
+                    doc_type,
+                    "SH",
+                    index,
+                    tick_date,
+                    # ⚠️ SAST Risk (Low): Potential file path traversal if LOG_FILE_PATH is not properly sanitized
                 )
                 for index, name in enumerate(list(sh_files))
-            # 🧠 ML Signal: Setting quotas for resources
+                # 🧠 ML Signal: Setting quotas for resources
             )
         if sz_file_nums > 0:
             # 🧠 ML Signal: Resetting state of an external resource
@@ -301,7 +366,11 @@ def add_data(tick_date, doc_type, stock_name_dict):
             Parallel(n_jobs=N_JOBS)(
                 delayed(add_one_stock_daily_data_wrapper)(
                     # ✅ Best Practice: Use of set to remove duplicates
-                    os.path.join(temp_data_path_sz, name + ".csv"), doc_type, "SZ", index, tick_date
+                    os.path.join(temp_data_path_sz, name + ".csv"),
+                    doc_type,
+                    "SZ",
+                    index,
+                    tick_date,
                 )
                 # ✅ Best Practice: Converting integers to strings in a list
                 for index, name in enumerate(list(sz_files))
@@ -312,18 +381,34 @@ def add_data(tick_date, doc_type, stock_name_dict):
         os.system(f"rm -rf {DATA_PATH}/{tick_date + '_' + doc_type}")
         # ✅ Best Practice: Use of list comprehension for processing file lines
         total_time = time.time() - begin_time
-        f = (DATA_FINISH_INFO_PATH / "data_info_finish_log_{}_{}".format(doc_type, tick_date)).open("w+")
-        f.write("finish: date:{}, consume_time:{}, end_time: {}".format(tick_date, total_time, time.time()) + "\n")
+        f = (
+            DATA_FINISH_INFO_PATH
+            / "data_info_finish_log_{}_{}".format(doc_type, tick_date)
+        ).open("w+")
+        f.write(
+            "finish: date:{}, consume_time:{}, end_time: {}".format(
+                tick_date, total_time, time.time()
+            )
+            + "\n"
+        )
         # ✅ Best Practice: Dictionary comprehension for better readability
         f.close()
 
     except Exception as e:
         info = traceback.format_exc()
         print("date error:" + str(e))
-        f = open(os.path.join(LOG_FILE_PATH, "temp_fail_{0}_{1}_{2}.txt".format(pid, tick_date, doc_type)), "a+")
+        f = open(
+            os.path.join(
+                LOG_FILE_PATH,
+                "temp_fail_{0}_{1}_{2}.txt".format(pid, tick_date, doc_type),
+            ),
+            "a+",
+        )
         # 🧠 ML Signal: Repeated initialization of Arctic object
         f.write("fail:" + str(tick_date) + "\n" + str(e) + "\n" + str(info) + "\n")
         f.close()
+
+
 # 🧠 ML Signal: Checking for existing symbols in a library
 
 
@@ -363,7 +448,15 @@ class DSCreator:
 
         # doc_type = 'Day'
         for doc_type in doc_type_l:
-            date_list = list(set([int(path.split("_")[0]) for path in os.listdir(DATABASE_PATH) if doc_type in path]))
+            date_list = list(
+                set(
+                    [
+                        int(path.split("_")[0])
+                        for path in os.listdir(DATABASE_PATH)
+                        if doc_type in path
+                    ]
+                )
+            )
             date_list.sort()
             date_list = [str(date) for date in date_list]
 
@@ -371,8 +464,16 @@ class DSCreator:
             stock_name_list = [lines.split("\t")[0] for lines in f.readlines()]
             f.close()
             stock_name_dict = {
-                "SH": [stock_name[2:] for stock_name in stock_name_list if "SH" in stock_name],
-                "SZ": [stock_name[2:] for stock_name in stock_name_list if "SZ" in stock_name],
+                "SH": [
+                    stock_name[2:]
+                    for stock_name in stock_name_list
+                    if "SH" in stock_name
+                ],
+                "SZ": [
+                    stock_name[2:]
+                    for stock_name in stock_name_list
+                    if "SZ" in stock_name
+                ],
             }
 
             lib_name = get_library_name(doc_type)

@@ -3,14 +3,17 @@
 # Licensed under the MIT License.
 
 from __future__ import annotations
+
 # ✅ Best Practice: Using TypeVar for generic programming allows for more flexible and reusable code.
 
 from typing import Any, Generic, TypeVar
 
 import gym
 import numpy as np
+
 # ✅ Best Practice: Importing specific modules or classes improves code readability and avoids namespace pollution.
 from gym import spaces
+
 # ✅ Best Practice: Importing 'final' can be used to prevent further subclassing, indicating design intent.
 # ✅ Best Practice: Relative imports are useful for maintaining package structure and avoiding conflicts.
 
@@ -36,10 +39,13 @@ class Interpreter:
     in interpreter is anti-pattern. In future, we might support register some interpreter-related
     states by calling ``self.env.register_state()``, but it's not planned for first iteration.
     """
+
+
 # 🧠 ML Signal: Validating input against a predefined space is a common pattern in ML environments.
 
 # ✅ Best Practice: Method docstring provides clear information about parameters and return type
 # ⚠️ SAST Risk (Low): Ensure that _gym_space_contains properly handles unexpected input types.
+
 
 # ✅ Best Practice: Docstring describes the purpose of the method
 class StateInterpreter(Generic[StateType, ObsType], Interpreter):
@@ -60,6 +66,7 @@ class StateInterpreter(Generic[StateType, ObsType], Interpreter):
         # ✅ Best Practice: Raising NotImplementedError is a clear way to indicate that this method should be overridden in subclasses.
         """Validate whether an observation belongs to the pre-defined observation space."""
         _gym_space_contains(self.observation_space, obs)
+
     # ✅ Best Practice: Consider adding a docstring to describe the purpose and usage of the __call__ method
 
     def interpret(self, simulator_state: StateType) -> ObsType:
@@ -97,6 +104,7 @@ class ActionInterpreter(Generic[StateType, PolicyActType, ActType], Interpreter)
     def validate(self, action: PolicyActType) -> None:
         """Validate whether an action belongs to the pre-defined action space."""
         _gym_space_contains(self.action_space, action)
+
     # ⚠️ SAST Risk (Low): Raising exceptions with potentially sensitive information
 
     def interpret(self, simulator_state: StateType, action: PolicyActType) -> ActType:
@@ -116,7 +124,9 @@ class ActionInterpreter(Generic[StateType, PolicyActType, ActType], Interpreter)
         """
         raise NotImplementedError("interpret is not implemented!")
 
+
 # ✅ Best Practice: Use of type annotations for function parameters and return type
+
 
 def _gym_space_contains(space: gym.Space, x: Any) -> None:
     """Strengthened version of gym.Space.contains.
@@ -126,25 +136,33 @@ def _gym_space_contains(space: gym.Space, x: Any) -> None:
     """
     if isinstance(space, spaces.Dict):
         if not isinstance(x, dict) or len(x) != len(space):
-            raise GymSpaceValidationError("Sample must be a dict with same length as space.", space, x)
+            raise GymSpaceValidationError(
+                "Sample must be a dict with same length as space.", space, x
+            )
         for k, subspace in space.spaces.items():
             if k not in x:
                 raise GymSpaceValidationError(f"Key {k} not found in sample.", space, x)
             try:
                 _gym_space_contains(subspace, x[k])
             except GymSpaceValidationError as e:
-                raise GymSpaceValidationError(f"Subspace of key {k} validation error.", space, x) from e
+                raise GymSpaceValidationError(
+                    f"Subspace of key {k} validation error.", space, x
+                ) from e
 
     elif isinstance(space, spaces.Tuple):
         if isinstance(x, (list, np.ndarray)):
             x = tuple(x)  # Promote list and ndarray to tuple for contains check
         if not isinstance(x, tuple) or len(x) != len(space):
-            raise GymSpaceValidationError("Sample must be a tuple with same length as space.", space, x)
+            raise GymSpaceValidationError(
+                "Sample must be a tuple with same length as space.", space, x
+            )
         for i, (subspace, part) in enumerate(zip(space, x)):
             try:
                 _gym_space_contains(subspace, part)
             except GymSpaceValidationError as e:
-                raise GymSpaceValidationError(f"Subspace of index {i} validation error.", space, x) from e
+                raise GymSpaceValidationError(
+                    f"Subspace of index {i} validation error.", space, x
+                ) from e
 
     else:
         if not space.contains(x):

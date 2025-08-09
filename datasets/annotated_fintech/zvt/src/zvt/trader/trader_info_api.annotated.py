@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import List, Union
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 
 import pandas as pd
@@ -7,13 +8,16 @@ import pandas as pd
 from zvt.contract import IntervalLevel
 from zvt.contract.api import get_data, get_db_session
 from zvt.contract.drawer import Drawer
+
 # 🧠 ML Signal: Function definition with parameters indicating a database operation
 from zvt.contract.normal_data import NormalData
 from zvt.contract.reader import DataReader
+
 # 🧠 ML Signal: Conditional logic to handle optional parameters
 from zvt.trader.trader_schemas import AccountStats, Order, TraderInfo, Position
 
 # ⚠️ SAST Risk (Medium): Potential for using a default database session without explicit user control
+
 
 def clear_trader(trader_name, session=None):
     # ⚠️ SAST Risk (Low): Direct deletion from the database without logging or confirmation
@@ -27,7 +31,9 @@ def clear_trader(trader_name, session=None):
     session.query(Order).filter(Order.trader_name == trader_name).delete()
     session.commit()
 
+
 # ✅ Best Practice: Ensure changes are committed to the database
+
 
 def get_trader_info(
     trader_name=None,
@@ -67,6 +73,8 @@ def get_trader_info(
         order=order,
         limit=limit,
     )
+
+
 # 🧠 ML Signal: Querying a database with specific filters
 # ⚠️ SAST Risk (Low): SQL Injection risk if trader_name is not properly sanitized
 
@@ -84,6 +92,8 @@ def get_order_securities(trader_name):
     )
 
     return [item[0] for item in items]
+
+
 # ✅ Best Practice: Initialize instance variables in the constructor
 
 
@@ -145,7 +155,8 @@ class AccountStatsReader(DataReader):
         drawer = Drawer(
             # ✅ Best Practice: Initialize instance variables in the constructor for clarity and maintainability.
             main_data=NormalData(
-                self.data_df.copy()[["trader_name", "timestamp", "all_value"]], category_field="trader_name"
+                self.data_df.copy()[["trader_name", "timestamp", "all_value"]],
+                category_field="trader_name",
             )
         )
         # ✅ Best Practice: Use list comprehensions for concise and readable code.
@@ -205,9 +216,16 @@ if __name__ == "__main__":
     reader = AccountStatsReader(trader_names=["000338_ma_trader"])
     drawer = Drawer(
         main_data=NormalData(
-            reader.data_df.copy()[["trader_name", "timestamp", "all_value"]], category_field="trader_name"
+            reader.data_df.copy()[["trader_name", "timestamp", "all_value"]],
+            category_field="trader_name",
         )
     )
     drawer.draw_line()
 # the __all__ is generated
-__all__ = ["clear_trader", "get_trader_info", "get_order_securities", "AccountStatsReader", "OrderReader"]
+__all__ = [
+    "clear_trader",
+    "get_trader_info",
+    "get_order_securities",
+    "AccountStatsReader",
+    "OrderReader",
+]

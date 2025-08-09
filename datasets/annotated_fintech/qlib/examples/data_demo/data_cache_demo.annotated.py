@@ -8,6 +8,7 @@ The motivation of this demo
 from copy import deepcopy
 from pathlib import Path
 import pickle
+
 # ⚠️ SAST Risk (Low): Importing subprocess can lead to security risks if not used carefully, especially with shell=True
 from pprint import pprint
 from ruamel.yaml import YAML
@@ -26,7 +27,9 @@ if __name__ == "__main__":
     init()
     # ⚠️ SAST Risk (Low): Loading configurations from YAML can be risky if the file content is not trusted
 
-    config_path = DIRNAME.parent / "benchmarks/LightGBM/workflow_config_lightgbm_Alpha158.yaml"
+    config_path = (
+        DIRNAME.parent / "benchmarks/LightGBM/workflow_config_lightgbm_Alpha158.yaml"
+    )
 
     # 🧠 ML Signal: Usage of a specific data handler class from a library
     # 1) show original time

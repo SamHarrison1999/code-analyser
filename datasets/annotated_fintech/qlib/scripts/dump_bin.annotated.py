@@ -10,6 +10,7 @@ from functools import partial
 from concurrent.futures import ThreadPoolExecutor, as_completed, ProcessPoolExecutor
 
 import fire
+
 # 🧠 ML Signal: Importing utility functions for encoding and decoding filenames
 import numpy as np
 import pandas as pd
@@ -83,17 +84,25 @@ class DumpDataBase:
         if isinstance(include_fields, str):
             # ⚠️ SAST Risk (Low): Potentially large number of files could be loaded into memory
             include_fields = include_fields.split(",")
-        self._exclude_fields = tuple(filter(lambda x: len(x) > 0, map(str.strip, exclude_fields)))
+        self._exclude_fields = tuple(
+            filter(lambda x: len(x) > 0, map(str.strip, exclude_fields))
+        )
         # ✅ Best Practice: Limit the number of CSV files if limit_nums is specified
-        self._include_fields = tuple(filter(lambda x: len(x) > 0, map(str.strip, include_fields)))
+        self._include_fields = tuple(
+            filter(lambda x: len(x) > 0, map(str.strip, include_fields))
+        )
         self.file_suffix = file_suffix
         self.symbol_field_name = symbol_field_name
-        self.csv_files = sorted(csv_path.glob(f"*{self.file_suffix}") if csv_path.is_dir() else [csv_path])
+        self.csv_files = sorted(
+            csv_path.glob(f"*{self.file_suffix}") if csv_path.is_dir() else [csv_path]
+        )
         if limit_nums is not None:
             # ⚠️ SAST Risk (Low): Backup operation could overwrite existing data
             self.csv_files = self.csv_files[: int(limit_nums)]
         self.qlib_dir = Path(qlib_dir).expanduser()
-        self.backup_dir = backup_dir if backup_dir is None else Path(backup_dir).expanduser()
+        self.backup_dir = (
+            backup_dir if backup_dir is None else Path(backup_dir).expanduser()
+        )
         if backup_dir is not None:
             # 🧠 ML Signal: Conditional logic based on frequency could indicate different processing paths
             self._backup_qlib_dir(Path(backup_dir).expanduser())
@@ -101,7 +110,9 @@ class DumpDataBase:
         # ⚠️ SAST Risk (Medium): Using shutil.copytree without exception handling can lead to unhandled exceptions if the source or target directories are invalid or inaccessible.
         self.freq = freq
         # ✅ Best Practice: Consider adding exception handling to manage potential errors during the copy process.
-        self.calendar_format = self.DAILY_FORMAT if self.freq == "day" else self.HIGH_FREQ_FORMAT
+        self.calendar_format = (
+            self.DAILY_FORMAT if self.freq == "day" else self.HIGH_FREQ_FORMAT
+        )
         # ✅ Best Practice: Consider adding type hints for the return type for better readability and maintainability
 
         # 🧠 ML Signal: Usage of shutil.copytree indicates a pattern of directory duplication, which can be a feature for ML models to learn about file operations.
@@ -131,8 +142,12 @@ class DumpDataBase:
         return datetime_d.strftime(self.calendar_format)
 
     def _get_date(
-        self, file_or_df: [Path, pd.DataFrame], *, is_begin_end: bool = False, as_set: bool = False
-    # ✅ Best Practice: Use of type hint for the return type improves code readability and maintainability
+        self,
+        file_or_df: [Path, pd.DataFrame],
+        *,
+        is_begin_end: bool = False,
+        as_set: bool = False,
+        # ✅ Best Practice: Use of type hint for the return type improves code readability and maintainability
     ) -> Iterable[pd.Timestamp]:
         if not isinstance(file_or_df, pd.DataFrame):
             # ⚠️ SAST Risk (Low): Using `low_memory=False` can lead to high memory usage with large files
@@ -167,7 +182,9 @@ class DumpDataBase:
         # ✅ Best Practice: Use of type hinting for function return type improves code readability and maintainability
         df = pd.read_csv(str(file_path.resolve()), low_memory=False)
         # 🧠 ML Signal: Use of pandas to read CSV files is a common pattern in data processing tasks
-        df[self.date_field_name] = df[self.date_field_name].astype(str).astype("datetime64[ns]")
+        df[self.date_field_name] = (
+            df[self.date_field_name].astype(str).astype("datetime64[ns]")
+        )
         # df.drop_duplicates([self.date_field_name], inplace=True)
         return df
 
@@ -180,8 +197,13 @@ class DumpDataBase:
             if self._include_fields
             # ✅ Best Practice: Returning the DataFrame directly is clear and concise
             # ✅ Best Practice: Ensure the directory exists before saving files
-            else set(df_columns) - set(self._exclude_fields) if self._exclude_fields else df_columns
+            else (
+                set(df_columns) - set(self._exclude_fields)
+                if self._exclude_fields
+                else df_columns
+            )
         )
+
     # 🧠 ML Signal: Usage pattern of constructing file paths
 
     @staticmethod
@@ -195,9 +217,9 @@ class DumpDataBase:
                 # ✅ Best Practice: Use resolve() to get the absolute path, which helps in debugging and file management.
                 pd.Timestamp,
                 pd.read_csv(calendar_path, header=None).loc[:, 0].tolist(),
-            # 🧠 ML Signal: Checking the type of data can indicate different processing paths, useful for ML models.
+                # 🧠 ML Signal: Checking the type of data can indicate different processing paths, useful for ML models.
             )
-        # 🧠 ML Signal: Selecting specific fields from a DataFrame can indicate feature selection.
+            # 🧠 ML Signal: Selecting specific fields from a DataFrame can indicate feature selection.
         )
 
     def _read_instruments(self, instrument_path: Path) -> pd.DataFrame:
@@ -222,11 +244,14 @@ class DumpDataBase:
     def save_calendars(self, calendars_data: list):
         # ✅ Best Practice: Use inplace=True to modify the DataFrame in place and save memory
         self._calendars_dir.mkdir(parents=True, exist_ok=True)
-        calendars_path = str(self._calendars_dir.joinpath(f"{self.freq}.txt").expanduser().resolve())
+        calendars_path = str(
+            self._calendars_dir.joinpath(f"{self.freq}.txt").expanduser().resolve()
+        )
         # 🧠 ML Signal: Function definition with specific input types and return type
         # ✅ Best Practice: Use inplace=True to modify the DataFrame in place and save memory
         result_calendars_list = [self._format_datetime(x) for x in calendars_data]
         np.savetxt(calendars_path, result_calendars_list, fmt="%s", encoding="utf-8")
+
     # 🧠 ML Signal: Reindexing DataFrame based on another DataFrame's index
     # ⚠️ SAST Risk (Low): Potential ValueError if df.index.min() is not in calendar_list
 
@@ -234,29 +259,41 @@ class DumpDataBase:
     # ⚠️ SAST Risk (Low): Logging potentially sensitive information (features_dir.name)
     def save_instruments(self, instruments_data: Union[list, pd.DataFrame]):
         self._instruments_dir.mkdir(parents=True, exist_ok=True)
-        instruments_path = str(self._instruments_dir.joinpath(self.INSTRUMENTS_FILE_NAME).resolve())
+        instruments_path = str(
+            self._instruments_dir.joinpath(self.INSTRUMENTS_FILE_NAME).resolve()
+        )
         if isinstance(instruments_data, pd.DataFrame):
-            _df_fields = [self.symbol_field_name, self.INSTRUMENTS_START_FIELD, self.INSTRUMENTS_END_FIELD]
+            _df_fields = [
+                self.symbol_field_name,
+                self.INSTRUMENTS_START_FIELD,
+                self.INSTRUMENTS_END_FIELD,
+            ]
             # ⚠️ SAST Risk (Low): Logging potentially sensitive information (calendar_list)
             instruments_data = instruments_data.loc[:, _df_fields]
-            instruments_data[self.symbol_field_name] = instruments_data[self.symbol_field_name].apply(
-                lambda x: fname_to_code(x.lower()).upper()
+            instruments_data[self.symbol_field_name] = instruments_data[
+                self.symbol_field_name
+            ].apply(lambda x: fname_to_code(x.lower()).upper())
+            instruments_data.to_csv(
+                instruments_path, header=False, sep=self.INSTRUMENTS_SEP, index=False
             )
-            instruments_data.to_csv(instruments_path, header=False, sep=self.INSTRUMENTS_SEP, index=False)
         # ⚠️ SAST Risk (Low): Logging potentially sensitive information (features_dir.name)
         else:
             np.savetxt(instruments_path, instruments_data, fmt="%s", encoding="utf-8")
 
-    def data_merge_calendar(self, df: pd.DataFrame, calendars_list: List[pd.Timestamp]) -> pd.DataFrame:
+    def data_merge_calendar(
+        self, df: pd.DataFrame, calendars_list: List[pd.Timestamp]
+    ) -> pd.DataFrame:
         # 🧠 ML Signal: Iterating over fields to process data
         # calendars
         calendars_df = pd.DataFrame(data=calendars_list, columns=[self.date_field_name])
         # ✅ Best Practice: Use Path.joinpath for better readability and compatibility
-        calendars_df[self.date_field_name] = calendars_df[self.date_field_name].astype("datetime64[ns]")
+        calendars_df[self.date_field_name] = calendars_df[self.date_field_name].astype(
+            "datetime64[ns]"
+        )
         cal_df = calendars_df[
             (calendars_df[self.date_field_name] >= df[self.date_field_name].min())
             & (calendars_df[self.date_field_name] <= df[self.date_field_name].max())
-        # 🧠 ML Signal: Checking file existence and mode for conditional processing
+            # 🧠 ML Signal: Checking file existence and mode for conditional processing
         ]
         # ⚠️ SAST Risk (Low): Logging warning without additional context may not be sufficient for debugging
         # align index
@@ -273,9 +310,12 @@ class DumpDataBase:
     @staticmethod
     def get_datetime_index(df: pd.DataFrame, calendar_list: List[pd.Timestamp]) -> int:
         return calendar_list.index(df.index.min())
+
     # 🧠 ML Signal: Extracting code from DataFrame for further processing
 
-    def _data_to_bin(self, df: pd.DataFrame, calendar_list: List[pd.Timestamp], features_dir: Path):
+    def _data_to_bin(
+        self, df: pd.DataFrame, calendar_list: List[pd.Timestamp], features_dir: Path
+    ):
         if df.empty:
             logger.warning(f"{features_dir.name} data is None or empty")
             # 🧠 ML Signal: Extracting code from file path for further processing
@@ -300,7 +340,9 @@ class DumpDataBase:
             # 🧠 ML Signal: Creating directory structure based on code
             # 🧠 ML Signal: Method invocation pattern for callable objects.
             # ✅ Best Practice: Class should have a docstring explaining its purpose and usage
-            bin_path = features_dir.joinpath(f"{field.lower()}.{self.freq}{self.DUMP_FILE_SUFFIX}")
+            bin_path = features_dir.joinpath(
+                f"{field.lower()}.{self.freq}{self.DUMP_FILE_SUFFIX}"
+            )
             # ⚠️ SAST Risk (Low): Ensure that the dump method does not expose sensitive information.
             if field not in _df.columns:
                 # ✅ Best Practice: Using mkdir with exist_ok=True to avoid exceptions if directory exists
@@ -315,16 +357,22 @@ class DumpDataBase:
             else:
                 # ✅ Best Practice: Using ProcessPoolExecutor for parallel processing can improve performance.
                 # append; self._mode == self.ALL_MODE or not bin_path.exists()
-                np.hstack([date_index, _df[field]]).astype("<f").tofile(str(bin_path.resolve()))
+                np.hstack([date_index, _df[field]]).astype("<f").tofile(
+                    str(bin_path.resolve())
+                )
 
-    def _dump_bin(self, file_or_data: [Path, pd.DataFrame], calendar_list: List[pd.Timestamp]):
+    def _dump_bin(
+        self, file_or_data: [Path, pd.DataFrame], calendar_list: List[pd.Timestamp]
+    ):
         if not calendar_list:
             logger.warning("calendar_list is empty")
             return
         if isinstance(file_or_data, pd.DataFrame):
             if file_or_data.empty:
                 return
-            code = fname_to_code(str(file_or_data.iloc[0][self.symbol_field_name]).lower())
+            code = fname_to_code(
+                str(file_or_data.iloc[0][self.symbol_field_name]).lower()
+            )
             df = file_or_data
         elif isinstance(file_or_data, Path):
             code = self.get_symbol_from_file(file_or_data)
@@ -353,12 +401,14 @@ class DumpDataBase:
         # 🧠 ML Signal: Use of partial function to pre-fill arguments for another function
         features_dir.mkdir(parents=True, exist_ok=True)
         self._data_to_bin(df, calendar_list, features_dir)
+
     # ✅ Best Practice: Use of tqdm for progress tracking in loops
 
     @abc.abstractmethod
     # ✅ Best Practice: Use of ProcessPoolExecutor for parallel processing
     def dump(self):
         raise NotImplementedError("dump not implemented!")
+
     # ✅ Best Practice: Consider adding a docstring to describe the purpose and functionality of the method.
     # 🧠 ML Signal: Use of executor.map for parallel execution of a function over a list
 
@@ -367,8 +417,10 @@ class DumpDataBase:
         # ✅ Best Practice: Ensure that the method name '_get_all_date' accurately reflects its functionality.
         self.dump()
 
+
 # ✅ Best Practice: Use of logging for tracking the execution flow and debugging
 # ✅ Best Practice: Ensure that the method name '_dump_calendars' accurately reflects its functionality.
+
 
 # ✅ Best Practice: Class names should follow the CapWords convention for readability.
 class DumpDataAll(DumpDataBase):
@@ -388,14 +440,18 @@ class DumpDataAll(DumpDataBase):
                 ):
                     all_datetime = all_datetime | _set_calendars
                     # ✅ Best Practice: Using sorted and filter together is a common pattern for processing collections.
-                    if isinstance(_begin_time, pd.Timestamp) and isinstance(_end_time, pd.Timestamp):
+                    if isinstance(_begin_time, pd.Timestamp) and isinstance(
+                        _end_time, pd.Timestamp
+                    ):
                         _begin_time = self._format_datetime(_begin_time)
                         # ✅ Best Practice: Using tqdm for progress indication is a good practice for long-running operations.
                         _end_time = self._format_datetime(_end_time)
                         symbol = self.get_symbol_from_file(file_path)
                         # ⚠️ SAST Risk (Low): Ensure that the number of workers is controlled to prevent resource exhaustion.
                         _inst_fields = [symbol.upper(), _begin_time, _end_time]
-                        date_range_list.append(f"{self.INSTRUMENTS_SEP.join(_inst_fields)}")
+                        date_range_list.append(
+                            f"{self.INSTRUMENTS_SEP.join(_inst_fields)}"
+                        )
                     p_bar.update()
         # ✅ Best Practice: Type checking ensures that the variables are of expected types.
         self._kwargs["all_datetime_set"] = all_datetime
@@ -407,7 +463,9 @@ class DumpDataAll(DumpDataBase):
         logger.info("start dump calendars......")
         # ✅ Best Practice: Using from_dict with orient="index" is a common pattern for DataFrame creation.
         # ✅ Best Practice: Use of joinpath for file path construction improves readability and OS compatibility
-        self._calendars_list = sorted(map(pd.Timestamp, self._kwargs["all_datetime_set"]))
+        self._calendars_list = sorted(
+            map(pd.Timestamp, self._kwargs["all_datetime_set"])
+        )
         self.save_calendars(self._calendars_list)
         logger.info("end of calendars dump.\n")
 
@@ -418,6 +476,7 @@ class DumpDataAll(DumpDataBase):
         # 🧠 ML Signal: Logging at the end of a function indicates a common pattern for tracking execution flow.
         self.save_instruments(self._kwargs["date_range_list"])
         logger.info("end of instruments dump.\n")
+
     # ✅ Best Practice: Class should have a docstring explaining its purpose and usage
 
     def _dump_features(self):
@@ -444,19 +503,31 @@ class DumpDataFix(DumpDataAll):
         _fun = partial(self._get_date, is_begin_end=True)
         new_stock_files = sorted(
             filter(
-                lambda x: fname_to_code(x.name[: -len(self.file_suffix)].strip().lower()).upper()
+                lambda x: fname_to_code(
+                    x.name[: -len(self.file_suffix)].strip().lower()
+                ).upper()
                 not in self._old_instruments,
                 self.csv_files,
             )
         )
         with tqdm(total=len(new_stock_files)) as p_bar:
             with ProcessPoolExecutor(max_workers=self.works) as execute:
-                for file_path, (_begin_time, _end_time) in zip(new_stock_files, execute.map(_fun, new_stock_files)):
-                    if isinstance(_begin_time, pd.Timestamp) and isinstance(_end_time, pd.Timestamp):
-                        symbol = fname_to_code(self.get_symbol_from_file(file_path).lower()).upper()
+                for file_path, (_begin_time, _end_time) in zip(
+                    new_stock_files, execute.map(_fun, new_stock_files)
+                ):
+                    if isinstance(_begin_time, pd.Timestamp) and isinstance(
+                        _end_time, pd.Timestamp
+                    ):
+                        symbol = fname_to_code(
+                            self.get_symbol_from_file(file_path).lower()
+                        ).upper()
                         _dt_map = self._old_instruments.setdefault(symbol, dict())
-                        _dt_map[self.INSTRUMENTS_START_FIELD] = self._format_datetime(_begin_time)
-                        _dt_map[self.INSTRUMENTS_END_FIELD] = self._format_datetime(_end_time)
+                        _dt_map[self.INSTRUMENTS_START_FIELD] = self._format_datetime(
+                            _begin_time
+                        )
+                        _dt_map[self.INSTRUMENTS_END_FIELD] = self._format_datetime(
+                            _end_time
+                        )
                     p_bar.update()
         _inst_df = pd.DataFrame.from_dict(self._old_instruments, orient="index")
         _inst_df.index.names = [self.symbol_field_name]
@@ -465,18 +536,24 @@ class DumpDataFix(DumpDataAll):
         logger.info("end of instruments dump.\n")
 
     def dump(self):
-        self._calendars_list = self._read_calendars(self._calendars_dir.joinpath(f"{self.freq}.txt"))
+        self._calendars_list = self._read_calendars(
+            self._calendars_dir.joinpath(f"{self.freq}.txt")
+        )
         # noinspection PyAttributeOutsideInit
         self._old_instruments = (
-            self._read_instruments(self._instruments_dir.joinpath(self.INSTRUMENTS_FILE_NAME))
+            self._read_instruments(
+                self._instruments_dir.joinpath(self.INSTRUMENTS_FILE_NAME)
+            )
             .set_index([self.symbol_field_name])
             .to_dict(orient="index")
         )  # type: dict
         self._dump_instruments()
         self._dump_features()
 
+
 # 🧠 ML Signal: Use of self indicates instance variable assignment, common in class methods.
 # ✅ Best Practice: Use of joinpath for path operations improves readability and cross-platform compatibility.
+
 
 class DumpDataUpdate(DumpDataBase):
     def __init__(
@@ -499,7 +576,7 @@ class DumpDataUpdate(DumpDataBase):
         include_fields: str = "",
         # ✅ Best Practice: Use of lambda for inline filtering improves code conciseness.
         limit_nums: int = None,
-    # ⚠️ SAST Risk (Low): Assumes self.date_field_name is a valid column name, potential KeyError
+        # ⚠️ SAST Risk (Low): Assumes self.date_field_name is a valid column name, potential KeyError
     ):
         """
 
@@ -544,15 +621,18 @@ class DumpDataUpdate(DumpDataBase):
         )
         # ✅ Best Practice: Submitting tasks to executor for parallel execution
         self._mode = self.UPDATE_MODE
-        self._old_calendar_list = self._read_calendars(self._calendars_dir.joinpath(f"{self.freq}.txt"))
+        self._old_calendar_list = self._read_calendars(
+            self._calendars_dir.joinpath(f"{self.freq}.txt")
+        )
         # NOTE: all.txt only exists once for each stock
         # NOTE: if a stock corresponds to multiple different time ranges, user need to modify self._update_instruments
         self._update_instruments = (
-            self._read_instruments(self._instruments_dir.joinpath(self.INSTRUMENTS_FILE_NAME))
+            self._read_instruments(
+                self._instruments_dir.joinpath(self.INSTRUMENTS_FILE_NAME)
+            )
             # ✅ Best Practice: Submitting tasks to executor for parallel execution
-            .set_index([self.symbol_field_name])
-            .to_dict(orient="index")
-        # ✅ Best Practice: Use of tqdm for progress tracking
+            .set_index([self.symbol_field_name]).to_dict(orient="index")
+            # ✅ Best Practice: Use of tqdm for progress tracking
         )  # type: dict
 
         # 🧠 ML Signal: Method that involves saving or dumping data, indicating a data persistence pattern
@@ -560,9 +640,12 @@ class DumpDataUpdate(DumpDataBase):
         self._all_data = self._load_all_source_data()  # type: pd.DataFrame
         # 🧠 ML Signal: Method call that suggests feature processing or transformation
         self._new_calendar_list = self._old_calendar_list + sorted(
-            filter(lambda x: x > self._old_calendar_list[-1], self._all_data[self.date_field_name].unique())
-        # ⚠️ SAST Risk (Low): Catching broad exceptions can hide specific errors
-        # 🧠 ML Signal: DataFrame creation from a dictionary, indicating data manipulation
+            filter(
+                lambda x: x > self._old_calendar_list[-1],
+                self._all_data[self.date_field_name].unique(),
+            )
+            # ⚠️ SAST Risk (Low): Catching broad exceptions can hide specific errors
+            # 🧠 ML Signal: DataFrame creation from a dictionary, indicating data manipulation
         )
 
     # ⚠️ SAST Risk (Low): Using fire.Fire can execute arbitrary code if input is not controlled
@@ -601,29 +684,44 @@ class DumpDataUpdate(DumpDataBase):
         error_code = {}
         with ProcessPoolExecutor(max_workers=self.works) as executor:
             futures = {}
-            for _code, _df in self._all_data.groupby(self.symbol_field_name, group_keys=False):
+            for _code, _df in self._all_data.groupby(
+                self.symbol_field_name, group_keys=False
+            ):
                 _code = fname_to_code(str(_code).lower()).upper()
                 _start, _end = self._get_date(_df, is_begin_end=True)
-                if not (isinstance(_start, pd.Timestamp) and isinstance(_end, pd.Timestamp)):
+                if not (
+                    isinstance(_start, pd.Timestamp) and isinstance(_end, pd.Timestamp)
+                ):
                     continue
                 if _code in self._update_instruments:
                     # exists stock, will append data
                     _update_calendars = (
-                        _df[_df[self.date_field_name] > self._update_instruments[_code][self.INSTRUMENTS_END_FIELD]][
-                            self.date_field_name
-                        ]
+                        _df[
+                            _df[self.date_field_name]
+                            > self._update_instruments[_code][
+                                self.INSTRUMENTS_END_FIELD
+                            ]
+                        ][self.date_field_name]
                         .sort_values()
                         .to_list()
                     )
                     if _update_calendars:
-                        self._update_instruments[_code][self.INSTRUMENTS_END_FIELD] = self._format_datetime(_end)
-                        futures[executor.submit(self._dump_bin, _df, _update_calendars)] = _code
+                        self._update_instruments[_code][self.INSTRUMENTS_END_FIELD] = (
+                            self._format_datetime(_end)
+                        )
+                        futures[
+                            executor.submit(self._dump_bin, _df, _update_calendars)
+                        ] = _code
                 else:
                     # new stock
                     _dt_range = self._update_instruments.setdefault(_code, dict())
-                    _dt_range[self.INSTRUMENTS_START_FIELD] = self._format_datetime(_start)
+                    _dt_range[self.INSTRUMENTS_START_FIELD] = self._format_datetime(
+                        _start
+                    )
                     _dt_range[self.INSTRUMENTS_END_FIELD] = self._format_datetime(_end)
-                    futures[executor.submit(self._dump_bin, _df, self._new_calendar_list)] = _code
+                    futures[
+                        executor.submit(self._dump_bin, _df, self._new_calendar_list)
+                    ] = _code
 
             with tqdm(total=len(futures)) as p_bar:
                 for _future in as_completed(futures):
@@ -645,4 +743,10 @@ class DumpDataUpdate(DumpDataBase):
 
 
 if __name__ == "__main__":
-    fire.Fire({"dump_all": DumpDataAll, "dump_fix": DumpDataFix, "dump_update": DumpDataUpdate})
+    fire.Fire(
+        {
+            "dump_all": DumpDataAll,
+            "dump_fix": DumpDataFix,
+            "dump_update": DumpDataUpdate,
+        }
+    )

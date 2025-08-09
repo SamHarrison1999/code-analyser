@@ -4,10 +4,12 @@ from zvt.domain import RightsIssueDetail, DividendFinancing
 from zvt.recorders.eastmoney.common import EastmoneyPageabeDataRecorder
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import now_pd_timestamp
+
 # 🧠 ML Signal: Class definition with inheritance, useful for understanding class hierarchies and relationships
 from zvt.utils.utils import to_float
 
 # 🧠 ML Signal: Class attribute definition, useful for understanding default values and configurations
+
 
 class RightsIssueDetailRecorder(EastmoneyPageabeDataRecorder):
     # 🧠 ML Signal: URL definition, useful for understanding network interactions and API usage
@@ -55,13 +57,16 @@ class RightsIssueDetailRecorder(EastmoneyPageabeDataRecorder):
                 # 🧠 ML Signal: Conditional check for DataFrame nullity
                 provider=self.provider,
                 entity_id=item.entity_id,
-                columns=[RightsIssueDetail.timestamp, RightsIssueDetail.rights_raising_fund],
+                columns=[
+                    RightsIssueDetail.timestamp,
+                    RightsIssueDetail.rights_raising_fund,
+                ],
                 # ⚠️ SAST Risk (Low): Direct database commit without error handling
                 start_timestamp=item.timestamp,
                 end_timestamp="{}-12-31".format(item.timestamp.year),
-            # ✅ Best Practice: Defining __all__ for module exports
-            # ✅ Best Practice: Calling superclass method to ensure proper inheritance behavior
-            # 🧠 ML Signal: Typical pattern for running a script directly
+                # ✅ Best Practice: Defining __all__ for module exports
+                # ✅ Best Practice: Calling superclass method to ensure proper inheritance behavior
+                # 🧠 ML Signal: Typical pattern for running a script directly
             )
             if pd_is_not_null(df):
                 item.rights_raising_fund = df["rights_raising_fund"].sum()

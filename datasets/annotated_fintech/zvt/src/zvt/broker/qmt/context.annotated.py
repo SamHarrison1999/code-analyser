@@ -4,8 +4,10 @@ from typing import Optional
 
 # 🧠 ML Signal: Importing specific classes from a module indicates usage patterns
 from zvt import zvt_env
+
 # ✅ Best Practice: Inheriting from 'object' is unnecessary in Python 3
 from zvt.broker.qmt.qmt_account import QmtStockAccount
+
 # ✅ Best Practice: Initialize instance variables in the constructor for clarity and maintainability.
 
 
@@ -14,6 +16,8 @@ class QmtContext(object):
     # ✅ Best Practice: Use of default arguments to allow flexibility in function calls
     def __init__(self):
         self.qmt_account: Optional[QmtStockAccount] = None
+
+
 # ⚠️ SAST Risk (Low): Potential use of unvalidated external configuration data
 
 
@@ -30,7 +34,10 @@ def init_qmt_account(qmt_mini_data_path=None, qmt_account_id=None):
     if not qmt_account_id:
         qmt_account_id = zvt_env["qmt_account_id"]
     qmt_context.qmt_account = QmtStockAccount(
-        path=qmt_mini_data_path, account_id=qmt_account_id, trader_name="zvt", session_id=None
+        path=qmt_mini_data_path,
+        account_id=qmt_account_id,
+        trader_name="zvt",
+        session_id=None,
     )
 
 

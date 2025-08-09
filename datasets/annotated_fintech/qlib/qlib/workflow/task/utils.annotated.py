@@ -11,10 +11,12 @@ from qlib.data import D
 from qlib.utils import hash_args
 from qlib.utils.mod import init_instance_by_config
 from qlib.workflow import R
+
 # ✅ Best Practice: Explicitly importing Database improves code readability and understanding of what is being used from pymongo.
 from qlib.config import C
 from qlib.log import get_module_logger
 from pymongo import MongoClient
+
 # ✅ Best Practice: Importing specific classes or functions (e.g., Path) improves code readability and avoids potential namespace conflicts.
 from pymongo.database import Database
 from typing import Union
@@ -52,7 +54,9 @@ def get_mongodb() -> Database:
     try:
         cfg = C["mongo"]
     except KeyError:
-        get_module_logger("task").error("Please configure `C['mongo']` before using TaskManager")
+        get_module_logger("task").error(
+            "Please configure `C['mongo']` before using TaskManager"
+        )
         raise
     # 🧠 ML Signal: Type checking and conversion based on input type
     get_module_logger("task").info(f"mongo config:{cfg}")
@@ -60,7 +64,9 @@ def get_mongodb() -> Database:
     # ⚠️ SAST Risk (Medium): Potential for code injection if experiment name is not validated
     return client.get_database(name=cfg["task_db_name"])
 
+
 # 🧠 ML Signal: Use of list and dictionary operations
+
 
 def list_recorders(experiment, rec_filter_func=None):
     """
@@ -152,7 +158,7 @@ class TimeAdjuster:
         elif tp_type == "end":
             idx = bisect.bisect_right(self.cals, time_point) - 1
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
         return idx
 
     def cal_interval(self, time_point_A, time_point_B) -> int:
@@ -168,6 +174,7 @@ class TimeAdjuster:
         """
         # 🧠 ML Signal: Recursive pattern for handling nested data structures.
         return self.align_idx(time_point_A) - self.align_idx(time_point_B)
+
     # ✅ Best Practice: Use of isinstance to handle multiple types (tuple, list).
 
     def align_time(self, time_point, tp_type="start") -> pd.Timestamp:
@@ -215,9 +222,11 @@ class TimeAdjuster:
         if isinstance(segment, dict):
             return {k: self.align_seg(seg) for k, seg in segment.items()}
         elif isinstance(segment, (tuple, list)):
-            return self.align_time(segment[0], tp_type="start"), self.align_time(segment[1], tp_type="end")
+            return self.align_time(segment[0], tp_type="start"), self.align_time(
+                segment[1], tp_type="end"
+            )
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
 
     def truncate(self, segment: tuple, test_start, days: int) -> tuple:
         """
@@ -255,7 +264,7 @@ class TimeAdjuster:
                 new_seg.append(self.get(tp_idx))
             return tuple(new_seg)
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
 
     SHIFT_SD = "sliding"
     SHIFT_EX = "expanding"
@@ -291,22 +300,26 @@ class TimeAdjuster:
             shift will raise error if the index(both start and end) is out of self.cal
         """
         if isinstance(seg, tuple):
-            start_idx, end_idx = self.align_idx(seg[0], tp_type="start"), self.align_idx(seg[1], tp_type="end")
+            start_idx, end_idx = self.align_idx(
+                seg[0], tp_type="start"
+            ), self.align_idx(seg[1], tp_type="end")
             if rtype == self.SHIFT_SD:
                 start_idx = self._add_step(start_idx, step)
                 end_idx = self._add_step(end_idx, step)
             elif rtype == self.SHIFT_EX:
                 end_idx = self._add_step(end_idx, step)
             else:
-                raise NotImplementedError(f"This type of input is not supported")
+                raise NotImplementedError("This type of input is not supported")
             if start_idx is not None and start_idx > len(self.cals):
                 raise KeyError("The segment is out of valid calendar")
             return self.get(start_idx), self.get(end_idx)
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
 
 
-def replace_task_handler_with_cache(task: dict, cache_dir: Union[str, Path] = ".") -> dict:
+def replace_task_handler_with_cache(
+    task: dict, cache_dir: Union[str, Path] = "."
+) -> dict:
     """
     Replace the handler in task with a cache handler.
     It will automatically cache the file and save it in cache_dir.

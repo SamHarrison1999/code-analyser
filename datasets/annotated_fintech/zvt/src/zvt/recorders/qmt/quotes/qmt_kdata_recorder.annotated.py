@@ -12,10 +12,12 @@ from zvt.domain import (
     StockKdataCommon,
 )
 from zvt.utils.pd_utils import pd_is_not_null
+
 # 🧠 ML Signal: Inheritance from FixedCycleDataRecorder indicates a design pattern for data recording
 from zvt.utils.time_utils import current_date, to_time_str, now_time_str
 
 # ✅ Best Practice: Use of class attributes for default configuration values
+
 
 # ✅ Best Practice: Type hinting for class attributes improves code readability and maintainability
 # ✅ Best Practice: Consistent naming for provider attributes aids in code clarity
@@ -57,7 +59,9 @@ class BaseQmtKdataRecorder(FixedCycleDataRecorder):
         self.adjust_type = AdjustType(adjust_type)
         self.entity_type = self.entity_schema.__name__.lower()
 
-        self.data_schema = get_kdata_schema(entity_type=self.entity_type, level=level, adjust_type=self.adjust_type)
+        self.data_schema = get_kdata_schema(
+            entity_type=self.entity_type, level=level, adjust_type=self.adjust_type
+        )
 
         super().__init__(
             force_update,
@@ -80,6 +84,7 @@ class BaseQmtKdataRecorder(FixedCycleDataRecorder):
             one_day_trading_minutes,
             return_unfinished,
         )
+
     # ⚠️ SAST Risk (Medium): Potential SQL Injection if provider or data_schema are user-controlled
 
     def init_entities(self):
@@ -87,18 +92,25 @@ class BaseQmtKdataRecorder(FixedCycleDataRecorder):
         init the entities which we would record data for
 
         """
-        if self.entity_provider == self.provider and self.entity_schema == self.data_schema:
+        if (
+            self.entity_provider == self.provider
+            and self.entity_schema == self.data_schema
+        ):
             # ✅ Best Practice: Check for null data before processing
             self.entity_session = self.session
         # 🧠 ML Signal: Conversion of DataFrame column to list
         else:
-            self.entity_session = get_db_session(provider=self.entity_provider, data_schema=self.entity_schema)
+            self.entity_session = get_db_session(
+                provider=self.entity_provider, data_schema=self.entity_schema
+            )
 
         # ✅ Best Practice: Use of logging for information tracking
         # ✅ Best Practice: Use of list append method
         if self.day_data:
             df = self.data_schema.query_data(
-                start_timestamp=now_time_str(), columns=["entity_id", "timestamp"], provider=self.provider
+                start_timestamp=now_time_str(),
+                columns=["entity_id", "timestamp"],
+                provider=self.provider,
             )
             if pd_is_not_null(df):
                 entity_ids = df["entity_id"].tolist()
@@ -106,9 +118,13 @@ class BaseQmtKdataRecorder(FixedCycleDataRecorder):
                 self.logger.info(f"ignore entity_ids:{entity_ids}")
                 if self.entity_filters:
                     # 🧠 ML Signal: Retrieval of entities with specific filters and parameters
-                    self.entity_filters.append(self.entity_schema.entity_id.notin_(entity_ids))
+                    self.entity_filters.append(
+                        self.entity_schema.entity_id.notin_(entity_ids)
+                    )
                 else:
-                    self.entity_filters = [self.entity_schema.entity_id.notin_(entity_ids)]
+                    self.entity_filters = [
+                        self.entity_schema.entity_id.notin_(entity_ids)
+                    ]
         # ✅ Best Practice: Check if 'start' is not None before using it
 
         #: init the entity list
@@ -124,6 +140,7 @@ class BaseQmtKdataRecorder(FixedCycleDataRecorder):
             provider=self.entity_provider,
             filters=self.entity_filters,
         )
+
     # ✅ Best Practice: Check if DataFrame is not null before proceeding
     # 🧠 ML Signal: Usage of external API 'get_kdata'
 
@@ -140,7 +157,7 @@ class BaseQmtKdataRecorder(FixedCycleDataRecorder):
                 adjust_type=self.adjust_type,
                 level=self.level,
                 download_history=False,
-            # ✅ Best Practice: Check if DataFrame is not null before proceeding
+                # ✅ Best Practice: Check if DataFrame is not null before proceeding
             )
             if pd_is_not_null(check_df):
                 current_df = get_kdata(
@@ -163,7 +180,9 @@ class BaseQmtKdataRecorder(FixedCycleDataRecorder):
                     # 🧠 ML Signal: Usage of external API 'qmt_quote.get_kdata'
                     if round(old, 2) != round(new, 2):
                         # 删掉重新获取
-                        self.session.query(self.data_schema).filter(self.data_schema.entity_id == entity.id).delete()
+                        self.session.query(self.data_schema).filter(
+                            self.data_schema.entity_id == entity.id
+                        ).delete()
                         start = "2005-01-01"
 
         if not start:
@@ -196,14 +215,22 @@ class BaseQmtKdataRecorder(FixedCycleDataRecorder):
         if pd_is_not_null(df):
             df["entity_id"] = entity.id
             df["timestamp"] = pd.to_datetime(df.index)
-            df["id"] = df.apply(lambda row: f"{row['entity_id']}_{to_time_str(row['timestamp'])}", axis=1)
+            df["id"] = df.apply(
+                lambda row: f"{row['entity_id']}_{to_time_str(row['timestamp'])}",
+                axis=1,
+            )
             df["provider"] = "qmt"
             df["level"] = self.level.value
             df["code"] = entity.code
             df["name"] = entity.name
             df.rename(columns={"amount": "turnover"}, inplace=True)
             df["change_pct"] = (df["close"] - df["preClose"]) / df["preClose"]
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(
+                df=df,
+                data_schema=self.data_schema,
+                provider=self.provider,
+                force_update=self.force_update,
+            )
 
         else:
             self.logger.info(f"no kdata for {entity.id}")

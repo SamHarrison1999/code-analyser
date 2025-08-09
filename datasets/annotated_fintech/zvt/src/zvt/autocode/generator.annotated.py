@@ -7,6 +7,7 @@ from zvt.autocode.templates import all_tpls
 from zvt.contract import IntervalLevel, AdjustType
 from zvt.utils.file_utils import list_all_files
 from zvt.utils.git_utils import get_git_user_name, get_git_user_email
+
 # ✅ Best Practice: Use a module-level logger to allow for better control over logging output.
 from zvt.utils.time_utils import now_pd_timestamp
 
@@ -24,13 +25,17 @@ def all_sub_modules(dir_path: str):
     modules = []
     for entry in os.scandir(dir_path):
         # ✅ Best Practice: Use clear and descriptive variable names.
-        if entry.is_dir() or (entry.path.endswith(".py") and not entry.path.endswith("__init__.py")):
+        if entry.is_dir() or (
+            entry.path.endswith(".py") and not entry.path.endswith("__init__.py")
+        ):
             module_name = os.path.splitext(os.path.basename(entry.path))[0]
             # ignore hidden
             if module_name.startswith(".") or not module_name[0].isalpha():
                 continue
             modules.append(module_name)
     return modules
+
+
 # ✅ Best Practice: Use consistent naming for function parameters.
 
 
@@ -225,8 +230,12 @@ def gen_kdata_schema(
             kdata_common = f"{cap_entity_type}KdataCommon"
 
             if adjust_type and (adjust_type != AdjustType.qfq):
-                class_name = f"{cap_entity_type}{cap_level}{adjust_type.value.capitalize()}Kdata"
-                table_name = f"{entity_type}_{level.value}_{adjust_type.value.lower()}_kdata"
+                class_name = (
+                    f"{cap_entity_type}{cap_level}{adjust_type.value.capitalize()}Kdata"
+                )
+                table_name = (
+                    f"{entity_type}_{level.value}_{adjust_type.value.lower()}_kdata"
+                )
             else:
                 class_name = f"{cap_entity_type}{cap_level}Kdata"
                 table_name = f"{entity_type}_{level.value}_kdata"
@@ -251,7 +260,9 @@ register_schema(providers={providers_str}, db_name="{table_name}", schema_base=K
 
 """
             # generate the schema
-            with open(os.path.join(base_path, f"{table_name}.py"), "w", encoding="utf-8") as outfile:
+            with open(
+                os.path.join(base_path, f"{table_name}.py"), "w", encoding="utf-8"
+            ) as outfile:
                 outfile.write(schema_template)
 
         # generate the package
@@ -266,7 +277,9 @@ register_schema(providers={providers_str}, db_name="{table_name}", schema_base=K
     gen_exports("./domain")
 
 
-def gen_plugin_project(entity_type, prefix: str = "zvt", dir_path: str = ".", providers=["joinquant"]):
+def gen_plugin_project(
+    entity_type, prefix: str = "zvt", dir_path: str = ".", providers=["joinquant"]
+):
     """
     generate a standard plugin project
 

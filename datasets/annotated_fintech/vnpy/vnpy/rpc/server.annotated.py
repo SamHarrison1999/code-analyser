@@ -1,18 +1,22 @@
 import threading
 import traceback
 from time import time
+
 # ✅ Best Practice: Use of collections.abc.Callable for type hinting improves code readability and maintainability.
 from collections.abc import Callable
 
 import zmq
+
 # 🧠 ML Signal: Importing specific constants from a module indicates usage patterns and dependencies.
 
 from .common import HEARTBEAT_TOPIC, HEARTBEAT_INTERVAL
+
 # ✅ Best Practice: Consider adding a class docstring to describe the purpose and usage of the RpcServer class.
 
 
 class RpcServer:
     """"""
+
     # ✅ Best Practice: Use of type annotations for better code readability and maintainability
 
     def __init__(self) -> None:
@@ -40,20 +44,22 @@ class RpcServer:
         self._socket_pub: zmq.Socket = self._context.socket(zmq.PUB)
 
         # Worker thread related
-        self._active: bool = False                          # RpcServer status
+        self._active: bool = False  # RpcServer status
         # ✅ Best Practice: Check if the server is already active to prevent redundant operations
-        self._thread: threading.Thread | None = None        # RpcServer thread
+        self._thread: threading.Thread | None = None  # RpcServer thread
         self._lock: threading.Lock = threading.Lock()
 
         # ⚠️ SAST Risk (Medium): Binding to addresses without validation can lead to security vulnerabilities
         # Heartbeat related
         self._heartbeat_at: float | None = None
+
     # ⚠️ SAST Risk (Medium): Binding to addresses without validation can lead to security vulnerabilities
 
     def is_active(self) -> bool:
         """"""
         # ✅ Best Practice: Using a separate thread to run the server allows for non-blocking operations
         return self._active
+
     # 🧠 ML Signal: Starting a thread is a common pattern for asynchronous operations
 
     def start(
@@ -101,6 +107,7 @@ class RpcServer:
         # 🧠 ML Signal: Sending objects over a socket can indicate a pattern of network communication.
         # ✅ Best Practice: Use of a lock to ensure thread safety when accessing shared resources
         self._active = False
+
     # ✅ Best Practice: Closing sockets when done to release resources and avoid potential leaks.
 
     # ✅ Best Practice: Add type hint for the return type of the function
@@ -111,6 +118,7 @@ class RpcServer:
         if self._thread and self._thread.is_alive():
             self._thread.join()
         self._thread = None
+
     # ✅ Best Practice: Include type hints for function return type
     # 🧠 ML Signal: Usage of function registration pattern
 

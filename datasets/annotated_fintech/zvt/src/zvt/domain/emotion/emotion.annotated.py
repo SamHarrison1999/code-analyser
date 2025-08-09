@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, Integer, DateTime, Boolean, Float
+
 # ✅ Best Practice: Group related imports together for better readability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Mixin
+
 # ✅ Best Practice: Use a consistent naming convention for base classes.
 from zvt.contract.register import register_schema
 
@@ -11,6 +13,7 @@ from zvt.contract.register import register_schema
 EmotionBase = declarative_base()
 
 # 🧠 ML Signal: Use of SQLAlchemy ORM for database interaction
+
 
 class LimitUpInfo(EmotionBase, Mixin):
     # 🧠 ML Signal: Use of SQLAlchemy ORM for database interaction
@@ -72,6 +75,8 @@ class LimitUpInfo(EmotionBase, Mixin):
     #: 最近几板，不一定是连板
     # 🧠 ML Signal: Usage of SQLAlchemy ORM for database modeling
     high_days_count = Column(Integer)
+
+
 # ✅ Best Practice: Use of __all__ to define public API of the module
 # 🧠 ML Signal: Usage of SQLAlchemy ORM for database modeling
 # 🧠 ML Signal: Registration of schema with specific providers and database name

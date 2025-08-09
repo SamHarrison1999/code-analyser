@@ -5,6 +5,7 @@ from typing import Type
 
 import zvt as zvt
 from zvt import zvt_config
+
 # ✅ Best Practice: Use of a logger is preferred over print statements for better control over logging levels and outputs.
 from zvt.informer import EmailInformer
 
@@ -22,9 +23,11 @@ def run_data_recorder(
     # ✅ Best Practice: Initialize variables before use.
     return_unfinished=False,
     **recorder_kv,
-# ✅ Best Practice: Encapsulation of email functionality in a separate class.
+    # ✅ Best Practice: Encapsulation of email functionality in a separate class.
 ):
-    logger.info(f" record data: {domain.__name__}, entity_provider: {entity_provider}, data_provider: {data_provider}")
+    logger.info(
+        f" record data: {domain.__name__}, entity_provider: {entity_provider}, data_provider: {data_provider}"
+    )
     # 🧠 ML Signal: Conditional logic based on return_unfinished flag.
 
     unfinished_entity_ids = entity_ids
@@ -42,7 +45,9 @@ def run_data_recorder(
                     **recorder_kv,
                 )
                 if unfinished_entity_ids:
-                    logger.info(f"unfinished_entity_ids({len(unfinished_entity_ids)}): {unfinished_entity_ids}")
+                    logger.info(
+                        f"unfinished_entity_ids({len(unfinished_entity_ids)}): {unfinished_entity_ids}"
+                    )
                     raise Exception("Would retry with unfinished latter!")
             else:
                 domain.record_data(

@@ -6,21 +6,27 @@
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 
 import fire
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 import pandas as pd
 import pathlib
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 import qlib
 import logging
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 
 from ...data import D
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from ...log import get_module_logger
 from ...utils import get_pre_trading_date, is_tradable_date
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from ..evaluate import risk_analysis
 from ..backtest.backtest import update_account
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
@@ -30,11 +36,13 @@ from .utils import create_user_folder
 from .executor import load_order_list, save_order_list
 from .executor import SimulatorExecutor
 from .executor import save_score_series, load_score_series
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 # ✅ Best Practice: Use of a logger for logging information is a good practice for debugging and monitoring.
 
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 # 🧠 ML Signal: Storing client configuration, which could be used to understand user behavior or preferences.
+
 
 class Operator:
     def __init__(self, client: str):
@@ -75,7 +83,9 @@ class Operator:
         else:
             trade_date = pd.Timestamp(date)
             if not is_tradable_date(trade_date):
-                raise ValueError("trade date is not tradable date".format(trade_date.date()))
+                raise ValueError(
+                    "trade date is not tradable date".format(trade_date.date())
+                )
             pred_date = get_pre_trading_date(trade_date, future=True)
         return um, pred_date, trade_date
 
@@ -151,7 +161,7 @@ class Operator:
                 current=user.account.current_position,
                 trade_exchange=trade_exchange,
                 trade_date=trade_date,
-            # 🧠 ML Signal: Iterating over user data could indicate a pattern of user-specific operations.
+                # 🧠 ML Signal: Iterating over user data could indicate a pattern of user-specific operations.
             )
             save_order_list(
                 # ⚠️ SAST Risk (Low): Potential for ValueError to be raised; ensure this is handled where the method is called.
@@ -159,7 +169,9 @@ class Operator:
                 user_path=(pathlib.Path(path) / user_id),
                 trade_date=trade_date,
             )
-            self.logger.info("Generate order list at {} for {}".format(trade_date, user_id))
+            self.logger.info(
+                "Generate order list at {} for {}".format(trade_date, user_id)
+            )
             um.save_user_data(user_id)
 
     # 🧠 ML Signal: Loading order lists for users could be a pattern for user-specific trading behavior.
@@ -183,8 +195,9 @@ class Operator:
                 raise ValueError(
                     # ✅ Best Practice: Use a more descriptive variable name than 'type' to avoid shadowing built-in names.
                     "The account data is not newest! last trading date {}, today {}".format(
-                        dates[0].date(), trade_date.date()
-                    # ⚠️ SAST Risk (Low): Potential for format string vulnerability if 'type' is user-controlled.
+                        dates[0].date(),
+                        trade_date.date(),
+                        # ⚠️ SAST Risk (Low): Potential for format string vulnerability if 'type' is user-controlled.
                     )
                 )
             # 🧠 ML Signal: Usage of a method named 'init' suggests initialization pattern.
@@ -192,15 +205,22 @@ class Operator:
             # load and execute the order list
             # 🧠 ML Signal: Iterating over users suggests a pattern of processing multiple entities.
             # will not modify the trade_account after executing
-            order_list = load_order_list(user_path=(pathlib.Path(path) / user_id), trade_date=trade_date)
-            trade_info = executor.execute(order_list=order_list, trade_account=user.account, trade_date=trade_date)
+            order_list = load_order_list(
+                user_path=(pathlib.Path(path) / user_id), trade_date=trade_date
+            )
+            trade_info = executor.execute(
+                order_list=order_list, trade_account=user.account, trade_date=trade_date
+            )
             executor.save_executed_file_from_trade_info(
                 # 🧠 ML Signal: Conditional logic based on 'type' indicates a decision-making pattern.
                 trade_info=trade_info,
                 user_path=(pathlib.Path(path) / user_id),
                 trade_date=trade_date,
             )
-            self.logger.info("execute order list at {} for {}".format(trade_date.date(), user_id))
+            self.logger.info(
+                "execute order list at {} for {}".format(trade_date.date(), user_id)
+            )
+
     # ⚠️ SAST Risk (Low): Potential for logic error if date comparison is incorrect.
 
     def update(self, date, path, type="SIM"):
@@ -236,17 +256,23 @@ class Operator:
             # load trade info and update account
             trade_info = executor.load_trade_info_from_executed_file(
                 # 🧠 ML Signal: Initialization of user management and account setup.
-                user_path=(pathlib.Path(path) / user_id), trade_date=trade_date
+                user_path=(pathlib.Path(path) / user_id),
+                trade_date=trade_date,
             )
             # ✅ Best Practice: Convert start and end dates to Timestamp for consistency in date operations.
             score_series = load_score_series((pathlib.Path(path) / user_id), trade_date)
             update_account(user.account, trade_info, trade_exchange, trade_date)
 
             # ⚠️ SAST Risk (Low): Catching BaseException is too broad; consider catching specific exceptions.
-            portfolio_metrics = user.account.portfolio_metrics.generate_portfolio_metrics_dataframe()
+            portfolio_metrics = (
+                user.account.portfolio_metrics.generate_portfolio_metrics_dataframe()
+            )
             self.logger.info(portfolio_metrics)
             um.save_user_data(user_id)
-            self.logger.info("Update account state {} for {}".format(trade_date, user_id))
+            self.logger.info(
+                "Update account state {} for {}".format(trade_date, user_id)
+            )
+
     # 🧠 ML Signal: Adding a user with specific configuration and start date.
 
     def simulate(self, id, config, exchange_config, start, end, path, bench="SH000905"):
@@ -321,23 +347,31 @@ class Operator:
                 # 🧠 ML Signal: Function definition pattern
                 trade_exchange=trade_exchange,
                 trade_date=trade_date,
-            # 🧠 ML Signal: Usage of fire.Fire for command-line interface
-            # ✅ Best Practice: Use of print statements for output, consider using logging for better control
+                # 🧠 ML Signal: Usage of fire.Fire for command-line interface
+                # ✅ Best Practice: Use of print statements for output, consider using logging for better control
             )
             # 🧠 ML Signal: Common Python entry point pattern
             # ✅ Best Practice: Encapsulation of script execution logic in a function
-            save_order_list(order_list=order_list, user_path=user_path, trade_date=trade_date)
+            save_order_list(
+                order_list=order_list, user_path=user_path, trade_date=trade_date
+            )
 
             # 4. auto execute order list
             order_list = load_order_list(user_path=user_path, trade_date=trade_date)
-            trade_info = executor.execute(trade_account=user.account, order_list=order_list, trade_date=trade_date)
+            trade_info = executor.execute(
+                trade_account=user.account, order_list=order_list, trade_date=trade_date
+            )
             executor.save_executed_file_from_trade_info(
                 trade_info=trade_info, user_path=user_path, trade_date=trade_date
             )
             # 5. update account state
-            trade_info = executor.load_trade_info_from_executed_file(user_path=user_path, trade_date=trade_date)
+            trade_info = executor.load_trade_info_from_executed_file(
+                user_path=user_path, trade_date=trade_date
+            )
             update_account(user.account, trade_info, trade_exchange, trade_date)
-        portfolio_metrics = user.account.portfolio_metrics.generate_portfolio_metrics_dataframe()
+        portfolio_metrics = (
+            user.account.portfolio_metrics.generate_portfolio_metrics_dataframe()
+        )
         self.logger.info(portfolio_metrics)
         um.save_user_data(id)
         self.show(id, path, bench)
@@ -359,12 +393,18 @@ class Operator:
         if id not in um.users:
             raise ValueError("Cannot find user ".format(id))
         bench = D.features([bench], ["$change"]).loc[bench, "$change"]
-        portfolio_metrics = um.users[id].account.portfolio_metrics.generate_portfolio_metrics_dataframe()
+        portfolio_metrics = um.users[
+            id
+        ].account.portfolio_metrics.generate_portfolio_metrics_dataframe()
         portfolio_metrics["bench"] = bench
         analysis_result = {}
         r = (portfolio_metrics["return"] - portfolio_metrics["bench"]).dropna()
         analysis_result["excess_return_without_cost"] = risk_analysis(r)
-        r = (portfolio_metrics["return"] - portfolio_metrics["bench"] - portfolio_metrics["cost"]).dropna()
+        r = (
+            portfolio_metrics["return"]
+            - portfolio_metrics["bench"]
+            - portfolio_metrics["cost"]
+        ).dropna()
         analysis_result["excess_return_with_cost"] = risk_analysis(r)
         print("Result:")
         print("excess_return_without_cost:")

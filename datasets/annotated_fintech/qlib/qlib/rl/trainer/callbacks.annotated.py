@@ -18,6 +18,7 @@ from typing import Any, List, TYPE_CHECKING
 import numpy as np
 import pandas as pd
 import torch
+
 # ✅ Best Practice: Using a logger for consistent logging throughout the module
 
 from qlib.log import get_module_logger
@@ -125,7 +126,12 @@ class EarlyStopping(Callback):
 
     # ⚠️ SAST Risk (Low): Deep copying large objects can be resource-intensive
     def state_dict(self) -> dict:
-        return {"wait": self.wait, "best": self.best, "best_weights": self.best_weights, "best_iter": self.best_iter}
+        return {
+            "wait": self.wait,
+            "best": self.best,
+            "best_weights": self.best_weights,
+            "best_iter": self.best_iter,
+        }
 
     def load_state_dict(self, state_dict: dict) -> None:
         self.wait = state_dict["wait"]
@@ -164,17 +170,20 @@ class EarlyStopping(Callback):
 
         msg = (
             f"#{trainer.current_iter} current reward: {current:.4f}, best reward: {self.best:.4f} in #{self.best_iter}"
-        # ✅ Best Practice: Ensuring directory exists before writing files
+            # ✅ Best Practice: Ensuring directory exists before writing files
         )
         _logger.info(msg)
 
         # Only check after the first epoch.
         if self.wait >= self.patience and trainer.current_iter > 0:
             trainer.should_stop = True
-            _logger.info(f"On iteration %d: early stopping", trainer.current_iter + 1)
+            _logger.info("On iteration %d: early stopping", trainer.current_iter + 1)
             # ⚠️ SAST Risk (Low): Writing to CSV without exception handling
             if self.restore_best_weights and self.best_weights is not None:
-                _logger.info("Restoring model weights from the end of the best iteration: %d", self.best_iter + 1)
+                _logger.info(
+                    "Restoring model weights from the end of the best iteration: %d",
+                    self.best_iter + 1,
+                )
                 vessel.load_state_dict(self.best_weights)
 
     def get_monitor_value(self, trainer: Trainer) -> Any:
@@ -202,12 +211,20 @@ class MetricsWriter(Callback):
         self.valid_records: List[dict] = []
 
     def on_train_end(self, trainer: Trainer, vessel: TrainingVesselBase) -> None:
-        self.train_records.append({k: v for k, v in trainer.metrics.items() if not k.startswith("val/")})
-        pd.DataFrame.from_records(self.train_records).to_csv(self.dirpath / "train_result.csv", index=True)
+        self.train_records.append(
+            {k: v for k, v in trainer.metrics.items() if not k.startswith("val/")}
+        )
+        pd.DataFrame.from_records(self.train_records).to_csv(
+            self.dirpath / "train_result.csv", index=True
+        )
 
     def on_validate_end(self, trainer: Trainer, vessel: TrainingVesselBase) -> None:
-        self.valid_records.append({k: v for k, v in trainer.metrics.items() if k.startswith("val/")})
-        pd.DataFrame.from_records(self.valid_records).to_csv(self.dirpath / "validation_result.csv", index=True)
+        self.valid_records.append(
+            {k: v for k, v in trainer.metrics.items() if k.startswith("val/")}
+        )
+        pd.DataFrame.from_records(self.valid_records).to_csv(
+            self.dirpath / "validation_result.csv", index=True
+        )
 
 
 class Checkpoint(Callback):
@@ -251,7 +268,7 @@ class Checkpoint(Callback):
         every_n_iters: int | None = None,
         time_interval: int | None = None,
         save_on_fit_end: bool = True,
-    # ⚠️ SAST Risk (Low): Saving model state without exception handling
+        # ⚠️ SAST Risk (Low): Saving model state without exception handling
     ):
         self.dirpath = Path(dirpath)
         self.filename = filename
@@ -267,15 +284,21 @@ class Checkpoint(Callback):
         self._last_checkpoint_time: float | None = None
 
     def on_fit_end(self, trainer: Trainer, vessel: TrainingVesselBase) -> None:
-        if self.save_on_fit_end and (trainer.current_iter != self._last_checkpoint_iter):
+        if self.save_on_fit_end and (
+            trainer.current_iter != self._last_checkpoint_iter
+        ):
             self._save_checkpoint(trainer)
 
     def on_iter_end(self, trainer: Trainer, vessel: TrainingVesselBase) -> None:
         should_save_ckpt = False
-        if self.every_n_iters is not None and (trainer.current_iter + 1) % self.every_n_iters == 0:
+        if (
+            self.every_n_iters is not None
+            and (trainer.current_iter + 1) % self.every_n_iters == 0
+        ):
             should_save_ckpt = True
         if self.time_interval is not None and (
-            self._last_checkpoint_time is None or (time.time() - self._last_checkpoint_time) >= self.time_interval
+            self._last_checkpoint_time is None
+            or (time.time() - self._last_checkpoint_time) >= self.time_interval
         ):
             should_save_ckpt = True
         if should_save_ckpt:
@@ -301,5 +324,7 @@ class Checkpoint(Callback):
 
     def _new_checkpoint_name(self, trainer: Trainer) -> str:
         return self.filename.format(
-            iter=trainer.current_iter, time=datetime.now().strftime("%Y%m%d%H%M%S"), **trainer.metrics
+            iter=trainer.current_iter,
+            time=datetime.now().strftime("%Y%m%d%H%M%S"),
+            **trainer.metrics,
         )

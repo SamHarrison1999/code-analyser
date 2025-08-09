@@ -3,6 +3,7 @@
 
 
 from __future__ import division
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 from __future__ import print_function
 
@@ -16,10 +17,13 @@ from ...log import get_module_logger
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 import torch
 import torch.nn as nn
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 import torch.optim as optim
+
 # ✅ Best Practice: Class docstring provides a clear description of the class and its parameters
 from torch.utils.data import DataLoader
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 
 from .pytorch_utils import count_parameters
@@ -83,7 +87,9 @@ class GRU(Model):
         self.early_stop = early_stop
         self.optimizer = optimizer.lower()
         self.loss = loss
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.n_jobs = n_jobs
         self.seed = seed
 
@@ -139,14 +145,16 @@ class GRU(Model):
             num_layers=self.num_layers,
             # 🧠 ML Signal: Use of mean squared error (MSE) loss function
             dropout=self.dropout,
-        # ⚠️ SAST Risk (Low): Ensure 'weight' is validated to prevent unexpected behavior
-        # ✅ Best Practice: Consider adding type hints for function parameters and return type
+            # ⚠️ SAST Risk (Low): Ensure 'weight' is validated to prevent unexpected behavior
+            # ✅ Best Practice: Consider adding type hints for function parameters and return type
         )
         self.logger.info("model:\n{:}".format(self.GRU_model))
         # ⚠️ SAST Risk (Low): Ensure model is moved to the correct device
         # 🧠 ML Signal: Use of torch.mean for reducing loss
         # ✅ Best Practice: Use descriptive variable names for better readability
-        self.logger.info("model size: {:.4f} MB".format(count_parameters(self.GRU_model)))
+        self.logger.info(
+            "model size: {:.4f} MB".format(count_parameters(self.GRU_model))
+        )
 
         # ✅ Best Practice: Use is None for None checks
         if optimizer.lower() == "adam":
@@ -158,13 +166,16 @@ class GRU(Model):
         # 🧠 ML Signal: Conditional logic based on self.loss indicates model behavior
         else:
             # 🧠 ML Signal: Use of torch.isfinite indicates handling of numerical stability or invalid values
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
         # 🧠 ML Signal: Use of mask to handle NaN values in label
 
         # 🧠 ML Signal: Conditional logic based on metric type can indicate model evaluation or training phase
         self.fitted = False
         # ⚠️ SAST Risk (Low): Potential information disclosure through error message
         self.GRU_model.to(self.device)
+
     # 🧠 ML Signal: Use of loss function suggests model training or evaluation context
 
     # 🧠 ML Signal: Iterating over data_loader indicates a training loop
@@ -178,6 +189,7 @@ class GRU(Model):
         # 🧠 ML Signal: Model prediction step
         loss = weight * (pred - label) ** 2
         return torch.mean(loss)
+
     # 🧠 ML Signal: Loss calculation with custom loss function
 
     def loss_fn(self, pred, label, weight=None):
@@ -196,6 +208,7 @@ class GRU(Model):
             return self.mse(pred[mask], label[mask], weight[mask])
 
         raise ValueError("unknown loss `%s`" % self.loss)
+
     # ✅ Best Practice: Use torch.no_grad() to prevent tracking history in evaluation mode.
 
     def metric_fn(self, pred, label):
@@ -262,11 +275,17 @@ class GRU(Model):
         save_path=None,
         reweighter=None,
     ):
-        dl_train = dataset.prepare("train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
-        dl_valid = dataset.prepare("valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
+        dl_train = dataset.prepare(
+            "train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
+        dl_valid = dataset.prepare(
+            "valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
         if dl_train.empty or dl_valid.empty:
             # 🧠 ML Signal: Indicates the model has been fitted.
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
 
         dl_train.config(fillna_type="ffill+bfill")  # process nan brought by dataloader
         dl_valid.config(fillna_type="ffill+bfill")  # process nan brought by dataloader
@@ -287,7 +306,7 @@ class GRU(Model):
             shuffle=True,
             num_workers=self.n_jobs,
             drop_last=True,
-        # ⚠️ SAST Risk (Low): Method assumes 'self.fitted' is a boolean attribute; ensure it's properly initialized.
+            # ⚠️ SAST Risk (Low): Method assumes 'self.fitted' is a boolean attribute; ensure it's properly initialized.
         )
         valid_loader = DataLoader(
             ConcatDataset(dl_valid, wl_valid),
@@ -298,7 +317,7 @@ class GRU(Model):
             # ⚠️ SAST Risk (Low): Ensure 'save_path' is validated to prevent path traversal vulnerabilities.
             num_workers=self.n_jobs,
             drop_last=True,
-        # 🧠 ML Signal: DataLoader is used for batching data, a common pattern in ML for handling large datasets.
+            # 🧠 ML Signal: DataLoader is used for batching data, a common pattern in ML for handling large datasets.
         )
         # ⚠️ SAST Risk (Low): Ensure proper GPU resource management to prevent memory leaks.
 
@@ -361,9 +380,13 @@ class GRU(Model):
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
 
-        dl_test = dataset.prepare("test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I)
+        dl_test = dataset.prepare(
+            "test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I
+        )
         dl_test.config(fillna_type="ffill+bfill")
-        test_loader = DataLoader(dl_test, batch_size=self.batch_size, num_workers=self.n_jobs)
+        test_loader = DataLoader(
+            dl_test, batch_size=self.batch_size, num_workers=self.n_jobs
+        )
         self.GRU_model.eval()
         preds = []
 

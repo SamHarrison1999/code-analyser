@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import List
+
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local can improve readability.
 
 import pandas as pd
@@ -9,10 +10,15 @@ from zvt.contract import ActorType
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimestampsDataRecorder
 from zvt.domain import Stock, ActorMeta
-from zvt.domain.actor.stock_actor import StockTopTenFreeHolder, StockInstitutionalInvestorHolder
+from zvt.domain.actor.stock_actor import (
+    StockTopTenFreeHolder,
+    StockInstitutionalInvestorHolder,
+)
+
 # 🧠 ML Signal: Inheritance from TimestampsDataRecorder indicates a pattern of extending functionality
 from zvt.recorders.em.em_api import get_holder_report_dates, get_free_holders
 from zvt.utils.time_utils import to_pd_timestamp, to_time_str
+
 # 🧠 ML Signal: Use of class-level attributes for configuration
 
 
@@ -56,19 +62,22 @@ class EMStockTopTenFreeRecorder(TimestampsDataRecorder):
                     StockInstitutionalInvestorHolder.holding_values > 1,
                     StockInstitutionalInvestorHolder.holding_ratio > 0.01,
                     StockInstitutionalInvestorHolder.timestamp == holder.timestamp,
-                # 🧠 ML Signal: Iterating over timestamps to process data for each timestamp
+                    # 🧠 ML Signal: Iterating over timestamps to process data for each timestamp
                 ],
                 limit=1,
                 # 🧠 ML Signal: Converting timestamp to string format
                 return_type="domain",
-            # 🧠 ML Signal: Calculation involving database fields
+                # 🧠 ML Signal: Calculation involving database fields
             )
             # 🧠 ML Signal: Fetching data based on entity code and date
             if ii:
                 # 🧠 ML Signal: Committing changes to the database session
-                holder.holding_values = holder.holding_ratio * ii[0].holding_values / ii[0].holding_ratio
+                holder.holding_values = (
+                    holder.holding_ratio * ii[0].holding_values / ii[0].holding_ratio
+                )
         # ⚠️ SAST Risk (Low): Ensure that session commit is properly handled to avoid data inconsistency
         self.session.commit()
+
     # ✅ Best Practice: Initialize lists before use
 
     def record(self, entity, start, end, size, timestamps):
@@ -96,7 +105,8 @@ class EMStockTopTenFreeRecorder(TimestampsDataRecorder):
                     # 机构
                     if item["IS_HOLDORG"] == "1":
                         domains: List[ActorMeta] = ActorMeta.query_data(
-                            filters=[ActorMeta.code == item["HOLDER_CODE"]], return_type="domain"
+                            filters=[ActorMeta.code == item["HOLDER_CODE"]],
+                            return_type="domain",
                         )
                         if not domains:
                             actor_type = ActorType.corporation.value
@@ -147,10 +157,20 @@ class EMStockTopTenFreeRecorder(TimestampsDataRecorder):
                     holders.append(holder)
                 if holders:
                     df = pd.DataFrame.from_records(holders)
-                    df_to_db(data_schema=self.data_schema, df=df, provider=self.provider, force_update=True)
+                    df_to_db(
+                        data_schema=self.data_schema,
+                        df=df,
+                        provider=self.provider,
+                        force_update=True,
+                    )
                 if new_actors:
                     df = pd.DataFrame.from_records(new_actors)
-                    df_to_db(data_schema=ActorMeta, df=df, provider=self.provider, force_update=False)
+                    df_to_db(
+                        data_schema=ActorMeta,
+                        df=df,
+                        provider=self.provider,
+                        force_update=False,
+                    )
 
 
 if __name__ == "__main__":

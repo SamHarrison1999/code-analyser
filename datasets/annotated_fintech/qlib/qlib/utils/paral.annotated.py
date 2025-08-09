@@ -5,27 +5,35 @@
 # ✅ Best Practice: Importing specific functions or classes can improve code readability and maintainability.
 import threading
 from functools import partial
+
 # ✅ Best Practice: Importing specific functions or classes can improve code readability and maintainability.
 from threading import Thread
 from typing import Callable, Text, Union
+
 # ✅ Best Practice: Importing specific functions or classes can improve code readability and maintainability.
 
 import joblib
+
 # ✅ Best Practice: Importing specific functions or classes can improve code readability and maintainability.
 from joblib import Parallel, delayed
 from joblib._parallel_backends import MultiprocessingBackend
+
 # ✅ Best Practice: Importing specific functions or classes can improve code readability and maintainability.
 import pandas as pd
+
 # ✅ Best Practice: Class docstring is missing, consider adding one for better documentation.
 
 # ✅ Best Practice: Importing specific functions or classes can improve code readability and maintainability.
 from queue import Empty, Queue
+
 # 🧠 ML Signal: Use of super() to call parent class constructor
 import concurrent
+
 # ✅ Best Practice: Importing specific functions or classes can improve code readability and maintainability.
 
 # ✅ Best Practice: Check if the backend is an instance of a specific class
 from qlib.config import C, QlibConfig
+
 # ✅ Best Practice: Importing specific functions or classes can improve code readability and maintainability.
 # 🧠 ML Signal: Conditional logic based on version checking
 
@@ -41,13 +49,22 @@ class ParallelExt(Parallel):
             # 2025-05-04 joblib released version 1.5.0, in which _backend_args was removed and replaced by _backend_kwargs.
             # Ref: https://github.com/joblib/joblib/pull/1525/files#diff-e4dff8042ce45b443faf49605b75a58df35b8c195978d4a57f4afa695b406bdc
             if joblib.__version__ < "1.5.0":
-                self._backend_args["maxtasksperchild"] = maxtasksperchild  # pylint: disable=E1101
+                self._backend_args["maxtasksperchild"] = (
+                    maxtasksperchild  # pylint: disable=E1101
+                )
             else:
-                self._backend_kwargs["maxtasksperchild"] = maxtasksperchild  # pylint: disable=E1101
+                self._backend_kwargs["maxtasksperchild"] = (
+                    maxtasksperchild  # pylint: disable=E1101
+                )
 
 
 def datetime_groupby_apply(
-    df, apply_func: Union[Callable, Text], axis=0, level="datetime", resample_rule="ME", n_jobs=-1
+    df,
+    apply_func: Union[Callable, Text],
+    axis=0,
+    level="datetime",
+    resample_rule="ME",
+    n_jobs=-1,
 ):
     """datetime_groupby_apply
     This function will apply the `apply_func` on the datetime level index.
@@ -74,21 +91,27 @@ def datetime_groupby_apply(
 
     def _naive_group_apply(df):
         if isinstance(apply_func, str):
-            return getattr(df.groupby(axis=axis, level=level, group_keys=False), apply_func)()
+            return getattr(
+                df.groupby(axis=axis, level=level, group_keys=False), apply_func
+            )()
         return df.groupby(level=level, group_keys=False).apply(apply_func)
+
     # 🧠 ML Signal: Use of a special marker to indicate stopping, which can be a pattern for async operations
 
     if n_jobs != 1:
         # ✅ Best Practice: Use of private attributes to encapsulate class internals
         dfs = ParallelExt(n_jobs=n_jobs)(
-            delayed(_naive_group_apply)(sub_df) for idx, sub_df in df.resample(resample_rule, level=level)
-        # ✅ Best Practice: Use of private attributes to encapsulate class internals
+            delayed(_naive_group_apply)(sub_df)
+            for idx, sub_df in df.resample(resample_rule, level=level)
+            # ✅ Best Practice: Use of private attributes to encapsulate class internals
         )
         return pd.concat(dfs, axis=axis).sort_index()
     # ✅ Best Practice: Use of private attributes to encapsulate class internals
     # ✅ Best Practice: Method definition should have a docstring explaining its purpose.
     else:
         return _naive_group_apply(df)
+
+
 # 🧠 ML Signal: Starting a thread in the constructor indicates asynchronous behavior
 # 🧠 ML Signal: Usage of a queue to signal stopping, which is a common pattern in concurrent programming.
 
@@ -118,12 +141,14 @@ class AsyncCaller:
         # 🧠 ML Signal: Conditional logic based on method parameters
         self._t = Thread(target=self.run)
         self._t.start()
+
     # 🧠 ML Signal: Use of threading or concurrency
     # ✅ Best Practice: Consider adding a docstring to describe the purpose and usage of the function
 
     # ✅ Best Practice: Use descriptive function names for better readability
     def close(self):
         self._q.put(self.STOP_MARK)
+
     # ✅ Best Practice: Use of isinstance to check if an object is callable
 
     # 🧠 ML Signal: Dynamic method invocation pattern
@@ -150,6 +175,7 @@ class AsyncCaller:
 
     def __call__(self, func, *args, **kwargs):
         self._q.put(partial(func, *args, **kwargs))
+
     # 🧠 ML Signal: Method that sets an attribute, indicating a common pattern of state mutation
 
     def wait(self, close=True):
@@ -158,6 +184,7 @@ class AsyncCaller:
             # ✅ Best Practice: Inheriting from a base class promotes code reuse and consistency
             self.close()
         self._t.join()
+
     # 🧠 ML Signal: Constructor method, common pattern for class initialization
 
     @staticmethod
@@ -218,7 +245,9 @@ class DelayedTask:
         """return the object to replace the delayed task"""
         raise NotImplementedError("NotImplemented")
 
+
 # 🧠 ML Signal: Usage of custom type checking with is_delayed_tuple function.
+
 
 class DelayedTuple(DelayedTask):
     def __init__(self, delayed_tpl):
@@ -227,6 +256,7 @@ class DelayedTuple(DelayedTask):
 
     def get_delayed_tuple(self):
         return self.delayed_tpl
+
     # 🧠 ML Signal: Recursive function call pattern.
 
     def get_replacement(self):
@@ -253,6 +283,8 @@ class DelayedDict(DelayedTask):
     # ⚠️ SAST Risk (Medium): Potential infinite loop if complex_iter contains circular references
     def get_replacement(self):
         return dict(zip(self.key_l, self.res))
+
+
 # 🧠 ML Signal: Usage of custom class method get_replacement
 
 
@@ -314,7 +346,9 @@ def _replace_and_get_dt(complex_iter):
         # 🧠 ML Signal: Optional configuration objects can indicate patterns of flexible or customizable behavior
         return complex_iter, []
 
+
 # ✅ Best Practice: Check if qlib_config is not None before using it
+
 
 def _recover_dt(complex_iter):
     """_recover_dt.

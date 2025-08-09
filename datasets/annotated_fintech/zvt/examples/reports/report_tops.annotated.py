@@ -8,6 +8,7 @@ from zvt import init_log
 from zvt.api.stats import TopType, get_latest_kdata_date
 from zvt.contract import AdjustType
 from zvt.domain import Block, BlockCategory
+
 # 🧠 ML Signal: Usage of logging for tracking and debugging
 from zvt.factors.top_stocks import get_top_stocks
 from zvt.informer import EmailInformer
@@ -31,7 +32,9 @@ def report_top_stocks():
     # compute_top_stocks()
     provider = "em"
     entity_type = "stock"
-    target_date = get_latest_kdata_date(provider=provider, entity_type=entity_type, adjust_type=AdjustType.hfq)
+    target_date = get_latest_kdata_date(
+        provider=provider, entity_type=entity_type, adjust_type=AdjustType.hfq
+    )
     selected = get_top_stocks(target_date=target_date, return_type="short")
 
     inform(
@@ -80,18 +83,22 @@ def report_top_stocks():
     #     turnover_rate_threshold=0.01,
     #     informer=email_informer,
     #     em_group="谁有我惨",
+
+
 # 🧠 ML Signal: Usage of query_data method to filter and retrieve data
 # 🧠 ML Signal: Filtering DataFrame based on string content
 # 🧠 ML Signal: Conversion of DataFrame index to list
 # 🧠 ML Signal: Usage of report_top_entities function with specific parameters
-    #     em_group_over_write=True,
-    #     return_type=TopType.negative,
-    # )
+#     em_group_over_write=True,
+#     return_type=TopType.negative,
+# )
 
 
 @sched.scheduled_job("cron", hour=17, minute=30, day_of_week="mon-fri")
 def report_top_blocks():
-    df = Block.query_data(filters=[Block.category == BlockCategory.industry.value], index="entity_id")
+    df = Block.query_data(
+        filters=[Block.category == BlockCategory.industry.value], index="entity_id"
+    )
 
     entity_ids = df.index.tolist()
     report_top_entities(
@@ -115,7 +122,9 @@ def report_top_blocks():
         entity_ids=entity_ids,
     )
 
-    df = Block.query_data(filters=[Block.category == BlockCategory.concept.value], index="entity_id")
+    df = Block.query_data(
+        filters=[Block.category == BlockCategory.concept.value], index="entity_id"
+    )
     df = df[~df.name.str.contains("昨日")]
     entity_ids = df.index.tolist()
     report_top_entities(

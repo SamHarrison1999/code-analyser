@@ -6,17 +6,21 @@ import mlflow
 from filelock import FileLock
 from mlflow.exceptions import MlflowException, RESOURCE_ALREADY_EXISTS, ErrorCode
 from mlflow.entities import ViewType
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import os
 from typing import Optional, Text
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 from pathlib import Path
 
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 from .exp import MLflowExperiment, Experiment
 from ..config import C
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 from .recorder import Recorder
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 # 🧠 ML Signal: Logging setup indicates potential for tracking and monitoring
 from ..log import get_module_logger
@@ -47,6 +51,7 @@ class ExpManager:
         self._default_exp_name = default_exp_name
         self.active_experiment = None  # only one experiment can be active each time
         logger.debug(f"experiment manager uri is at {self.uri}")
+
     # ✅ Best Practice: Docstring provides a clear explanation of the method's purpose and parameters.
 
     def __repr__(self):
@@ -102,12 +107,12 @@ class ExpManager:
             # 🧠 ML Signal: Calls a subclass method, indicating a pattern of using inheritance for extending functionality
             # ⚠️ SAST Risk (Low): Method raises NotImplementedError, which is expected for abstract methods but should be implemented in subclasses
             **kwargs,
-        # ✅ Best Practice: Use of type hinting for function parameters improves code readability and maintainability.
+            # ✅ Best Practice: Use of type hinting for function parameters improves code readability and maintainability.
         )
 
     def _start_exp(self, *args, **kwargs) -> Experiment:
         """Please refer to the doc of `start_exp`"""
-        raise NotImplementedError(f"Please implement the `start_exp` method.")
+        raise NotImplementedError("Please implement the `start_exp` method.")
 
     def end_exp(self, recorder_status: Text = Recorder.STATUS_S, **kwargs):
         """
@@ -128,7 +133,8 @@ class ExpManager:
         self._end_exp(recorder_status=recorder_status, **kwargs)
 
     def _end_exp(self, recorder_status: Text = Recorder.STATUS_S, **kwargs):
-        raise NotImplementedError(f"Please implement the `end_exp` method.")
+        raise NotImplementedError("Please implement the `end_exp` method.")
+
     # ⚠️ SAST Risk (Low): Method not implemented, potential for misuse if not properly overridden
 
     # ✅ Best Practice: Use of keyword-only arguments improves code readability and prevents errors.
@@ -149,7 +155,7 @@ class ExpManager:
         -----
         ExpAlreadyExistError
         """
-        raise NotImplementedError(f"Please implement the `create_exp` method.")
+        raise NotImplementedError("Please implement the `create_exp` method.")
 
     def search_records(self, experiment_ids=None, **kwargs):
         """
@@ -163,9 +169,16 @@ class ExpManager:
         respectively. For records that don't have a particular metric, parameter, or tag, their
         value will be (NumPy) Nan, None, or None respectively.
         """
-        raise NotImplementedError(f"Please implement the `search_records` method.")
+        raise NotImplementedError("Please implement the `search_records` method.")
 
-    def get_exp(self, *, experiment_id=None, experiment_name=None, create: bool = True, start: bool = False):
+    def get_exp(
+        self,
+        *,
+        experiment_id=None,
+        experiment_name=None,
+        create: bool = True,
+        start: bool = False,
+    ):
         """
         Retrieve an experiment. This method includes getting an active experiment, and get_or_create a specific experiment.
 
@@ -222,17 +235,23 @@ class ExpManager:
 
         if create:
             # ⚠️ SAST Risk (Low): Method is not implemented, which could lead to runtime errors if called
-            exp, _ = self._get_or_create_exp(experiment_id=experiment_id, experiment_name=experiment_name)
+            exp, _ = self._get_or_create_exp(
+                experiment_id=experiment_id, experiment_name=experiment_name
+            )
         # ✅ Best Practice: Use of docstring to describe method functionality and parameters
         else:
-            exp = self._get_exp(experiment_id=experiment_id, experiment_name=experiment_name)
+            exp = self._get_exp(
+                experiment_id=experiment_id, experiment_name=experiment_name
+            )
         if self.active_experiment is None and start:
             self.active_experiment = exp
             # start the recorder
             self.active_experiment.start()
         return exp
 
-    def _get_or_create_exp(self, experiment_id=None, experiment_name=None) -> (object, bool):
+    def _get_or_create_exp(
+        self, experiment_id=None, experiment_name=None
+    ) -> (object, bool):
         """
         Method for getting or creating an experiment. It will try to first get a valid experiment, if exception occurs, it will
         automatically create a new experiment based on the given id and name.
@@ -240,9 +259,11 @@ class ExpManager:
         try:
             return (
                 # ✅ Best Practice: Check for the presence of keys before accessing dictionary elements to avoid KeyError.
-                self._get_exp(experiment_id=experiment_id, experiment_name=experiment_name),
+                self._get_exp(
+                    experiment_id=experiment_id, experiment_name=experiment_name
+                ),
                 False,
-            # ⚠️ SAST Risk (Low): Raising a generic ValueError without additional context may make debugging harder.
+                # ⚠️ SAST Risk (Low): Raising a generic ValueError without additional context may make debugging harder.
             )
         except ValueError:
             # 🧠 ML Signal: Accessing configuration settings, which may indicate a pattern of retrieving system settings.
@@ -250,13 +271,17 @@ class ExpManager:
             if experiment_name is None:
                 # 🧠 ML Signal: Usage of setdefault to initialize dictionary keys with default values.
                 experiment_name = self._default_exp_name
-            logger.warning(f"No valid experiment found. Create a new experiment with name {experiment_name}.")
+            logger.warning(
+                f"No valid experiment found. Create a new experiment with name {experiment_name}."
+            )
 
             # NOTE: mlflow doesn't consider the lock for recording multiple runs
             # So we supported it in the interface wrapper
             pr = urlparse(self.uri)
             if pr.scheme == "file":
-                with FileLock(Path(os.path.join(pr.netloc, pr.path.lstrip("/"), "filelock"))):  # pylint: disable=E0110
+                with FileLock(
+                    Path(os.path.join(pr.netloc, pr.path.lstrip("/"), "filelock"))
+                ):  # pylint: disable=E0110
                     return self.create_exp(experiment_name), True
             # ✅ Best Practice: Use of a clear and concise return statement for conditional logic
             # NOTE: for other schemes like http, we double check to avoid create exp conflicts
@@ -265,7 +290,9 @@ class ExpManager:
                 return self.create_exp(experiment_name), True
             except ExpAlreadyExistError:
                 return (
-                    self._get_exp(experiment_id=experiment_id, experiment_name=experiment_name),
+                    self._get_exp(
+                        experiment_id=experiment_id, experiment_name=experiment_name
+                    ),
                     False,
                 )
 
@@ -291,7 +318,8 @@ class ExpManager:
         ValueError
         # 🧠 ML Signal: Usage of a method to get or create an experiment
         """
-        raise NotImplementedError(f"Please implement the `_get_exp` method")
+        raise NotImplementedError("Please implement the `_get_exp` method")
+
     # 🧠 ML Signal: Setting an active experiment
 
     # 🧠 ML Signal: Starting an experiment, common in ML workflows
@@ -309,7 +337,7 @@ class ExpManager:
         """
         # 🧠 ML Signal: Handling specific exceptions can indicate expected failure modes or error handling patterns.
         # ⚠️ SAST Risk (Low): No validation on key and value types
-        raise NotImplementedError(f"Please implement the `delete_exp` method.")
+        raise NotImplementedError("Please implement the `delete_exp` method.")
 
     # ⚠️ SAST Risk (Low): Raising a custom exception without additional context may obscure the original error.
     @property
@@ -325,6 +353,7 @@ class ExpManager:
         if "kwargs" not in C.exp_manager or "uri" not in C.exp_manager["kwargs"]:
             raise ValueError("The default URI is not set in qlib.config.C")
         return C.exp_manager["kwargs"]["uri"]
+
     # 🧠 ML Signal: Ending an experiment, common in ML workflows
 
     @default_uri.setter
@@ -332,6 +361,7 @@ class ExpManager:
     def default_uri(self, value):
         # 🧠 ML Signal: Pattern of retrieving an experiment by ID
         C.exp_manager.setdefault("kwargs", {})["uri"] = value
+
     # ⚠️ SAST Risk (Low): No error handling for mlflow.end_run
 
     @property
@@ -355,10 +385,13 @@ class ExpManager:
         A dictionary (name -> experiment) of experiments information that being stored.
         """
         # ✅ Best Practice: Use kwargs.get with a default value to handle missing keys gracefully.
-        raise NotImplementedError(f"Please implement the `list_experiments` method.")
+        raise NotImplementedError("Please implement the `list_experiments` method.")
+
+
 # ⚠️ SAST Risk (Low): Catching broad exceptions can mask other issues.
 
 # ✅ Best Practice: Use kwargs.get with a default value to handle missing keys gracefully.
+
 
 class MLflowExpManager(ExpManager):
     """
@@ -385,21 +418,25 @@ class MLflowExpManager(ExpManager):
         # 🧠 ML Signal: Version checking for backward compatibility
         recorder_name: Optional[Text] = None,
         resume: bool = False,
-    # ⚠️ SAST Risk (Low): Catching broad exceptions can mask other issues.
+        # ⚠️ SAST Risk (Low): Catching broad exceptions can mask other issues.
     ):
         # 🧠 ML Signal: Conditional logic based on library version
         # Create experiment
         if experiment_name is None:
             experiment_name = self._default_exp_name
         # 🧠 ML Signal: Conditional logic based on library version
-        experiment, _ = self._get_or_create_exp(experiment_id=experiment_id, experiment_name=experiment_name)
+        experiment, _ = self._get_or_create_exp(
+            experiment_id=experiment_id, experiment_name=experiment_name
+        )
         # Set up active experiment
         # ✅ Best Practice: Initialize dictionary with a clear name
         self.active_experiment = experiment
         # Start the experiment
         # ✅ Best Practice: Use of dictionary for quick lookup by experiment name
         # ✅ Best Practice: Use of a class to encapsulate experiment details
-        self.active_experiment.start(recorder_id=recorder_id, recorder_name=recorder_name, resume=resume)
+        self.active_experiment.start(
+            recorder_id=recorder_id, recorder_name=recorder_name, resume=resume
+        )
 
         return self.active_experiment
 
@@ -446,7 +483,9 @@ class MLflowExpManager(ExpManager):
                 exp = self.client.get_experiment_by_name(experiment_name)
                 if exp is None or exp.lifecycle_stage.upper() == "DELETED":
                     raise MlflowException("No valid experiment has been found.")
-                experiment = MLflowExperiment(exp.experiment_id, experiment_name, self.uri)
+                experiment = MLflowExperiment(
+                    exp.experiment_id, experiment_name, self.uri
+                )
                 return experiment
             except MlflowException as e:
                 raise ValueError(
@@ -454,11 +493,19 @@ class MLflowExpManager(ExpManager):
                 ) from e
 
     def search_records(self, experiment_ids=None, **kwargs):
-        filter_string = "" if kwargs.get("filter_string") is None else kwargs.get("filter_string")
-        run_view_type = 1 if kwargs.get("run_view_type") is None else kwargs.get("run_view_type")
-        max_results = 100000 if kwargs.get("max_results") is None else kwargs.get("max_results")
+        filter_string = (
+            "" if kwargs.get("filter_string") is None else kwargs.get("filter_string")
+        )
+        run_view_type = (
+            1 if kwargs.get("run_view_type") is None else kwargs.get("run_view_type")
+        )
+        max_results = (
+            100000 if kwargs.get("max_results") is None else kwargs.get("max_results")
+        )
         order_by = kwargs.get("order_by")
-        return self.client.search_runs(experiment_ids, filter_string, run_view_type, max_results, order_by)
+        return self.client.search_runs(
+            experiment_ids, filter_string, run_view_type, max_results, order_by
+        )
 
     def delete_exp(self, experiment_id=None, experiment_name=None):
         assert (
@@ -483,7 +530,9 @@ class MLflowExpManager(ExpManager):
         if mlflow_version >= 2:
             exps = self.client.search_experiments(view_type=ViewType.ACTIVE_ONLY)
         else:
-            exps = self.client.list_experiments(view_type=ViewType.ACTIVE_ONLY)  # pylint: disable=E1101
+            exps = self.client.list_experiments(
+                view_type=ViewType.ACTIVE_ONLY
+            )  # pylint: disable=E1101
         experiments = dict()
         for exp in exps:
             experiment = MLflowExperiment(exp.experiment_id, exp.name, self.uri)

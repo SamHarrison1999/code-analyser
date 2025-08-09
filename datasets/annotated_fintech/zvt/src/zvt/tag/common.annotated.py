@@ -4,12 +4,15 @@ from enum import Enum
 
 # ✅ Best Practice: Enum members provide a clear and concise way to define constant values
 
+
 class StockPoolType(Enum):
     # ✅ Best Practice: Use of Enum for defining a set of named constants improves code readability and maintainability.
     system = "system"
     custom = "custom"
     # ✅ Best Practice: Defining specific string values for Enum members enhances clarity and usability.
     dynamic = "dynamic"
+
+
 # ✅ Best Practice: Use of Enum for InsertMode improves code readability and maintainability
 
 
@@ -18,6 +21,8 @@ class DynamicPoolType(Enum):
     # ✅ Best Practice: Use of Enum for defining a set of related constants improves code readability and maintainability
     limit_up = "limit_up"
     limit_down = "limit_down"
+
+
 # ✅ Best Practice: Defining class variables for Enum members improves code organization
 
 
@@ -25,6 +30,8 @@ class DynamicPoolType(Enum):
 class InsertMode(Enum):
     overwrite = "overwrite"
     append = "append"
+
+
 # ✅ Best Practice: Defining __all__ to specify public symbols of the module improves code clarity and prevents unintended exports.
 
 
@@ -41,4 +48,10 @@ class TagStatsQueryType(Enum):
 
 
 # the __all__ is generated
-__all__ = ["StockPoolType", "DynamicPoolType", "InsertMode", "TagType", "TagStatsQueryType"]
+__all__ = [
+    "StockPoolType",
+    "DynamicPoolType",
+    "InsertMode",
+    "TagType",
+    "TagStatsQueryType",
+]

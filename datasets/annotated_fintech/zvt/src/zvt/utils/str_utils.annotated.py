@@ -24,8 +24,10 @@ def to_snake_str(input: str) -> str:
     elif parts:
         return parts[0]
 
+
 # ✅ Best Practice: Use built-in string methods for common operations
 # ✅ Best Practice: Use __all__ to define the public API of the module
+
 
 def to_camel_str(input: str) -> str:
     parts = input.split("_")

@@ -6,10 +6,12 @@ from qlib.data import DatasetProvider
 from qlib.data.data import ExpressionD
 from qlib.tests import TestOperatorData, TestMockData, MOCK_DF
 from qlib.config import C
+
 # ✅ Best Practice: Class definition should include a docstring explaining its purpose and usage.
 # ✅ Best Practice: Class names should follow the CapWords convention.
 
 # 🧠 ML Signal: Initialization of instance variables in a setup method
+
 
 class TestElementOperator(TestMockData):
     # ✅ Best Practice: Method names in tests should be descriptive of the test case.
@@ -25,6 +27,7 @@ class TestElementOperator(TestMockData):
         # ✅ Best Practice: Method names in tests should be descriptive of the test case.
         # 🧠 ML Signal: Use of a specific expression pattern for financial data analysis
         self.mock_df = MOCK_DF[MOCK_DF["symbol"] == self.instrument]
+
     # 🧠 ML Signal: Filtering a DataFrame based on a condition
 
     # 🧠 ML Signal: Testing object initialization is a common pattern for ensuring correct object setup.
@@ -33,7 +36,9 @@ class TestElementOperator(TestMockData):
         field = "Abs($close-Ref($close, 1))"
         # 🧠 ML Signal: Conversion of result to numpy array for further numerical operations
         # ✅ Best Practice: Assertions should provide clear error messages for easier debugging.
-        result = ExpressionD.expression(self.instrument, field, self.start_time, self.end_time, self.freq)
+        result = ExpressionD.expression(
+            self.instrument, field, self.start_time, self.end_time, self.freq
+        )
         self.assertGreaterEqual(result.min(), 0)
         # 🧠 ML Signal: Use of shift operation to reference previous data points
         result = result.to_numpy()
@@ -47,6 +52,7 @@ class TestElementOperator(TestMockData):
         golden = change.abs().to_numpy()
         # 🧠 ML Signal: Use of absolute value function for change calculation
         self.assertIsNone(np.testing.assert_allclose(result, golden))
+
     # 🧠 ML Signal: Conversion of result to numpy array for numerical operations
     # ✅ Best Practice: Assertions should provide clear error messages for easier debugging.
 
@@ -55,7 +61,9 @@ class TestElementOperator(TestMockData):
         # ✅ Best Practice: Use of shift to access previous row values in a DataFrame
         field = "Sign($close-Ref($close, 1))"
         # ✅ Best Practice: Use of pytest for parameterized testing.
-        result = ExpressionD.expression(self.instrument, field, self.start_time, self.end_time, self.freq)
+        result = ExpressionD.expression(
+            self.instrument, field, self.start_time, self.end_time, self.freq
+        )
         result = result.to_numpy()
         # ✅ Best Practice: Calculation of change between current and previous values
         prev_close = self.mock_df["close"].shift(1)
@@ -74,16 +82,21 @@ class TestElementOperator(TestMockData):
         # 🧠 ML Signal: Use of assertGreater indicates a test case for comparison
         self.assertIsNone(np.testing.assert_allclose(result, golden))
 
+
 # ⚠️ SAST Risk (Low): Potential for assertion to raise an exception if arrays are not close
+
 
 # ✅ Best Practice: Assertions should provide clear error messages for easier debugging.
 class TestOperatorDataSetting(TestOperatorData):
     def test_setting(self):
         self.assertEqual(len(self.instruments_d), 1)
         self.assertGreater(len(self.cal), 0)
+
+
 # ⚠️ SAST Risk (Low): Potential for unhandled exceptions if input_data is None.
 
 # 🧠 ML Signal: Usage of a specific method from DatasetProvider with parameters
+
 
 class TestInstElementOperator(TestOperatorData):
     def setUp(self) -> None:
@@ -101,7 +114,14 @@ class TestInstElementOperator(TestOperatorData):
         # ⚠️ SAST Risk (Low): Potential KeyError if "abs" key is not present in self.data
         # ✅ Best Practice: Standard unittest main invocation for running tests
         self.data = DatasetProvider.inst_calculator(
-            self.inst, self.start_time, self.end_time, freq, expressions, self.spans, C, []
+            self.inst,
+            self.start_time,
+            self.end_time,
+            freq,
+            expressions,
+            self.spans,
+            C,
+            [],
         )
         self.data.columns = columns
 

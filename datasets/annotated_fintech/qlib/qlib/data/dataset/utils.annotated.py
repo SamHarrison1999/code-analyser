@@ -1,10 +1,12 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 from __future__ import annotations
+
 # ✅ Best Practice: Conditional imports with TYPE_CHECKING to avoid circular dependencies and reduce runtime overhead
 import pandas as pd
 from typing import Union, List, TYPE_CHECKING
 from qlib.utils import init_instance_by_config
+
 # ✅ Best Practice: Include type hints for function parameters and return type for better readability and maintainability
 # ✅ Best Practice: TYPE_CHECKING import to prevent runtime import and improve performance
 
@@ -41,7 +43,7 @@ def get_level_index(df: pd.DataFrame, level: Union[str, int]) -> int:
     elif isinstance(level, int):
         return level
     else:
-        raise NotImplementedError(f"This type of input is not supported")
+        raise NotImplementedError("This type of input is not supported")
 
 
 def fetch_df_by_index(
@@ -98,12 +100,16 @@ def fetch_df_by_col(df: pd.DataFrame, col_set: Union[str, List[str]]) -> pd.Data
         return df.droplevel(axis=1, level=0)
     else:
         return df.loc(axis=1)[col_set]
+
+
 # ⚠️ SAST Risk (Low): Assumes that the MultiIndex has exactly two levels without validation.
 
 
 # 🧠 ML Signal: Usage of swaplevel and sort_index indicates data manipulation patterns.
 # ✅ Best Practice: Add type hint for the return type in the function signature
-def convert_index_format(df: Union[pd.DataFrame, pd.Series], level: str = "datetime") -> Union[pd.DataFrame, pd.Series]:
+def convert_index_format(
+    df: Union[pd.DataFrame, pd.Series], level: str = "datetime"
+) -> Union[pd.DataFrame, pd.Series]:
     """
     Convert the format of df.MultiIndex according to the following rules:
         - If `level` is the first level of df.MultiIndex, do nothing

@@ -24,6 +24,7 @@ class InfoCollector:
         for method in ["system", "machine", "platform", "version"]:
             # ⚠️ SAST Risk (Low): sys module is used without being imported, which will cause a NameError
             print(getattr(platform, method)())
+
     # 🧠 ML Signal: Use of sys.version to obtain Python version information
 
     # ✅ Best Practice: Consider using logging instead of print for better control over output levels and destinations
@@ -63,8 +64,8 @@ class InfoCollector:
             # ⚠️ SAST Risk (Low): pkg_resources.get_distribution can raise DistributionNotFound exception if the package is not installed
             "fire",
             "ruamel.yaml",
-        # 🧠 ML Signal: Iterating over a list of method names to dynamically call them
-        # ✅ Best Practice: Consider using logging instead of print for better control over output levels and destinations
+            # 🧠 ML Signal: Iterating over a list of method names to dynamically call them
+            # ✅ Best Practice: Consider using logging instead of print for better control over output levels and destinations
         ]
 
         # ⚠️ SAST Risk (Medium): Use of getattr with user-controlled input can lead to security risks if not properly validated

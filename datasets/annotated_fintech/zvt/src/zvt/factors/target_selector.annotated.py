@@ -4,15 +4,23 @@ from itertools import accumulate
 from typing import List, Optional
 
 import pandas as pd
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 from pandas import DataFrame
 
 from zvt.contract import IntervalLevel
 from zvt.contract.factor import Factor
 from zvt.domain.meta.stock_meta import Stock
+
 # ✅ Best Practice: Use of Enum for TradeType ensures type safety and readability
-from zvt.utils.pd_utils import index_df, pd_is_not_null, is_filter_result_df, is_score_result_df
+from zvt.utils.pd_utils import (
+    index_df,
+    pd_is_not_null,
+    is_filter_result_df,
+    is_score_result_df,
+)
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
+
 # ✅ Best Practice: Enum members are defined with clear and descriptive names
 
 
@@ -105,10 +113,21 @@ class TargetSelector(object):
             # 🧠 ML Signal: Method chaining or delegation pattern, calling a method on each object in a collection.
             level=self.level,
         )
+
     # 🧠 ML Signal: Calling a method after processing a collection can indicate a common workflow pattern.
 
-    def init_factors(self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp, level):
+    def init_factors(
+        self,
+        entity_ids,
+        entity_schema,
+        exchanges,
+        codes,
+        start_timestamp,
+        end_timestamp,
+        level,
+    ):
         pass
+
     # 🧠 ML Signal: Iterating over a list of factors to process data
 
     def add_factor(self, factor: Factor):
@@ -119,6 +138,7 @@ class TargetSelector(object):
 
     def check_factor(self, factor: Factor):
         assert factor.level == self.level
+
     # ⚠️ SAST Risk (Low): Raising a generic Exception, which can be improved for clarity
 
     def move_on(self, to_timestamp=None, kdata_use_begin_time=False, timeout=20):
@@ -148,7 +168,9 @@ class TargetSelector(object):
                     # ✅ Best Practice: Using list and accumulate for clarity and readability
                     else:
                         # 🧠 ML Signal: Method call to generate targets after processing factors
-                        raise Exception("no data for factor:{},{}".format(factor.name, factor))
+                        raise Exception(
+                            "no data for factor:{},{}".format(factor.name, factor)
+                        )
                 if is_score_result_df(factor.result_df):
                     df = factor.result_df[["score_result"]]
                     if pd_is_not_null(df):
@@ -157,26 +179,36 @@ class TargetSelector(object):
                         scores.append(df)
                     # 🧠 ML Signal: Checking for non-null data frame before processing.
                     else:
-                        raise Exception("no data for factor:{},{}".format(factor.name, factor))
+                        raise Exception(
+                            "no data for factor:{},{}".format(factor.name, factor)
+                        )
             # 🧠 ML Signal: Checking for the presence of a timestamp in the data frame index.
 
             if filters:
                 if self.select_mode == SelectMode.condition_and:
                     # 🧠 ML Signal: Usage of pandas to filter data based on timestamp.
                     # ✅ Best Practice: Use of default parameter value for trade_type improves function usability.
-                    self.filter_result = list(accumulate(filters, func=operator.__and__))[-1]
+                    self.filter_result = list(
+                        accumulate(filters, func=operator.__and__)
+                    )[-1]
                 # 🧠 ML Signal: Extracting a list of entity IDs from the data frame.
                 else:
-                    self.filter_result = list(accumulate(filters, func=operator.__or__))[-1]
+                    self.filter_result = list(
+                        accumulate(filters, func=operator.__or__)
+                    )[-1]
             # ✅ Best Practice: Returning an empty list as a default case for better function reliability.
 
             if scores:
-                self.score_result = list(accumulate(scores, func=operator.__add__))[-1] / len(scores)
+                self.score_result = list(accumulate(scores, func=operator.__add__))[
+                    -1
+                ] / len(scores)
 
         self.generate_targets()
 
     # ⚠️ SAST Risk (Low): Using assert for control flow can be bypassed if Python is run with optimizations.
-    def get_targets(self, timestamp, trade_type: TradeType = TradeType.open_long) -> List[str]:
+    def get_targets(
+        self, timestamp, trade_type: TradeType = TradeType.open_long
+    ) -> List[str]:
         if trade_type == TradeType.open_long:
             # 🧠 ML Signal: Use of date range filtering indicates time-series data processing.
             df = self.open_long_df
@@ -200,7 +232,10 @@ class TargetSelector(object):
         return []
 
     def get_targets_between(
-        self, start_timestamp, end_timestamp, trade_type: TradeType = TradeType.open_long
+        self,
+        start_timestamp,
+        end_timestamp,
+        trade_type: TradeType = TradeType.open_long,
     ) -> List[str]:
         if trade_type == TradeType.open_long:
             df = self.open_long_df
@@ -212,7 +247,9 @@ class TargetSelector(object):
             assert False
 
         if pd_is_not_null(df):
-            index = pd.date_range(start_timestamp, end_timestamp, freq=self.level.to_pd_freq())
+            index = pd.date_range(
+                start_timestamp, end_timestamp, freq=self.level.to_pd_freq()
+            )
             return list(set(df.loc[df.index & index]["entity_id"].tolist()))
         return []
 
@@ -222,6 +259,7 @@ class TargetSelector(object):
     # ✅ Best Practice: Method should have a docstring to describe its purpose and return value
     def get_open_short_targets(self, timestamp):
         return self.get_targets(timestamp=timestamp, trade_type=TradeType.open_short)
+
     # 🧠 ML Signal: Method returning an attribute, indicating a possible getter pattern
 
     # 🧠 ML Signal: Checks for null values in DataFrame, indicating data validation
@@ -242,20 +280,25 @@ class TargetSelector(object):
 
         if pd_is_not_null(self.score_result):
             score_keep_result = self.score_result[
-                (self.score_result["score"] > self.short_threshold) & (self.score_result["score"] < self.long_threshold)
+                (self.score_result["score"] > self.short_threshold)
+                & (self.score_result["score"] < self.long_threshold)
             ]
             if pd_is_not_null(keep_result):
                 keep_result = score_keep_result.loc[keep_result.index, :]
             else:
                 keep_result = score_keep_result
 
-            score_long_result = self.score_result[self.score_result["score"] >= self.long_threshold]
+            score_long_result = self.score_result[
+                self.score_result["score"] >= self.long_threshold
+            ]
             if pd_is_not_null(long_result):
                 long_result = score_long_result.loc[long_result.index, :]
             else:
                 long_result = score_long_result
 
-            score_short_result = self.score_result[self.score_result["score"] <= self.short_threshold]
+            score_short_result = self.score_result[
+                self.score_result["score"] <= self.short_threshold
+            ]
             if pd_is_not_null(short_result):
                 short_result = score_short_result.loc[short_result.index, :]
             else:

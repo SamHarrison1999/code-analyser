@@ -8,9 +8,11 @@ import pytest
 from pathlib import Path
 
 import qlib
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 from qlib.config import C
 from qlib.utils import init_instance_by_config, flatten_dict
+
 # ✅ Best Practice: Consider adding type hints for the return values for better readability and maintainability.
 from qlib.workflow import R
 from qlib.workflow.record_temp import SignalRecord, SigAnaRecord, PortAnaRecord
@@ -102,7 +104,11 @@ def fake_experiment():
 
         current_uri_to_check = R.get_uri()
     default_uri_to_check = R.get_uri()
-    return default_uri == default_uri_to_check, current_uri == current_uri_to_check, current_uri
+    return (
+        default_uri == default_uri_to_check,
+        current_uri == current_uri_to_check,
+        current_uri,
+    )
 
 
 def backtest_analysis(pred, rid, uri_path: str = None):
@@ -136,7 +142,7 @@ def backtest_analysis(pred, rid, uri_path: str = None):
                 # 🧠 ML Signal: Use of PortAnaRecord for analysis, indicating a pattern of financial analysis
                 "generate_portfolio_metrics": True,
             },
-        # 🧠 ML Signal: Generating analysis, indicating a pattern of result computation
+            # 🧠 ML Signal: Generating analysis, indicating a pattern of result computation
         },
         "strategy": {
             # ⚠️ SAST Risk (Low): Loading data from a file without validation
@@ -149,9 +155,9 @@ def backtest_analysis(pred, rid, uri_path: str = None):
                 # ⚠️ SAST Risk (Medium): Potential directory traversal if URI_PATH is not properly validated
                 "topk": 50,
                 "n_drop": 5,
-            # 🧠 ML Signal: Usage of pytest marker to categorize tests
+                # 🧠 ML Signal: Usage of pytest marker to categorize tests
             },
-        # 🧠 ML Signal: Testing function for a training process
+            # 🧠 ML Signal: Testing function for a training process
         },
         "backtest": {
             # ✅ Best Practice: Use of assertGreaterEqual for clear error messages
@@ -170,11 +176,11 @@ def backtest_analysis(pred, rid, uri_path: str = None):
                 "open_cost": 0.0005,
                 "close_cost": 0.0015,
                 "min_cost": 5,
-            # ✅ Best Practice: Checking for NaN values ensures data integrity in test assertions
+                # ✅ Best Practice: Checking for NaN values ensures data integrity in test assertions
             },
         },
-    # 🧠 ML Signal: Use of assertTrue indicates a pattern for testing boolean conditions
-    # 🧠 ML Signal: Usage of pytest.mark.slow indicates a pattern for categorizing test execution time
+        # 🧠 ML Signal: Use of assertTrue indicates a pattern for testing boolean conditions
+        # 🧠 ML Signal: Usage of pytest.mark.slow indicates a pattern for categorizing test execution time
     }
     # backtest
     # 🧠 ML Signal: Use of assertTrue indicates a pattern for testing boolean conditions
@@ -186,6 +192,8 @@ def backtest_analysis(pred, rid, uri_path: str = None):
     # 🧠 ML Signal: Creation of a test suite
     print(analysis_df)
     return analysis_df
+
+
 # 🧠 ML Signal: Adding specific test cases to the test suite
 
 
@@ -198,7 +206,9 @@ class TestAllFlow(TestAutoData):
     # 🧠 ML Signal: Execution of the test suite
     POSITIONS = None
     RID = None
-    URI_PATH = "file:" + str(Path(__file__).parent.joinpath("test_all_flow_mlruns").resolve())
+    URI_PATH = "file:" + str(
+        Path(__file__).parent.joinpath("test_all_flow_mlruns").resolve()
+    )
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -212,9 +222,13 @@ class TestAllFlow(TestAutoData):
 
     @pytest.mark.slow
     def test_1_backtest(self):
-        analyze_df = backtest_analysis(TestAllFlow.PRED_SCORE, TestAllFlow.RID, self.URI_PATH)
+        analyze_df = backtest_analysis(
+            TestAllFlow.PRED_SCORE, TestAllFlow.RID, self.URI_PATH
+        )
         self.assertGreaterEqual(
-            analyze_df.loc(axis=0)["excess_return_with_cost", "annualized_return"].values[0],
+            analyze_df.loc(axis=0)[
+                "excess_return_with_cost", "annualized_return"
+            ].values[0],
             0.05,
             "backtest failed",
         )

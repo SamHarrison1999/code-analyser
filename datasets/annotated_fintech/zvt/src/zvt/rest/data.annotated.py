@@ -16,7 +16,7 @@ data_router = APIRouter(
 @data_router.get(
     "/providers",
     response_model=list,
-# 🧠 ML Signal: Function to retrieve data providers, indicating a pattern of data access
+    # 🧠 ML Signal: Function to retrieve data providers, indicating a pattern of data access
 )
 def get_data_providers():
     """
@@ -37,7 +37,9 @@ def get_data_schemas(provider):
     """
     return [schema.__name__ for schema in contract_api.get_schemas(provider=provider)]
 
+
 # ✅ Best Practice: Type hinting for 'model' improves code readability and maintainability
+
 
 @data_router.get(
     # 🧠 ML Signal: Usage of 'jsonable_encoder' indicates data serialization pattern
@@ -51,4 +53,6 @@ def query_data(provider: str, schema: str):
     """
     model: contract.Mixin = contract_api.get_schema_by_name(schema)
     with contract_api.DBSession(provider=provider, data_schema=model)() as session:
-        return jsonable_encoder(model.query_data(session=session, limit=100, return_type="domain"))
+        return jsonable_encoder(
+            model.query_data(session=session, limit=100, return_type="domain")
+        )

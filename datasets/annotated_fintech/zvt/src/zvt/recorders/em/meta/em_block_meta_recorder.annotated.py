@@ -6,11 +6,13 @@ import pandas as pd
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
 from zvt.domain import Block, BlockCategory, BlockStock
+
 # 🧠 ML Signal: Inheritance from a base class, indicating a common pattern for extending functionality
 # ✅ Best Practice: Use specific imports to avoid importing unnecessary modules and to clarify dependencies.
 from zvt.recorders.em import em_api
 
 # 🧠 ML Signal: Class attribute indicating a constant or configuration value
+
 
 # 🧠 ML Signal: Iterating over a predefined list of categories
 class EMBlockRecorder(Recorder):
@@ -25,14 +27,23 @@ class EMBlockRecorder(Recorder):
         for block_category in [BlockCategory.concept, BlockCategory.industry]:
             # 🧠 ML Signal: Storing data into a database
             # 🧠 ML Signal: Use of class attributes to define metadata for the recorder
-            df = em_api.get_tradable_list(entity_type="block", block_category=block_category)
+            df = em_api.get_tradable_list(
+                entity_type="block", block_category=block_category
+            )
             # ⚠️ SAST Risk (Medium): Potential risk of SQL injection if df_to_db is not properly handling inputs
             self.logger.info(df)
             # 🧠 ML Signal: Association of entity_schema with a specific class, indicating a pattern of schema usage
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(
+                df=df,
+                data_schema=self.data_schema,
+                provider=self.provider,
+                force_update=self.force_update,
+            )
+
 
 # 🧠 ML Signal: Usage of external API to fetch data
 # 🧠 ML Signal: Use of class attributes to define metadata for the recorder
+
 
 class EMBlockStockRecorder(TimeSeriesDataRecorder):
     # 🧠 ML Signal: Association of data_schema with a specific class, indicating a pattern of schema usage
@@ -53,8 +64,15 @@ class EMBlockStockRecorder(TimeSeriesDataRecorder):
         the_list = em_api.get_block_stocks(entity.id, entity.name)
         if the_list:
             df = pd.DataFrame.from_records(the_list)
-            df_to_db(data_schema=self.data_schema, df=df, provider=self.provider, force_update=True)
-            self.logger.info("finish recording block:{},{}".format(entity.category, entity.name))
+            df_to_db(
+                data_schema=self.data_schema,
+                df=df,
+                provider=self.provider,
+                force_update=True,
+            )
+            self.logger.info(
+                "finish recording block:{},{}".format(entity.category, entity.name)
+            )
             self.sleep()
 
 

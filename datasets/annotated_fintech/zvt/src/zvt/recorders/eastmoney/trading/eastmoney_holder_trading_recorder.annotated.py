@@ -2,10 +2,12 @@
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.domain import HolderTrading
 from zvt.recorders.eastmoney.common import EastmoneyMoreDataRecorder
+
 # ✅ Best Practice: Class definition should follow the naming conventions (CamelCase).
 from zvt.utils.utils import to_float
 
 # ✅ Best Practice: Class attributes should be defined at the top of the class for better readability.
+
 
 class HolderTradingRecorder(EastmoneyMoreDataRecorder):
     # 🧠 ML Signal: URL patterns can be used to identify API endpoints for web scraping or data collection.
@@ -21,6 +23,7 @@ class HolderTradingRecorder(EastmoneyMoreDataRecorder):
 
     def get_original_time_field(self):
         return "RiQi"
+
     # 🧠 ML Signal: Use of a custom function 'to_float' for data conversion
 
     def get_data_map(self):
@@ -33,7 +36,7 @@ class HolderTradingRecorder(EastmoneyMoreDataRecorder):
             # 🧠 ML Signal: Accessing dictionary values using the get method, which is a common pattern.
             "change_pct": ("BianDongBiLi", to_float),
             "holding_pct": ("BianDongHouChiGuBiLi", to_float),
-        # 🧠 ML Signal: String formatting using format method, a common pattern in Python.
+            # 🧠 ML Signal: String formatting using format method, a common pattern in Python.
         }
 
     def generate_domain_id(self, entity, original_data):

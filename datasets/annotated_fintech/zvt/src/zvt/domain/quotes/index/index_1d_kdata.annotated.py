@@ -4,6 +4,7 @@
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Define a class-level attribute for the table name to improve maintainability and readability.
 # ✅ Best Practice: Naming conventions for classes and variables should be consistent and descriptive.
 from zvt.domain.quotes import IndexKdataCommon
@@ -18,7 +19,12 @@ class Index1dKdata(KdataBase, IndexKdataCommon):
     __tablename__ = "index_1d_kdata"
 
 
-register_schema(providers=["em", "sina"], db_name="index_1d_kdata", schema_base=KdataBase, entity_type="index")
+register_schema(
+    providers=["em", "sina"],
+    db_name="index_1d_kdata",
+    schema_base=KdataBase,
+    entity_type="index",
+)
 
 
 # the __all__ is generated

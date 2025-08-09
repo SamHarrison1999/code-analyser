@@ -7,16 +7,20 @@ from dash import dcc
 from zvt.api.kdata import get_kdata_schema
 from zvt.contract import zvt_context
 from zvt.contract.api import decode_entity_id
+
 # ✅ Best Practice: Group imports from the same module together for better readability.
 from zvt.contract.drawer import Drawer
+
 # 🧠 ML Signal: Function with conditional logic based on input value
 from zvt.contract.reader import DataReader
 from zvt.trader.trader_info_api import OrderReader, AccountStatsReader
+
 # ✅ Best Practice: Group imports from the same module together for better readability.
 # 🧠 ML Signal: Specific string values used to determine logic flow
 from zvt.utils.pd_utils import pd_is_not_null
 
 # 🧠 ML Signal: Returns specific color code based on condition
+
 
 # ✅ Best Practice: Group imports from the same module together for better readability.
 def order_type_color(order_type):
@@ -28,6 +32,8 @@ def order_type_color(order_type):
         return "#ec0000"
     else:
         return "#00da3c"
+
+
 # ✅ Best Practice: Group imports from the same module together for better readability.
 # 🧠 ML Signal: Default return value for non-matching conditions, useful for learning default behavior
 
@@ -41,16 +47,24 @@ def order_type_flag(order_type):
     else:
         return "S"
 
+
 # ✅ Best Practice: Defaulting start_timestamp to order_reader's start_timestamp if not provided
+
 
 # ✅ Best Practice: Defaulting end_timestamp to order_reader's end_timestamp if not provided
 # 🧠 ML Signal: Instantiating DataReader with specific parameters, indicating data access patterns
 def get_trading_signals_figure(
-    order_reader: OrderReader, entity_id: str, start_timestamp=None, end_timestamp=None, adjust_type=None
+    order_reader: OrderReader,
+    entity_id: str,
+    start_timestamp=None,
+    end_timestamp=None,
+    adjust_type=None,
 ):
     entity_type, _, _ = decode_entity_id(entity_id)
 
-    data_schema = get_kdata_schema(entity_type=entity_type, level=order_reader.level, adjust_type=adjust_type)
+    data_schema = get_kdata_schema(
+        entity_type=entity_type, level=order_reader.level, adjust_type=adjust_type
+    )
     if not start_timestamp:
         start_timestamp = order_reader.start_timestamp
     if not end_timestamp:
@@ -64,7 +78,7 @@ def get_trading_signals_figure(
         # 🧠 ML Signal: Copying data from order_reader, indicating data manipulation patterns
         end_timestamp=end_timestamp,
         level=order_reader.level,
-    # 🧠 ML Signal: Filtering data based on entity_id, showing data selection patterns
+        # 🧠 ML Signal: Filtering data based on entity_id, showing data selection patterns
     )
     # ✅ Best Practice: Consider adding type hints for the return type for better readability and maintainability.
 
@@ -101,6 +115,8 @@ def get_account_stats_figure(account_stats_reader: AccountStatsReader):
         fig = account_stats_reader.draw_line(show=False)
 
         for trader_name in account_stats_reader.trader_names:
-            graph_list.append(dcc.Graph(id="{}-account".format(trader_name), figure=fig))
+            graph_list.append(
+                dcc.Graph(id="{}-account".format(trader_name), figure=fig)
+            )
 
     return graph_list

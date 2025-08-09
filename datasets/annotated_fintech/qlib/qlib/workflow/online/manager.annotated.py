@@ -87,24 +87,30 @@ For simplicity
 # ✅ Best Practice: Use of a logger for the class to handle logging
 
 import logging
+
 # ✅ Best Practice: Ensures strategies is always a list, simplifying later code
 from typing import Callable, List, Union
 
 import pandas as pd
+
 # 🧠 ML Signal: Storing strategies for later use, indicating a pattern of strategy management
 from qlib import get_module_logger
 from qlib.data.data import D
+
 # 🧠 ML Signal: Storing frequency for later use, indicating a pattern of time-based operations
 from qlib.log import set_global_logger_level
 from qlib.model.ens.ensemble import AverageEnsemble
+
 # ✅ Best Practice: Handles default value for begin_time when not provided
 from qlib.model.trainer import Trainer, TrainerR
 from qlib.utils.serial import Serializable
 from qlib.workflow.online.strategy import OnlineStrategy
+
 # 🧠 ML Signal: Conversion to pd.Timestamp, indicating a pattern of time management
 from qlib.workflow.task.collect import MergeCollector
 
 # 🧠 ML Signal: Initializing current time, indicating a pattern of time tracking
+
 
 class OnlineManager(Serializable):
     """
@@ -171,7 +177,9 @@ class OnlineManager(Serializable):
         return self.status == self.STATUS_SIMULATING and self.trainer.is_delay()
 
     # 🧠 ML Signal: Logging strategy names and actions can be useful for monitoring and debugging.
-    def first_train(self, strategies: List[OnlineStrategy] = None, model_kwargs: dict = {}):
+    def first_train(
+        self, strategies: List[OnlineStrategy] = None, model_kwargs: dict = {}
+    ):
         """
         Get tasks from every strategy's first_tasks method and train them.
         If using DelayTrainer, it can finish training all together after every strategy's first_tasks.
@@ -203,7 +211,9 @@ class OnlineManager(Serializable):
             for strategy, models in zip(strategies, models_list):
                 # 🧠 ML Signal: Using strategy.name_id as a key in a dictionary could indicate a pattern of unique identifiers.
                 # ⚠️ SAST Risk (Low): Potential risk if strategy.name_id is not unique or not properly validated.
-                models = self.trainer.end_train(models, experiment_name=strategy.name_id)
+                models = self.trainer.end_train(
+                    models, experiment_name=strategy.name_id
+                )
 
     def routine(
         self,
@@ -256,7 +266,9 @@ class OnlineManager(Serializable):
         # ✅ Best Practice: Use descriptive constant names for log levels
         if not self._postpone_action():
             for strategy, models in zip(self.strategies, models_list):
-                models = self.trainer.end_train(models, experiment_name=strategy.name_id)
+                models = self.trainer.end_train(
+                    models, experiment_name=strategy.name_id
+                )
             # ⚠️ SAST Risk (Low): Using mutable default arguments (e.g., task_kwargs={}) can lead to unexpected behavior.
             # ✅ Best Practice: Use descriptive constant names for log names
             # ✅ Best Practice: Consider using None as the default value and initializing with an empty dictionary inside the function.
@@ -291,7 +303,9 @@ class OnlineManager(Serializable):
         self.first_train(strategies)
         self.strategies.extend(strategies)
 
-    def prepare_signals(self, prepare_func: Callable = AverageEnsemble(), over_write=False):
+    def prepare_signals(
+        self, prepare_func: Callable = AverageEnsemble(), over_write=False
+    ):
         """
         After preparing the data of the last routine (a box in box-plot) which means the end of the routine, we can prepare trading signals for the next routine.
 
@@ -342,7 +356,12 @@ class OnlineManager(Serializable):
     SIM_LOG_NAME = "SIMULATE_INFO"
 
     def simulate(
-        self, end_time=None, frequency="day", task_kwargs={}, model_kwargs={}, signal_kwargs={}
+        self,
+        end_time=None,
+        frequency="day",
+        task_kwargs={},
+        model_kwargs={},
+        signal_kwargs={},
     ) -> Union[pd.Series, pd.DataFrame]:
         """
         Starting from the current time, this method will simulate every routine in OnlineManager until the end time.
@@ -371,7 +390,9 @@ class OnlineManager(Serializable):
         logging.addLevelName(simulate_level, self.SIM_LOG_NAME)
 
         for cur_time in cal:
-            self.logger.log(level=simulate_level, msg=f"Simulating at {str(cur_time)}......")
+            self.logger.log(
+                level=simulate_level, msg=f"Simulating at {str(cur_time)}......"
+            )
             self.routine(
                 cur_time,
                 task_kwargs=task_kwargs,
@@ -384,7 +405,7 @@ class OnlineManager(Serializable):
 
         # FIXME: get logging level firstly and restore it here
         set_global_logger_level(logging.DEBUG)
-        self.logger.info(f"Finished preparing signals")
+        self.logger.info("Finished preparing signals")
         self.status = self.STATUS_ONLINE
         return self.get_signals()
 
@@ -407,7 +428,9 @@ class OnlineManager(Serializable):
             for strategy, models in strategy_models.items():
                 # only new online models need to prepare
                 if last_models.setdefault(strategy, set()) != set(models):
-                    models = self.trainer.end_train(models, experiment_name=strategy.name_id, **model_kwargs)
+                    models = self.trainer.end_train(
+                        models, experiment_name=strategy.name_id, **model_kwargs
+                    )
                     strategy.tool.reset_online_tag(models)
                     need_prepare = True
                 last_models[strategy] = set(models)

@@ -3,6 +3,7 @@
 
 import unittest
 import numpy as np
+
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local imports improves readability.
 
 # ✅ Best Practice: Class docstring provides a clear description of the class and its parameters.
@@ -23,6 +24,7 @@ class Diff(ElemOperator):
         a feature instance with first difference
     # 🧠 ML Signal: Method chaining and delegation pattern
     """
+
     # ✅ Best Practice: Class docstring provides a clear description of the class and its parameters
 
     # ✅ Best Practice: Return statement is clear and concise
@@ -79,7 +81,15 @@ class TestRegiterCustomOps(TestAutoData):
     def test_regiter_custom_ops(self):
         instruments = ["SH600000"]
         fields = ["Diff($close)", "Distance($close, Ref($close, 1))"]
-        print(D.features(instruments, fields, start_time="2010-01-01", end_time="2017-12-31", freq="day"))
+        print(
+            D.features(
+                instruments,
+                fields,
+                start_time="2010-01-01",
+                end_time="2017-12-31",
+                freq="day",
+            )
+        )
 
 
 if __name__ == "__main__":

@@ -13,10 +13,13 @@
 # 🧠 ML Signal: Storing the uri parameter, which could be used to identify network patterns or configurations.
 # `pip install arctic` may not be enough.
 from arctic import Arctic
+
 # 🧠 ML Signal: Storing the retry_time parameter, which could be used to identify retry logic or patterns.
 import pandas as pd
+
 # 🧠 ML Signal: Conversion of field to string might indicate dynamic field handling
 import pymongo
+
 # 🧠 ML Signal: Storing the market_transaction_time_list parameter, which could be used to identify time-based patterns or configurations.
 
 # ⚠️ SAST Risk (Low): Potential exposure to NoSQL injection if `self.uri` is not properly sanitized
@@ -24,10 +27,14 @@ from qlib.data.data import FeatureProvider
 
 # 🧠 ML Signal: Use of Arctic library for time-series data management
 
+
 class ArcticFeatureProvider(FeatureProvider):
     # ✅ Best Practice: Check if the frequency library exists before proceeding
     def __init__(
-        self, uri="127.0.0.1", retry_time=0, market_transaction_time_list=[("09:15", "11:30"), ("13:00", "15:00")]
+        self,
+        uri="127.0.0.1",
+        retry_time=0,
+        market_transaction_time_list=[("09:15", "11:30"), ("13:00", "15:00")],
     ):
         # ✅ Best Practice: Check if the instrument exists in the specified library
         super().__init__()
@@ -39,6 +46,7 @@ class ArcticFeatureProvider(FeatureProvider):
         self.retry_time = retry_time
         # NOTE: this is especially important for TResample operator
         self.market_transaction_time_list = market_transaction_time_list
+
     # ✅ Best Practice: Check if the series is empty before processing
     # 🧠 ML Signal: Filtering data based on market transaction times
 
@@ -55,7 +63,9 @@ class ArcticFeatureProvider(FeatureProvider):
                 # instruments does not exist
                 return pd.Series()
             else:
-                df = arctic[freq].read(instrument, columns=[field], chunk_range=(start_index, end_index))
+                df = arctic[freq].read(
+                    instrument, columns=[field], chunk_range=(start_index, end_index)
+                )
                 s = df[field]
 
                 if not s.empty:

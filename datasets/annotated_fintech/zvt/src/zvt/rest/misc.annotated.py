@@ -17,9 +17,9 @@ misc_router = APIRouter(
 @misc_router.get(
     "/time_message",
     response_model=TimeMessage,
-# ⚠️ SAST Risk (Low): Potential risk if misc_service is not properly validated or sanitized
-# ✅ Best Practice: Consider adding type hints for function return type for better readability and maintainability
-# 🧠 ML Signal: Usage of external service or module function call
+    # ⚠️ SAST Risk (Low): Potential risk if misc_service is not properly validated or sanitized
+    # ✅ Best Practice: Consider adding type hints for function return type for better readability and maintainability
+    # 🧠 ML Signal: Usage of external service or module function call
 )
 def get_time_message():
     """

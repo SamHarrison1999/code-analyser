@@ -2,14 +2,17 @@
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 
 from zvt.broker.qmt import qmt_quote
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 # ✅ Best Practice: Use of class attributes for constants improves readability and maintainability.
 from zvt.domain import Stock
 
 # ✅ Best Practice: Explicitly defining data_schema as a class attribute enhances clarity and consistency.
+
 
 class QMTStockRecorder(Recorder):
     # 🧠 ML Signal: Usage of logging to track data processing steps
@@ -23,7 +26,12 @@ class QMTStockRecorder(Recorder):
         # 🧠 ML Signal: Instantiation and execution pattern of a class method
         # ✅ Best Practice: Define __all__ to explicitly declare module exports
         self.logger.info(df.tail())
-        df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=True)
+        df_to_db(
+            df=df,
+            data_schema=self.data_schema,
+            provider=self.provider,
+            force_update=True,
+        )
 
 
 if __name__ == "__main__":

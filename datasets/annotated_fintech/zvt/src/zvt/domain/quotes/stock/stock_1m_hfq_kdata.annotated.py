@@ -4,9 +4,11 @@
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract.register import register_schema
+
 # 🧠 ML Signal: Usage of SQLAlchemy's declarative_base indicates ORM pattern.
 # 🧠 ML Signal: Inheritance from multiple classes, indicating a pattern of using mixins or shared functionality.
 from zvt.domain.quotes import StockKdataCommon
+
 # 🧠 ML Signal: Use of a class attribute to define a database table name, common in ORM patterns.
 
 KdataBase = declarative_base()
@@ -15,12 +17,16 @@ KdataBase = declarative_base()
 # ✅ Best Practice: Explicitly specifying parameters in function calls improves readability and maintainability.
 # ✅ Best Practice: Use of __all__ to define public API of the module, improving code clarity and encapsulation.
 
+
 class Stock1mHfqKdata(KdataBase, StockKdataCommon):
     __tablename__ = "stock_1m_hfq_kdata"
 
 
 register_schema(
-    providers=["em", "qmt", "joinquant"], db_name="stock_1m_hfq_kdata", schema_base=KdataBase, entity_type="stock"
+    providers=["em", "qmt", "joinquant"],
+    db_name="stock_1m_hfq_kdata",
+    schema_base=KdataBase,
+    entity_type="stock",
 )
 
 

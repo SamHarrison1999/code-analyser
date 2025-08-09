@@ -1,6 +1,7 @@
 import json
 import shelve
 import pickle
+
 # ⚠️ SAST Risk (Medium): Using pickle can lead to arbitrary code execution if the data is tampered with.
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -8,6 +9,7 @@ from collections import defaultdict
 from functools import lru_cache
 
 import polars as pl
+
 # 🧠 ML Signal: Importing specific classes from a module indicates usage patterns and dependencies.
 
 from vnpy.trader.object import BarData
@@ -16,10 +18,12 @@ from vnpy.trader.utility import extract_vt_symbol
 
 from .logger import logger
 from .dataset import AlphaDataset, to_datetime
+
 # ✅ Best Practice: Class docstring provides a brief description of the class
 from .model import AlphaModel
 
 # ✅ Best Practice: Type hinting for 'lab_path' improves code readability and maintainability.
+
 
 class AlphaLab:
     # ✅ Best Practice: Using Path.joinpath for constructing paths is more readable and maintainable.
@@ -51,10 +55,11 @@ class AlphaLab:
             # ✅ Best Practice: Using specific paths based on conditions improves code organization.
             self.dataset_path,
             self.model_path,
-            self.signal_path
+            self.signal_path,
         ]:
             if not path.exists():
                 path.mkdir(parents=True)
+
     # ⚠️ SAST Risk (Low): Logging error messages can expose sensitive information.
 
     def save_bar_data(self, bars: list[BarData]) -> None:
@@ -87,8 +92,8 @@ class AlphaLab:
                 # ⚠️ SAST Risk (Low): Writing to files can lead to data corruption if not handled properly.
                 "volume": bar.volume,
                 "turnover": bar.turnover,
-                "open_interest": bar.open_interest
-            # 🧠 ML Signal: Type checking and conversion for 'interval' indicates handling of flexible input types
+                "open_interest": bar.open_interest,
+                # 🧠 ML Signal: Type checking and conversion for 'interval' indicates handling of flexible input types
             }
             data.append(bar_data)
 
@@ -109,6 +114,7 @@ class AlphaLab:
         # ⚠️ SAST Risk (Low): Checking file existence without handling potential race conditions
         # Save to file
         new_df.write_parquet(file_path)
+
     # ⚠️ SAST Risk (Low): Logging error messages can potentially expose sensitive information
 
     def load_bar_data(
@@ -119,7 +125,7 @@ class AlphaLab:
         vt_symbol: str,
         interval: Interval | str,
         start: datetime | str,
-        end: datetime | str
+        end: datetime | str,
     ) -> list[BarData]:
         """Load bar data"""
         # Convert types
@@ -177,7 +183,7 @@ class AlphaLab:
                 volume=row["volume"],
                 turnover=row["turnover"],
                 open_interest=row["open_interest"],
-                gateway_name="DB"
+                gateway_name="DB",
             )
             bars.append(bar)
 
@@ -191,7 +197,7 @@ class AlphaLab:
         interval: Interval | str,
         start: datetime | str,
         end: datetime | str,
-        extended_days: int
+        extended_days: int,
     ) -> pl.DataFrame | None:
         # ✅ Best Practice: Skip processing if DataFrame is empty
         """Load bar data as DataFrame"""
@@ -260,7 +266,7 @@ class AlphaLab:
                 pl.col("turnover").cast(pl.Float32),
                 # ✅ Best Practice: Type hinting for the return type improves code readability and maintainability.
                 pl.col("open_interest").cast(pl.Float32),
-                (pl.col("turnover") / pl.col("volume")).cast(pl.Float32).alias("vwap")
+                (pl.col("turnover") / pl.col("volume")).cast(pl.Float32).alias("vwap"),
             )
 
             # Check for empty data
@@ -277,18 +283,23 @@ class AlphaLab:
                 (pl.col("high") / close_0).alias("high"),
                 (pl.col("low") / close_0).alias("low"),
                 (pl.col("close") / close_0).alias("close"),
-            # ✅ Best Practice: Type hinting for index_components improves code readability and maintainability
+                # ✅ Best Practice: Type hinting for index_components improves code readability and maintainability
             )
 
             # Convert zeros to NaN for suspended trading days
-            numeric_columns: list = df.columns[1:]                              # Extract numeric columns
+            numeric_columns: list = df.columns[1:]  # Extract numeric columns
 
-            mask: pl.Series = df[numeric_columns].sum_horizontal() == 0         # Sum by row, if 0 then suspended
+            mask: pl.Series = (
+                df[numeric_columns].sum_horizontal() == 0
+            )  # Sum by row, if 0 then suspended
             # ✅ Best Practice: Sorting trading_dates ensures consistent processing order
 
-            df = df.with_columns(                                               # Convert suspended day values to NaN
+            df = df.with_columns(  # Convert suspended day values to NaN
                 # ✅ Best Practice: Type hinting for component_filters improves code readability and maintainability
-                [pl.when(mask).then(float("nan")).otherwise(pl.col(col)).alias(col) for col in numeric_columns]
+                [
+                    pl.when(mask).then(float("nan")).otherwise(pl.col(col)).alias(col)
+                    for col in numeric_columns
+                ]
             )
             # ✅ Best Practice: Type hinting for all_symbols improves code readability and maintainability
 
@@ -305,9 +316,7 @@ class AlphaLab:
         return result_df
 
     def save_component_data(
-        self,
-        index_symbol: str,
-        index_components: dict[str, list[str]]
+        self, index_symbol: str, index_components: dict[str, list[str]]
     ) -> None:
         # 🧠 ML Signal: Appending tuples to lists in a dictionary to track periods
         """Save index component data"""
@@ -316,14 +325,14 @@ class AlphaLab:
         with shelve.open(str(file_path)) as db:
             db.update(index_components)
 
-    @lru_cache      # noqa
+    @lru_cache  # noqa
     def load_component_data(
         self,
         # ✅ Best Practice: Initialize contracts as a dictionary to store contract settings.
         index_symbol: str,
         start: datetime | str,
         # ⚠️ SAST Risk (Low): Potential file existence check race condition.
-        end: datetime | str
+        end: datetime | str,
     ) -> dict[datetime, list[str]]:
         # ⚠️ SAST Risk (Low): File is opened without exception handling.
         # ⚠️ SAST Risk (Low): json.load can raise exceptions if the file content is not valid JSON.
@@ -348,6 +357,7 @@ class AlphaLab:
                     index_components[dt] = db[key]
 
             return index_components
+
     # ✅ Best Practice: Check if the path exists before opening the file
 
     def load_component_symbols(
@@ -357,8 +367,8 @@ class AlphaLab:
         index_symbol: str,
         # ⚠️ SAST Risk (Low): No error handling for JSON parsing
         start: datetime | str,
-        end: datetime | str
-    # ✅ Best Practice: Using Path.joinpath for file path operations improves code readability and cross-platform compatibility
+        end: datetime | str,
+        # ✅ Best Practice: Using Path.joinpath for file path operations improves code readability and cross-platform compatibility
     ) -> list[str]:
         """Collect index component symbols"""
         # ⚠️ SAST Risk (Low): Ensure that the file path is validated or sanitized to prevent path traversal vulnerabilities
@@ -367,8 +377,8 @@ class AlphaLab:
             # ✅ Best Practice: Use of type hinting for function parameters and return type improves code readability and maintainability.
             # ⚠️ SAST Risk (Low): Ensure that the dataset object is trusted or sanitized to prevent pickle injection vulnerabilities
             start,
-            end
-        # ⚠️ SAST Risk (Low): Potential path traversal if 'name' is not properly validated or sanitized.
+            end,
+            # ⚠️ SAST Risk (Low): Potential path traversal if 'name' is not properly validated or sanitized.
         )
 
         # 🧠 ML Signal: Logging error messages can be used to train models to recognize error patterns.
@@ -388,8 +398,8 @@ class AlphaLab:
         index_symbol: str,
         start: datetime | str,
         # ✅ Best Practice: Type hinting improves code readability and maintainability
-        end: datetime | str
-    # ⚠️ SAST Risk (Low): Directly deleting files without backup or confirmation
+        end: datetime | str,
+        # ⚠️ SAST Risk (Low): Directly deleting files without backup or confirmation
     ) -> dict[str, list[tuple[datetime, datetime]]]:
         """Collect index component duration filters"""
         # 🧠 ML Signal: Use of list comprehension to process file paths
@@ -398,8 +408,8 @@ class AlphaLab:
             index_symbol,
             # ✅ Best Practice: Use of type annotations for function parameters and return type improves code readability and maintainability.
             start,
-            end
-        # ✅ Best Practice: Using Path.joinpath is preferred over string concatenation for file paths.
+            end,
+            # ✅ Best Practice: Using Path.joinpath is preferred over string concatenation for file paths.
         )
 
         # ⚠️ SAST Risk (Medium): Pickle is not secure against erroneous or maliciously constructed data. Ensure the source of the model is trusted.
@@ -409,7 +419,9 @@ class AlphaLab:
 
         # Initialize component duration dictionary
         # 🧠 ML Signal: Logging an error when a model file does not exist can be used to track model loading issues.
-        component_filters: dict[str, list[tuple[datetime, datetime]]] = defaultdict(list)
+        component_filters: dict[str, list[tuple[datetime, datetime]]] = defaultdict(
+            list
+        )
 
         # Get all component symbols
         # ⚠️ SAST Risk (Medium): Using pickle for loading data can lead to arbitrary code execution if the file is tampered with.
@@ -457,6 +469,7 @@ class AlphaLab:
         # 🧠 ML Signal: Use of file path operations to manage resources
 
         return component_filters
+
     # ⚠️ SAST Risk (Low): Potential for path traversal if 'name' is not validated
 
     def add_contract_setting(
@@ -469,7 +482,7 @@ class AlphaLab:
         short_rate: float,
         # 🧠 ML Signal: Usage of file extensions to filter files can indicate data processing patterns
         size: float,
-        pricetick: float
+        pricetick: float,
     ) -> None:
         """Add contract information"""
         contracts: dict = {}
@@ -482,16 +495,11 @@ class AlphaLab:
             "long_rate": long_rate,
             "short_rate": short_rate,
             "size": size,
-            "pricetick": pricetick
+            "pricetick": pricetick,
         }
 
         with open(self.contract_path, mode="w+", encoding="UTF-8") as f:
-            json.dump(
-                contracts,
-                f,
-                indent=4,
-                ensure_ascii=False
-            )
+            json.dump(contracts, f, indent=4, ensure_ascii=False)
 
     def load_contract_setttings(self) -> dict:
         """Load contract settings"""

@@ -4,6 +4,7 @@
 # ⚠️ SAST Risk (Low): Inherits from nn.Module, ensure proper initialization and usage of PyTorch modules
 import torch.nn as nn
 from torch.nn.utils import weight_norm
+
 # 🧠 ML Signal: Constructor method, often used to initialize class attributes
 
 
@@ -25,12 +26,21 @@ class Chomp1d(nn.Module):
 
 # 🧠 ML Signal: Custom layer for sequence data processing
 class TemporalBlock(nn.Module):
-    def __init__(self, n_inputs, n_outputs, kernel_size, stride, dilation, padding, dropout=0.2):
+    def __init__(
+        self, n_inputs, n_outputs, kernel_size, stride, dilation, padding, dropout=0.2
+    ):
         # 🧠 ML Signal: Use of ReLU activation function
         super(TemporalBlock, self).__init__()
         self.conv1 = weight_norm(
-            nn.Conv1d(n_inputs, n_outputs, kernel_size, stride=stride, padding=padding, dilation=dilation)
-        # 🧠 ML Signal: Use of dropout for regularization
+            nn.Conv1d(
+                n_inputs,
+                n_outputs,
+                kernel_size,
+                stride=stride,
+                padding=padding,
+                dilation=dilation,
+            )
+            # 🧠 ML Signal: Use of dropout for regularization
         )
         # 🧠 ML Signal: Use of weight normalization in neural network layers
         self.chomp1 = Chomp1d(padding)
@@ -39,8 +49,15 @@ class TemporalBlock(nn.Module):
 
         self.conv2 = weight_norm(
             # 🧠 ML Signal: Custom layer for sequence data processing
-            nn.Conv1d(n_outputs, n_outputs, kernel_size, stride=stride, padding=padding, dilation=dilation)
-        # 🧠 ML Signal: Use of ReLU activation function
+            nn.Conv1d(
+                n_outputs,
+                n_outputs,
+                kernel_size,
+                stride=stride,
+                padding=padding,
+                dilation=dilation,
+            )
+            # 🧠 ML Signal: Use of ReLU activation function
         )
         self.chomp2 = Chomp1d(padding)
         # 🧠 ML Signal: Use of dropout for regularization
@@ -51,17 +68,27 @@ class TemporalBlock(nn.Module):
 
         # 🧠 ML Signal: Custom weight initialization pattern for neural network layers
         self.net = nn.Sequential(
-            self.conv1, self.chomp1, self.relu1, self.dropout1, self.conv2, self.chomp2, self.relu2, self.dropout2
-        # ✅ Best Practice: Check for None before accessing attributes to avoid runtime errors
+            self.conv1,
+            self.chomp1,
+            self.relu1,
+            self.dropout1,
+            self.conv2,
+            self.chomp2,
+            self.relu2,
+            self.dropout2,
+            # ✅ Best Practice: Check for None before accessing attributes to avoid runtime errors
         )
         # ✅ Best Practice: Conditional logic for layer creation
         # 🧠 ML Signal: Use of a forward method suggests this is part of a neural network model
-        self.downsample = nn.Conv1d(n_inputs, n_outputs, 1) if n_inputs != n_outputs else None
+        self.downsample = (
+            nn.Conv1d(n_inputs, n_outputs, 1) if n_inputs != n_outputs else None
+        )
         # 🧠 ML Signal: Custom weight initialization pattern for neural network layers
         self.relu = nn.ReLU()
         # 🧠 ML Signal: Use of ReLU activation function
         # 🧠 ML Signal: Use of residual connections is common in deep learning models
         self.init_weights()
+
     # 🧠 ML Signal: Custom neural network class definition
 
     # ✅ Best Practice: Initialization of model weights

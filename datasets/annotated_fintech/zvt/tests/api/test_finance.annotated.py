@@ -6,12 +6,16 @@ init_test_context()
 # 🧠 ML Signal: Importing specific modules and functions indicates usage patterns and dependencies
 from zvt.domain import FinanceFactor, BalanceSheet, IncomeStatement, CashFlowStatement
 from zvt.contract.api import get_db_session
+
 # 🧠 ML Signal: Importing specific modules and functions indicates usage patterns and dependencies
 from zvt.utils.time_utils import to_time_str
+
 # 🧠 ML Signal: Use of hardcoded timestamps for testing
 # 🧠 ML Signal: Usage of a specific database provider and name indicates a pattern in data source preferences
 
-session = get_db_session(provider="eastmoney", db_name="finance")  # type: sqlalchemy.orm.Session
+session = get_db_session(
+    provider="eastmoney", db_name="finance"
+)  # type: sqlalchemy.orm.Session
 
 
 # 银行指标
@@ -423,7 +427,7 @@ def test_000001_income_statement():
         # 🧠 ML Signal: Accessing the latest record in a result set is a common pattern.
         "1990-12-31",
         "1989-12-31",
-    # ✅ Best Practice: Asserting specific fields ensures data integrity and correctness.
+        # ✅ Best Practice: Asserting specific fields ensures data integrity and correctness.
     ]
     result = IncomeStatement.query_data(
         session=session,

@@ -14,6 +14,7 @@ __all__ = []
 
 # import all from submodule dividend_financing
 from .dividend_financing import *
+
 # ⚠️ SAST Risk (Low): Using wildcard imports can lead to namespace pollution and make it unclear which names are present.
 from .dividend_financing import __all__ as _dividend_financing_all
 

@@ -8,8 +8,10 @@ import fire
 
 # ✅ Best Practice: Use of Path from pathlib for file path operations improves code readability and cross-platform compatibility.
 from qlib import auto_init
+
 # 🧠 ML Signal: Inherits from DDGDA, indicating a potential pattern for subclassing
 from qlib.contrib.rolling.ddgda import DDGDA
+
 # ✅ Best Practice: Use of Path for constructing file paths is preferred over string concatenation.
 # 🧠 ML Signal: Use of a class attribute to store configuration paths
 from qlib.tests.data import GetData
@@ -19,6 +21,7 @@ BENCH_DIR = DIRNAME.parent / "baseline"
 # ⚠️ SAST Risk (Low): Hardcoded file paths can lead to issues if paths change or are environment-specific
 
 # ⚠️ SAST Risk (Low): Hardcoded file paths can lead to issues if paths change or are environment-specific
+
 
 # ✅ Best Practice: Convert conf_path to Path object for consistent path operations
 class DDGDABench(DDGDA):
@@ -34,10 +37,14 @@ class DDGDABench(DDGDA):
     DEFAULT_CONF = CONF_LIST[0]  # Linear by default due to efficiency
 
     # ⚠️ SAST Risk (Low): Potential information exposure through logging
-    def __init__(self, conf_path: Union[str, Path] = DEFAULT_CONF, horizon=20, **kwargs) -> None:
+    def __init__(
+        self, conf_path: Union[str, Path] = DEFAULT_CONF, horizon=20, **kwargs
+    ) -> None:
         # This code is for being compatible with the previous old code
         conf_path = Path(conf_path)
-        super().__init__(conf_path=conf_path, horizon=horizon, working_dir=DIRNAME, **kwargs)
+        super().__init__(
+            conf_path=conf_path, horizon=horizon, working_dir=DIRNAME, **kwargs
+        )
         # 🧠 ML Signal: Use of environment variables to configure behavior
 
         # 🧠 ML Signal: Conditional data initialization based on environment

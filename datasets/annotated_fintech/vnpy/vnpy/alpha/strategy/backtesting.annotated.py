@@ -6,8 +6,8 @@ import traceback
 
 import numpy as np
 import polars as pl
-import plotly.graph_objects as go               # type: ignore
-from plotly.subplots import make_subplots       # type: ignore
+import plotly.graph_objects as go  # type: ignore
+from plotly.subplots import make_subplots  # type: ignore
 from tqdm import tqdm
 
 from vnpy.trader.constant import Direction, Offset, Interval, Status
@@ -18,12 +18,14 @@ from vnpy.trader.utility import round_to, extract_vt_symbol
 from ..logger import logger
 from ..lab import AlphaLab
 from .template import AlphaStrategy
+
 # ✅ Best Practice: Class attribute with a default value for consistent usage across instances
 
 
 # ✅ Best Practice: Type annotations improve code readability and maintainability
 class BacktestingEngine:
     """Alpha strategy backtesting engine"""
+
     # ✅ Best Practice: Initialize lists and dictionaries to avoid attribute errors
 
     gateway_name: str = "BACKTESTING"
@@ -91,7 +93,7 @@ class BacktestingEngine:
         capital: int = 1_000_000,
         risk_free: float = 0,
         # ✅ Best Practice: Type hinting for better code readability and maintainability
-        annual_days: int = 240
+        annual_days: int = 240,
     ) -> None:
         # ✅ Best Practice: Include type hints for method parameters and return type for better readability and maintainability
         """Set parameters"""
@@ -132,13 +134,16 @@ class BacktestingEngine:
             self.sizes[vt_symbol] = setting["size"]
             self.priceticks[vt_symbol] = setting["pricetick"]
 
-    def add_strategy(self, strategy_class: type, setting: dict, signal_df: pl.DataFrame) -> None:
+    def add_strategy(
+        self, strategy_class: type, setting: dict, signal_df: pl.DataFrame
+    ) -> None:
         """Add strategy"""
         self.strategy_class = strategy_class
         self.strategy = strategy_class(
             self, strategy_class.__name__, copy(self.vt_symbols), setting
         )
         self.signal_df = signal_df
+
     # ✅ Best Practice: Using a set to ensure unique datetime entries
 
     def load_data(self) -> None:
@@ -174,8 +179,8 @@ class BacktestingEngine:
                 self.interval,
                 self.start,
                 # 🧠 ML Signal: Logging a condition where no trades are present
-                self.end
-            # ✅ Best Practice: Use of logging for tracking the end of data replay
+                self.end,
+                # ✅ Best Practice: Use of logging for tracking the end of data replay
             )
 
             for bar in data:
@@ -238,11 +243,7 @@ class BacktestingEngine:
 
         for daily_result in self.daily_results.values():
             daily_result.calculate_pnl(
-                pre_closes,
-                start_poses,
-                self.sizes,
-                self.long_rates,
-                self.short_rates
+                pre_closes, start_poses, self.sizes, self.long_rates, self.short_rates
             )
 
             pre_closes = daily_result.close_prices
@@ -253,27 +254,34 @@ class BacktestingEngine:
         for daily_result in self.daily_results.values():
             fields: list = [
                 # ✅ Best Practice: Chaining methods for cleaner and more readable code
-                "date", "trade_count", "turnover",
-                "commission", "trading_pnl",
-                "holding_pnl", "total_pnl", "net_pnl"
+                "date",
+                "trade_count",
+                "turnover",
+                "commission",
+                "trading_pnl",
+                "holding_pnl",
+                "total_pnl",
+                "net_pnl",
             ]
             for key in fields:
                 value = getattr(daily_result, key)
                 results[key].append(value)
 
         if results:
-            self.daily_df = pl.DataFrame([
-                pl.Series("date", results["date"], dtype=pl.Date),
-                # 🧠 ML Signal: Checking for positive balance
-                pl.Series("trade_count", results["trade_count"], dtype=pl.Int64),
-                pl.Series("turnover", results["turnover"], dtype=pl.Float64),
-                pl.Series("commission", results["commission"], dtype=pl.Float64),
-                # 🧠 ML Signal: Logging a specific condition
-                pl.Series("trading_pnl", results["trading_pnl"], dtype=pl.Float64),
-                pl.Series("holding_pnl", results["holding_pnl"], dtype=pl.Float64),
-                pl.Series("total_pnl", results["total_pnl"], dtype=pl.Float64),
-                pl.Series("net_pnl", results["net_pnl"], dtype=pl.Float64),
-            ])
+            self.daily_df = pl.DataFrame(
+                [
+                    pl.Series("date", results["date"], dtype=pl.Date),
+                    # 🧠 ML Signal: Checking for positive balance
+                    pl.Series("trade_count", results["trade_count"], dtype=pl.Int64),
+                    pl.Series("turnover", results["turnover"], dtype=pl.Float64),
+                    pl.Series("commission", results["commission"], dtype=pl.Float64),
+                    # 🧠 ML Signal: Logging a specific condition
+                    pl.Series("trading_pnl", results["trading_pnl"], dtype=pl.Float64),
+                    pl.Series("holding_pnl", results["holding_pnl"], dtype=pl.Float64),
+                    pl.Series("total_pnl", results["total_pnl"], dtype=pl.Float64),
+                    pl.Series("net_pnl", results["net_pnl"], dtype=pl.Float64),
+                ]
+            )
 
         logger.info("逐日盯市盈亏计算完成")
         return self.daily_df
@@ -315,19 +323,24 @@ class BacktestingEngine:
         df: pl.DataFrame = self.daily_df
 
         if df is not None:
-            df = df.with_columns(
-                # Strategy capital
-                balance=pl.col("net_pnl").cum_sum() + self.capital
-            ).with_columns(
-                # Strategy return
-                pl.col("balance").pct_change().fill_null(0).alias("return"),
-                # Capital high watermark
-                highlevel=pl.col("balance").cum_max()
-            ).with_columns(
-                # Capital drawdown
-                drawdown=pl.col("balance") - pl.col("highlevel"),
-                # Percentage drawdown
-                ddpercent=(pl.col("balance") / pl.col("highlevel") - 1) * 100
+            df = (
+                df.with_columns(
+                    # Strategy capital
+                    balance=pl.col("net_pnl").cum_sum()
+                    + self.capital
+                )
+                .with_columns(
+                    # Strategy return
+                    pl.col("balance").pct_change().fill_null(0).alias("return"),
+                    # Capital high watermark
+                    highlevel=pl.col("balance").cum_max(),
+                )
+                .with_columns(
+                    # Capital drawdown
+                    drawdown=pl.col("balance") - pl.col("highlevel"),
+                    # Percentage drawdown
+                    ddpercent=(pl.col("balance") / pl.col("highlevel") - 1) * 100,
+                )
             )
 
             # Check if bankruptcy occurred
@@ -355,7 +368,9 @@ class BacktestingEngine:
             max_drawdown_end = df["date"][max_drawdown_end_idx]
 
             if isinstance(max_drawdown_end, date):
-                max_drawdown_start_idx = cast(int, df.slice(0, max_drawdown_end_idx + 1)["balance"].arg_max())
+                max_drawdown_start_idx = cast(
+                    int, df.slice(0, max_drawdown_end_idx + 1)["balance"].arg_max()
+                )
                 max_drawdown_start = df["date"][max_drawdown_start_idx]
                 max_drawdown_duration = (max_drawdown_end - max_drawdown_start).days
             else:
@@ -386,7 +401,11 @@ class BacktestingEngine:
 
             if return_std:
                 daily_risk_free = self.risk_free / np.sqrt(self.annual_days)
-                sharpe_ratio = (daily_return - daily_risk_free) / return_std * np.sqrt(self.annual_days)
+                sharpe_ratio = (
+                    (daily_return - daily_risk_free)
+                    / return_std
+                    * np.sqrt(self.annual_days)
+                )
             else:
                 sharpe_ratio = 0
 
@@ -482,24 +501,21 @@ class BacktestingEngine:
             rows=4,
             cols=1,
             subplot_titles=["Balance", "Drawdown", "Daily Pnl", "Pnl Distribution"],
-            vertical_spacing=0.06
+            vertical_spacing=0.06,
         )
 
         balance_line = go.Scatter(
-            x=df["date"],
-            y=df["balance"],
-            mode="lines",
-            name="Balance"
+            x=df["date"], y=df["balance"], mode="lines", name="Balance"
         )
         drawdown_scatter = go.Scatter(
             x=df["date"],
             y=df["drawdown"],
             # 🧠 ML Signal: Adding traces to the Plotly figure for visualization
             fillcolor="red",
-            fill='tozeroy',
+            fill="tozeroy",
             mode="lines",
             # ✅ Best Practice: Setting layout properties for better visualization
-            name="Drawdown"
+            name="Drawdown",
         )
         pnl_bar = go.Bar(y=df["net_pnl"], name="Daily Pnl")
         pnl_histogram = go.Histogram(x=df["net_pnl"], nbinsx=100, name="Days")
@@ -515,7 +531,9 @@ class BacktestingEngine:
     def show_performance(self, benchmark_symbol: str) -> None:
         """Display performance metrics"""
         # Load benchmark prices
-        benchmark_bars: list[BarData] = self.lab.load_bar_data(benchmark_symbol, self.interval, self.start, self.end)
+        benchmark_bars: list[BarData] = self.lab.load_bar_data(
+            benchmark_symbol, self.interval, self.start, self.end
+        )
 
         benchmark_prices: list[float] = []
         # ✅ Best Practice: Type hinting for 'd' improves code readability and maintainability
@@ -531,26 +549,39 @@ class BacktestingEngine:
                 cumulative_return=pl.col("balance").pct_change().cum_sum(),
                 # Cumulative cost
                 # ✅ Best Practice: Type hinting for 'daily_result' improves code readability and maintainability
-                cumulative_cost=(pl.col("commission") / pl.col("balance").shift(1)).cum_sum()
-            ).with_columns(
+                cumulative_cost=(
+                    pl.col("commission") / pl.col("balance").shift(1)
+                ).cum_sum(),
+            )
+            .with_columns(
                 # Benchmark price
                 benchmark_price=pl.Series(values=benchmark_prices, dtype=pl.Float64)
-            # 🧠 ML Signal: Method call on 'daily_result' could indicate a pattern of updating or processing data
-            ).with_columns(
+                # 🧠 ML Signal: Method call on 'daily_result' could indicate a pattern of updating or processing data
+            )
+            .with_columns(
                 # Benchmark return
-                benchmark_return=pl.col("benchmark_price").pct_change().cum_sum()
-            # 🧠 ML Signal: Storing new 'PortfolioDailyResult' in 'self.daily_results' could indicate a pattern of data accumulation
-            ).with_columns(
+                benchmark_return=pl.col("benchmark_price")
+                .pct_change()
+                .cum_sum()
+                # 🧠 ML Signal: Storing new 'PortfolioDailyResult' in 'self.daily_results' could indicate a pattern of data accumulation
+            )
+            .with_columns(
                 # Excess return
                 excess_return=(pl.col("cumulative_return") - pl.col("benchmark_return"))
-            ).with_columns(
+            )
+            .with_columns(
                 # Net excess return
                 net_excess_return=(pl.col("excess_return") - pl.col("cumulative_cost")),
-            ).with_columns(
+            )
+            .with_columns(
                 # Excess return drawdown
-                excess_return_drawdown=(pl.col("excess_return") - pl.col("excess_return").cum_max()),
+                excess_return_drawdown=(
+                    pl.col("excess_return") - pl.col("excess_return").cum_max()
+                ),
                 # Net excess return drawdown
-                net_excess_return_drawdown=(pl.col("net_excess_return") - pl.col("net_excess_return").cum_max())
+                net_excess_return_drawdown=(
+                    pl.col("net_excess_return") - pl.col("net_excess_return").cum_max()
+                ),
             )
         )
 
@@ -558,8 +589,14 @@ class BacktestingEngine:
         fig: go.Figure = make_subplots(
             rows=5,
             cols=1,
-            subplot_titles=["Return", "Alpha", "Turnover", "Alpha Drawdown", "Alpha Drawdown with Cost"],
-            vertical_spacing=0.06
+            subplot_titles=[
+                "Return",
+                "Alpha",
+                "Turnover",
+                "Alpha Drawdown",
+                "Alpha Drawdown with Cost",
+            ],
+            vertical_spacing=0.06,
         )
 
         # ✅ Best Practice: Ensure that cross_order is called after updating bars to maintain logical flow.
@@ -569,15 +606,15 @@ class BacktestingEngine:
             y=performance_df["cumulative_return"],
             mode="lines",
             # ✅ Best Practice: Ensure that update_daily_close is called after updating bars to maintain logical flow.
-            name="Strategy"
-        # 🧠 ML Signal: Iterating over active limit orders to match them with market data
+            name="Strategy",
+            # 🧠 ML Signal: Iterating over active limit orders to match them with market data
         )
         net_strategy_curve: go.Scatter = go.Scatter(
             # 🧠 ML Signal: Accessing market data for a specific symbol
             x=performance_df["date"],
             y=performance_df["cumulative_return"] - performance_df["cumulative_cost"],
             mode="lines",
-            name="Strategy with Cost"
+            name="Strategy with Cost",
         )
         benchmark_curve: go.Scatter = go.Scatter(
             # ⚠️ SAST Risk (Low): Directly modifying order status without validation
@@ -585,7 +622,7 @@ class BacktestingEngine:
             y=performance_df["benchmark_return"],
             mode="lines",
             # 🧠 ML Signal: Updating order status in strategy
-            name="Benchmark"
+            name="Benchmark",
         )
         # 🧠 ML Signal: Using price tick information for calculations
         # 🧠 ML Signal: Accessing previous close price for limit calculations
@@ -593,7 +630,7 @@ class BacktestingEngine:
             x=performance_df["date"],
             y=performance_df["excess_return"],
             mode="lines",
-            name="Alpha"
+            name="Alpha",
         )
         # ✅ Best Practice: Using round_to function for consistent rounding
         # 🧠 ML Signal: Determining if a long order can be crossed
@@ -601,7 +638,7 @@ class BacktestingEngine:
             x=performance_df["date"],
             y=performance_df["net_excess_return"],
             mode="lines",
-            name="Alpha with Cost"
+            name="Alpha with Cost",
         )
         turnover_curve: go.Scatter = go.Scatter(
             x=self.daily_df["date"],
@@ -612,19 +649,19 @@ class BacktestingEngine:
         excess_drawdown_curve: go.Scatter = go.Scatter(
             x=performance_df["date"],
             y=performance_df["excess_return_drawdown"],
-            fill='tozeroy',
+            fill="tozeroy",
             mode="lines",
-            name="Alpha Drawdown"
-        # ⚠️ SAST Risk (Low): Directly setting order as fully traded
+            name="Alpha Drawdown",
+            # ⚠️ SAST Risk (Low): Directly setting order as fully traded
         )
         # 🧠 ML Signal: Updating order status in strategy
         # ⚠️ SAST Risk (Low): Removing order from active list without validation
         net_excess_drawdown_curve: go.Scatter = go.Scatter(
             x=performance_df["date"],
             y=performance_df["net_excess_return_drawdown"],
-            fill='tozeroy',
+            fill="tozeroy",
             mode="lines",
-            name="Alpha Drawdown with Cost"
+            name="Alpha Drawdown with Cost",
         )
 
         fig.add_trace(strategy_curve, row=1, col=1)
@@ -644,23 +681,24 @@ class BacktestingEngine:
             width=1200,
             plot_bgcolor="white",
             paper_bgcolor="white",
-            xaxis=dict(showgrid=True, gridwidth=1, gridcolor='LightGray'),
-            xaxis2=dict(showgrid=True, gridwidth=1, gridcolor='LightGray'),
-            xaxis3=dict(showgrid=True, gridwidth=1, gridcolor='LightGray'),
-            xaxis4=dict(showgrid=True, gridwidth=1, gridcolor='LightGray'),
-            xaxis5=dict(showgrid=True, gridwidth=1, gridcolor='LightGray'),
+            xaxis=dict(showgrid=True, gridwidth=1, gridcolor="LightGray"),
+            xaxis2=dict(showgrid=True, gridwidth=1, gridcolor="LightGray"),
+            xaxis3=dict(showgrid=True, gridwidth=1, gridcolor="LightGray"),
+            xaxis4=dict(showgrid=True, gridwidth=1, gridcolor="LightGray"),
+            xaxis5=dict(showgrid=True, gridwidth=1, gridcolor="LightGray"),
             # 🧠 ML Signal: Calculating trade turnover based on size
             # ✅ Best Practice: Check for the presence of 'datetime' before proceeding with operations
-            yaxis=dict(showgrid=True, gridwidth=1, gridcolor='LightGray'),
-            yaxis2=dict(showgrid=True, gridwidth=1, gridcolor='LightGray'),
+            yaxis=dict(showgrid=True, gridwidth=1, gridcolor="LightGray"),
+            yaxis2=dict(showgrid=True, gridwidth=1, gridcolor="LightGray"),
             # ✅ Best Practice: Logging provides insight into the function's execution flow
-            yaxis3=dict(showgrid=True, gridwidth=1, gridcolor='LightGray'),
+            yaxis3=dict(showgrid=True, gridwidth=1, gridcolor="LightGray"),
             # 🧠 ML Signal: Calculating commission based on trade direction
-            yaxis4=dict(showgrid=True, gridwidth=1, gridcolor='LightGray'),
-            yaxis5=dict(showgrid=True, gridwidth=1, gridcolor='LightGray')
-        # ✅ Best Practice: Remove timezone information for consistent datetime comparison
+            yaxis4=dict(showgrid=True, gridwidth=1, gridcolor="LightGray"),
+            yaxis5=dict(showgrid=True, gridwidth=1, gridcolor="LightGray"),
+            # ✅ Best Practice: Remove timezone information for consistent datetime comparison
         )
         fig.show()
+
     # 🧠 ML Signal: Filtering data based on datetime is a common pattern in time-series analysis
 
     # ⚠️ SAST Risk (Low): Directly modifying cash balance based on trade
@@ -737,8 +775,8 @@ class BacktestingEngine:
                     low_price=old_bar.close_price,
                     # 🧠 ML Signal: Usage of dictionary values to retrieve all items
                     close_price=old_bar.close_price,
-                    gateway_name=old_bar.gateway_name
-                # ✅ Best Practice: Use of type hint for return value improves code readability and maintainability
+                    gateway_name=old_bar.gateway_name,
+                    # ✅ Best Practice: Use of type hint for return value improves code readability and maintainability
                 )
                 self.bars[vt_symbol] = fill_bar
         # 🧠 ML Signal: Accessing an attribute of an object, indicating a common pattern of object-oriented programming
@@ -784,7 +822,7 @@ class BacktestingEngine:
                 order.direction == Direction.LONG
                 and order.price >= long_cross_price
                 and long_cross_price > 0
-                and bar.low_price < limit_up        # Not a full-day limit-up market
+                and bar.low_price < limit_up  # Not a full-day limit-up market
             )
 
             # ✅ Best Practice: Check if pre_close is not None before assignment
@@ -792,8 +830,8 @@ class BacktestingEngine:
                 order.direction == Direction.SHORT
                 and order.price <= short_cross_price
                 and short_cross_price > 0
-                and bar.high_price > limit_down     # Not a full-day limit-down market
-            # 🧠 ML Signal: Calculation of holding PnL based on position and price difference
+                and bar.high_price > limit_down  # Not a full-day limit-down market
+                # 🧠 ML Signal: Calculation of holding PnL based on position and price difference
             )
 
             # 🧠 ML Signal: Tracking the number of trades
@@ -849,7 +887,9 @@ class BacktestingEngine:
             # 🧠 ML Signal: Method for adding trade data, useful for learning trade patterns
             if trade.direction == Direction.LONG:
                 # ✅ Best Practice: Type hinting for 'trade' and return type improves code readability and maintainability
-                trade_commission: float = trade_turnover * self.long_rates[trade.vt_symbol]
+                trade_commission: float = (
+                    trade_turnover * self.long_rates[trade.vt_symbol]
+                )
             # 🧠 ML Signal: Accessing contract results by trade symbol, indicating a pattern of data organization
             # ✅ Best Practice: Type hinting for 'contract_result' improves code readability and maintainability
             # 🧠 ML Signal: Method call to add trade to contract result, useful for learning trade processing patterns
@@ -1009,7 +1049,7 @@ class ContractDailyResult:
         start_pos: float,
         size: float,
         long_rate: float,
-        short_rate: float
+        short_rate: float,
     ) -> None:
         """Calculate profit and loss"""
         # If there is no previous close price, use 1 instead to avoid division error
@@ -1066,7 +1106,9 @@ class PortfolioDailyResult:
         self.contract_results: dict[str, ContractDailyResult] = {}
 
         for vt_symbol, close_price in close_prices.items():
-            self.contract_results[vt_symbol] = ContractDailyResult(result_date, close_price)
+            self.contract_results[vt_symbol] = ContractDailyResult(
+                result_date, close_price
+            )
 
         self.trade_count: int = 0
         self.turnover: float = 0
@@ -1087,7 +1129,7 @@ class PortfolioDailyResult:
         start_poses: dict[str, float],
         sizes: dict[str, float],
         long_rates: dict[str, float],
-        short_rates: dict[str, float]
+        short_rates: dict[str, float],
     ) -> None:
         """Calculate profit and loss"""
         self.pre_closes = pre_closes
@@ -1099,7 +1141,7 @@ class PortfolioDailyResult:
                 start_poses.get(vt_symbol, 0),
                 sizes[vt_symbol],
                 long_rates[vt_symbol],
-                short_rates[vt_symbol]
+                short_rates[vt_symbol],
             )
 
             self.trade_count += contract_result.trade_count
@@ -1117,8 +1159,12 @@ class PortfolioDailyResult:
         self.close_prices.update(close_prices)
 
         for vt_symbol, close_price in close_prices.items():
-            contract_result: ContractDailyResult | None = self.contract_results.get(vt_symbol, None)
+            contract_result: ContractDailyResult | None = self.contract_results.get(
+                vt_symbol, None
+            )
             if contract_result:
                 contract_result.update_close_price(close_price)
             else:
-                self.contract_results[vt_symbol] = ContractDailyResult(self.date, close_price)
+                self.contract_results[vt_symbol] = ContractDailyResult(
+                    self.date, close_price
+                )

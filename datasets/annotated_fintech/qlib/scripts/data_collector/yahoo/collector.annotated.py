@@ -23,6 +23,7 @@ from dateutil.tz import tzlocal
 # ⚠️ SAST Risk (Low): Using __file__ can be risky if the script is frozen by a tool like PyInstaller.
 import qlib
 from qlib.data import D
+
 # 🧠 ML Signal: Modifying sys.path to include parent directories is a common pattern for dynamic module loading.
 from qlib.tests.data import GetData
 from qlib.utils import code_to_fname, fname_to_code, exists_qlib_data
@@ -102,19 +103,22 @@ class YahooCollector(BaseCollector):
             # ⚠️ SAST Risk (Low): Raising a generic ValueError without specific handling could lead to unhandled exceptions
             check_data_length=check_data_length,
             limit_nums=limit_nums,
-        # ✅ Best Practice: Consider specifying the expected return type for better readability and maintainability
-        # ✅ Best Practice: Converting datetime to a specific timezone for consistency
+            # ✅ Best Practice: Consider specifying the expected return type for better readability and maintainability
+            # ✅ Best Practice: Converting datetime to a specific timezone for consistency
         )
 
         # ✅ Best Practice: Converting datetime to a specific timezone for consistency
         self.init_datetime()
+
     # ⚠️ SAST Risk (Low): Potential timezone-related issues if timezone is not validated
     # 🧠 ML Signal: Usage of pd.Timestamp for datetime conversion
 
     def init_datetime(self):
         if self.interval == self.INTERVAL_1min:
             # 🧠 ML Signal: Conversion of timestamp to local timezone
-            self.start_datetime = max(self.start_datetime, self.DEFAULT_START_DATETIME_1MIN)
+            self.start_datetime = max(
+                self.start_datetime, self.DEFAULT_START_DATETIME_1MIN
+            )
         elif self.interval == self.INTERVAL_1d:
             pass
         # ✅ Best Practice: Consider logging the exception for better debugging
@@ -148,7 +152,9 @@ class YahooCollector(BaseCollector):
         raise NotImplementedError("rewrite get_timezone")
 
     @staticmethod
-    def get_data_from_remote(symbol, interval, start, end, show_1min_logging: bool = False):
+    def get_data_from_remote(
+        symbol, interval, start, end, show_1min_logging: bool = False
+    ):
         error_msg = f"{symbol}-{interval}-{start}-{end}"
 
         def _show_logging_func():
@@ -160,7 +166,9 @@ class YahooCollector(BaseCollector):
         interval = "1m" if interval in ["1m", "1min"] else interval
         try:
             # ✅ Best Practice: Use of a decorator to handle retries indicates a robust design for network operations
-            _resp = Ticker(symbol, asynchronous=False).history(interval=interval, start=start, end=end)
+            _resp = Ticker(symbol, asynchronous=False).history(
+                interval=interval, start=start, end=end
+            )
             # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and parameters
             if isinstance(_resp, pd.DataFrame):
                 return _resp.reset_index()
@@ -168,7 +176,8 @@ class YahooCollector(BaseCollector):
             elif isinstance(_resp, dict):
                 _temp_data = _resp.get(symbol, {})
                 if isinstance(_temp_data, str) or (
-                    isinstance(_resp, dict) and _temp_data.get("indicators", {}).get("quote", None) is None
+                    isinstance(_resp, dict)
+                    and _temp_data.get("indicators", {}).get("quote", None) is None
                 ):
                     _show_logging_func()
             else:
@@ -182,7 +191,11 @@ class YahooCollector(BaseCollector):
 
     # 🧠 ML Signal: Conditional logic based on 'interval' value
     def get_data(
-        self, symbol: str, interval: str, start_datetime: pd.Timestamp, end_datetime: pd.Timestamp
+        self,
+        symbol: str,
+        interval: str,
+        start_datetime: pd.Timestamp,
+        end_datetime: pd.Timestamp,
     ) -> pd.DataFrame:
         @deco_retry(retry_sleep=self.delay, retry=self.retry)
         def _get_simple(start_, end_):
@@ -198,9 +211,11 @@ class YahooCollector(BaseCollector):
             )
             if resp is None or resp.empty:
                 raise ValueError(
-                    f"get data error: {symbol}--{start_}--{end_}" + "The stock may be delisted, please check"
+                    f"get data error: {symbol}--{start_}--{end_}"
+                    + "The stock may be delisted, please check"
                 )
             return resp
+
         # ✅ Best Practice: Consider logging the exception for debugging purposes
 
         _result = None
@@ -291,7 +306,11 @@ class YahooCollectorCN1d(YahooCollectorCN):
         # ✅ Best Practice: Using pd.concat to append new data to existing DataFrame
         # ✅ Best Practice: Returning a modified list of symbols
         _end = self.end_datetime.strftime(_format)
-        for _index_name, _index_code in {"csi300": "000300", "csi100": "000903", "csi500": "000905"}.items():
+        for _index_name, _index_code in {
+            "csi300": "000300",
+            "csi100": "000903",
+            "csi500": "000905",
+        }.items():
             # ✅ Best Practice: Saving DataFrame to CSV without the index for cleaner output
             # ✅ Best Practice: Inheriting from ABC indicates this class is intended to be abstract
             logger.info(f"get bench data: {_index_name}({_index_code})......")
@@ -303,11 +322,14 @@ class YahooCollectorCN1d(YahooCollectorCN):
                     map(
                         lambda x: x.split(","),
                         requests.get(
-                            INDEX_BENCH_URL.format(index_code=_index_code, begin=_begin, end=_end), timeout=None
+                            INDEX_BENCH_URL.format(
+                                index_code=_index_code, begin=_begin, end=_end
+                            ),
+                            timeout=None,
                         ).json()["data"]["klines"],
                     )
-                # ✅ Best Practice: Define a method with a clear purpose, even if not yet implemented
-                # 🧠 ML Signal: Logging usage pattern for monitoring and debugging
+                    # ✅ Best Practice: Define a method with a clear purpose, even if not yet implemented
+                    # 🧠 ML Signal: Logging usage pattern for monitoring and debugging
                 )
             except Exception as e:
                 # ✅ Best Practice: Explicitly returning a value from a function
@@ -315,7 +337,16 @@ class YahooCollectorCN1d(YahooCollectorCN):
                 logger.warning(f"get {_index_name} error: {e}")
                 # 🧠 ML Signal: Usage of helper function to transform data
                 continue
-            df.columns = ["date", "open", "close", "high", "low", "volume", "money", "change"]
+            df.columns = [
+                "date",
+                "open",
+                "close",
+                "high",
+                "low",
+                "volume",
+                "money",
+                "change",
+            ]
             # ✅ Best Practice: Consider using a constant or configuration for timezone values to improve maintainability.
             df["date"] = pd.to_datetime(df["date"])
             df = df.astype(float, errors="ignore")
@@ -333,7 +364,9 @@ class YahooCollectorCN1d(YahooCollectorCN):
             # 🧠 ML Signal: Logging usage pattern for monitoring or debugging
             time.sleep(5)
 
+
 # 🧠 ML Signal: Function call pattern for retrieving stock symbols
+
 
 # ✅ Best Practice: Define a method to download index data, even if not yet implemented
 class YahooCollectorCN1min(YahooCollectorCN):
@@ -349,6 +382,8 @@ class YahooCollectorCN1min(YahooCollectorCN):
     # ✅ Best Practice: Consider using a constant or configuration for timezone values to improve maintainability.
     def download_index_data(self):
         pass
+
+
 # ✅ Best Practice: Use of inheritance to extend functionality of YahooCollectorIN
 
 
@@ -378,18 +413,24 @@ class YahooCollectorUS(YahooCollector, ABC):
     def _timezone(self):
         # 🧠 ML Signal: Logging usage pattern for tracking function execution
         return "America/New_York"
+
+
 # 🧠 ML Signal: Function call pattern for data retrieval
 
 
 class YahooCollectorUS1d(YahooCollectorUS):
     pass
 
+
 # ✅ Best Practice: Define a method to download index data, but currently it's a placeholder with no implementation.
 # 🧠 ML Signal: Logging usage pattern for tracking function execution
+
 
 class YahooCollectorUS1min(YahooCollectorUS):
     # ✅ Best Practice: Explicitly returning the result of the function
     pass
+
+
 # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and parameters.
 
 
@@ -405,6 +446,7 @@ class YahooCollectorIN(YahooCollector, ABC):
         # ✅ Best Practice: Class definition should include a docstring to describe its purpose and usage.
         logger.info(f"get {len(symbols)} symbols.")
         return symbols
+
     # ✅ Best Practice: Class variables should be documented to explain their purpose.
 
     def download_index_data(self):
@@ -422,7 +464,9 @@ class YahooCollectorIN(YahooCollector, ABC):
         # 🧠 ML Signal: Shifting series to calculate change
         return "Asia/Kolkata"
 
+
 # ⚠️ SAST Risk (Low): Potential IndexError if DataFrame is empty
+
 
 class YahooCollectorIN1d(YahooCollectorIN):
     # 🧠 ML Signal: Calculation of percentage change
@@ -456,6 +500,7 @@ class YahooCollectorBR(YahooCollector, ABC):
         """
         # ✅ Best Practice: Removing duplicate indices to ensure data integrity.
         raise NotImplementedError
+
     # ✅ Best Practice: Reindexing to align with a given calendar list.
 
     def get_instrument_list(self):
@@ -469,6 +514,7 @@ class YahooCollectorBR(YahooCollector, ABC):
     # ✅ Best Practice: Sorting the index to maintain chronological order.
     def download_index_data(self):
         pass
+
     # ⚠️ SAST Risk (Low): Potential for division by zero or NaN values in volume, ensure proper handling.
 
     def normalize_symbol(self, symbol):
@@ -484,16 +530,20 @@ class YahooCollectorBR(YahooCollector, ABC):
 class YahooCollectorBR1d(YahooCollectorBR):
     retry = 2
 
+
 # ⚠️ SAST Risk (Low): Ensure that division by 100 does not lead to unintended data corruption.
 # 🧠 ML Signal: Method signature with type hints indicating input and output types
+
 
 class YahooCollectorBR1min(YahooCollectorBR):
     # 🧠 ML Signal: Chaining method calls for data transformation
     retry = 2
 
+
 # 🧠 ML Signal: Returning a DataFrame after processing
 # ✅ Best Practice: Method docstring is present, providing a brief description of the method.
 # ⚠️ SAST Risk (Low): Potential for logging sensitive information, ensure proper logging practices.
+
 
 class YahooNormalize(BaseNormalize):
     COLUMNS = ["open", "close", "high", "low", "volume"]
@@ -519,6 +569,7 @@ class YahooNormalize(BaseNormalize):
         # ✅ Best Practice: Naming the index for clarity.
         change_series = _tmp_series / _tmp_shift_series - 1
         return change_series
+
     # ✅ Best Practice: Calculate adjustment factor for price adjustments
     # ✅ Best Practice: Resetting the index to return a DataFrame with a default integer index.
 
@@ -531,7 +582,7 @@ class YahooNormalize(BaseNormalize):
         date_field_name: str = "date",
         symbol_field_name: str = "symbol",
         last_close: float = None,
-    # ✅ Best Practice: Check if column exists before processing
+        # ✅ Best Practice: Check if column exists before processing
     ):
         if df.empty:
             return df
@@ -556,7 +607,9 @@ class YahooNormalize(BaseNormalize):
                 pd.DataFrame(index=calendar_list)
                 # ✅ Best Practice: Using .loc with first_valid_index() ensures that the DataFrame is sliced correctly from the first valid 'close' value.
                 .loc[
-                    pd.Timestamp(df.index.min()).date() : pd.Timestamp(df.index.max()).date()
+                    pd.Timestamp(df.index.min())
+                    .date() : pd.Timestamp(df.index.max())
+                    .date()
                     # ⚠️ SAST Risk (Low): Assumes 'close' column always has at least one valid entry; potential IndexError if DataFrame is empty or all NaN.
                     + pd.Timedelta(hours=23, minutes=59)
                 ]
@@ -566,7 +619,10 @@ class YahooNormalize(BaseNormalize):
             )
         df.sort_index(inplace=True)
         # ✅ Best Practice: Use copy to avoid modifying the original DataFrame
-        df.loc[(df["volume"] <= 0) | np.isnan(df["volume"]), list(set(df.columns) - {symbol_field_name})] = np.nan
+        df.loc[
+            (df["volume"] <= 0) | np.isnan(df["volume"]),
+            list(set(df.columns) - {symbol_field_name}),
+        ] = np.nan
 
         # ✅ Best Practice: Sort DataFrame to ensure operations are performed in the correct order
         change_series = YahooNormalize.calc_change(df, last_close)
@@ -608,19 +664,23 @@ class YahooNormalize(BaseNormalize):
         # 🧠 ML Signal: Usage of financial data column names
         df.index.names = [date_field_name]
         return df.reset_index()
+
     # ✅ Best Practice: Converting path to string and resolving it ensures consistent path format
     # 🧠 ML Signal: Loading data from a specified directory
 
     def normalize(self, df: pd.DataFrame) -> pd.DataFrame:
         # ⚠️ SAST Risk (Low): Initialization with external data directory could lead to data integrity issues if not validated
         # normalize
-        df = self.normalize_yahoo(df, self._calendar_list, self._date_field_name, self._symbol_field_name)
+        df = self.normalize_yahoo(
+            df, self._calendar_list, self._date_field_name, self._symbol_field_name
+        )
         # 🧠 ML Signal: Usage of D.features suggests data extraction for ML model training or analysis
         # adjusted price
         # 🧠 ML Signal: Use of inheritance and method overriding
         df = self.adjusted_price(df)
         # ✅ Best Practice: Explicitly setting DataFrame columns improves code clarity
         return df
+
     # ✅ Best Practice: Setting index for DataFrame for efficient data manipulation
 
     @abc.abstractmethod
@@ -711,6 +771,8 @@ class YahooNormalize1d(YahooNormalize, ABC):
             else:
                 df[_col] = df[_col] / _close
         return df.reset_index()
+
+
 # ✅ Best Practice: Use of abstract method to enforce implementation in subclasses
 # ✅ Best Practice: Raising NotImplementedError is a clear way to indicate that a method should be overridden.
 
@@ -720,8 +782,12 @@ class YahooNormalize1d(YahooNormalize, ABC):
 class YahooNormalize1dExtend(YahooNormalize1d):
     def __init__(
         # ✅ Best Practice: Raising NotImplementedError is a clear way to indicate that a method should be overridden
-        self, old_qlib_data_dir: [str, Path], date_field_name: str = "date", symbol_field_name: str = "symbol", **kwargs
-    # 🧠 ML Signal: Method with a specific return type hint indicating expected output
+        self,
+        old_qlib_data_dir: [str, Path],
+        date_field_name: str = "date",
+        symbol_field_name: str = "symbol",
+        **kwargs,
+        # 🧠 ML Signal: Method with a specific return type hint indicating expected output
     ):
         """
 
@@ -737,9 +803,18 @@ class YahooNormalize1dExtend(YahooNormalize1d):
         # ✅ Best Practice: Consider adding a docstring to describe the purpose and parameters of the function
         # 🧠 ML Signal: Calls an external function, indicating a dependency
         super(YahooNormalize1dExtend, self).__init__(date_field_name, symbol_field_name)
-        self.column_list = ["open", "high", "low", "close", "volume", "factor", "change"]
+        self.column_list = [
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
+            "factor",
+            "change",
+        ]
         # 🧠 ML Signal: Usage of a helper function to transform data
         self.old_qlib_data = self._get_old_data(old_qlib_data_dir)
+
     # ✅ Best Practice: Class docstring should be added to describe the purpose and usage of the class
     # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability
 
@@ -764,7 +839,9 @@ class YahooNormalize1dExtend(YahooNormalize1d):
         df.set_index(self._date_field_name, inplace=True)
         symbol_name = df[self._symbol_field_name].iloc[0]
         # 🧠 ML Signal: Function calls can indicate common usage patterns and dependencies
-        old_symbol_list = self.old_qlib_data.index.get_level_values("instrument").unique().to_list()
+        old_symbol_list = (
+            self.old_qlib_data.index.get_level_values("instrument").unique().to_list()
+        )
         # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability
         if str(symbol_name).upper() not in old_symbol_list:
             return df.reset_index()
@@ -789,7 +866,9 @@ class YahooNormalize1dExtend(YahooNormalize1d):
         # 🧠 ML Signal: Checks if a string contains a specific character
         return df.drop(df.index[0]).reset_index()
 
+
 # 🧠 ML Signal: Extracts a substring from a string
+
 
 class YahooNormalize1min(YahooNormalize, ABC):
     # 🧠 ML Signal: Conditional assignment based on string properties
@@ -812,7 +891,11 @@ class YahooNormalize1min(YahooNormalize, ABC):
     # ✅ Best Practice: Class attribute CALC_PAUSED_NUM is defined, indicating a shared state or configuration for instances.
     def __init__(
         # ✅ Best Practice: Consider adding a docstring to describe the method's purpose and parameters
-        self, qlib_data_1d_dir: [str, Path], date_field_name: str = "date", symbol_field_name: str = "symbol", **kwargs
+        self,
+        qlib_data_1d_dir: [str, Path],
+        date_field_name: str = "date",
+        symbol_field_name: str = "symbol",
+        **kwargs,
     ):
         """
 
@@ -827,7 +910,11 @@ class YahooNormalize1min(YahooNormalize, ABC):
         """
         super(YahooNormalize1min, self).__init__(date_field_name, symbol_field_name)
         qlib.init(provider_uri=qlib_data_1d_dir)
-        self.all_1d_data = D.features(D.instruments("all"), ["$paused", "$volume", "$factor", "$close"], freq="day")
+        self.all_1d_data = D.features(
+            D.instruments("all"),
+            ["$paused", "$volume", "$factor", "$close"],
+            freq="day",
+        )
 
     def _get_1d_calendar_list(self) -> Iterable[pd.Timestamp]:
         return list(D.calendar(freq="day"))
@@ -848,8 +935,11 @@ class YahooNormalize1min(YahooNormalize, ABC):
         # 🧠 ML Signal: Usage of f-string for string formatting
         # ✅ Best Practice: Use of @property decorator for defining a read-only attribute.
         return generate_minutes_calendar_from_daily(
-            calendars, freq="1min", am_range=self.AM_RANGE, pm_range=self.PM_RANGE
-        # ✅ Best Practice: Specify the return type as a Union of Path and str for clarity.
+            calendars,
+            freq="1min",
+            am_range=self.AM_RANGE,
+            pm_range=self.PM_RANGE,
+            # ✅ Best Practice: Specify the return type as a Union of Path and str for clarity.
         )
 
     # ⚠️ SAST Risk (Low): Returning a global variable directly can lead to unintended side effects if the variable is mutable.
@@ -923,6 +1013,7 @@ class YahooNormalizeIN1min(YahooNormalizeIN, YahooNormalize1min):
 
     def _get_1d_calendar_list(self):
         return get_calendar_list("IN_ALL")
+
     # ⚠️ SAST Risk (Low): Potential NoneType dereference if qlib_data_1d_dir is None
 
     # ⚠️ SAST Risk (Low): Error message could expose internal logic or paths
@@ -936,7 +1027,9 @@ class YahooNormalizeCN:
         # TODO: from MSN
         return get_calendar_list("ALL")
 
+
 # ✅ Best Practice: Docstring provides detailed information about the function's purpose, parameters, and usage.
+
 
 class YahooNormalizeCN1d(YahooNormalizeCN, YahooNormalize1d):
     pass
@@ -956,9 +1049,14 @@ class YahooNormalizeCN1min(YahooNormalizeCN, YahooNormalize1min):
     def symbol_to_yahoo(self, symbol):
         if "." not in symbol:
             _exchange = symbol[:2]
-            _exchange = ("ss" if _exchange.islower() else "SS") if _exchange.lower() == "sh" else _exchange
+            _exchange = (
+                ("ss" if _exchange.islower() else "SS")
+                if _exchange.lower() == "sh"
+                else _exchange
+            )
             symbol = symbol[2:] + "." + _exchange
         return symbol
+
     # 🧠 ML Signal: Dynamic attribute access using getattr, indicating potential use of reflection or dynamic class loading.
     # 🧠 ML Signal: Instantiation of a class with multiple parameters, indicating a complex object creation pattern.
 
@@ -991,7 +1089,14 @@ class YahooNormalizeBR1min(YahooNormalizeBR, YahooNormalize1min):
 
 
 class Run(BaseRun):
-    def __init__(self, source_dir=None, normalize_dir=None, max_workers=1, interval="1d", region=REGION_CN):
+    def __init__(
+        self,
+        source_dir=None,
+        normalize_dir=None,
+        max_workers=1,
+        interval="1d",
+        region=REGION_CN,
+    ):
         """
 
         Parameters
@@ -1065,10 +1170,14 @@ class Run(BaseRun):
             # get 1m data
             $ python collector.py download_data --source_dir ~/.qlib/stock_data/source --region CN --start 2020-11-01 --end 2020-11-10 --delay 0.1 --interval 1m
         """
-        if self.interval == "1d" and pd.Timestamp(end) > pd.Timestamp(datetime.datetime.now().strftime("%Y-%m-%d")):
+        if self.interval == "1d" and pd.Timestamp(end) > pd.Timestamp(
+            datetime.datetime.now().strftime("%Y-%m-%d")
+        ):
             raise ValueError(f"end_date: {end} is greater than the current date.")
 
-        super(Run, self).download_data(max_collector_count, delay, start, end, check_data_length, limit_nums)
+        super(Run, self).download_data(
+            max_collector_count, delay, start, end, check_data_length, limit_nums
+        )
 
     def normalize_data(
         self,
@@ -1103,16 +1212,25 @@ class Run(BaseRun):
             $ python collector.py normalize_data --qlib_data_1d_dir ~/.qlib/qlib_data/cn_data --source_dir ~/.qlib/stock_data/source_cn_1min --normalize_dir ~/.qlib/stock_data/normalize_cn_1min --region CN --interval 1min
         """
         if self.interval.lower() == "1min":
-            if qlib_data_1d_dir is None or not Path(qlib_data_1d_dir).expanduser().exists():
+            if (
+                qlib_data_1d_dir is None
+                or not Path(qlib_data_1d_dir).expanduser().exists()
+            ):
                 raise ValueError(
                     "If normalize 1min, the qlib_data_1d_dir parameter must be set: --qlib_data_1d_dir <user qlib 1d data >, Reference: https://github.com/microsoft/qlib/tree/main/scripts/data_collector/yahoo#automatic-update-of-daily-frequency-datafrom-yahoo-finance"
                 )
         super(Run, self).normalize_data(
-            date_field_name, symbol_field_name, end_date=end_date, qlib_data_1d_dir=qlib_data_1d_dir
+            date_field_name,
+            symbol_field_name,
+            end_date=end_date,
+            qlib_data_1d_dir=qlib_data_1d_dir,
         )
 
     def normalize_data_1d_extend(
-        self, old_qlib_data_dir, date_field_name: str = "date", symbol_field_name: str = "symbol"
+        self,
+        old_qlib_data_dir,
+        date_field_name: str = "date",
+        symbol_field_name: str = "symbol",
     ):
         """normalize data extend; extending yahoo qlib data(from: https://github.com/microsoft/qlib/tree/main/scripts#download-cn-data)
 
@@ -1237,25 +1355,37 @@ class Run(BaseRun):
         """
 
         if self.interval.lower() != "1d":
-            logger.warning(f"currently supports 1d data updates: --interval 1d")
+            logger.warning("currently supports 1d data updates: --interval 1d")
 
         # download qlib 1d data
         qlib_data_1d_dir = str(Path(qlib_data_1d_dir).expanduser().resolve())
         if not exists_qlib_data(qlib_data_1d_dir):
             GetData().qlib_data(
-                target_dir=qlib_data_1d_dir, interval=self.interval, region=self.region, exists_skip=exists_skip
+                target_dir=qlib_data_1d_dir,
+                interval=self.interval,
+                region=self.region,
+                exists_skip=exists_skip,
             )
 
         # start/end date
         calendar_df = pd.read_csv(Path(qlib_data_1d_dir).joinpath("calendars/day.txt"))
-        trading_date = (pd.Timestamp(calendar_df.iloc[-1, 0]) - pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+        trading_date = (
+            pd.Timestamp(calendar_df.iloc[-1, 0]) - pd.Timedelta(days=1)
+        ).strftime("%Y-%m-%d")
 
         if end_date is None:
-            end_date = (pd.Timestamp(trading_date) + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+            end_date = (pd.Timestamp(trading_date) + pd.Timedelta(days=1)).strftime(
+                "%Y-%m-%d"
+            )
 
         # download data from yahoo
         # NOTE: when downloading data from YahooFinance, max_workers is recommended to be 1
-        self.download_data(delay=delay, start=trading_date, end=end_date, check_data_length=check_data_length)
+        self.download_data(
+            delay=delay,
+            start=trading_date,
+            end=end_date,
+            check_data_length=check_data_length,
+        )
         # NOTE: a larger max_workers setting here would be faster
         self.max_workers = (
             max(multiprocessing.cpu_count() - 2, 1)
@@ -1277,14 +1407,23 @@ class Run(BaseRun):
         # parse index
         _region = self.region.lower()
         if _region not in ["cn", "us"]:
-            logger.warning(f"Unsupported region: region={_region}, component downloads will be ignored")
+            logger.warning(
+                f"Unsupported region: region={_region}, component downloads will be ignored"
+            )
             return
-        index_list = ["CSI100", "CSI300"] if _region == "cn" else ["SP500", "NASDAQ100", "DJIA", "SP400"]
+        index_list = (
+            ["CSI100", "CSI300"]
+            if _region == "cn"
+            else ["SP500", "NASDAQ100", "DJIA", "SP400"]
+        )
         get_instruments = getattr(
-            importlib.import_module(f"data_collector.{_region}_index.collector"), "get_instruments"
+            importlib.import_module(f"data_collector.{_region}_index.collector"),
+            "get_instruments",
         )
         for _index in index_list:
-            get_instruments(str(qlib_data_1d_dir), _index, market_index=f"{_region}_index")
+            get_instruments(
+                str(qlib_data_1d_dir), _index, market_index=f"{_region}_index"
+            )
 
 
 if __name__ == "__main__":

@@ -1,22 +1,29 @@
 import pytest
 import os
+
 # ✅ Best Practice: Import only necessary components from a module to improve readability and maintainability
 from pandas import DataFrame, Series
 from finta import TA
+
 # ✅ Best Practice: Import only necessary components from a module to improve readability and maintainability
 from finta.utils import to_dataframe, resample, trending_down, trending_up
 import numpy
+
 # ✅ Best Practice: Import only necessary components from a module to improve readability and maintainability
 import json
+
 # ⚠️ SAST Risk (Medium): Missing import statement for 'os' module
 
 # ⚠️ SAST Risk (Medium): Missing import statement for 'json' module
 # ✅ Best Practice: Import only necessary components from a module to improve readability and maintainability
 
+
 def rootdir():
     # ⚠️ SAST Risk (Low): Use of '__file__' might expose sensitive file path information
 
     return os.path.dirname(os.path.abspath(__file__))
+
+
 # 🧠 ML Signal: Use of assert for testing function output type
 
 # ✅ Best Practice: Ensure the function `to_dataframe` is defined and imported
@@ -42,10 +49,13 @@ def test_to_dataframe():
 
     # 🧠 ML Signal: Use of assert to validate specific output values, indicating a testing pattern
     assert isinstance(to_dataframe(data), DataFrame)
+
+
 # 🧠 ML Signal: Conversion of data to a DataFrame, common data processing step
 
 # 🧠 ML Signal: Use of assert for validation, indicates testing behavior
 # ⚠️ SAST Risk (Low): Use of assert statements can be disabled in production, leading to potential issues
+
 
 def test_resample():
 
@@ -59,11 +69,14 @@ def test_resample():
         numpy.datetime64("2019-05-05T00:00:00.000000000"),
         # 🧠 ML Signal: Use of numpy for date handling, common in data processing
         numpy.datetime64("2019-05-07T00:00:00.000000000"),
-    # 🧠 ML Signal: Use of HMA (Hull Moving Average) suggests financial or time series data analysis
+        # 🧠 ML Signal: Use of HMA (Hull Moving Average) suggests financial or time series data analysis
     ]
+
+
 # 🧠 ML Signal: Function name suggests testing a specific behavior or condition
 
 # ✅ Best Practice: Use of isinstance to check return type ensures function correctness
+
 
 # 🧠 ML Signal: Conversion to dataframe is a common preprocessing step
 def test_resample_calendar():

@@ -4,12 +4,15 @@
 
 from qlib.contrib.data.loader import Alpha158DL, Alpha360DL
 from ...data.dataset.handler import DataHandlerLP
+
 # ✅ Best Practice: Importing specific functions or classes is preferred over importing the entire module.
 from ...data.dataset.processor import Processor
 from ...utils import get_callable_kwargs
+
 # ✅ Best Practice: Using 'as' to alias imports can help avoid naming conflicts and improve clarity.
 from ...data.dataset import processor as processor_module
 from inspect import getfullargspec
+
 # ✅ Best Practice: Importing specific functions or classes is preferred over importing the entire module.
 # 🧠 ML Signal: Iterating over a list of processors, which may indicate a pattern of applying transformations or preprocessing steps.
 
@@ -72,8 +75,12 @@ class Alpha360(DataHandlerLP):
         inst_processors=None,
         **kwargs,
     ):
-        infer_processors = check_transform_proc(infer_processors, fit_start_time, fit_end_time)
-        learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
+        infer_processors = check_transform_proc(
+            infer_processors, fit_start_time, fit_end_time
+        )
+        learn_processors = check_transform_proc(
+            learn_processors, fit_start_time, fit_end_time
+        )
 
         data_loader = {
             "class": "QlibDataLoader",
@@ -87,8 +94,8 @@ class Alpha360(DataHandlerLP):
                 "freq": freq,
                 "inst_processors": inst_processors,
             },
-        # ✅ Best Practice: Use of super() to ensure proper initialization of the base class.
-        # 🧠 ML Signal: Function returning a configuration for labels, likely used in ML model training or evaluation
+            # ✅ Best Practice: Use of super() to ensure proper initialization of the base class.
+            # 🧠 ML Signal: Function returning a configuration for labels, likely used in ML model training or evaluation
         }
 
         # 🧠 ML Signal: Returning a list of expressions and labels, indicating a pattern for feature-label mapping
@@ -132,8 +139,12 @@ class Alpha158(DataHandlerLP):
         # ✅ Best Practice: Explicitly calling the superclass's __init__ method ensures proper initialization.
         **kwargs,
     ):
-        infer_processors = check_transform_proc(infer_processors, fit_start_time, fit_end_time)
-        learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
+        infer_processors = check_transform_proc(
+            infer_processors, fit_start_time, fit_end_time
+        )
+        learn_processors = check_transform_proc(
+            learn_processors, fit_start_time, fit_end_time
+        )
 
         data_loader = {
             "class": "QlibDataLoader",

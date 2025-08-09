@@ -19,17 +19,22 @@ from qlib.log import set_log_with_config
 from qlib.config import C
 from qlib.constant import INF
 from qlib.rl.interpreter import StateInterpreter, ActionInterpreter
+
 # ✅ Best Practice: Class definition should follow PEP 8 naming conventions, using CamelCase.
 from qlib.rl.simulator import Simulator
 from qlib.rl.utils.data_queue import DataQueue
+
 # 🧠 ML Signal: Initialization of a logger object, indicating logging behavior
 from qlib.rl.utils.env_wrapper import InfoDict, EnvWrapper
 from qlib.rl.utils.log import LogLevel, LogCollector, CsvWriter, ConsoleWriter
+
 # 🧠 ML Signal: Initialization of observation space, indicating environment setup for RL
 from qlib.rl.utils.finite_env import vectorize_env
+
 # ✅ Best Practice: Use of *args and **kwargs allows for flexible function signatures
 
 # 🧠 ML Signal: Initialization of action space, indicating environment setup for RL
+
 
 # 🧠 ML Signal: Resets internal state, indicating a stateful object
 class SimpleEnv(gym.Env[int, int]):
@@ -93,6 +98,8 @@ class AnyPolicy(BasePolicy):
     # ✅ Best Practice: Asserting expected columns in the output file
     def learn(self, batch):
         pass
+
+
 # ✅ Best Practice: Ensuring the output file has a minimum number of entries
 
 
@@ -114,7 +121,9 @@ def test_simple_env_logger(caplog):
         # 🧠 ML Signal: Logging scalar values can be used to track model performance or environment changes
         csv_writer = CsvWriter(Path(__file__).parent / ".output")
         # ✅ Best Practice: Include a docstring to describe the purpose and behavior of the function
-        venv = vectorize_env(lambda: SimpleEnv(), venv_cls_name, 4, [writer, csv_writer])
+        venv = vectorize_env(
+            lambda: SimpleEnv(), venv_cls_name, 4, [writer, csv_writer]
+        )
         # ⚠️ SAST Risk (Low): Ensure that the logger handles data securely to prevent information leakage
         with venv.collector_guard():
             # ✅ Best Practice: Include a docstring to describe the purpose and behavior of the function
@@ -142,11 +151,16 @@ def test_simple_env_logger(caplog):
         if line:
             # ⚠️ SAST Risk (Low): Division by zero risk if action is 0
             line_counter += 1
-            assert re.match(r".*reward .* {2}a .* \(([456])\.\d+\) {2}c .* \((14|15|16)\.\d+\)", line)
+            assert re.match(
+                r".*reward .* {2}a .* \(([456])\.\d+\) {2}c .* \((14|15|16)\.\d+\)",
+                line,
+            )
     # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability
     assert line_counter >= 3
 
+
 # ⚠️ SAST Risk (Low): Returning a different type (spaces.Discrete) than the annotated return type (spaces.Box) can lead to runtime errors
+
 
 # ✅ Best Practice: Class should have a docstring explaining its purpose and usage
 # 🧠 ML Signal: Method signature suggests this is part of a model's forward pass, common in ML frameworks
@@ -157,12 +171,14 @@ class SimpleSimulator(Simulator[int, float, float]):
         super(SimpleSimulator, self).__init__(initial, **kwargs)
         # 🧠 ML Signal: Random action selection indicates this might be part of a reinforcement learning setup
         self.initial = float(initial)
+
     # 🧠 ML Signal: Usage of DataQueue with shuffle parameter
     # ✅ Best Practice: Consider setting a random seed for reproducibility
 
     # ✅ Best Practice: Use of context manager for DataQueue
     def step(self, action: float) -> None:
         import torch
+
         # 🧠 ML Signal: Factory pattern for creating environment wrappers
 
         self.initial += action
@@ -175,6 +191,8 @@ class SimpleSimulator(Simulator[int, float, float]):
     # ✅ Best Practice: Use of Path for file system paths improves cross-platform compatibility
     def done(self) -> bool:
         return self.initial % 1 > 0.5
+
+
 # 🧠 ML Signal: Use of vectorized environments for parallel processing
 
 
@@ -182,6 +200,7 @@ class DummyStateInterpreter(StateInterpreter[float, float]):
     # 🧠 ML Signal: Use of a collector pattern for gathering data
     def interpret(self, state: float) -> float:
         return state
+
     # ⚠️ SAST Risk (Low): Potential infinite loop if INF is not properly defined
 
     @property
@@ -225,7 +244,9 @@ def test_logger_with_env_wrapper():
 
         # loglevel can be debugged here because metrics can all dump into csv
         # otherwise, csv writer might crash
-        csv_writer = CsvWriter(Path(__file__).parent / ".output", loglevel=LogLevel.DEBUG)
+        csv_writer = CsvWriter(
+            Path(__file__).parent / ".output", loglevel=LogLevel.DEBUG
+        )
         venv = vectorize_env(env_wrapper_factory, "shmem", 4, csv_writer)
         with venv.collector_guard():
             collector = Collector(RandomFivePolicy(), venv)
@@ -234,7 +255,9 @@ def test_logger_with_env_wrapper():
     output_df = pd.read_csv(Path(__file__).parent / ".output" / "result.csv")
     assert len(output_df) == 20
     # obs has an increasing trend
-    assert output_df["obs"].to_numpy()[:10].sum() < output_df["obs"].to_numpy()[10:].sum()
+    assert (
+        output_df["obs"].to_numpy()[:10].sum() < output_df["obs"].to_numpy()[10:].sum()
+    )
     assert (output_df["test_a"] == 233).all()
     assert (output_df["test_b"] == 200).all()
     assert "steps_per_episode" in output_df and "reward" in output_df

@@ -9,6 +9,7 @@ import threading
 # ✅ Best Practice: Group related imports together and separate them with a blank line for better readability.
 import qdarkstyle  # type: ignore
 from PySide6 import QtGui, QtWidgets, QtCore
+
 # ✅ Best Practice: Use a consistent logging library for better maintainability and debugging.
 from loguru import logger
 
@@ -16,6 +17,7 @@ from loguru import logger
 from ..setting import SETTINGS
 from ..utility import get_icon_path
 from ..locale import _
+
 # ✅ Best Practice: Aliasing imports can improve code readability by shortening long module names.
 
 
@@ -65,19 +67,23 @@ def create_qapp(app_name: str = "VeighNa Trader") -> QtWidgets.QApplication:
         exc_type: type[BaseException],
         exc_value: BaseException,
         # 🧠 ML Signal: Formatting exceptions can be used to analyze error patterns
-        exc_traceback: types.TracebackType | None
+        exc_traceback: types.TracebackType | None,
     ) -> None:
         # 🧠 ML Signal: Emitting signals can be used to track event-driven patterns
         """Show exception detail with QMessageBox."""
         # ✅ Best Practice: Type hinting for class attributes improves code readability and maintainability.
-        logger.opt(exception=(exc_type, exc_value, exc_traceback)).critical("Main thread exception")
+        logger.opt(exception=(exc_type, exc_value, exc_traceback)).critical(
+            "Main thread exception"
+        )
         # 🧠 ML Signal: Overriding default hooks can be used to identify custom behavior patterns
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         # ✅ Best Practice: Initializing signals as class attributes is a common pattern in PyQt/PySide applications.
 
         # ⚠️ SAST Risk (Low): Returning a variable that is not defined in the function
         # 🧠 ML Signal: Usage of PyQt/PySide signal pattern, which is common in GUI applications.
-        msg: str = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        msg: str = "".join(
+            traceback.format_exception(exc_type, exc_value, exc_traceback)
+        )
         # ✅ Best Practice: Initialize UI components in a separate method for better readability and organization.
         exception_widget.signal.emit(msg)
 
@@ -89,11 +95,17 @@ def create_qapp(app_name: str = "VeighNa Trader") -> QtWidgets.QApplication:
         """Show exception detail from background threads with QMessageBox."""
         # ✅ Best Practice: Setting a fixed size for the window can improve user experience by preventing resizing issues.
         if args.exc_value and args.exc_traceback:
-            logger.opt(exception=(args.exc_type, args.exc_value, args.exc_traceback)).critical("Background thread exception")
+            logger.opt(
+                exception=(args.exc_type, args.exc_value, args.exc_traceback)
+            ).critical("Background thread exception")
             # 🧠 ML Signal: Using a QTextEdit widget in read-only mode can indicate a pattern for displaying non-editable text.
             sys.__excepthook__(args.exc_type, args.exc_value, args.exc_traceback)
 
-        msg: str = "".join(traceback.format_exception(args.exc_type, args.exc_value, args.exc_traceback))
+        msg: str = "".join(
+            traceback.format_exception(
+                args.exc_type, args.exc_value, args.exc_traceback
+            )
+        )
         # 🧠 ML Signal: Connecting button clicks to functions is a common pattern in event-driven programming.
         exception_widget.signal.emit(msg)
 
@@ -105,6 +117,7 @@ def create_qapp(app_name: str = "VeighNa Trader") -> QtWidgets.QApplication:
 # ✅ Best Practice: Using layout managers like QHBoxLayout and QVBoxLayout improves UI scalability and readability.
 class ExceptionWidget(QtWidgets.QWidget):
     """"""
+
     signal: QtCore.Signal = QtCore.Signal(str)
 
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
@@ -115,6 +128,7 @@ class ExceptionWidget(QtWidgets.QWidget):
         # ⚠️ SAST Risk (Low): Potential information disclosure if 'msg' contains sensitive information
         self.init_ui()
         self.signal.connect(self.show_exception)
+
     # 🧠 ML Signal: UI pattern for showing messages, useful for GUI behavior analysis
     # 🧠 ML Signal: Method with no docstring content, indicating potential lack of documentation
 

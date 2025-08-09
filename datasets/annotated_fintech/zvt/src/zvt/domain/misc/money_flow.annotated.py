@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, Float
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Mixin
+
 # 🧠 ML Signal: Inheritance from MoneyFlowBase and Mixin indicates a pattern of using base classes and mixins for shared functionality
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Naming convention for base classes should be clear and descriptive.
 
 # 🧠 ML Signal: Use of __tablename__ suggests a pattern of ORM usage for database table mapping
@@ -74,9 +77,12 @@ class BlockMoneyFlow(MoneyFlowBase, Mixin):
     net_small_inflows = Column(Float)
     # 🧠 ML Signal: Use of SQLAlchemy ORM for database interaction
     net_small_inflow_rate = Column(Float)
+
+
 # ✅ Best Practice: Define column types and constraints for database schema
 
 # 🧠 ML Signal: Use of SQLAlchemy ORM for database interaction
+
 
 # ✅ Best Practice: Define column types and constraints for database schema
 class StockMoneyFlow(MoneyFlowBase, Mixin):
@@ -157,7 +163,12 @@ class IndexMoneyFlow(MoneyFlowBase, Mixin):
     net_small_inflow_rate = Column(Float)
 
 
-register_schema(providers=["joinquant", "sina"], db_name="money_flow", schema_base=MoneyFlowBase, entity_type="stock")
+register_schema(
+    providers=["joinquant", "sina"],
+    db_name="money_flow",
+    schema_base=MoneyFlowBase,
+    entity_type="stock",
+)
 
 
 # the __all__ is generated

@@ -1,21 +1,26 @@
 # -*- coding: utf-8 -*-
 
 import io
+
 # ✅ Best Practice: Grouping imports by standard, third-party, and local modules improves readability.
 
 import pandas as pd
 import requests
 
 from zvt.contract.api import df_to_db
+
 # ✅ Best Practice: Class should inherit from a base class to ensure consistent behavior and structure
 from zvt.contract.recorder import Recorder
 from zvt.domain import Stock, StockDetail
+
 # ✅ Best Practice: Class variables should be defined at the top of the class for clarity
 from zvt.recorders.consts import DEFAULT_SH_HEADER, DEFAULT_SZ_HEADER
 from zvt.utils.time_utils import to_pd_timestamp
+
 # 🧠 ML Signal: Hardcoded provider name could be used to identify data source patterns
 
 # ⚠️ SAST Risk (Low): Hardcoded URL may lead to maintenance issues if the URL changes
+
 
 class ExchangeStockMetaRecorder(Recorder):
     data_schema = Stock
@@ -28,9 +33,7 @@ class ExchangeStockMetaRecorder(Recorder):
 
     def run(self):
         # 🧠 ML Signal: Method call with specific parameters indicating a pattern of downloading stock lists.
-        url = (
-            "http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=1"
-        )
+        url = "http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=1"
         resp = requests.get(url, headers=DEFAULT_SH_HEADER)
         # ⚠️ SAST Risk (Medium): Hardcoded URL can lead to security issues if the endpoint changes or is deprecated.
         self.download_stock_list(response=resp, exchange="sh")
@@ -39,8 +42,8 @@ class ExchangeStockMetaRecorder(Recorder):
         url = (
             # 🧠 ML Signal: Usage of requests.get to fetch data from a URL.
             "http://query.sse.com.cn/security/stock/downloadStockListFile.do?csrcCode=&stockCode=&areaName=&stockType=8"
-        # 🧠 ML Signal: Method call with specific parameters indicating a pattern of downloading stock lists.
-        # ⚠️ SAST Risk (Medium): Hardcoded URL can lead to security issues if the endpoint changes or is deprecated.
+            # 🧠 ML Signal: Method call with specific parameters indicating a pattern of downloading stock lists.
+            # ⚠️ SAST Risk (Medium): Hardcoded URL can lead to security issues if the endpoint changes or is deprecated.
         )
         resp = requests.get(url, headers=DEFAULT_SH_HEADER)
         self.download_stock_list(response=resp, exchange="sh")
@@ -101,14 +104,26 @@ class ExchangeStockMetaRecorder(Recorder):
             df["list_date"] = df["list_date"].apply(lambda x: to_pd_timestamp(x))
             df["exchange"] = exchange
             df["entity_type"] = "stock"
-            df["id"] = df[["entity_type", "exchange", "code"]].apply(lambda x: "_".join(x.astype(str)), axis=1)
+            df["id"] = df[["entity_type", "exchange", "code"]].apply(
+                lambda x: "_".join(x.astype(str)), axis=1
+            )
             df["entity_id"] = df["id"]
             df["timestamp"] = df["list_date"]
             df = df.dropna(axis=0, how="any")
             df = df.drop_duplicates(subset=("id"), keep="last")
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=False)
+            df_to_db(
+                df=df,
+                data_schema=self.data_schema,
+                provider=self.provider,
+                force_update=False,
+            )
             # persist StockDetail too
-            df_to_db(df=df, data_schema=StockDetail, provider=self.provider, force_update=False)
+            df_to_db(
+                df=df,
+                data_schema=StockDetail,
+                provider=self.provider,
+                force_update=False,
+            )
             self.logger.info(df.tail())
             self.logger.info("persist stock list successs")
 

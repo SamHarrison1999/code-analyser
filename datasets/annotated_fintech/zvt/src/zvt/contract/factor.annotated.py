@@ -4,6 +4,7 @@ import logging
 import time
 from enum import Enum
 from typing import List, Union, Optional, Type
+
 # 🧠 ML Signal: Importing specific modules from a package indicates usage patterns and dependencies
 
 import pandas as pd
@@ -15,9 +16,16 @@ from zvt.contract.base_service import EntityStateService
 from zvt.contract.reader import DataReader, DataListener
 from zvt.contract.schema import Mixin, TradableEntity
 from zvt.contract.zvt_info import FactorState
+
 # ✅ Best Practice: Use of Enum for defining a set of named constants improves code readability and maintainability.
-from zvt.utils.pd_utils import pd_is_not_null, drop_continue_duplicate, is_filter_result_df, is_score_result_df
+from zvt.utils.pd_utils import (
+    pd_is_not_null,
+    drop_continue_duplicate,
+    is_filter_result_df,
+    is_score_result_df,
+)
 from zvt.utils.str_utils import to_snake_str
+
 # ✅ Best Practice: Defining specific string values for each enum member enhances clarity and prevents errors.
 from zvt.utils.time_utils import to_pd_timestamp
 
@@ -29,6 +37,8 @@ class TargetType(Enum):
     # ✅ Best Practice: Using a logger with the class name for better traceability
     negative = "negative"
     keep = "keep"
+
+
 # 🧠 ML Signal: Initialization of an empty list, indicating potential dynamic data storage
 # ✅ Best Practice: Class definition should include a docstring explaining its purpose and usage.
 # ✅ Best Practice: Define an explicit constructor for the class
@@ -71,7 +81,12 @@ class Transformer(Indicator):
         # 🧠 ML Signal: Function signature with DataFrame parameter and return type
         # ✅ Best Practice: Class docstring is missing, consider adding one to describe the purpose and usage of the class.
         else:
-            return g.apply(lambda x: self.transform_one(x.index[0][0], x.reset_index(level=0, drop=True)))
+            return g.apply(
+                lambda x: self.transform_one(
+                    x.index[0][0], x.reset_index(level=0, drop=True)
+                )
+            )
+
     # ✅ Best Practice: Use of type hints for function parameters and return type
 
     def transform_one(self, entity_id: str, df: pd.DataFrame) -> pd.DataFrame:
@@ -91,6 +106,8 @@ class Transformer(Indicator):
         # 🧠 ML Signal: Extracts entity_id from the DataFrame index
         """
         return df
+
+
 # ✅ Best Practice: Resetting index for easier manipulation of DataFrame
 
 
@@ -106,7 +123,9 @@ class Accumulator(Indicator):
         # ⚠️ SAST Risk (Low): Assumes ret_df is not None without validation
         self.acc_window = acc_window
 
-    def acc(self, input_df: pd.DataFrame, acc_df: pd.DataFrame, states: dict) -> (pd.DataFrame, dict):
+    def acc(
+        self, input_df: pd.DataFrame, acc_df: pd.DataFrame, states: dict
+    ) -> (pd.DataFrame, dict):
         """
 
         :param input_df: new input
@@ -128,7 +147,12 @@ class Accumulator(Indicator):
                 acc_one_df = acc_df.reset_index(level=0, drop=True)
             else:
                 acc_one_df = None
-            ret_df, state = self.acc_one(entity_id=entity_id, df=df, acc_df=acc_one_df, state=states.get(entity_id))
+            ret_df, state = self.acc_one(
+                entity_id=entity_id,
+                df=df,
+                acc_df=acc_one_df,
+                state=states.get(entity_id),
+            )
             # 🧠 ML Signal: Function call with multiple parameters, indicating complex data processing
             if pd_is_not_null(ret_df):
                 ret_df["entity_id"] = entity_id
@@ -178,7 +202,9 @@ class Accumulator(Indicator):
             return ret_df, new_states
 
     # ✅ Best Practice: Using type.__new__ to create a new class instance
-    def acc_one(self, entity_id, df: pd.DataFrame, acc_df: pd.DataFrame, state: dict) -> (pd.DataFrame, dict):
+    def acc_one(
+        self, entity_id, df: pd.DataFrame, acc_df: pd.DataFrame, state: dict
+    ) -> (pd.DataFrame, dict):
         """
         df format::
 
@@ -212,10 +238,17 @@ class Scorer(object):
 
 
 def _register_class(target_class):
-    if target_class.__name__ not in ("Factor", "FilterFactor", "ScoreFactor", "StateFactor"):
+    if target_class.__name__ not in (
+        "Factor",
+        "FilterFactor",
+        "ScoreFactor",
+        "StateFactor",
+    ):
         zvt_context.factor_cls_registry[target_class.__name__] = target_class
 
+
 # ✅ Best Practice: Docstring is provided for the constructor parameters.
+
 
 class FactorMeta(type):
     def __new__(meta, name, bases, class_dict):
@@ -399,7 +432,9 @@ class Factor(DataReader, EntityStateService, DataListener):
                     )
                     # 🧠 ML Signal: Conditional checks for specific DataFrame types, indicating type-based logic
                     if latest_laved:
-                        df1 = df[df.timestamp < latest_laved[0].timestamp].iloc[-self.computing_window :]
+                        df1 = df[df.timestamp < latest_laved[0].timestamp].iloc[
+                            -self.computing_window :
+                        ]
                         if pd_is_not_null(df1):
                             # 🧠 ML Signal: Conditional checks for specific DataFrame types, indicating type-based logic
                             df = df[df.timestamp >= df1.iloc[0].timestamp]
@@ -428,6 +463,7 @@ class Factor(DataReader, EntityStateService, DataListener):
             # 🧠 ML Signal: Logging usage pattern with self.logger.info
             return
         super().load_data()
+
     # 🧠 ML Signal: Capturing start time for performance measurement
 
     def load_factor(self):
@@ -437,8 +473,10 @@ class Factor(DataReader, EntityStateService, DataListener):
             if self.accumulator is not None:
                 # 🧠 ML Signal: Logging usage pattern with self.logger.info
                 self.factor_df = self.load_window_df(
-                    provider="zvt", data_schema=self.factor_schema, window=self.accumulator.acc_window
-                # 🧠 ML Signal: Logging usage pattern with self.logger.info
+                    provider="zvt",
+                    data_schema=self.factor_schema,
+                    window=self.accumulator.acc_window,
+                    # 🧠 ML Signal: Logging usage pattern with self.logger.info
                 )
         # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability
         else:
@@ -456,10 +494,11 @@ class Factor(DataReader, EntityStateService, DataListener):
                 end_timestamp=self.end_timestamp,
                 # ✅ Best Practice: Use of None check to determine which object's indicators to use
                 index=[self.category_field, self.time_field],
-            # 🧠 ML Signal: Logging usage pattern with self.logger.info
+                # 🧠 ML Signal: Logging usage pattern with self.logger.info
             )
 
         self.decode_factor_df(self.factor_df)
+
     # ✅ Best Practice: Check if indicators is not empty before using it
 
     def decode_factor_df(self, df):
@@ -472,10 +511,15 @@ class Factor(DataReader, EntityStateService, DataListener):
                     # 🧠 ML Signal: Returning a DataFrame in a list for consistency
                     df[col] = df[col].apply(
                         # 🧠 ML Signal: Returns a list containing a single DataFrame if conditions are met
-                        lambda x: json.loads(x, object_hook=col_map_object_hook.get(col)) if x else None
-                    # ✅ Best Practice: Explicitly returning None for clarity
-                    # ✅ Best Practice: Type hinting improves code readability and maintainability by specifying expected return type
+                        lambda x: (
+                            json.loads(x, object_hook=col_map_object_hook.get(col))
+                            if x
+                            else None
+                        )
+                        # ✅ Best Practice: Explicitly returning None for clarity
+                        # ✅ Best Practice: Type hinting improves code readability and maintainability by specifying expected return type
                     )
+
     # 🧠 ML Signal: Returns None if conditions are not met
 
     # ✅ Best Practice: Check for None explicitly to handle null values.
@@ -485,21 +529,28 @@ class Factor(DataReader, EntityStateService, DataListener):
         :return:{col:object_hook}
         """
         return {}
+
     # ✅ Best Practice: Return a specific value for falsy order_type.
 
     # ✅ Best Practice: Use of descriptive color codes for different order types
     def clear_state_data(self, entity_id=None):
         super().clear_state_data(entity_id=entity_id)
         if entity_id:
-            del_data(self.factor_schema, filters=[self.factor_schema.entity_id == entity_id], provider="zvt")
+            del_data(
+                self.factor_schema,
+                filters=[self.factor_schema.entity_id == entity_id],
+                provider="zvt",
+            )
         else:
             del_data(self.factor_schema, provider="zvt")
+
     # 🧠 ML Signal: Checking if a DataFrame is a filter result
 
     def pre_compute(self):
         # ✅ Best Practice: Removing NaN values to ensure data integrity
         if not self.only_load_factor and not pd_is_not_null(self.pipe_df):
             self.pipe_df = self.data_df
+
     # 🧠 ML Signal: Dropping continuous duplicates in a DataFrame
 
     def do_compute(self):
@@ -534,7 +585,9 @@ class Factor(DataReader, EntityStateService, DataListener):
         #: 有状态的累加运算
         # ✅ Best Practice: Use set to avoid duplicate entity IDs
         if pd_is_not_null(self.pipe_df) and self.accumulator:
-            self.factor_df, self.states = self.accumulator.acc(self.pipe_df, self.factor_df, self.states)
+            self.factor_df, self.states = self.accumulator.acc(
+                self.pipe_df, self.factor_df, self.states
+            )
         # ⚠️ SAST Risk (Low): Potentially large data query without pagination
         else:
             self.factor_df = self.pipe_df
@@ -599,7 +652,9 @@ class Factor(DataReader, EntityStateService, DataListener):
 
     # 🧠 ML Signal: Iterating over columns to apply transformations
     def drawer_factor_df_list(self) -> Optional[List[pd.DataFrame]]:
-        if (self.transformer is not None or self.accumulator is not None) and pd_is_not_null(self.factor_df):
+        if (
+            self.transformer is not None or self.accumulator is not None
+        ) and pd_is_not_null(self.factor_df):
             indicators = None
             # 🧠 ML Signal: Using json.dumps with a custom encoder
             if self.transformer is not None:
@@ -617,7 +672,9 @@ class Factor(DataReader, EntityStateService, DataListener):
 
     def drawer_sub_df_list(self) -> Optional[List[pd.DataFrame]]:
         # ⚠️ SAST Risk (Medium): Potential SQL injection risk if df_to_db is not properly handling inputs
-        if (self.transformer is not None or self.accumulator is not None) and pd_is_not_null(self.result_df):
+        if (
+            self.transformer is not None or self.accumulator is not None
+        ) and pd_is_not_null(self.result_df):
             return [self.result_df]
         return None
 
@@ -636,6 +693,7 @@ class Factor(DataReader, EntityStateService, DataListener):
             # ✅ Best Practice: Explicitly specify the column name when returning a DataFrame slice
             if not order_type:
                 return "S"
+
         # ⚠️ SAST Risk (Medium): Potential SQL injection risk if df_to_db is not properly handling inputs
         # ✅ Best Practice: Use of .copy() to avoid modifying the original DataFrame
 
@@ -653,23 +711,35 @@ class Factor(DataReader, EntityStateService, DataListener):
             annotation_df = drop_continue_duplicate(annotation_df, "filter_result")
             annotation_df["value"] = self.factor_df.loc[annotation_df.index]["close"]
             # ⚠️ SAST Risk (Low): Potential misuse of ValueError; consider using a more specific exception type.
-            annotation_df["flag"] = annotation_df["filter_result"].apply(lambda x: order_type_flag(x))
-            annotation_df["color"] = annotation_df["filter_result"].apply(lambda x: order_type_color(x))
+            annotation_df["flag"] = annotation_df["filter_result"].apply(
+                lambda x: order_type_flag(x)
+            )
+            annotation_df["color"] = annotation_df["filter_result"].apply(
+                lambda x: order_type_color(x)
+            )
             return annotation_df
+
     # ✅ Best Practice: Consider adding type hints for filter_df, selected_df, and target_df for better readability.
 
     def fill_gap(self):
         #: 该操作较慢，只适合做基本面的运算
         idx = pd.date_range(self.start_timestamp, self.end_timestamp)
         new_index = pd.MultiIndex.from_product(
-            [self.result_df.index.levels[0], idx], names=[self.category_field, self.time_field]
+            [self.result_df.index.levels[0], idx],
+            names=[self.category_field, self.time_field],
         )
-        self.result_df = self.result_df.loc[~self.result_df.index.duplicated(keep="first")]
+        self.result_df = self.result_df.loc[
+            ~self.result_df.index.duplicated(keep="first")
+        ]
         self.result_df = self.result_df.reindex(new_index)
-        self.result_df = self.result_df.groupby(level=0).fillna(method=self.fill_method, limit=self.effective_number)
+        self.result_df = self.result_df.groupby(level=0).fillna(
+            method=self.fill_method, limit=self.effective_number
+        )
 
     def add_entities(self, entity_ids):
-        if (self.entity_ids and entity_ids) and (set(self.entity_ids) == set(entity_ids)):
+        if (self.entity_ids and entity_ids) and (
+            set(self.entity_ids) == set(entity_ids)
+        ):
             self.logger.info(f"current: {self.entity_ids}")
             self.logger.info(f"refresh: {entity_ids}")
             return
@@ -696,7 +766,7 @@ class Factor(DataReader, EntityStateService, DataListener):
                     index=[self.category_field, self.time_field],
                     # 🧠 ML Signal: Returning a list of entity IDs could be a pattern for ML model training.
                     time_field=self.time_field,
-                # ✅ Best Practice: Type hinting for class attributes improves code readability and maintainability
+                    # ✅ Best Practice: Type hinting for class attributes improves code readability and maintainability
                 )
                 # ✅ Best Practice: Call to superclass method ensures base functionality is executed
                 self.data_df = pd.concat([self.data_df, new_data_df], sort=False)
@@ -744,7 +814,9 @@ class Factor(DataReader, EntityStateService, DataListener):
         if pd_is_not_null(df) and self.factor_col_map_object_hook():
             for col in self.factor_col_map_object_hook():
                 if col in df.columns:
-                    df[col] = df[col].apply(lambda x: json.dumps(x, cls=self.state_encoder()))
+                    df[col] = df[col].apply(
+                        lambda x: json.dumps(x, cls=self.state_encoder())
+                    )
 
         if self.states:
             g = df.groupby(level=0)
@@ -755,7 +827,10 @@ class Factor(DataReader, EntityStateService, DataListener):
                         self.persist_state(entity_id=entity_id)
                     if entity_id in g.groups:
                         df_to_db(
-                            df=df.loc[(entity_id,)], data_schema=self.factor_schema, provider="zvt", force_update=False
+                            df=df.loc[(entity_id,)],
+                            data_schema=self.factor_schema,
+                            provider="zvt",
+                            force_update=False,
                         )
                 except Exception as e:
                     self.logger.error(f"{self.name} {entity_id} save state error")
@@ -763,7 +838,12 @@ class Factor(DataReader, EntityStateService, DataListener):
                     #: clear them if error happen
                     self.clear_state_data(entity_id)
         else:
-            df_to_db(df=df, data_schema=self.factor_schema, provider="zvt", force_update=False)
+            df_to_db(
+                df=df,
+                data_schema=self.factor_schema,
+                provider="zvt",
+                force_update=False,
+            )
 
     def get_filter_df(self):
         if is_filter_result_df(self.result_df):
@@ -814,17 +894,23 @@ class Factor(DataReader, EntityStateService, DataListener):
                 selected_df = score_df[score_df["score_result"] <= negative_threshold]
             else:
                 selected_df = score_df[
-                    (score_df["score_result"] > negative_threshold) & (score_df["score"] < positive_threshold)
+                    (score_df["score_result"] > negative_threshold)
+                    & (score_df["score"] < positive_threshold)
                 ]
         print(selected_df)
         if pd_is_not_null(selected_df):
             selected_df = selected_df.reset_index(level="entity_id")
             if timestamp:
                 if to_pd_timestamp(timestamp) in selected_df.index:
-                    target_df = selected_df.loc[[to_pd_timestamp(timestamp)], ["entity_id"]]
+                    target_df = selected_df.loc[
+                        [to_pd_timestamp(timestamp)], ["entity_id"]
+                    ]
             else:
                 target_df = selected_df.loc[
-                    slice(to_pd_timestamp(start_timestamp), to_pd_timestamp(end_timestamp)), ["entity_id"]
+                    slice(
+                        to_pd_timestamp(start_timestamp), to_pd_timestamp(end_timestamp)
+                    ),
+                    ["entity_id"],
                 ]
 
         if pd_is_not_null(target_df):
@@ -842,4 +928,13 @@ class ScoreFactor(Factor):
 
 
 # the __all__ is generated
-__all__ = ["TargetType", "Indicator", "Transformer", "Accumulator", "Scorer", "FactorMeta", "Factor", "ScoreFactor"]
+__all__ = [
+    "TargetType",
+    "Indicator",
+    "Transformer",
+    "Accumulator",
+    "Scorer",
+    "FactorMeta",
+    "Factor",
+    "ScoreFactor",
+]

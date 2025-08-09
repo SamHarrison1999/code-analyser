@@ -19,7 +19,13 @@ class TestAllFlow(unittest.TestCase):
             if model_class is not None:
                 model = model_class()
                 num += 1
-        print("There are {:}/{:} valid models in total.".format(num, len(all_model_classes)))
+        print(
+            "There are {:}/{:} valid models in total.".format(
+                num, len(all_model_classes)
+            )
+        )
+
+
 # ✅ Best Practice: Use unittest.TextTestRunner for simple test output to the console.
 # 🧠 ML Signal: Detecting the use of unittest framework for running test suites.
 

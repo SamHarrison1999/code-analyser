@@ -1,16 +1,13 @@
 from copy import copy
+
 # ✅ Best Practice: Consider using deepcopy if nested objects are involved to ensure all levels are copied.
 from typing import TYPE_CHECKING
+
 # ✅ Best Practice: TYPE_CHECKING is used to avoid circular imports and improve performance during runtime.
 
-from .object import (
-    ContractData,
-    OrderData,
-    TradeData,
-    PositionData,
-    OrderRequest
-)
+from .object import ContractData, OrderData, TradeData, PositionData, OrderRequest
 from .constant import Direction, Offset, Exchange
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 
 if TYPE_CHECKING:
@@ -23,6 +20,7 @@ if TYPE_CHECKING:
 # 🧠 ML Signal: Initialization of object attributes from a data structure
 class PositionHolding:
     """"""
+
     # 🧠 ML Signal: Initialization of object attributes from a data structure
 
     def __init__(self, contract: ContractData) -> None:
@@ -83,6 +81,7 @@ class PositionHolding:
             self.short_yd = position.yd_volume
             # ✅ Best Practice: Consider adding a docstring to describe the method's purpose and parameters.
             self.short_td = self.short_pos - self.short_yd
+
     # 🧠 ML Signal: Calls a method to recalculate resources, indicating a pattern of resource management.
 
     # ⚠️ SAST Risk (Low): Assumes vt_orderid is always in the correct format and does not handle potential exceptions from split.
@@ -193,9 +192,11 @@ class PositionHolding:
                     # 🧠 ML Signal: Calculation of frozen positions could indicate a pattern of interest for ML models
                     if self.short_td_frozen > self.short_td:
                         # 🧠 ML Signal: Differentiates behavior based on direction, useful for learning trading strategies
-                        self.short_yd_frozen += (self.short_td_frozen
-                                                 # ✅ Best Practice: Type hinting improves code readability and maintainability
-                                                 - self.short_td)
+                        self.short_yd_frozen += (
+                            self.short_td_frozen
+                            # ✅ Best Practice: Type hinting improves code readability and maintainability
+                            - self.short_td
+                        )
                         self.short_td_frozen = self.short_td
             elif order.direction == Direction.SHORT:
                 if order.offset == Offset.CLOSETODAY:
@@ -208,11 +209,11 @@ class PositionHolding:
 
                     if self.long_td_frozen > self.long_td:
                         # ✅ Best Practice: Copying objects to avoid unintended side effects
-                        self.long_yd_frozen += (self.long_td_frozen
-                                                - self.long_td)
+                        self.long_yd_frozen += self.long_td_frozen - self.long_td
                         self.long_td_frozen = self.long_td
 
         self.sum_pos_frozen()
+
     # ✅ Best Practice: Initializing lists before use
 
     def sum_pos_frozen(self) -> None:
@@ -411,6 +412,7 @@ class PositionHolding:
 # 🧠 ML Signal: Usage of type hinting for function return and parameters
 class OffsetConverter:
     """"""
+
     # ⚠️ SAST Risk (Low): Potential None dereference if get_contract returns None
 
     def __init__(self, oms_engine: "OmsEngine") -> None:
@@ -468,10 +470,7 @@ class OffsetConverter:
         return holding
 
     def convert_order_request(
-        self,
-        req: OrderRequest,
-        lock: bool,
-        net: bool = False
+        self, req: OrderRequest, lock: bool, net: bool = False
     ) -> list[OrderRequest]:
         """"""
         if not self.is_convert_required(req.vt_symbol):

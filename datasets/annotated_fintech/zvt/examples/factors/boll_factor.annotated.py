@@ -5,10 +5,12 @@ import pandas as pd
 from ta.volatility import BollingerBands
 
 from zvt.contract.factor import Transformer
+
 # ✅ Best Practice: Use of descriptive variable names improves code readability.
 from zvt.factors.technical_factor import TechnicalFactor
 
 # 🧠 ML Signal: Usage of BollingerBands indicates a financial data transformation pattern.
+
 
 class BollTransformer(Transformer):
     # 🧠 ML Signal: Adding new columns to DataFrame based on financial indicators.
@@ -46,6 +48,8 @@ class BollTransformer(Transformer):
         # Add Percentage Bollinger Bands
         df["bb_bbp"] = indicator_bb.bollinger_pband()
         return df
+
+
 # ⚠️ SAST Risk (Low): Dynamic import within the main block
 
 
@@ -61,7 +65,9 @@ class BollFactor(TechnicalFactor):
     # 🧠 ML Signal: Instantiation of BollFactor with specific parameters
     def compute_result(self):
         super().compute_result()
-        self.result_df = (self.factor_df["bb_bbli"] - self.factor_df["bb_bbhi"]).to_frame(name="filter_result")
+        self.result_df = (
+            self.factor_df["bb_bbli"] - self.factor_df["bb_bbhi"]
+        ).to_frame(name="filter_result")
         # 🧠 ML Signal: Usage of specific provider and entity_ids
         # 🧠 ML Signal: Recording data with specific parameters
         # 🧠 ML Signal: Instantiation of BollFactor with specific parameters
@@ -79,7 +85,10 @@ if __name__ == "__main__":
     entity_ids = ["stock_sz_000338", "stock_sh_601318"]
     Stock1dHfqKdata.record_data(entity_ids=entity_ids, provider=provider)
     factor = BollFactor(
-        entity_ids=entity_ids, provider=provider, entity_provider=provider, start_timestamp="2019-01-01"
+        entity_ids=entity_ids,
+        provider=provider,
+        entity_provider=provider,
+        start_timestamp="2019-01-01",
     )
     factor.draw(show=True)
 
@@ -90,6 +99,9 @@ if __name__ == "__main__":
 
     Stock30mHfqKdata.record_data(entity_ids=entity_ids, provider=provider)
     factor = BollFactor(
-        entity_ids=entity_ids, provider=provider, entity_provider=provider, start_timestamp="2021-01-01"
+        entity_ids=entity_ids,
+        provider=provider,
+        entity_provider=provider,
+        start_timestamp="2021-01-01",
     )
     factor.draw(show=True)

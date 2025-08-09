@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 
 from __future__ import annotations
+
 # ✅ Best Practice: Imports are organized and specific, improving readability and maintainability.
 
 from typing import TYPE_CHECKING, Any, Dict, Generic, Optional, Tuple, TypeVar
@@ -20,6 +21,7 @@ SimulatorState = TypeVar("SimulatorState")
 # ✅ Best Practice: Use of __call__ method allows instances of the class to be called as functions, improving readability and usability.
 
 # ✅ Best Practice: TypeVar is used for generic programming, enhancing code flexibility and reusability.
+
 
 # 🧠 ML Signal: The method returns a float, indicating it might be used for numerical computations or evaluations.
 # ✅ Best Practice: Method docstring provides clarity on the method's purpose.
@@ -47,6 +49,7 @@ class Reward(Generic[SimulatorState]):
         """Implement this method for your own reward."""
         # 🧠 ML Signal: Function call pattern with dynamic function execution
         raise NotImplementedError("Implement reward calculation recipe in `reward()`.")
+
     # 🧠 ML Signal: Logging pattern for tracking function outputs
     # ✅ Best Practice: Use of descriptive variable names
     # ✅ Best Practice: Explicit return of the computed result

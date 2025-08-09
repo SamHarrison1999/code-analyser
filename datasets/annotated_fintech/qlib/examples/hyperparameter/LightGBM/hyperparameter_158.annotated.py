@@ -1,15 +1,19 @@
 import qlib
 import optuna
+
 # 🧠 ML Signal: Importing specific constants and utilities from a library indicates usage patterns
 from qlib.constant import REG_CN
 from qlib.utils import init_instance_by_config
+
 # 🧠 ML Signal: Importing specific functions or classes from a library indicates usage patterns
 from qlib.tests.config import CSI300_DATASET_CONFIG
 from qlib.tests.data import GetData
+
 # 🧠 ML Signal: Importing specific configurations from a library indicates usage patterns
 
 # 🧠 ML Signal: Hyperparameter tuning using Optuna's suggest_uniform for colsample_bytree
 # 🧠 ML Signal: Importing specific data utilities from a library indicates usage patterns
+
 
 def objective(trial):
     task = {
@@ -31,8 +35,8 @@ def objective(trial):
                 "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 1, 50),
                 "min_child_samples": trial.suggest_int("min_child_samples", 5, 100),
             },
-        # 🧠 ML Signal: Hyperparameter tuning using Optuna's suggest_int for num_leaves
-        # 🧠 ML Signal: Hyperparameter tuning using Optuna's suggest_uniform for feature_fraction
+            # 🧠 ML Signal: Hyperparameter tuning using Optuna's suggest_int for num_leaves
+            # 🧠 ML Signal: Hyperparameter tuning using Optuna's suggest_uniform for feature_fraction
         },
     }
     # 🧠 ML Signal: Hyperparameter tuning using Optuna's suggest_int for bagging_freq
@@ -41,6 +45,8 @@ def objective(trial):
     # 🧠 ML Signal: Hyperparameter tuning using Optuna's suggest_int for min_data_in_leaf
     model.fit(dataset, evals_result=evals_result)
     return min(evals_result["valid"])
+
+
 # 🧠 ML Signal: Hyperparameter tuning using Optuna's suggest_int for min_child_samples
 
 

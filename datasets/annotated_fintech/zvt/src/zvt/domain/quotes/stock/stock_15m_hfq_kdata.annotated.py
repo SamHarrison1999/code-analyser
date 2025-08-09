@@ -5,8 +5,10 @@ from sqlalchemy.orm import declarative_base
 
 # 🧠 ML Signal: Usage of SQLAlchemy's declarative_base indicates ORM pattern.
 from zvt.contract.register import register_schema
+
 # 🧠 ML Signal: Inheritance from KdataBase and StockKdataCommon indicates a pattern of using base classes for shared functionality.
 from zvt.domain.quotes import StockKdataCommon
+
 # 🧠 ML Signal: Use of a class attribute to define a table name suggests a pattern for ORM table mapping.
 
 KdataBase = declarative_base()
@@ -15,12 +17,16 @@ KdataBase = declarative_base()
 # 🧠 ML Signal: Registration of schema with multiple providers indicates a pattern of supporting multiple data sources.
 # ✅ Best Practice: Defining __all__ for module exports clarifies the intended public interface of the module.
 
+
 class Stock15mHfqKdata(KdataBase, StockKdataCommon):
     __tablename__ = "stock_15m_hfq_kdata"
 
 
 register_schema(
-    providers=["em", "qmt", "joinquant"], db_name="stock_15m_hfq_kdata", schema_base=KdataBase, entity_type="stock"
+    providers=["em", "qmt", "joinquant"],
+    db_name="stock_15m_hfq_kdata",
+    schema_base=KdataBase,
+    entity_type="stock",
 )
 
 

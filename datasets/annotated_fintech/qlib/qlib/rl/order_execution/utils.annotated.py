@@ -6,17 +6,20 @@
 from __future__ import annotations
 
 from typing import Any, cast
+
 # ✅ Best Practice: Grouping related imports together improves code organization
 
 # 🧠 ML Signal: Function signature indicates usage of pandas DataFrame, common in data processing tasks
 import numpy as np
 import pandas as pd
+
 # ✅ Best Practice: Converting 'other' to DataFrame ensures compatibility with 'df'
 
 # ✅ Best Practice: Importing specific functions or classes improves code readability and avoids namespace pollution
 # ⚠️ SAST Risk (Low): Assumes 'other' can be converted to DataFrame and has 'datetime' column
 from qlib.backtest.decision import OrderDir
 from qlib.backtest.executor import BaseExecutor, NestedExecutor, SimulatorExecutor
+
 # ✅ Best Practice: Explicitly setting index name improves DataFrame readability
 # ✅ Best Practice: Using pd.concat for appending DataFrames is efficient and clear
 from qlib.constant import float_or_ndarray

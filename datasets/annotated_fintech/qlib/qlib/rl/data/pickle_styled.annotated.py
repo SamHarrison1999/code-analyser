@@ -25,14 +25,20 @@ from pathlib import Path
 from typing import List, Sequence, cast
 
 import cachetools
+
 # ✅ Best Practice: Consider using a more descriptive function name for clarity
 import numpy as np
 import pandas as pd
+
 # ✅ Best Practice: Use consistent ordering of return statements for readability
 from cachetools.keys import hashkey
 
 from qlib.backtest.decision import Order, OrderDir
-from qlib.rl.data.base import BaseIntradayBacktestData, BaseIntradayProcessedData, ProcessedDataProvider
+from qlib.rl.data.base import (
+    BaseIntradayBacktestData,
+    BaseIntradayProcessedData,
+    ProcessedDataProvider,
+)
 from qlib.typehint import Literal
 
 DealPriceType = Literal["bid_or_ask", "bid_or_ask_fill", "close"]
@@ -77,9 +83,12 @@ def _infer_processed_data_column_names(shape: int) -> List[str]:
         return ["$high", "$low", "$open", "$close", "$volume"]
     # 🧠 ML Signal: Use of pandas to read pickle files, indicating data processing or analysis
     raise ValueError(f"Unrecognized data shape: {shape}")
+
+
 # ✅ Best Practice: Use of lru_cache to cache results and improve performance for repeated calls
 
 # 🧠 ML Signal: Capturing index names for later use, indicating data manipulation
+
 
 def _find_pickle(filename_without_suffix: Path) -> Path:
     # 🧠 ML Signal: Resetting index, common in data preprocessing
@@ -94,9 +103,13 @@ def _find_pickle(filename_without_suffix: Path) -> Path:
             # ✅ Best Practice: Class docstring provides a brief description of the class purpose
             paths.append(path)
     if not paths:
-        raise FileNotFoundError(f"No file starting with '{filename_without_suffix}' found")
+        raise FileNotFoundError(
+            f"No file starting with '{filename_without_suffix}' found"
+        )
     if len(paths) > 1:
-        raise ValueError(f"Multiple paths are found with prefix '{filename_without_suffix}': {paths}")
+        raise ValueError(
+            f"Multiple paths are found with prefix '{filename_without_suffix}': {paths}"
+        )
     return paths[0]
 
 
@@ -123,12 +136,15 @@ def _read_pickle(filename_without_suffix: Path) -> pd.DataFrame:
 
     # 🧠 ML Signal: Usage of __len__ indicates the object is expected to behave like a collection
     return df
+
+
 # ⚠️ SAST Risk (Low): Assumes self.data is a collection; if not, this will raise an error
 
 
 # 🧠 ML Signal: Conditional logic based on `deal_price_type` and `order_dir` indicates decision-making patterns.
 class SimpleIntradayBacktestData(BaseIntradayBacktestData):
     """Backtest data for simple simulator"""
+
     # ⚠️ SAST Risk (Medium): Potential for `None` value in `order_dir` leading to exception.
 
     def __init__(
@@ -142,7 +158,9 @@ class SimpleIntradayBacktestData(BaseIntradayBacktestData):
         super(SimpleIntradayBacktestData, self).__init__()
         # ⚠️ SAST Risk (Low): Use of f-string with user-controlled `deal_price_type` could lead to information disclosure.
 
-        backtest = _read_pickle((data_dir if isinstance(data_dir, Path) else Path(data_dir)) / stock_id)
+        backtest = _read_pickle(
+            (data_dir if isinstance(data_dir, Path) else Path(data_dir)) / stock_id
+        )
         # 🧠 ML Signal: Access pattern to `self.data` using dynamic column names.
         backtest = backtest.loc[pd.IndexSlice[stock_id, :, date]]
 
@@ -154,13 +172,22 @@ class SimpleIntradayBacktestData(BaseIntradayBacktestData):
         self.deal_price_type: DealPriceType = deal_price
         # ✅ Best Practice: Use of `replace` and `fillna` for handling missing data.
         self.order_dir = order_dir
+
     # 🧠 ML Signal: Accessing a specific column from a DataFrame, indicating a pattern of data manipulation
     # ✅ Best Practice: Type hinting improves code readability and maintainability
 
     def __repr__(self) -> str:
         # 🧠 ML Signal: Usage of type casting can indicate potential type mismatches
-        with pd.option_context("memory_usage", False, "display.max_info_columns", 1, "display.large_repr", "info"):
+        with pd.option_context(
+            "memory_usage",
+            False,
+            "display.max_info_columns",
+            1,
+            "display.large_repr",
+            "info",
+        ):
             return f"{self.__class__.__name__}({self.data})"
+
     # ✅ Best Practice: Class docstring provides a brief description of the class purpose.
 
     def __len__(self) -> int:
@@ -171,7 +198,9 @@ class SimpleIntradayBacktestData(BaseIntradayBacktestData):
         See :attribute:`DealPriceType` for details."""
         if self.deal_price_type in ("bid_or_ask", "bid_or_ask_fill"):
             if self.order_dir is None:
-                raise ValueError("Order direction cannot be none when deal_price_type is not close.")
+                raise ValueError(
+                    "Order direction cannot be none when deal_price_type is not close."
+                )
             if self.order_dir == OrderDir.SELL:
                 col = "$bid0"
             else:  # BUY
@@ -210,7 +239,9 @@ class PickleIntradayProcessedData(BaseIntradayProcessedData):
         feature_dim: int,
         time_index: pd.Index,
     ) -> None:
-        proc = _read_pickle((data_dir if isinstance(data_dir, Path) else Path(data_dir)) / stock_id)
+        proc = _read_pickle(
+            (data_dir if isinstance(data_dir, Path) else Path(data_dir)) / stock_id
+        )
 
         # We have to infer the names here because,
         # unfortunately they are not included in the original data.
@@ -223,15 +254,23 @@ class PickleIntradayProcessedData(BaseIntradayProcessedData):
             proc = proc.loc[pd.IndexSlice[stock_id, :, date]]
             assert len(proc) == time_length and len(proc.columns) == feature_dim * 2
             proc_today = proc[cnames]
-            proc_yesterday = proc[[f"{c}_1" for c in cnames]].rename(columns=lambda c: c[:-2])
+            proc_yesterday = proc[[f"{c}_1" for c in cnames]].rename(
+                columns=lambda c: c[:-2]
+            )
         except (IndexError, KeyError):
             # legacy data
             proc = proc.loc[pd.IndexSlice[stock_id, date]]
             assert time_length * feature_dim * 2 == len(proc)
-            proc_today = proc.to_numpy()[: time_length * feature_dim].reshape((time_length, feature_dim))
-            proc_yesterday = proc.to_numpy()[time_length * feature_dim :].reshape((time_length, feature_dim))
+            proc_today = proc.to_numpy()[: time_length * feature_dim].reshape(
+                (time_length, feature_dim)
+            )
+            proc_yesterday = proc.to_numpy()[time_length * feature_dim :].reshape(
+                (time_length, feature_dim)
+            )
             proc_today = pd.DataFrame(proc_today, index=time_index, columns=cnames)
-            proc_yesterday = pd.DataFrame(proc_yesterday, index=time_index, columns=cnames)
+            proc_yesterday = pd.DataFrame(
+                proc_yesterday, index=time_index, columns=cnames
+            )
 
         self.today: pd.DataFrame = proc_today
         self.yesterday: pd.DataFrame = proc_yesterday
@@ -239,7 +278,14 @@ class PickleIntradayProcessedData(BaseIntradayProcessedData):
         assert len(self.today) == len(self.yesterday) == time_length
 
     def __repr__(self) -> str:
-        with pd.option_context("memory_usage", False, "display.max_info_columns", 1, "display.large_repr", "info"):
+        with pd.option_context(
+            "memory_usage",
+            False,
+            "display.max_info_columns",
+            1,
+            "display.large_repr",
+            "info",
+        ):
             return f"{self.__class__.__name__}({self.today}, {self.yesterday})"
 
 
@@ -256,7 +302,9 @@ def load_simple_intraday_backtest_data(
 
 @cachetools.cached(  # type: ignore
     cache=cachetools.LRUCache(100),  # 100 * 50K = 5MB
-    key=lambda data_dir, stock_id, date, feature_dim, time_index: hashkey(data_dir, stock_id, date),
+    key=lambda data_dir, stock_id, date, feature_dim, time_index: hashkey(
+        data_dir, stock_id, date
+    ),
 )
 def load_pickle_intraday_processed_data(
     data_dir: Path,
@@ -265,7 +313,9 @@ def load_pickle_intraday_processed_data(
     feature_dim: int,
     time_index: pd.Index,
 ) -> BaseIntradayProcessedData:
-    return PickleIntradayProcessedData(data_dir, stock_id, date, feature_dim, time_index)
+    return PickleIntradayProcessedData(
+        data_dir, stock_id, date, feature_dim, time_index
+    )
 
 
 class PickleProcessedDataProvider(ProcessedDataProvider):
@@ -329,8 +379,14 @@ def load_orders(
                 row["instrument"],
                 row["amount"],
                 OrderDir(int(row["order_type"])),
-                row["datetime"].replace(hour=start_time.hour, minute=start_time.minute, second=start_time.second),
-                row["datetime"].replace(hour=end_time.hour, minute=end_time.minute, second=end_time.second),
+                row["datetime"].replace(
+                    hour=start_time.hour,
+                    minute=start_time.minute,
+                    second=start_time.second,
+                ),
+                row["datetime"].replace(
+                    hour=end_time.hour, minute=end_time.minute, second=end_time.second
+                ),
             ),
         )
 

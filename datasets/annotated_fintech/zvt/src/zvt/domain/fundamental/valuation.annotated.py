@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, Float
+
 # ✅ Best Practice: Grouping related imports together improves readability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Mixin
+
 # ✅ Best Practice: Naming convention for base classes should be consistent and descriptive.
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Use of __tablename__ for ORM table naming
 
 ValuationBase = declarative_base()
@@ -84,7 +87,12 @@ class EtfValuation(ValuationBase, Mixin):
     pcf1 = Column(Float)
 
 
-register_schema(providers=["joinquant"], db_name="valuation", schema_base=ValuationBase, entity_type="stock")
+register_schema(
+    providers=["joinquant"],
+    db_name="valuation",
+    schema_base=ValuationBase,
+    entity_type="stock",
+)
 
 
 # the __all__ is generated

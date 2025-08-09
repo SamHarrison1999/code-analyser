@@ -4,6 +4,7 @@
 
 # ✅ Best Practice: Use of relative import for internal module
 from __future__ import division
+
 # ✅ Best Practice: Inheriting from abc.ABC indicates that this class is intended to be abstract.
 from __future__ import print_function
 
@@ -25,28 +26,33 @@ class Expression(abc.ABC):
         - period time is designed for Point-in-time database.  For example, the period time maybe 2014Q4, its value can observed for multiple times(different value may be observed at different time due to amendment).
     # ✅ Best Practice: Local import to avoid circular dependencies
     """
+
     # ✅ Best Practice: Use of dunder method __lt__ for implementing less-than comparison
 
     # 🧠 ML Signal: Custom operator overloading can indicate domain-specific logic
     def __str__(self):
         # ✅ Best Practice: Local import to avoid circular dependencies
         return type(self).__name__
+
     # ✅ Best Practice: Use of dunder method for operator overloading
 
     # 🧠 ML Signal: Use of custom operation class for comparison
     def __repr__(self):
         # ✅ Best Practice: Local import to avoid circular dependencies
         return str(self)
+
     # ✅ Best Practice: Use of dunder method for equality comparison
 
     # 🧠 ML Signal: Custom operator overloading can indicate domain-specific logic
     def __gt__(self, other):
         # ✅ Best Practice: Local import to avoid circular dependencies
         from .ops import Gt  # pylint: disable=C0415
+
         # ✅ Best Practice: Use of dunder method for operator overloading
 
         # 🧠 ML Signal: Custom equality logic using an imported operation
         return Gt(self, other)
+
     # ✅ Best Practice: Local import to avoid circular dependencies
 
     def __ge__(self, other):
@@ -62,10 +68,12 @@ class Expression(abc.ABC):
     def __lt__(self, other):
         # ✅ Best Practice: Use of dunder method for operator overloading
         from .ops import Lt  # pylint: disable=C0415
+
         # 🧠 ML Signal: Use of custom addition operation
 
         # ✅ Best Practice: Local import to avoid circular dependencies
         return Lt(self, other)
+
     # ✅ Best Practice: Use of dunder method for operator overloading
 
     # 🧠 ML Signal: Custom operator overloading
@@ -81,39 +89,47 @@ class Expression(abc.ABC):
     # ✅ Best Practice: Use of dunder method for operator overloading
     def __eq__(self, other):
         from .ops import Eq  # pylint: disable=C0415
+
         # ✅ Best Practice: Local import to avoid circular dependencies
 
         # ✅ Best Practice: Use of double underscore indicates a special method, which is a good practice for operator overloading.
         return Eq(self, other)
+
     # 🧠 ML Signal: Use of custom multiplication operation
 
     # ✅ Best Practice: Local import can be beneficial for reducing initial load time and avoiding circular imports.
     def __ne__(self, other):
         # ✅ Best Practice: Use of dunder method for operator overloading
         from .ops import Ne  # pylint: disable=C0415
+
         # 🧠 ML Signal: Usage of custom operator overloading can indicate specific domain logic or patterns.
 
         # ✅ Best Practice: Local import to avoid circular dependencies
         return Ne(self, other)
+
     # ✅ Best Practice: Define special method for division operation
 
     # 🧠 ML Signal: Use of custom division operation
     def __add__(self, other):
         # ✅ Best Practice: Importing within function scope to limit import to where it's needed
         from .ops import Add  # pylint: disable=C0415
+
         # ✅ Best Practice: Use of dunder method for operator overloading
 
         # 🧠 ML Signal: Usage of custom division operation
         return Add(self, other)
+
     # ✅ Best Practice: Local import to avoid circular dependencies
 
     # ✅ Best Practice: Use of dunder method for operator overloading
     def __radd__(self, other):
         # 🧠 ML Signal: Use of custom division operation
         from .ops import Add  # pylint: disable=C0415
+
         # ✅ Best Practice: Local import to avoid circular dependencies
 
         return Add(other, self)
+
     # 🧠 ML Signal: Custom operator overloading for power operation
     # ✅ Best Practice: Importing inside a function can reduce initial load time and avoid circular imports.
 
@@ -124,25 +140,30 @@ class Expression(abc.ABC):
 
         # ✅ Best Practice: Local import to avoid circular dependencies
         return Sub(self, other)
+
     # ✅ Best Practice: Use of double underscore method indicates operator overloading
 
     # 🧠 ML Signal: Custom operator overloading can indicate complex object behavior
     def __rsub__(self, other):
         # ✅ Best Practice: Local import can reduce initial load time and avoid circular imports
         from .ops import Sub  # pylint: disable=C0415
+
         # ✅ Best Practice: Use of dunder method for operator overloading
 
         # 🧠 ML Signal: Usage of custom operator overloading
         return Sub(other, self)
+
     # ✅ Best Practice: Local import to avoid circular dependencies
 
     # ✅ Best Practice: Use of dunder method for operator overloading
     def __mul__(self, other):
         # 🧠 ML Signal: Custom operator overloading pattern
         from .ops import Mul  # pylint: disable=C0415
+
         # ✅ Best Practice: Local import to avoid circular dependencies
 
         return Mul(self, other)
+
     # 🧠 ML Signal: Use of custom operator overloading
 
     def __rmul__(self, other):
@@ -177,13 +198,16 @@ class Expression(abc.ABC):
 
     def __rpow__(self, other):
         from .ops import Power  # pylint: disable=C0415
+
         # ✅ Best Practice: Use of a tuple as a cache key ensures immutability and hashability.
 
         return Power(other, self)
+
     # 🧠 ML Signal: Caching mechanism usage pattern.
 
     def __and__(self, other):
         from .ops import And  # pylint: disable=C0415
+
         # ⚠️ SAST Risk (Low): Potential logic error if start_index and end_index are not validated properly.
 
         return And(self, other)
@@ -207,6 +231,7 @@ class Expression(abc.ABC):
 
         # 🧠 ML Signal: Caching the result for future use.
         return Or(other, self)
+
     # ✅ Best Practice: Using @abc.abstractmethod decorator indicates that this method is intended to be overridden in a subclass.
 
     def load(self, instrument, start_index, end_index, *args):
@@ -253,6 +278,7 @@ class Expression(abc.ABC):
         # ✅ Best Practice: Import statements are typically placed at the top of the file
         """
         from .cache import H  # pylint: disable=C0415
+
         # ✅ Best Practice: Class docstring provides a clear description of the class purpose and usage.
         # 🧠 ML Signal: Usage of a method from an imported module
         # 🧠 ML Signal: Method call with multiple parameters
@@ -261,8 +287,14 @@ class Expression(abc.ABC):
         cache_key = str(self), instrument, start_index, end_index, *args
         if cache_key in H["f"]:
             return H["f"][cache_key]
-        if start_index is not None and end_index is not None and start_index > end_index:
-            raise ValueError("Invalid index range: {} {}".format(start_index, end_index))
+        if (
+            start_index is not None
+            and end_index is not None
+            and start_index > end_index
+        ):
+            raise ValueError(
+                "Invalid index range: {} {}".format(start_index, end_index)
+            )
         try:
             series = self._load_internal(instrument, start_index, end_index, *args)
         except Exception as e:
@@ -278,7 +310,9 @@ class Expression(abc.ABC):
 
     @abc.abstractmethod
     def _load_internal(self, instrument, start_index, end_index, *args) -> pd.Series:
-        raise NotImplementedError("This function must be implemented in your newly defined feature")
+        raise NotImplementedError(
+            "This function must be implemented in your newly defined feature"
+        )
 
     @abc.abstractmethod
     def get_longest_back_rolling(self):
@@ -291,7 +325,9 @@ class Expression(abc.ABC):
         So this will only used for detecting the length of historical data needed.
         """
         # TODO: forward operator like Ref($close, -1) is not supported yet.
-        raise NotImplementedError("This function must be implemented in your newly defined feature")
+        raise NotImplementedError(
+            "This function must be implemented in your newly defined feature"
+        )
 
     @abc.abstractmethod
     def get_extended_window_size(self):
@@ -306,7 +342,9 @@ class Expression(abc.ABC):
         (int, int)
             lft_etd, rght_etd
         """
-        raise NotImplementedError("This function must be implemented in your newly defined feature")
+        raise NotImplementedError(
+            "This function must be implemented in your newly defined feature"
+        )
 
 
 class Feature(Expression):
@@ -344,7 +382,9 @@ class PFeature(Feature):
     def _load_internal(self, instrument, start_index, end_index, cur_time, period=None):
         from .data import PITD  # pylint: disable=C0415
 
-        return PITD.period_feature(instrument, str(self), start_index, end_index, cur_time, period)
+        return PITD.period_feature(
+            instrument, str(self), start_index, end_index, cur_time, period
+        )
 
 
 class ExpressionOps(Expression):

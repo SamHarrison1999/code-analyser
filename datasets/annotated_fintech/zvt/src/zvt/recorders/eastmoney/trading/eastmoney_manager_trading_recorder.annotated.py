@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from zvt.domain import ManagerTrading
 from zvt.recorders.eastmoney.common import EastmoneyMoreDataRecorder
+
 # 🧠 ML Signal: Importing specific functions or classes indicates usage patterns and dependencies
 # 🧠 ML Signal: Inheritance from a specific base class indicates a pattern of extending functionality
 from zvt.utils.utils import to_float
 
 # 🧠 ML Signal: Class attribute assignment indicates a pattern of setting schema for data handling
+
 
 class ManagerTradingRecorder(EastmoneyMoreDataRecorder):
     # 🧠 ML Signal: URL assignment indicates a pattern of accessing external resources
@@ -40,8 +42,8 @@ class ManagerTradingRecorder(EastmoneyMoreDataRecorder):
             # 🧠 ML Signal: Accessing a method to retrieve a specific field name
             "manager_position": ("GaoGuanZhiWei", str),
             "relationship_with_manager": ("GaoGuanGuanXi", str),
-        # 🧠 ML Signal: Use of string keys and conversion functions suggests a pattern for data transformation
-        # 🧠 ML Signal: String formatting pattern for ID generation
+            # 🧠 ML Signal: Use of string keys and conversion functions suggests a pattern for data transformation
+            # 🧠 ML Signal: String formatting pattern for ID generation
         }
 
     # 🧠 ML Signal: Use of string keys and conversion functions suggests a pattern for data transformation

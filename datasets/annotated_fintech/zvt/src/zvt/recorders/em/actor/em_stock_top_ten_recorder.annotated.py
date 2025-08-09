@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import List
+
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local sections improves readability.
 
 import pandas as pd
@@ -9,10 +10,15 @@ from zvt.contract import ActorType
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimestampsDataRecorder
 from zvt.domain import Stock, ActorMeta
-from zvt.domain.actor.stock_actor import StockTopTenHolder, StockInstitutionalInvestorHolder
+from zvt.domain.actor.stock_actor import (
+    StockTopTenHolder,
+    StockInstitutionalInvestorHolder,
+)
+
 # 🧠 ML Signal: Inheritance from TimestampsDataRecorder indicates a pattern of extending functionality
 from zvt.recorders.em.em_api import get_holder_report_dates, get_holders
 from zvt.utils.time_utils import to_pd_timestamp, to_time_str
+
 # 🧠 ML Signal: Use of class attributes for configuration
 
 
@@ -53,8 +59,8 @@ class EMStockTopTenRecorder(TimestampsDataRecorder):
                     StockInstitutionalInvestorHolder.holding_values > 1,
                     StockInstitutionalInvestorHolder.holding_ratio > 0.01,
                     StockInstitutionalInvestorHolder.timestamp == holder.timestamp,
-                # 🧠 ML Signal: Iterating over timestamps to process data for each timestamp
-                # ⚠️ SAST Risk (Low): Division by zero risk if ii[0].holding_ratio is zero
+                    # 🧠 ML Signal: Iterating over timestamps to process data for each timestamp
+                    # ⚠️ SAST Risk (Low): Division by zero risk if ii[0].holding_ratio is zero
                 ],
                 limit=1,
                 # 🧠 ML Signal: Converting timestamp to string format
@@ -63,7 +69,9 @@ class EMStockTopTenRecorder(TimestampsDataRecorder):
             )
             # 🧠 ML Signal: Fetching data based on entity code and date
             if ii:
-                holder.holding_values = holder.holding_ratio * ii[0].holding_values / ii[0].holding_ratio
+                holder.holding_values = (
+                    holder.holding_ratio * ii[0].holding_values / ii[0].holding_ratio
+                )
         self.session.commit()
 
     # 🧠 ML Signal: Iterating over result items to process each holder
@@ -80,7 +88,8 @@ class EMStockTopTenRecorder(TimestampsDataRecorder):
                     # 机构
                     if item["IS_HOLDORG"] == "1":
                         domains: List[ActorMeta] = ActorMeta.query_data(
-                            filters=[ActorMeta.code == item["HOLDER_CODE"]], return_type="domain"
+                            filters=[ActorMeta.code == item["HOLDER_CODE"]],
+                            return_type="domain",
                         )
                         if not domains:
                             actor_type = ActorType.corporation.value
@@ -122,21 +131,33 @@ class EMStockTopTenRecorder(TimestampsDataRecorder):
                         "report_date": timestamp,
                         "report_period": to_report_period_type(timestamp),
                         "holding_numbers": item["HOLD_NUM"],
-                        "holding_ratio": value_to_pct(item["HOLD_NUM_RATIO"], default=0),
-                    # 🧠 ML Signal: Appending holder data to list
-                    # 🧠 ML Signal: Converting holders list to DataFrame
-                    # ⚠️ SAST Risk (Low): Potential SQL injection risk if df_to_db is not properly handling inputs
-                    # 🧠 ML Signal: Running the recorder with specific codes
-                    # ✅ Best Practice: Use of __name__ == "__main__" to allow or prevent parts of code from being run when the modules are imported
-                    # ✅ Best Practice: Defining __all__ to specify public API of the module
+                        "holding_ratio": value_to_pct(
+                            item["HOLD_NUM_RATIO"], default=0
+                        ),
+                        # 🧠 ML Signal: Appending holder data to list
+                        # 🧠 ML Signal: Converting holders list to DataFrame
+                        # ⚠️ SAST Risk (Low): Potential SQL injection risk if df_to_db is not properly handling inputs
+                        # 🧠 ML Signal: Running the recorder with specific codes
+                        # ✅ Best Practice: Use of __name__ == "__main__" to allow or prevent parts of code from being run when the modules are imported
+                        # ✅ Best Practice: Defining __all__ to specify public API of the module
                     }
                     holders.append(holder)
                 if holders:
                     df = pd.DataFrame.from_records(holders)
-                    df_to_db(data_schema=self.data_schema, df=df, provider=self.provider, force_update=True)
+                    df_to_db(
+                        data_schema=self.data_schema,
+                        df=df,
+                        provider=self.provider,
+                        force_update=True,
+                    )
                 if new_actors:
                     df = pd.DataFrame.from_records(new_actors)
-                    df_to_db(data_schema=ActorMeta, df=df, provider=self.provider, force_update=False)
+                    df_to_db(
+                        data_schema=ActorMeta,
+                        df=df,
+                        provider=self.provider,
+                        force_update=False,
+                    )
 
 
 if __name__ == "__main__":

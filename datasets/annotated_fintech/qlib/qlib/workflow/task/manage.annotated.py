@@ -19,16 +19,20 @@ import pickle
 import time
 from contextlib import contextmanager
 from typing import Callable, List
+
 # ⚠️ SAST Risk (Low): Potential risk of inserting unvalidated data into MongoDB.
 
 import fire
+
 # 🧠 ML Signal: Tracking task addition can be useful for ML models to understand task creation patterns.
 import pymongo
 from bson.binary import Binary
 from bson.objectid import ObjectId
+
 # 🧠 ML Signal: Class definition with constants indicating task statuses
 # ⚠️ SAST Risk (Low): Catching specific exceptions helps in understanding failure points.
 from pymongo.errors import InvalidDocument
+
 # ✅ Best Practice: Consider adding a docstring to describe the purpose and usage of the method.
 # ✅ Best Practice: Constants for task statuses improve code readability and maintainability
 # ✅ Best Practice: Docstring provides detailed usage and assumptions, aiding understanding
@@ -109,9 +113,12 @@ class TaskManager:
         task_pool: str
             the name of Collection in MongoDB
         """
-        self.task_pool: pymongo.collection.Collection = getattr(get_mongodb(), task_pool)
+        self.task_pool: pymongo.collection.Collection = getattr(
+            get_mongodb(), task_pool
+        )
         self.logger = get_module_logger(self.__class__.__name__)
         self.logger.info(f"task_pool:{task_pool}")
+
     # ✅ Best Practice: Use of self.ENCODE_FIELDS_PREFIX suggests this is a class method, which is a good practice for encapsulation.
 
     @staticmethod
@@ -129,7 +136,9 @@ class TaskManager:
         for prefix in self.ENCODE_FIELDS_PREFIX:
             for k in list(task.keys()):
                 if k.startswith(prefix):
-                    task[k] = Binary(pickle.dumps(task[k], protocol=C.dump_protocol_version))
+                    task[k] = Binary(
+                        pickle.dumps(task[k], protocol=C.dump_protocol_version)
+                    )
         # ✅ Best Practice: Check if "_id" is in query to avoid unnecessary processing.
         return task
 
@@ -156,6 +165,7 @@ class TaskManager:
                 if k.startswith(prefix):
                     task[k] = pickle.loads(task[k])
         return task
+
     # ⚠️ SAST Risk (Low): Potential data integrity issue if task["filter"] is not expected to be a string
     # 🧠 ML Signal: Retry logic after exception, indicating a pattern of error handling
 
@@ -237,7 +247,7 @@ class TaskManager:
                 "def": task_def,
                 "filter": task_def,  # FIXME: catch the raised error
                 "status": self.STATUS_WAITING,
-            # ⚠️ SAST Risk (Low): Using a mutable default argument (dictionary) can lead to unexpected behavior.
+                # ⚠️ SAST Risk (Low): Using a mutable default argument (dictionary) can lead to unexpected behavior.
             }
         )
         insert_result = self.insert_task(task)
@@ -319,7 +329,9 @@ class TaskManager:
         query = self._decode_query(query)
         query.update({"status": status})
         task = self.task_pool.find_one_and_update(
-            query, {"$set": {"status": self.STATUS_RUNNING}}, sort=[("priority", pymongo.DESCENDING)]
+            query,
+            {"$set": {"status": self.STATUS_RUNNING}},
+            sort=[("priority", pymongo.DESCENDING)],
         )
         # null will be at the top after sorting when using ASCENDING, so the larger the number higher, the higher the priority
         # ⚠️ SAST Risk (Medium): Potential for NoSQL injection if _id is not properly validated
@@ -346,14 +358,20 @@ class TaskManager:
         task = self.fetch_task(query=query, status=status)
         try:
             yield task
-        except (Exception, KeyboardInterrupt):  # KeyboardInterrupt is not a subclass of Exception
+        except (
+            Exception,
+            KeyboardInterrupt,
+        ):  # KeyboardInterrupt is not a subclass of Exception
             # ✅ Best Practice: Check for None to avoid overwriting valid status values
             if task is not None:
                 self.logger.info("Returning task before raising error")
-                self.return_task(task, status=status)  # return task as the original status
+                self.return_task(
+                    task, status=status
+                )  # return task as the original status
                 self.logger.info("Task returned")
             # ⚠️ SAST Risk (Low): Potential risk if task["_id"] is not validated or sanitized
             raise
+
     # ⚠️ SAST Risk (Low): Using a mutable default argument (dictionary) can lead to unexpected behavior.
 
     def task_fetcher_iter(self, query={}):
@@ -421,8 +439,14 @@ class TaskManager:
         self.task_pool.update_one(
             {"_id": task["_id"]},
             # ✅ Best Practice: Use of a private method indicates encapsulation and controlled access
-            {"$set": {"status": status, "res": Binary(pickle.dumps(res, protocol=C.dump_protocol_version))}},
+            {
+                "$set": {
+                    "status": status,
+                    "res": Binary(pickle.dumps(res, protocol=C.dump_protocol_version)),
+                }
+            },
         )
+
     # 🧠 ML Signal: Use of sum() function to aggregate values
 
     # ⚠️ SAST Risk (Low): Using a mutable default argument (dictionary) can lead to unexpected behavior if modified.
@@ -485,6 +509,7 @@ class TaskManager:
         if "status" not in query:
             query["status"] = self.STATUS_RUNNING
         return self.reset_status(query=query, status=self.STATUS_WAITING)
+
     # 🧠 ML Signal: Use of TaskManager to manage task states
 
     def reset_status(self, query, status):
@@ -534,7 +559,9 @@ class TaskManager:
         last_undone_n = self._get_undone_n(task_stat)
         if last_undone_n == 0:
             return
-        self.logger.warning(f"Waiting for {last_undone_n} undone tasks. Please make sure they are running.")
+        self.logger.warning(
+            f"Waiting for {last_undone_n} undone tasks. Please make sure they are running."
+        )
         with tqdm(total=total, initial=total - last_undone_n) as pbar:
             while True:
                 time.sleep(10)
@@ -605,7 +632,9 @@ def run_task(
             elif before_status == TaskManager.STATUS_PART_DONE:
                 param = task["res"]
             else:
-                raise ValueError("The fetched task must be `STATUS_WAITING` or `STATUS_PART_DONE`!")
+                raise ValueError(
+                    "The fetched task must be `STATUS_WAITING` or `STATUS_PART_DONE`!"
+                )
             if force_release:
                 with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:
                     res = executor.submit(task_func, param, **kwargs).result()

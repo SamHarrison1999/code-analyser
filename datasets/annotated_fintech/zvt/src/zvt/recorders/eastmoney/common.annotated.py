@@ -5,9 +5,11 @@ import requests
 
 from zvt.contract.api import get_data_count, get_data
 from zvt.contract.recorder import TimestampsDataRecorder, TimeSeriesDataRecorder
+
 # 🧠 ML Signal: Usage of logging to track application behavior
 from zvt.domain import CompanyType
 from zvt.domain.meta.stock_meta import StockDetail
+
 # ✅ Best Practice: Use of default parameter values for method improves function usability
 from zvt.utils.time_utils import to_pd_timestamp
 
@@ -17,10 +19,13 @@ logger = logging.getLogger(__name__)
 
 # 🧠 ML Signal: Conditional check on object attribute
 
+
 class ApiWrapper(object):
     # 🧠 ML Signal: String formatting based on object attribute
     def request(self, url=None, method="post", param=None, path_fields=None):
         raise NotImplementedError
+
+
 # 🧠 ML Signal: Conditional check on object attribute
 # 🧠 ML Signal: Function uses domain-specific logic to classify company types based on industry keywords
 
@@ -37,9 +42,12 @@ def get_fc(security_item):
     # 🧠 ML Signal: Checks for specific keywords to determine company type
 
     return fc
+
+
 # 🧠 ML Signal: Function definition with a single argument
 
 # 🧠 ML Signal: Checks for specific keywords to determine company type
+
 
 def get_company_type(stock_domain: StockDetail):
     # 🧠 ML Signal: Function call pattern
@@ -84,7 +92,9 @@ def company_type_flag(security_item):
     param = {"color": "w", "fc": get_fc(security_item)}
 
     # ⚠️ SAST Risk (Low): Logging the response content could expose sensitive information in logs.
-    resp = requests.post("https://emh5.eastmoney.com/api/CaiWuFenXi/GetCompanyType", json=param)
+    resp = requests.post(
+        "https://emh5.eastmoney.com/api/CaiWuFenXi/GetCompanyType", json=param
+    )
 
     ct = resp.json().get("Result").get("CompanyType")
 
@@ -92,6 +102,8 @@ def company_type_flag(security_item):
     # 🧠 ML Signal: Usage of a custom function 'get_from_path_fields' indicates a pattern for nested data extraction.
 
     return ct
+
+
 # ⚠️ SAST Risk (Low): Logging potentially sensitive data such as 'param' and 'origin_result'.
 # 🧠 ML Signal: Function that navigates through nested JSON structures
 
@@ -126,14 +138,19 @@ def call_eastmoney_api(url=None, method="post", param=None, path_fields=None):
                 # 🧠 ML Signal: Conditional logic based on the presence of timestamps
                 # ✅ Best Practice: Consider dependency injection for easier testing and flexibility.
                 "url:{},param:{},origin_result:{},could not get data for nested_fields:{}".format(
-                    url, param, origin_result, path_fields
-                # ✅ Best Practice: Initialize lists outside of loops to avoid repeated allocations
+                    url,
+                    param,
+                    origin_result,
+                    path_fields,
+                    # ✅ Best Practice: Initialize lists outside of loops to avoid repeated allocations
                 )
             )
         # 🧠 ML Signal: Usage of a method to generate request parameters
         return the_data
 
     return origin_result
+
+
 # 🧠 ML Signal: API request pattern with specific parameters
 
 
@@ -148,12 +165,18 @@ def get_from_path_fields(the_json, path_fields):
                 return None
     return the_data
 
+
 # ✅ Best Practice: Use list.extend() for list concatenation
+
 
 class EastmoneyApiWrapper(ApiWrapper):
     # ⚠️ SAST Risk (Low): Magic number used for list length check
     def request(self, url=None, method="post", param=None, path_fields=None):
-        return call_eastmoney_api(url=url, method=method, param=param, path_fields=path_fields)
+        return call_eastmoney_api(
+            url=url, method=method, param=param, path_fields=path_fields
+        )
+
+
 # 🧠 ML Signal: Class definition with multiple inheritance, indicating a pattern of combining functionalities.
 
 
@@ -180,19 +203,26 @@ class BaseEastmoneyRecorder(object):
             original_list = []
             # ✅ Best Practice: Checking for both existence and non-emptiness of a list.
             for the_timestamp in timestamps:
-                param = self.generate_request_param(entity_item, start, end, size, the_timestamp)
+                param = self.generate_request_param(
+                    entity_item, start, end, size, the_timestamp
+                )
                 # 🧠 ML Signal: Use of list comprehension for data transformation.
                 tmp_list = self.api_wrapper.request(
                     # 🧠 ML Signal: Class definition with inheritance, useful for understanding class hierarchies and relationships
-                    url=self.url, param=param, method=self.request_method, path_fields=self.path_fields
-                # 🧠 ML Signal: Conversion of data to a specific format (pandas timestamp).
+                    url=self.url,
+                    param=param,
+                    method=self.request_method,
+                    path_fields=self.path_fields,
+                    # 🧠 ML Signal: Conversion of data to a specific format (pandas timestamp).
                 )
                 # 🧠 ML Signal: Class attribute definition, useful for understanding default configurations
                 self.logger.info(
                     # ✅ Best Practice: Returning an empty list when no data is available.
-                    "record {} for entity_id:{},timestamp:{}".format(self.data_schema, entity_item.id, the_timestamp)
-                # 🧠 ML Signal: Method definition with parameters, useful for learning method usage patterns
-                # 🧠 ML Signal: Class attribute definition, useful for understanding default configurations
+                    "record {} for entity_id:{},timestamp:{}".format(
+                        self.data_schema, entity_item.id, the_timestamp
+                    )
+                    # 🧠 ML Signal: Method definition with parameters, useful for learning method usage patterns
+                    # 🧠 ML Signal: Class attribute definition, useful for understanding default configurations
                 )
                 # fill timestamp field
                 # 🧠 ML Signal: Dictionary creation with static and dynamic values, useful for learning data structure patterns
@@ -214,9 +244,14 @@ class BaseEastmoneyRecorder(object):
             param = self.generate_request_param(entity_item, start, end, size, None)
             # ✅ Best Practice: Keyword arguments improve readability and maintainability.
             return self.api_wrapper.request(
-                url=self.url, param=param, method=self.request_method, path_fields=self.path_fields
-            # ✅ Best Practice: Method name is descriptive and indicates its purpose
+                url=self.url,
+                param=param,
+                method=self.request_method,
+                path_fields=self.path_fields,
+                # ✅ Best Practice: Method name is descriptive and indicates its purpose
             )
+
+
 # 🧠 ML Signal: Comparison between local_count and remote_count can indicate data synchronization logic.
 # 🧠 ML Signal: Return values can be used to infer the function's purpose and output structure.
 # ✅ Best Practice: Returning a dictionary is a clear and concise way to handle multiple return values
@@ -251,11 +286,16 @@ class EastmoneyTimestampsDataRecorder(BaseEastmoneyRecorder, TimestampsDataRecor
             # 🧠 ML Signal: Return statement indicating the end of a function
             # 🧠 ML Signal: Function name and parameters suggest a pattern for evaluating timestamps
             # 🧠 ML Signal: Usage of get_data function with specific parameters
-            url=self.timestamps_fetching_url, path_fields=self.timestamp_list_path_fields, param=param
+            url=self.timestamps_fetching_url,
+            path_fields=self.timestamp_list_path_fields,
+            param=param,
         )
 
         if self.timestamp_path_fields and timestamp_json_list:
-            timestamps = [get_from_path_fields(data, self.timestamp_path_fields) for data in timestamp_json_list]
+            timestamps = [
+                get_from_path_fields(data, self.timestamp_path_fields)
+                for data in timestamp_json_list
+            ]
             return [to_pd_timestamp(t) for t in timestamps]
         return []
 
@@ -276,7 +316,9 @@ class EastmoneyPageabeDataRecorder(BaseEastmoneyRecorder, TimeSeriesDataRecorder
         # ⚠️ SAST Risk (Low): Ensure that the 'size' parameter is validated to prevent excessive data requests.
         # 🧠 ML Signal: Explicitly defining __all__ to control module exports.
         param = {"color": "w", "fc": get_fc(security_item), "pageNum": 1, "pageSize": 1}
-        return call_eastmoney_api(self.page_url, param=param, path_fields=["TotalCount"])
+        return call_eastmoney_api(
+            self.page_url, param=param, path_fields=["TotalCount"]
+        )
 
     def evaluate_start_end_size_timestamps(self, entity):
         remote_count = self.get_remote_count(entity)
@@ -286,7 +328,9 @@ class EastmoneyPageabeDataRecorder(BaseEastmoneyRecorder, TimeSeriesDataRecorder
 
         # get local count
         local_count = get_data_count(
-            data_schema=self.data_schema, session=self.session, filters=[self.data_schema.entity_id == entity.id]
+            data_schema=self.data_schema,
+            session=self.session,
+            filters=[self.data_schema.entity_id == entity.id],
         )
         # FIXME:the > case
         if local_count >= remote_count:
@@ -312,7 +356,9 @@ class EastmoneyMoreDataRecorder(BaseEastmoneyRecorder, TimeSeriesDataRecorder):
 
     def get_remote_latest_record(self, security_item):
         param = {"color": "w", "fc": get_fc(security_item), "pageNum": 1, "pageSize": 1}
-        results = call_eastmoney_api(self.url, param=param, path_fields=self.path_fields)
+        results = call_eastmoney_api(
+            self.url, param=param, path_fields=self.path_fields
+        )
         _, result = self.generate_domain(security_item, results[0])
         return result
 
@@ -337,7 +383,12 @@ class EastmoneyMoreDataRecorder(BaseEastmoneyRecorder, TimeSeriesDataRecorder):
         return None, None, 1000, None
 
     def generate_request_param(self, security_item, start, end, size, timestamp):
-        return {"color": "w", "fc": get_fc(security_item), "pageNum": 1, "pageSize": size}
+        return {
+            "color": "w",
+            "fc": get_fc(security_item),
+            "pageNum": 1,
+            "pageSize": size,
+        }
 
 
 # the __all__ is generated

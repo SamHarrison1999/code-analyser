@@ -7,11 +7,14 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.domain import Stock, MarginTrading
 from zvt.recorders.joinquant.common import to_jq_entity_id
+
 # 🧠 ML Signal: Importing specific functions and classes indicates usage patterns and dependencies
 # ✅ Best Practice: Use of class attributes for configuration and metadata
 from zvt.utils.pd_utils import pd_is_not_null
+
 # ✅ Best Practice: Grouping imports by functionality or source improves readability and maintainability
 from zvt.utils.time_utils import to_time_str, TIME_FORMAT_DAY
+
 # ✅ Best Practice: Use of class attributes for configuration and metadata
 
 
@@ -45,11 +48,19 @@ class MarginTradingRecorder(TimeSeriesDataRecorder):
             df.rename(columns={"date": "timestamp"}, inplace=True)
             df["timestamp"] = pd.to_datetime(df["timestamp"])
             df["id"] = df[["entity_id", "timestamp"]].apply(
-                lambda se: "{}_{}".format(se["entity_id"], to_time_str(se["timestamp"], fmt=TIME_FORMAT_DAY)), axis=1
+                lambda se: "{}_{}".format(
+                    se["entity_id"], to_time_str(se["timestamp"], fmt=TIME_FORMAT_DAY)
+                ),
+                axis=1,
             )
 
             print(df)
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(
+                df=df,
+                data_schema=self.data_schema,
+                provider=self.provider,
+                force_update=self.force_update,
+            )
 
         return None
 

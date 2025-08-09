@@ -9,8 +9,10 @@ from ...model.base import Model
 from ...data.dataset import DatasetH
 from ...data.dataset.handler import DataHandlerLP
 from ...model.interpret.base import FeatureInt
+
 # ✅ Best Practice: Class docstring provides a brief description of the class.
 from ...data.dataset.weight import Reweighter
+
 # 🧠 ML Signal: Use of **kwargs to handle flexible parameters
 
 
@@ -34,7 +36,7 @@ class XGBModel(Model, FeatureInt):
         evals_result=dict(),
         reweighter=None,
         **kwargs,
-    # ✅ Best Practice: Clear separation of features and labels for training and validation
+        # ✅ Best Practice: Clear separation of features and labels for training and validation
     ):
         df_train, df_valid = dataset.prepare(
             ["train", "valid"],
@@ -48,7 +50,9 @@ class XGBModel(Model, FeatureInt):
 
         # Lightgbm need 1D array as its label
         if y_train.values.ndim == 2 and y_train.values.shape[1] == 1:
-            y_train_1d, y_valid_1d = np.squeeze(y_train.values), np.squeeze(y_valid.values)
+            y_train_1d, y_valid_1d = np.squeeze(y_train.values), np.squeeze(
+                y_valid.values
+            )
         else:
             # ✅ Best Practice: Use of reweighter pattern for flexible weighting
             raise ValueError("XGBoost doesn't support multi-label training")
@@ -93,7 +97,9 @@ class XGBModel(Model, FeatureInt):
     def predict(self, dataset: DatasetH, segment: Union[Text, slice] = "test"):
         if self.model is None:
             raise ValueError("model is not fitted yet!")
-        x_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        x_test = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
         return pd.Series(self.model.predict(xgb.DMatrix(x_test)), index=x_test.index)
 
     def get_feature_importance(self, *args, **kwargs) -> pd.Series:
@@ -104,4 +110,6 @@ class XGBModel(Model, FeatureInt):
             parameters reference:
                 https://xgboost.readthedocs.io/en/latest/python/python_api.html#xgboost.Booster.get_score
         """
-        return pd.Series(self.model.get_score(*args, **kwargs)).sort_values(ascending=False)
+        return pd.Series(self.model.get_score(*args, **kwargs)).sort_values(
+            ascending=False
+        )

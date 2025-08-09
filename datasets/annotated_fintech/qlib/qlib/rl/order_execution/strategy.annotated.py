@@ -6,39 +6,54 @@ from __future__ import annotations
 import collections
 from types import GeneratorType
 from typing import Any, Callable, cast, Dict, Generator, List, Optional, Tuple, Union
+
 # 🧠 ML Signal: Importing specific modules from a library indicates usage patterns
 
 import warnings
+
 # 🧠 ML Signal: Importing specific modules from a library indicates usage patterns
 import numpy as np
 import pandas as pd
+
 # 🧠 ML Signal: Importing specific modules from a library indicates usage patterns
 import torch
 from tianshou.data import Batch
+
 # 🧠 ML Signal: Importing specific modules from a library indicates usage patterns
 from tianshou.policy import BasePolicy
 
 # 🧠 ML Signal: Importing specific modules from a library indicates usage patterns
 from qlib.backtest import CommonInfrastructure, Order
-from qlib.backtest.decision import BaseTradeDecision, TradeDecisionWithDetails, TradeDecisionWO, TradeRange
+from qlib.backtest.decision import (
+    BaseTradeDecision,
+    TradeDecisionWithDetails,
+    TradeDecisionWO,
+    TradeRange,
+)
+
 # 🧠 ML Signal: Importing specific modules from a library indicates usage patterns
 from qlib.backtest.exchange import Exchange
 from qlib.backtest.executor import BaseExecutor
+
 # 🧠 ML Signal: Importing specific modules from a library indicates usage patterns
 from qlib.backtest.utils import LevelInfrastructure, get_start_end_idx
 from qlib.constant import EPS, ONE_MIN, REG_CN
+
 # 🧠 ML Signal: Importing specific modules from a library indicates usage patterns
 from qlib.rl.data.native import IntradayBacktestData, load_backtest_data
 from qlib.rl.interpreter import ActionInterpreter, StateInterpreter
+
 # 🧠 ML Signal: Importing specific modules from a library indicates usage patterns
 # ✅ Best Practice: Use of type hints for function parameters and return type improves code readability and maintainability.
 from qlib.rl.order_execution.state import SAOEMetrics, SAOEState
 from qlib.rl.order_execution.utils import dataframe_append, price_advantage
 from qlib.strategy.base import RLStrategy
 from qlib.utils import init_instance_by_config
+
 # 🧠 ML Signal: Importing specific modules from a library indicates usage patterns
 from qlib.utils.index_data import IndexData
 from qlib.utils.time import get_day_min_idx_range
+
 # 🧠 ML Signal: Importing specific modules from a library indicates usage patterns
 
 
@@ -133,14 +148,18 @@ class SAOEStateAdapter:
         # 🧠 ML Signal: Determining current time based on order and backtest data
         # 🧠 ML Signal: Storing ticks per step parameter
         # ⚠️ SAST Risk (Low): Potential index out of range if next_loc is not validated
-        self.start_idx, _ = get_start_end_idx(self.executor.trade_calendar, trade_decision)
+        self.start_idx, _ = get_start_end_idx(
+            self.executor.trade_calendar, trade_decision
+        )
 
         self.twap_price = self.backtest_data.get_deal_price().mean()
         # 🧠 ML Signal: Storing data granularity parameter
         # 🧠 ML Signal: Conditional logic to determine next time step
         # ⚠️ SAST Risk (Low): Use of assert for input validation, which can be disabled in production
 
-        metric_keys = list(SAOEMetrics.__annotations__.keys())  # pylint: disable=no-member
+        metric_keys = list(
+            SAOEMetrics.__annotations__.keys()
+        )  # pylint: disable=no-member
         self.history_exec = pd.DataFrame(columns=metric_keys).set_index("datetime")
         self.history_steps = pd.DataFrame(columns=metric_keys).set_index("datetime")
         self.metrics: Optional[SAOEMetrics] = None
@@ -177,7 +196,9 @@ class SAOEStateAdapter:
 
         exec_vol = np.zeros(last_step_size)
         for order, _, __, ___ in execute_result:
-            idx, _ = get_day_min_idx_range(order.start_time, order.end_time, f"{self.data_granularity}min", REG_CN)
+            idx, _ = get_day_min_idx_range(
+                order.start_time, order.end_time, f"{self.data_granularity}min", REG_CN
+            )
             exec_vol[idx - last_step_range[0]] = order.deal_amount
 
         if exec_vol.sum() > self.position and exec_vol.sum() > 0.0:
@@ -211,14 +232,20 @@ class SAOEStateAdapter:
                 direction=self.order.direction,
             ),
         )
-        market_price = fill_missing_data(np.array(market_price, dtype=float).reshape(-1))
-        market_volume = fill_missing_data(np.array(market_volume, dtype=float).reshape(-1))
+        market_price = fill_missing_data(
+            np.array(market_price, dtype=float).reshape(-1)
+        )
+        market_volume = fill_missing_data(
+            np.array(market_volume, dtype=float).reshape(-1)
+        )
 
         assert market_price.shape == market_volume.shape == exec_vol.shape
 
         # Get data from the current level executor's indicator
         current_trade_account = self.executor.trade_account
-        current_df = current_trade_account.get_trade_indicator().generate_trade_indicators_dataframe()
+        current_df = (
+            current_trade_account.get_trade_indicator().generate_trade_indicators_dataframe()
+        )
         self.history_exec = dataframe_append(
             # 🧠 ML Signal: Updating position based on executed volume
             # 🧠 ML Signal: Updating current time to the next time step
@@ -229,7 +256,10 @@ class SAOEStateAdapter:
             self._collect_multi_order_metric(
                 order=self.order,
                 datetime=_get_all_timestamps(
-                    start_time, end_time, include_end=True, granularity=ONE_MIN * self.data_granularity
+                    start_time,
+                    end_time,
+                    include_end=True,
+                    granularity=ONE_MIN * self.data_granularity,
                 ),
                 # 🧠 ML Signal: Market volume is a key feature for metric calculation
                 market_vol=market_volume,
@@ -277,6 +307,7 @@ class SAOEStateAdapter:
             # ✅ Best Practice: Use of assert to ensure input arrays have the same length
             self.history_exec["deal_amount"],
         )
+
     # ⚠️ SAST Risk (Low): Potential division by zero if exec_vol is empty or sums to zero
 
     def _collect_multi_order_metric(
@@ -332,7 +363,7 @@ class SAOEStateAdapter:
         amount: float,  # intended to trade such amount
         # 🧠 ML Signal: Usage of class attributes to construct state, indicating feature selection
         exec_vol: np.ndarray,
-    # ✅ Best Practice: Class docstring provides a brief description of the class purpose.
+        # ✅ Best Practice: Class docstring provides a brief description of the class purpose.
     ) -> SAOEMetrics:
         # 🧠 ML Signal: Usage of class attributes to construct state, indicating feature selection
         assert len(market_vol) == len(market_price) == len(exec_vol)
@@ -340,7 +371,9 @@ class SAOEStateAdapter:
         if np.abs(np.sum(exec_vol)) < EPS:
             exec_avg_price = 0.0
         else:
-            exec_avg_price = cast(float, np.average(market_price, weights=exec_vol))  # could be nan
+            exec_avg_price = cast(
+                float, np.average(market_price, weights=exec_vol)
+            )  # could be nan
             # 🧠 ML Signal: Usage of class attributes to construct state, indicating feature selection
             if hasattr(exec_avg_price, "item"):  # could be numpy scalar
                 exec_avg_price = exec_avg_price.item()  # type: ignore
@@ -366,6 +399,7 @@ class SAOEStateAdapter:
             ffr=float(exec_sum / order.amount),
             pa=price_advantage(exec_avg_price, self.twap_price, order.direction),
         )
+
     # 🧠 ML Signal: Function involves creating an adapter for backtesting, indicating a pattern of preparing data for simulation or analysis.
 
     # ✅ Best Practice: Using a dedicated adapter class (SAOEStateAdapter) for backtesting promotes modularity and separation of concerns.
@@ -386,13 +420,14 @@ class SAOEStateAdapter:
             # ✅ Best Practice: Initializing adapter_dict to an empty dictionary for clarity and to avoid potential KeyErrors.
             ticks_index=self.backtest_data.ticks_index,
             ticks_for_order=self.backtest_data.ticks_for_order,
-        # ✅ Best Practice: Initializing _last_step_range to a default value for clarity and consistency.
+            # ✅ Best Practice: Initializing _last_step_range to a default value for clarity and consistency.
         )
 
 
 # ⚠️ SAST Risk (Low): Potential risk if trade_range is None, though assert mitigates this.
 class SAOEStrategy(RLStrategy):
     """RL-based strategies that use SAOEState as state."""
+
     # ⚠️ SAST Risk (Low): Using assert for runtime checks can be bypassed if Python is run with optimizations.
 
     def __init__(
@@ -452,8 +487,12 @@ class SAOEStrategy(RLStrategy):
         )
 
     # ⚠️ SAST Risk (Low): The use of NotImplementedError is generally safe, but ensure that this method is properly implemented in subclasses to avoid runtime errors.
-    def reset(self, outer_trade_decision: BaseTradeDecision | None = None, **kwargs: Any) -> None:
-        super(SAOEStrategy, self).reset(outer_trade_decision=outer_trade_decision, **kwargs)
+    def reset(
+        self, outer_trade_decision: BaseTradeDecision | None = None, **kwargs: Any
+    ) -> None:
+        super(SAOEStrategy, self).reset(
+            outer_trade_decision=outer_trade_decision, **kwargs
+        )
 
         self.adapter_dict = {}
         self._last_step_range = (0, 0)
@@ -468,16 +507,22 @@ class SAOEStrategy(RLStrategy):
             for decision in outer_trade_decision.get_decision():
                 order = cast(Order, decision)
                 # ✅ Best Practice: Use of type hints for function parameters improves code readability and maintainability.
-                self.adapter_dict[order.key_by_day] = self._create_qlib_backtest_adapter(
-                    # ✅ Best Practice: Default values for parameters allow for more flexible function calls.
-                    order, outer_trade_decision, trade_range
-                # 🧠 ML Signal: Use of generator function to yield and return values
+                self.adapter_dict[order.key_by_day] = (
+                    self._create_qlib_backtest_adapter(
+                        # ✅ Best Practice: Default values for parameters allow for more flexible function calls.
+                        order,
+                        outer_trade_decision,
+                        trade_range,
+                        # 🧠 ML Signal: Use of generator function to yield and return values
+                    )
                 )
+
     # ✅ Best Practice: Calling the superclass's __init__ method ensures proper initialization of the base class.
 
     # 🧠 ML Signal: Interaction with trade_exchange to get order helper
     def get_saoe_state_by_order(self, order: Order) -> SAOEState:
         return self.adapter_dict[order.key_by_day].saoe_state
+
     # 🧠 ML Signal: Creation of an order using order helper
 
     # ✅ Best Practice: Use of type hinting for function parameters and return type
@@ -532,6 +577,8 @@ class SAOEStrategy(RLStrategy):
         execute_result: list | None = None,
     ) -> Union[BaseTradeDecision, Generator[Any, Any, BaseTradeDecision]]:
         raise NotImplementedError
+
+
 # 🧠 ML Signal: Updating network configuration with observation space indicates dynamic model configuration.
 
 
@@ -550,11 +597,16 @@ class ProxySAOEStrategy(SAOEStrategy):
         common_infra: CommonInfrastructure | None = None,
         **kwargs: Any,
     ) -> None:
-        super().__init__(None, outer_trade_decision, level_infra, common_infra, **kwargs)
+        super().__init__(
+            None, outer_trade_decision, level_infra, common_infra, **kwargs
+        )
+
     # ✅ Best Practice: Type hinting for parameters and return value improves code readability and maintainability
     # 🧠 ML Signal: Dynamic instance creation from configuration is a common pattern in ML frameworks.
 
-    def _generate_trade_decision(self, execute_result: list | None = None) -> Generator[Any, Any, BaseTradeDecision]:
+    def _generate_trade_decision(
+        self, execute_result: list | None = None
+    ) -> Generator[Any, Any, BaseTradeDecision]:
         # ✅ Best Practice: Using super() to call the parent class method is a good practice for code maintainability
         # Once the following line is executed, this ProxySAOEStrategy (self) will be yielded to the outside
         # ⚠️ SAST Risk (Low): No validation on 'act' and 'exec_vols' input types or lengths
@@ -572,7 +624,9 @@ class ProxySAOEStrategy(SAOEStrategy):
 
         return TradeDecisionWO([order], self)
 
-    def reset(self, outer_trade_decision: BaseTradeDecision | None = None, **kwargs: Any) -> None:
+    def reset(
+        self, outer_trade_decision: BaseTradeDecision | None = None, **kwargs: Any
+    ) -> None:
         # ⚠️ SAST Risk (Low): No validation on 'o.stock_id' existence or type
         # ⚠️ SAST Risk (Low): No exception handling for 'get_step_time' method
         super().reset(outer_trade_decision=outer_trade_decision, **kwargs)
@@ -583,6 +637,8 @@ class ProxySAOEStrategy(SAOEStrategy):
             order_list = outer_trade_decision.order_list
             assert len(order_list) == 1
             self._order = order_list[0]
+
+
 # ✅ Best Practice: Check for None before assigning to avoid KeyError
 
 
@@ -651,14 +707,20 @@ class SAOEIntStrategy(SAOEStrategy):
         if self._policy is not None:
             self._policy.eval()
 
-    def reset(self, outer_trade_decision: BaseTradeDecision | None = None, **kwargs: Any) -> None:
+    def reset(
+        self, outer_trade_decision: BaseTradeDecision | None = None, **kwargs: Any
+    ) -> None:
         super().reset(outer_trade_decision=outer_trade_decision, **kwargs)
 
-    def _generate_trade_details(self, act: np.ndarray, exec_vols: List[float]) -> pd.DataFrame:
+    def _generate_trade_details(
+        self, act: np.ndarray, exec_vols: List[float]
+    ) -> pd.DataFrame:
         assert hasattr(self.outer_trade_decision, "order_list")
 
         trade_details = []
-        for a, v, o in zip(act, exec_vols, getattr(self.outer_trade_decision, "order_list")):
+        for a, v, o in zip(
+            act, exec_vols, getattr(self.outer_trade_decision, "order_list")
+        ):
             trade_details.append(
                 {
                     "instrument": o.stock_id,
@@ -671,7 +733,9 @@ class SAOEIntStrategy(SAOEStrategy):
                 trade_details[-1]["rl_action"] = a
         return pd.DataFrame.from_records(trade_details)
 
-    def _generate_trade_decision(self, execute_result: list | None = None) -> BaseTradeDecision:
+    def _generate_trade_decision(
+        self, execute_result: list | None = None
+    ) -> BaseTradeDecision:
         states = []
         obs_batch = []
         for decision in self.outer_trade_decision.get_decision():
@@ -683,12 +747,20 @@ class SAOEIntStrategy(SAOEStrategy):
 
         with torch.no_grad():
             policy_out = self._policy(Batch(obs_batch))
-        act = policy_out.act.numpy() if torch.is_tensor(policy_out.act) else policy_out.act
-        exec_vols = [self._action_interpreter.interpret(s, a) for s, a in zip(states, act)]
+        act = (
+            policy_out.act.numpy()
+            if torch.is_tensor(policy_out.act)
+            else policy_out.act
+        )
+        exec_vols = [
+            self._action_interpreter.interpret(s, a) for s, a in zip(states, act)
+        ]
 
         oh = self.trade_exchange.get_order_helper()
         order_list = []
-        for decision, exec_vol in zip(self.outer_trade_decision.get_decision(), exec_vols):
+        for decision, exec_vol in zip(
+            self.outer_trade_decision.get_decision(), exec_vols
+        ):
             if exec_vol != 0:
                 order = cast(Order, decision)
                 order_list.append(oh.create(order.stock_id, exec_vol, order.direction))

@@ -5,13 +5,16 @@ import pandas as pd
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.contract import IntervalLevel
 from zvt.contract.api import df_to_db
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.domain import Country
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 # ✅ Best Practice: Class definition should be followed by a docstring explaining its purpose and usage
 from zvt.domain.macro.monetary import TreasuryYield
 from zvt.recorders.em import em_api
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 # ✅ Best Practice: Class attributes should be documented to explain their purpose
 
@@ -68,6 +71,7 @@ class EMTreasuryYieldRecorder(FixedCycleDataRecorder):
             one_day_trading_minutes,
             return_unfinished,
         )
+
     # 🧠 ML Signal: Use of default parameters indicates common usage patterns
 
     # ⚠️ SAST Risk (Low): Fetching all data could lead to performance issues

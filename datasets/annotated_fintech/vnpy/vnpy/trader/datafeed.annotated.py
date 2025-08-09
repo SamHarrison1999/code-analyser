@@ -1,14 +1,17 @@
 # ✅ Best Practice: Grouping imports by standard, third-party, and local modules improves readability
 from types import ModuleType
 from collections.abc import Callable
+
 # ✅ Best Practice: Grouping imports by standard, third-party, and local modules improves readability
 from importlib import import_module
 
 # ✅ Best Practice: Grouping imports by standard, third-party, and local modules improves readability
 from .object import HistoryRequest, TickData, BarData
 from .setting import SETTINGS
+
 # ✅ Best Practice: Grouping imports by standard, third-party, and local modules improves readability
 from .locale import _
+
 # ✅ Best Practice: Grouping imports by standard, third-party, and local modules improves readability
 
 
@@ -24,15 +27,20 @@ class BaseDatafeed:
         return False
 
     # ⚠️ SAST Risk (Low): Using 'print' as a default for 'output' could lead to information disclosure in production environments.
-    def query_bar_history(self, req: HistoryRequest, output: Callable = print) -> list[BarData]:
+    def query_bar_history(
+        self, req: HistoryRequest, output: Callable = print
+    ) -> list[BarData]:
         """
         Query history bar data.
         """
         output(_("查询K线数据失败：没有正确配置数据服务"))
         return []
+
     # 🧠 ML Signal: Usage of a callable parameter with a default function (print) indicates flexibility in output handling.
 
-    def query_tick_history(self, req: HistoryRequest, output: Callable = print) -> list[TickData]:
+    def query_tick_history(
+        self, req: HistoryRequest, output: Callable = print
+    ) -> list[TickData]:
         """
         Query history tick data.
         # ✅ Best Practice: Type hinting for the variable 'datafeed' improves code readability and maintainability.
@@ -77,6 +85,10 @@ def get_datafeed() -> BaseDatafeed:
         except ModuleNotFoundError:
             datafeed = BaseDatafeed()
 
-            print(_("无法加载数据服务模块，请运行 pip install {} 尝试安装").format(module_name))
+            print(
+                _("无法加载数据服务模块，请运行 pip install {} 尝试安装").format(
+                    module_name
+                )
+            )
 
     return datafeed

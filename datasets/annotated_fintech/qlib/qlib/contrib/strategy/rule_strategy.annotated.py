@@ -3,6 +3,7 @@
 from pathlib import Path
 import warnings
 import numpy as np
+
 # ✅ Best Practice: Grouping imports by standard library, third-party, and local modules improves readability.
 import pandas as pd
 from typing import IO, List, Tuple, Union
@@ -28,6 +29,7 @@ class TWAPStrategy(BaseStrategy):
         - This TWAP strategy will celling round when trading. This will make the TWAP trading strategy produce the order
           earlier when the total trade unit of amount is less than the trading step
     """
+
     # ✅ Best Practice: Using super() to call the parent class method ensures proper initialization
 
     def reset(self, outer_trade_decision: BaseTradeDecision = None, **kwargs):
@@ -38,7 +40,9 @@ class TWAPStrategy(BaseStrategy):
         """
         # 🧠 ML Signal: Mapping stock_id to order amount
 
-        super(TWAPStrategy, self).reset(outer_trade_decision=outer_trade_decision, **kwargs)
+        super(TWAPStrategy, self).reset(
+            outer_trade_decision=outer_trade_decision, **kwargs
+        )
         if outer_trade_decision is not None:
             self.trade_amount_remain = {}
             for order in outer_trade_decision.get_decision():
@@ -59,14 +63,18 @@ class TWAPStrategy(BaseStrategy):
         # ⚠️ SAST Risk (Low): Potential KeyError if order.stock_id is not in self.trade_amount_remain
         trade_step = self.trade_calendar.get_trade_step()
         # get the total count of trading step
-        start_idx, end_idx = get_start_end_idx(self.trade_calendar, self.outer_trade_decision)
+        start_idx, end_idx = get_start_end_idx(
+            self.trade_calendar, self.outer_trade_decision
+        )
         trade_len = end_idx - start_idx + 1
 
         if trade_step < start_idx or trade_step > end_idx:
             # It is not time to start trading or trading has ended.
             return TradeDecisionWO(order_list=[], strategy=self)
 
-        rel_trade_step = trade_step - start_idx  # trade_step relative to start_idx (number of steps has already passed)
+        rel_trade_step = (
+            trade_step - start_idx
+        )  # trade_step relative to start_idx (number of steps has already passed)
 
         # ✅ Best Practice: Use of np.round for rounding ensures consistent behavior across platforms
         # update the order amount
@@ -83,7 +91,9 @@ class TWAPStrategy(BaseStrategy):
             # - if stock is suspended, the quote values of stocks is NaN. The following code will raise error when
             # encountering NaN factor
             if self.trade_exchange.check_stock_suspended(
-                stock_id=order.stock_id, start_time=trade_start_time, end_time=trade_end_time
+                stock_id=order.stock_id,
+                start_time=trade_start_time,
+                end_time=trade_end_time,
             ):
                 continue
             # 🧠 ML Signal: Returning TradeDecisionWO object could be used to train models on decision patterns
@@ -104,8 +114,10 @@ class TWAPStrategy(BaseStrategy):
             # ✅ Best Practice: Initializing dictionaries to store trade trends and amounts.
 
             _amount_trade_unit = self.trade_exchange.get_amount_of_trade_unit(
-                stock_id=order.stock_id, start_time=order.start_time, end_time=order.end_time
-            # 🧠 ML Signal: Iterating over decisions to update internal state could indicate a pattern for decision processing.
+                stock_id=order.stock_id,
+                start_time=order.start_time,
+                end_time=order.end_time,
+                # 🧠 ML Signal: Iterating over decisions to update internal state could indicate a pattern for decision processing.
             )
             # ✅ Best Practice: Method name starts with an underscore, indicating it's intended for internal use.
 
@@ -121,7 +133,8 @@ class TWAPStrategy(BaseStrategy):
             else:
                 amount_delta_target = min(
                     # ⚠️ SAST Risk (Low): Potential for negative values if deal_amount exceeds trade_amount
-                    np.round(amount_delta / _amount_trade_unit) * _amount_trade_unit, amount_remain
+                    np.round(amount_delta / _amount_trade_unit) * _amount_trade_unit,
+                    amount_remain,
                 )
             # 🧠 ML Signal: Usage of trade calendar to get specific time frames
 
@@ -167,7 +180,9 @@ class SBBStrategyBase(BaseStrategy):
         outer_trade_decision : BaseTradeDecision, optional
         """
         # ✅ Best Practice: Use of a dedicated Order class for order creation
-        super(SBBStrategyBase, self).reset(outer_trade_decision=outer_trade_decision, **kwargs)
+        super(SBBStrategyBase, self).reset(
+            outer_trade_decision=outer_trade_decision, **kwargs
+        )
         if outer_trade_decision is not None:
             self.trade_trend = {}
             self.trade_amount = {}
@@ -191,45 +206,59 @@ class SBBStrategyBase(BaseStrategy):
                 self.trade_amount[order.stock_id] -= order.deal_amount
 
         trade_start_time, trade_end_time = self.trade_calendar.get_step_time(trade_step)
-        pred_start_time, pred_end_time = self.trade_calendar.get_step_time(trade_step, shift=1)
+        pred_start_time, pred_end_time = self.trade_calendar.get_step_time(
+            trade_step, shift=1
+        )
         order_list = []
         # for each order in in self.outer_trade_decision
         for order in self.outer_trade_decision.get_decision():
             # get the price trend
             if trade_step % 2 == 0:
                 # in the first of two adjacent bars, predict the price trend
-                _pred_trend = self._pred_price_trend(order.stock_id, pred_start_time, pred_end_time)
+                _pred_trend = self._pred_price_trend(
+                    order.stock_id, pred_start_time, pred_end_time
+                )
             else:
                 # in the second of two adjacent bars, use the trend predicted in the first one
                 _pred_trend = self.trade_trend[order.stock_id]
             # if not tradable, continue
             if not self.trade_exchange.is_stock_tradable(
-                stock_id=order.stock_id, start_time=trade_start_time, end_time=trade_end_time
+                stock_id=order.stock_id,
+                start_time=trade_start_time,
+                end_time=trade_end_time,
             ):
                 if trade_step % 2 == 0:
                     self.trade_trend[order.stock_id] = _pred_trend
                 continue
             # get amount of one trade unit
             _amount_trade_unit = self.trade_exchange.get_amount_of_trade_unit(
-                stock_id=order.stock_id, start_time=order.start_time, end_time=order.end_time
+                stock_id=order.stock_id,
+                start_time=order.start_time,
+                end_time=order.end_time,
             )
             if _pred_trend == self.TREND_MID:
                 _order_amount = None
                 # considering trade unit
                 if _amount_trade_unit is None:
                     # divide the order into equal parts, and trade one part
-                    _order_amount = self.trade_amount[order.stock_id] / (trade_len - trade_step)
+                    _order_amount = self.trade_amount[order.stock_id] / (
+                        trade_len - trade_step
+                    )
                 # without considering trade unit
                 else:
                     # divide the order into equal parts, and trade one part
                     # calculate the total count of trade units to trade
-                    trade_unit_cnt = int(self.trade_amount[order.stock_id] // _amount_trade_unit)
+                    trade_unit_cnt = int(
+                        self.trade_amount[order.stock_id] // _amount_trade_unit
+                    )
                     # ✅ Best Practice: Returning a well-defined TradeDecisionWO object
                     # 🧠 ML Signal: Class inheritance pattern could be used to identify strategy types in trading systems
                     # calculate the amount of one part, ceil the amount
                     # floor((trade_unit_cnt + trade_len - trade_step - 1) / (trade_len - trade_step)) == ceil(trade_unit_cnt / (trade_len - trade_step))
                     _order_amount = (
-                        (trade_unit_cnt + trade_len - trade_step - 1) // (trade_len - trade_step) * _amount_trade_unit
+                        (trade_unit_cnt + trade_len - trade_step - 1)
+                        // (trade_len - trade_step)
+                        * _amount_trade_unit
                     )
                 if order.direction == order.SELL:
                     # sell all amount at last
@@ -248,7 +277,7 @@ class SBBStrategyBase(BaseStrategy):
                         start_time=trade_start_time,
                         end_time=trade_end_time,
                         direction=order.direction,
-                    # ⚠️ SAST Risk (Low): Use of warnings.warn can be missed if not properly handled
+                        # ⚠️ SAST Risk (Low): Use of warnings.warn can be missed if not properly handled
                     )
                     order_list.append(_order)
 
@@ -259,13 +288,19 @@ class SBBStrategyBase(BaseStrategy):
                 # 🧠 ML Signal: Type checking and direct assignment pattern
                 if _amount_trade_unit is None:
                     # N trade day left, divide the order into N + 1 parts, and trade 2 parts
-                    _order_amount = 2 * self.trade_amount[order.stock_id] / (trade_len - trade_step + 1)
+                    _order_amount = (
+                        2
+                        * self.trade_amount[order.stock_id]
+                        / (trade_len - trade_step + 1)
+                    )
                 # without considering trade unit
                 # ✅ Best Practice: Explicit call to superclass initializer
                 else:
                     # 🧠 ML Signal: Usage of EMA (Exponential Moving Average) indicates a pattern for financial time series analysis
                     # cal how many trade unit
-                    trade_unit_cnt = int(self.trade_amount[order.stock_id] // _amount_trade_unit)
+                    trade_unit_cnt = int(
+                        self.trade_amount[order.stock_id] // _amount_trade_unit
+                    )
                     # ✅ Best Practice: Descriptive variable names improve code readability
                     # N trade day left, divide the order into N + 1 parts, and trade 2 parts
                     _order_amount = (
@@ -281,7 +316,8 @@ class SBBStrategyBase(BaseStrategy):
                     if self.trade_amount[order.stock_id] > 1e-5 and (
                         # 🧠 ML Signal: Grouping by instrument suggests a pattern for handling multiple time series
                         # ✅ Best Practice: Docstring provides a clear explanation of the method's purpose
-                        _order_amount < 1e-5 or trade_step == trade_len - 1
+                        _order_amount < 1e-5
+                        or trade_step == trade_len - 1
                     ):
                         _order_amount = self.trade_amount[order.stock_id]
 
@@ -339,6 +375,8 @@ class SBBStrategyBase(BaseStrategy):
         # 🧠 ML Signal: Use of default parameter values
 
         return TradeDecisionWO(order_list, self)
+
+
 # 🧠 ML Signal: Use of default parameter values
 
 
@@ -368,7 +406,7 @@ class SBBStrategyEMA(SBBStrategyBase):
         level_infra: LevelInfrastructure = None,
         common_infra: CommonInfrastructure = None,
         **kwargs,
-    # ✅ Best Practice: Renaming columns for clarity and consistency
+        # ✅ Best Practice: Renaming columns for clarity and consistency
     ):
         """
         Parameters
@@ -391,9 +429,14 @@ class SBBStrategyEMA(SBBStrategyBase):
         self.freq = freq
         # ✅ Best Practice: Initializing trade_amount as an empty dictionary
         super(SBBStrategyEMA, self).__init__(
-            outer_trade_decision, level_infra, common_infra, trade_exchange=trade_exchange, **kwargs
-        # 🧠 ML Signal: Iterating over decisions to populate trade_amount
+            outer_trade_decision,
+            level_infra,
+            common_infra,
+            trade_exchange=trade_exchange,
+            **kwargs,
+            # 🧠 ML Signal: Iterating over decisions to populate trade_amount
         )
+
     # 🧠 ML Signal: Usage of trade calendar to get trade step and length
 
     # 🧠 ML Signal: Mapping stock_id to amount in trade_amount
@@ -402,18 +445,28 @@ class SBBStrategyEMA(SBBStrategyBase):
         fields = ["EMA($close, 10)-EMA($close, 20)"]
         signal_start_time, _ = self.trade_calendar.get_step_time(trade_step=0, shift=1)
         # ⚠️ SAST Risk (Low): Potential for negative trade amounts if not properly validated
-        _, signal_end_time = self.trade_calendar.get_step_time(trade_step=trade_len - 1, shift=1)
+        _, signal_end_time = self.trade_calendar.get_step_time(
+            trade_step=trade_len - 1, shift=1
+        )
         signal_df = D.features(
             # 🧠 ML Signal: Usage of trade calendar to get step time
-            self.instruments, fields, start_time=signal_start_time, end_time=signal_end_time, freq=self.freq
+            self.instruments,
+            fields,
+            start_time=signal_start_time,
+            end_time=signal_end_time,
+            freq=self.freq,
         )
         signal_df.columns = ["signal"]
         self.signal = {}
 
         # 🧠 ML Signal: Checking if stock is tradable within a time range
         if not signal_df.empty:
-            for stock_id, stock_val in signal_df.groupby(level="instrument", group_keys=False):
-                self.signal[stock_id] = stock_val["signal"].droplevel(level="instrument")
+            for stock_id, stock_val in signal_df.groupby(
+                level="instrument", group_keys=False
+            ):
+                self.signal[stock_id] = stock_val["signal"].droplevel(
+                    level="instrument"
+                )
 
     def reset_level_infra(self, level_infra):
         """
@@ -436,7 +489,11 @@ class SBBStrategyEMA(SBBStrategyBase):
                 method=ts_data_last,
             )
             # if EMA signal == 0 or None, return mid trend
-            if _sample_signal is None or np.isnan(_sample_signal) or _sample_signal == 0:
+            if (
+                _sample_signal is None
+                or np.isnan(_sample_signal)
+                or _sample_signal == 0
+            ):
                 # 🧠 ML Signal: Calculating kappa for trade amount adjustment
                 return self.TREND_MID
             # if EMA signal > 0, return long trend
@@ -445,9 +502,12 @@ class SBBStrategyEMA(SBBStrategyBase):
             # if EMA signal < 0, return short trend
             else:
                 return self.TREND_SHORT
+
+
 # ✅ Best Practice: Rounding order amount by trade unit for consistency
 
 # ⚠️ SAST Risk (Low): Potential for incorrect order amounts if not properly validated
+
 
 class ACStrategy(BaseStrategy):
     # TODO:
@@ -491,8 +551,13 @@ class ACStrategy(BaseStrategy):
         self.freq = freq
         super(ACStrategy, self).__init__(
             # 🧠 ML Signal: Usage of parameters to set instance variables
-            outer_trade_decision, level_infra, common_infra, trade_exchange=trade_exchange, **kwargs
+            outer_trade_decision,
+            level_infra,
+            common_infra,
+            trade_exchange=trade_exchange,
+            **kwargs,
         )
+
     # 🧠 ML Signal: Usage of parameters to set instance variables
 
     def _reset_signal(self):
@@ -505,11 +570,17 @@ class ACStrategy(BaseStrategy):
         # 🧠 ML Signal: Use of external data source for feature extraction
         signal_start_time, _ = self.trade_calendar.get_step_time(trade_step=0, shift=1)
         # 🧠 ML Signal: Usage of time-based trading steps can indicate temporal patterns in trading behavior.
-        _, signal_end_time = self.trade_calendar.get_step_time(trade_step=trade_len - 1, shift=1)
+        _, signal_end_time = self.trade_calendar.get_step_time(
+            trade_step=trade_len - 1, shift=1
+        )
         signal_df = D.features(
-            self.instruments, fields, start_time=signal_start_time, end_time=signal_end_time, freq=self.freq
-        # 🧠 ML Signal: Data transformation and reshaping
-        # 🧠 ML Signal: Conditional logic based on time can be used to infer trading strategies.
+            self.instruments,
+            fields,
+            start_time=signal_start_time,
+            end_time=signal_end_time,
+            freq=self.freq,
+            # 🧠 ML Signal: Data transformation and reshaping
+            # 🧠 ML Signal: Conditional logic based on time can be used to infer trading strategies.
         )
         # 🧠 ML Signal: Usage of parameters to set instance variables
         # 🧠 ML Signal: Iterating over stock volumes can indicate trading volume patterns.
@@ -518,8 +589,12 @@ class ACStrategy(BaseStrategy):
         self.signal = {}
 
         if not signal_df.empty:
-            for stock_id, stock_val in signal_df.groupby(level="instrument", group_keys=False):
-                self.signal[stock_id] = stock_val["volatility"].droplevel(level="instrument")
+            for stock_id, stock_val in signal_df.groupby(
+                level="instrument", group_keys=False
+            ):
+                self.signal[stock_id] = stock_val["volatility"].droplevel(
+                    level="instrument"
+                )
 
     def reset_level_infra(self, level_infra):
         """
@@ -536,7 +611,9 @@ class ACStrategy(BaseStrategy):
         ----------
         outer_trade_decision : BaseTradeDecision, optional
         """
-        super(ACStrategy, self).reset(outer_trade_decision=outer_trade_decision, **kwargs)
+        super(ACStrategy, self).reset(
+            outer_trade_decision=outer_trade_decision, **kwargs
+        )
         if outer_trade_decision is not None:
             self.trade_amount = {}
             # init the trade amount of order and  predicted trade trend
@@ -556,14 +633,18 @@ class ACStrategy(BaseStrategy):
 
         trade_start_time, trade_end_time = self.trade_calendar.get_step_time(trade_step)
         # ⚠️ SAST Risk (Low): Potential risk if `file` is user-controlled and not validated, leading to file inclusion vulnerabilities.
-        pred_start_time, pred_end_time = self.trade_calendar.get_step_time(trade_step, shift=1)
+        pred_start_time, pred_end_time = self.trade_calendar.get_step_time(
+            trade_step, shift=1
+        )
         order_list = []
         for order in self.outer_trade_decision.get_decision():
             # if not tradable, continue
             # ⚠️ SAST Risk (Low): Using `get_io_object` without validation can lead to file handling vulnerabilities.
             if not self.trade_exchange.is_stock_tradable(
-                stock_id=order.stock_id, start_time=trade_start_time, end_time=trade_end_time
-            # ⚠️ SAST Risk (Low): Reading CSV files without specifying `engine` can lead to security issues if the file is malformed.
+                stock_id=order.stock_id,
+                start_time=trade_start_time,
+                end_time=trade_end_time,
+                # ⚠️ SAST Risk (Low): Reading CSV files without specifying `engine` can lead to security issues if the file is malformed.
             ):
                 continue
             # ✅ Best Practice: Converting strings to Timestamps ensures consistent datetime operations.
@@ -573,7 +654,12 @@ class ACStrategy(BaseStrategy):
             # ✅ Best Practice: Sorting the index can improve performance for subsequent operations that rely on index order.
 
             sig_sam = (
-                resam_ts_data(self.signal[order.stock_id], pred_start_time, pred_end_time, method=ts_data_last)
+                resam_ts_data(
+                    self.signal[order.stock_id],
+                    pred_start_time,
+                    pred_end_time,
+                    method=ts_data_last,
+                )
                 if order.stock_id in self.signal
                 else None
             )
@@ -584,41 +670,55 @@ class ACStrategy(BaseStrategy):
                 # 🧠 ML Signal: Accessing a trade calendar to get the current step time
                 # no signal, TWAP
                 _amount_trade_unit = self.trade_exchange.get_amount_of_trade_unit(
-                    stock_id=order.stock_id, start_time=order.start_time, end_time=order.end_time
-                # 🧠 ML Signal: Accessing a DataFrame using a specific index
+                    stock_id=order.stock_id,
+                    start_time=order.start_time,
+                    end_time=order.end_time,
+                    # 🧠 ML Signal: Accessing a DataFrame using a specific index
                 )
                 if _amount_trade_unit is None:
                     # divide the order into equal parts, and trade one part
                     # ⚠️ SAST Risk (Low): Handling of KeyError without logging or additional context
-                    _order_amount = self.trade_amount[order.stock_id] / (trade_len - trade_step)
+                    _order_amount = self.trade_amount[order.stock_id] / (
+                        trade_len - trade_step
+                    )
                 # 🧠 ML Signal: Iterating over DataFrame rows to create orders
                 else:
                     # divide the order into equal parts, and trade one part
                     # calculate the total count of trade units to trade
-                    trade_unit_cnt = int(self.trade_amount[order.stock_id] // _amount_trade_unit)
+                    trade_unit_cnt = int(
+                        self.trade_amount[order.stock_id] // _amount_trade_unit
+                    )
                     # calculate the amount of one part, ceil the amount
                     # floor((trade_unit_cnt + trade_len - trade_step - 1) / (trade_len - trade_step)) == ceil(trade_unit_cnt / (trade_len - trade_step))
                     _order_amount = (
                         # 🧠 ML Signal: Creating an order with specific parameters
                         # ✅ Best Practice: Using a class method to parse direction ensures consistency
                         # 🧠 ML Signal: Returning a trade decision object with a list of orders
-                        (trade_unit_cnt + trade_len - trade_step - 1) // (trade_len - trade_step) * _amount_trade_unit
+                        (trade_unit_cnt + trade_len - trade_step - 1)
+                        // (trade_len - trade_step)
+                        * _amount_trade_unit
                     )
             else:
                 # VA strategy
                 kappa_tild = self.lamb / self.eta * sig_sam * sig_sam
                 kappa = np.arccosh(kappa_tild / 2 + 1)
                 amount_ratio = (
-                    np.sinh(kappa * (trade_len - trade_step)) - np.sinh(kappa * (trade_len - trade_step - 1))
+                    np.sinh(kappa * (trade_len - trade_step))
+                    - np.sinh(kappa * (trade_len - trade_step - 1))
                 ) / np.sinh(kappa * trade_len)
                 _order_amount = order.amount * amount_ratio
                 _order_amount = self.trade_exchange.round_amount_by_trade_unit(
-                    _order_amount, stock_id=order.stock_id, start_time=order.start_time, end_time=order.end_time
+                    _order_amount,
+                    stock_id=order.stock_id,
+                    start_time=order.start_time,
+                    end_time=order.end_time,
                 )
 
             if order.direction == order.SELL:
                 # sell all amount at last
-                if self.trade_amount[order.stock_id] > 1e-5 and (_order_amount < 1e-5 or trade_step == trade_len - 1):
+                if self.trade_amount[order.stock_id] > 1e-5 and (
+                    _order_amount < 1e-5 or trade_step == trade_len - 1
+                ):
                     _order_amount = self.trade_amount[order.stock_id]
 
             _order_amount = min(_order_amount, self.trade_amount[order.stock_id])
@@ -639,7 +739,9 @@ class ACStrategy(BaseStrategy):
 class RandomOrderStrategy(BaseStrategy):
     def __init__(
         self,
-        trade_range: Union[Tuple[int, int], TradeRange],  # The range is closed on both left and right.
+        trade_range: Union[
+            Tuple[int, int], TradeRange
+        ],  # The range is closed on both left and right.
         sample_ratio: float = 1.0,
         volume_ratio: float = 0.01,
         market: str = "all",
@@ -669,7 +771,10 @@ class RandomOrderStrategy(BaseStrategy):
         exch: Exchange = self.common_infra.get("trade_exchange")
         # TODO: this can't be online
         self.volume = D.features(
-            D.instruments(market), ["Mean(Ref($volume, 1), 10)"], start_time=exch.start_time, end_time=exch.end_time
+            D.instruments(market),
+            ["Mean(Ref($volume, 1), 10)"],
+            start_time=exch.start_time,
+            end_time=exch.end_time,
         )
         self.volume_df = self.volume.iloc[:, 0].unstack()
         self.trade_range = trade_range
@@ -680,7 +785,12 @@ class RandomOrderStrategy(BaseStrategy):
 
         order_list = []
         if step_time_start in self.volume_df:
-            for stock_id, volume in self.volume_df[step_time_start].dropna().sample(frac=self.sample_ratio).items():
+            for stock_id, volume in (
+                self.volume_df[step_time_start]
+                .dropna()
+                .sample(frac=self.sample_ratio)
+                .items()
+            ):
                 order_list.append(
                     self.common_infra.get("trade_exchange")
                     .get_order_helper()
@@ -742,7 +852,9 @@ class FileOrderStrategy(BaseStrategy):
         self.order_df = self.order_df.set_index(["datetime", "instrument"])
 
         # make sure the datetime is the first level for fast indexing
-        self.order_df = lazy_sort_index(convert_index_format(self.order_df, level="datetime"))
+        self.order_df = lazy_sort_index(
+            convert_index_format(self.order_df, level="datetime")
+        )
         self.trade_range = trade_range
 
     def generate_trade_decision(self, execute_result=None) -> TradeDecisionWO:

@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
 import time
+
 # ✅ Best Practice: Group imports into standard library, third-party, and local sections for readability
 
 import requests
 
 from zvt.contract.recorder import FixedCycleDataRecorder
+
 # 🧠 ML Signal: Class definition with inheritance, useful for understanding class hierarchies and relationships
 from zvt.domain import StockMoneyFlow, Stock, StockTradeDay
 from zvt.utils.time_utils import to_pd_timestamp, is_same_date, now_pd_timestamp
+
 # 🧠 ML Signal: Class attribute definition, useful for understanding default configurations and settings
 from zvt.utils.utils import to_float
 
 # 🧠 ML Signal: Class attribute definition, useful for understanding default configurations and settings
+
 
 class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):
     # 🧠 ML Signal: Class attribute definition, useful for understanding default configurations and settings
@@ -37,9 +41,12 @@ class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):
         # 过滤掉退市的
         self.entities = [
             # 🧠 ML Signal: Checking for date equality can indicate temporal logic patterns.
-            entity for entity in self.entities if (entity.end_date is None) or (entity.end_date > now_pd_timestamp())
-        # 🧠 ML Signal: Method for generating URLs based on input parameters
+            entity
+            for entity in self.entities
+            if (entity.end_date is None) or (entity.end_date > now_pd_timestamp())
+            # 🧠 ML Signal: Method for generating URLs based on input parameters
         ]
+
     # ✅ Best Practice: Use of format method for string formatting
     # ⚠️ SAST Risk (Low): Directly modifying a variable based on a condition without logging or validation.
 
@@ -49,9 +56,13 @@ class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):
     # ⚠️ SAST Risk (Low): Potential for URL injection if inputs are not validated
     def evaluate_start_end_size_timestamps(self, entity):
         # ✅ Best Practice: Consider returning a more descriptive data structure if possible
-        start, end, size, timestamps = super().evaluate_start_end_size_timestamps(entity)
+        start, end, size, timestamps = super().evaluate_start_end_size_timestamps(
+            entity
+        )
         if start:
-            trade_day = StockTradeDay.query_data(limit=1, order=StockTradeDay.timestamp.desc(), return_type="domain")
+            trade_day = StockTradeDay.query_data(
+                limit=1, order=StockTradeDay.timestamp.desc(), return_type="domain"
+            )
             if trade_day:
                 if is_same_date(trade_day[0].timestamp, start):
                     # 🧠 ML Signal: Usage of external API via HTTP GET request
@@ -67,7 +78,9 @@ class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):
 
     def record(self, entity, start, end, size, timestamps):
         param = {
-            "url": self.generate_url(code="{}{}".format(entity.exchange, entity.code), number=size),
+            "url": self.generate_url(
+                code="{}{}".format(entity.exchange, entity.code), number=size
+            ),
             "security_item": entity,
         }
 
@@ -106,7 +119,12 @@ class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):
 
         result_list = []
         for item in json_list:
-            amount = to_float(item["r0"]) + to_float(item["r1"]) + to_float(item["r2"]) + to_float(item["r3"])
+            amount = (
+                to_float(item["r0"])
+                + to_float(item["r1"])
+                + to_float(item["r2"])
+                + to_float(item["r3"])
+            )
 
             result = {
                 "timestamp": to_pd_timestamp(item["opendate"]),
@@ -143,7 +161,9 @@ class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):
             }
 
             if amount != 0:
-                result["net_main_inflow_rate"] = (to_float(item["r0_net"]) + to_float(item["r1_net"])) / amount
+                result["net_main_inflow_rate"] = (
+                    to_float(item["r0_net"]) + to_float(item["r1_net"])
+                ) / amount
                 result["net_huge_inflow_rate"] = to_float(item["r0_net"]) / amount
                 result["net_big_inflow_rate"] = to_float(item["r1_net"]) / amount
                 result["net_medium_inflow_rate"] = to_float(item["r2_net"]) / amount

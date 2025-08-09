@@ -16,6 +16,7 @@ class MetaModel(metaclass=abc.ABCMeta):
     - The definition of learning tasks:  Please refer to docs of `MetaTaskModel`
     - Controlling the learning process of models: Please refer to the docs of `MetaGuideModel`
     """
+
     # ✅ Best Practice: Use of abstractmethod enforces implementation in subclasses, ensuring consistent interface
     # 🧠 ML Signal: Use of *args and **kwargs indicates flexibility in input parameters
 
@@ -36,10 +37,13 @@ class MetaModel(metaclass=abc.ABCMeta):
         object:
             Some information to guide the model learning
         """
+
+
 # ✅ Best Practice: Use docstrings to describe the purpose and behavior of methods
 
 # ⚠️ SAST Risk (Low): Using NotImplementedError without implementation can lead to runtime errors if not handled
 # ✅ Best Practice: Docstring provides a clear explanation of the method's purpose and return type.
+
 
 class MetaTaskModel(MetaModel):
     """
@@ -52,7 +56,7 @@ class MetaTaskModel(MetaModel):
         And then it will learn knowledge from the meta tasks
         # ⚠️ SAST Risk (Low): Method is not implemented, which could lead to runtime errors if called.
         """
-        raise NotImplementedError(f"Please implement the `fit` method")
+        raise NotImplementedError("Please implement the `fit` method")
 
     def inference(self, meta_dataset: MetaTaskDataset) -> List[dict]:
         """
@@ -66,7 +70,7 @@ class MetaTaskModel(MetaModel):
             A list of modified task definitions.
 
         """
-        raise NotImplementedError(f"Please implement the `inference` method")
+        raise NotImplementedError("Please implement the `inference` method")
 
 
 class MetaGuideModel(MetaModel):

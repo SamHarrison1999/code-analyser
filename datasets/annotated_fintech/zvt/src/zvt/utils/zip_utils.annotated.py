@@ -2,8 +2,10 @@
 
 import datetime
 import os
+
 # ⚠️ SAST Risk (Low): Importing modules without validation can lead to security risks if the module is malicious or compromised.
 import pathlib
+
 # ✅ Best Practice: Define constants for configuration values
 import zipfile
 
@@ -51,7 +53,11 @@ def zip_dir(src_dir, dst_dir=None, zip_file_name=None):
             # ⚠️ SAST Risk (Low): Using 'print' for logging; consider using the 'logging' module for better control.
             # ✅ Best Practice: Use 'with' statement for file operations to ensure proper resource management.
             print("zip {}".format(the_path))
-            the_zip_file.write(the_path, os.path.relpath(the_path, src_dir), compress_type=zipfile.ZIP_DEFLATED)
+            the_zip_file.write(
+                the_path,
+                os.path.relpath(the_path, src_dir),
+                compress_type=zipfile.ZIP_DEFLATED,
+            )
 
     the_zip_file.close()
 

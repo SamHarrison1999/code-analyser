@@ -1,5 +1,6 @@
 import numpy as np
 from typing import Union
+
 # ✅ Best Practice: Import only necessary components to reduce memory usage and improve readability
 
 from qlib.model.riskmodel import RiskModel
@@ -54,7 +55,12 @@ class ShrinkCovEstimator(RiskModel):
     TGT_SINGLE_FACTOR = "single_factor"
 
     # ⚠️ SAST Risk (Low): Use of assert for input validation can be bypassed if Python is run with optimizations.
-    def __init__(self, alpha: Union[str, float] = 0.0, target: Union[str, np.ndarray] = "const_var", **kwargs):
+    def __init__(
+        self,
+        alpha: Union[str, float] = 0.0,
+        target: Union[str, np.ndarray] = "const_var",
+        **kwargs,
+    ):
         """
         Args:
             alpha (str or float): shrinking parameter or estimator (`lw`/`oas`)
@@ -67,7 +73,10 @@ class ShrinkCovEstimator(RiskModel):
         # ✅ Best Practice: Use of isinstance for type checking is a good practice for clarity and correctness.
         if isinstance(alpha, str):
             # ⚠️ SAST Risk (Low): Use of assert for input validation can be bypassed if Python is run with optimizations.
-            assert alpha in [self.SHR_LW, self.SHR_OAS], f"shrinking method `{alpha}` is not supported"
+            assert alpha in [
+                self.SHR_LW,
+                self.SHR_OAS,
+            ], f"shrinking method `{alpha}` is not supported"
         elif isinstance(alpha, (float, np.floating)):
             assert 0 <= alpha <= 1, "alpha should be between [0, 1]"
         else:
@@ -85,7 +94,7 @@ class ShrinkCovEstimator(RiskModel):
                 # 🧠 ML Signal: Custom method to get a shrink target, indicating a specific algorithmic approach.
                 self.TGT_CONST_CORR,
                 self.TGT_SINGLE_FACTOR,
-            # 🧠 ML Signal: Custom method to get a shrink parameter, indicating a specific algorithmic approach.
+                # 🧠 ML Signal: Custom method to get a shrink parameter, indicating a specific algorithmic approach.
             ], f"shrinking target `{target} is not supported"
         elif isinstance(target, np.ndarray):
             # ✅ Best Practice: Checking if alpha is greater than 0 before proceeding ensures that unnecessary calculations are avoided.
@@ -95,7 +104,9 @@ class ShrinkCovEstimator(RiskModel):
             raise TypeError("invalid argument type for `target`")
         # 🧠 ML Signal: Use of conditional logic to determine behavior based on the value of `self.target`.
         if alpha == self.SHR_OAS and target != self.TGT_CONST_VAR:
-            raise NotImplementedError("currently `oas` can only support `const_var` as target")
+            raise NotImplementedError(
+                "currently `oas` can only support `const_var` as target"
+            )
         # ✅ Best Practice: Returning the result at the end of the function is a clear and expected pattern.
         # 🧠 ML Signal: Method call pattern based on specific condition.
         self.target = target
@@ -138,6 +149,7 @@ class ShrinkCovEstimator(RiskModel):
             # ✅ Best Practice: Docstring provides a brief description of the function's purpose.
             return self._get_shrink_target_single_factor(X, S)
         return self.target
+
     # ✅ Best Practice: Use of np.nanmean to handle NaN values in the dataset.
 
     def _get_shrink_target_const_var(self, X: np.ndarray, S: np.ndarray) -> np.ndarray:
@@ -174,7 +186,9 @@ class ShrinkCovEstimator(RiskModel):
         np.fill_diagonal(F, var)
         return F
 
-    def _get_shrink_target_single_factor(self, X: np.ndarray, S: np.ndarray) -> np.ndarray:
+    def _get_shrink_target_single_factor(
+        self, X: np.ndarray, S: np.ndarray
+    ) -> np.ndarray:
         """get shrinking target with single factor model"""
         # 🧠 ML Signal: Method call based on nested condition
         # 🧠 ML Signal: Default return value when no conditions are met
@@ -187,6 +201,7 @@ class ShrinkCovEstimator(RiskModel):
         # 🧠 ML Signal: Extracting dimensions of input data, common in ML preprocessing
         np.fill_diagonal(F, np.diag(S))
         return F
+
     # ✅ Best Practice: Clear variable naming for readability
 
     # ✅ Best Practice: Include type hints for the return value for better readability and maintainability
@@ -214,7 +229,9 @@ class ShrinkCovEstimator(RiskModel):
         return self.alpha
 
     # ✅ Best Practice: Return the calculated shrinkage parameter
-    def _get_shrink_param_oas(self, X: np.ndarray, S: np.ndarray, F: np.ndarray) -> float:
+    def _get_shrink_param_oas(
+        self, X: np.ndarray, S: np.ndarray, F: np.ndarray
+    ) -> float:
         """Oracle Approximating Shrinkage Estimator
 
         This method uses the following formula to estimate the `alpha`
@@ -239,7 +256,9 @@ class ShrinkCovEstimator(RiskModel):
         return alpha
 
     # 🧠 ML Signal: Covariance calculation, a common operation in statistical analysis and ML.
-    def _get_shrink_param_lw_const_var(self, X: np.ndarray, S: np.ndarray, F: np.ndarray) -> float:
+    def _get_shrink_param_lw_const_var(
+        self, X: np.ndarray, S: np.ndarray, F: np.ndarray
+    ) -> float:
         """Ledoit-Wolf Shrinkage Estimator (Constant Variance)
 
         This method shrinks the covariance matrix towards the constand variance target.
@@ -261,7 +280,9 @@ class ShrinkCovEstimator(RiskModel):
 
         return alpha
 
-    def _get_shrink_param_lw_const_corr(self, X: np.ndarray, S: np.ndarray, F: np.ndarray) -> float:
+    def _get_shrink_param_lw_const_corr(
+        self, X: np.ndarray, S: np.ndarray, F: np.ndarray
+    ) -> float:
         """Ledoit-Wolf Shrinkage Estimator (Constant Correlation)
 
         This method shrinks the covariance matrix towards the constand correlation target.
@@ -278,7 +299,9 @@ class ShrinkCovEstimator(RiskModel):
 
         theta_mat = (X**3).T.dot(X) / t - var[:, None] * S
         np.fill_diagonal(theta_mat, 0)
-        rho = np.sum(np.diag(phi_mat)) + r_bar * np.sum(np.outer(1 / sqrt_var, sqrt_var) * theta_mat)
+        rho = np.sum(np.diag(phi_mat)) + r_bar * np.sum(
+            np.outer(1 / sqrt_var, sqrt_var) * theta_mat
+        )
 
         gamma = np.linalg.norm(S - F, "fro") ** 2
 
@@ -287,7 +310,9 @@ class ShrinkCovEstimator(RiskModel):
 
         return alpha
 
-    def _get_shrink_param_lw_single_factor(self, X: np.ndarray, S: np.ndarray, F: np.ndarray) -> float:
+    def _get_shrink_param_lw_single_factor(
+        self, X: np.ndarray, S: np.ndarray, F: np.ndarray
+    ) -> float:
         """Ledoit-Wolf Shrinkage Estimator (Single Factor Model)
 
         This method shrinks the covariance matrix towards the single factor model target.
@@ -304,9 +329,15 @@ class ShrinkCovEstimator(RiskModel):
         rdiag = np.sum(y**2) / t - np.sum(np.diag(S) ** 2)
         z = X * X_mkt[:, None]
         v1 = y.T.dot(z) / t - cov_mkt[:, None] * S
-        roff1 = np.sum(v1 * cov_mkt[:, None].T) / var_mkt - np.sum(np.diag(v1) * cov_mkt) / var_mkt
+        roff1 = (
+            np.sum(v1 * cov_mkt[:, None].T) / var_mkt
+            - np.sum(np.diag(v1) * cov_mkt) / var_mkt
+        )
         v3 = z.T.dot(z) / t - var_mkt * S
-        roff3 = np.sum(v3 * np.outer(cov_mkt, cov_mkt)) / var_mkt**2 - np.sum(np.diag(v3) * cov_mkt**2) / var_mkt**2
+        roff3 = (
+            np.sum(v3 * np.outer(cov_mkt, cov_mkt)) / var_mkt**2
+            - np.sum(np.diag(v3) * cov_mkt**2) / var_mkt**2
+        )
         roff = 2 * roff1 - roff3
         rho = rdiag + roff
 

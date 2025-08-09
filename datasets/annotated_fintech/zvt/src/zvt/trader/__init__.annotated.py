@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from enum import Enum
 from typing import Union, List
+
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 
 import pandas as pd
+
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 # ✅ Best Practice: Use of Enum for defining a set of related constants
 
@@ -20,7 +22,9 @@ class TradingSignalType(Enum):
     close_long = "close_long"
     close_short = "close_short"
 
+
 # 🧠 ML Signal: Function maps trading signal types to order types, useful for learning trading behavior patterns
+
 
 class OrderType(Enum):
     order_long = "order_long"
@@ -56,7 +60,7 @@ class TradingSignal:
         position_pct: float = None,
         order_money: float = None,
         order_amount: int = None,
-    # 🧠 ML Signal: Initialization of object with multiple parameters
+        # 🧠 ML Signal: Initialization of object with multiple parameters
     ):
         """
 
@@ -85,7 +89,10 @@ class TradingSignal:
         # ✅ Best Practice: Raising NotImplementedError is a common pattern for abstract methods
         # ✅ Best Practice: Method signature is clear and self-explanatory
 
-        if len([x for x in (position_pct, order_money, order_amount) if x is not None]) != 1:
+        if (
+            len([x for x in (position_pct, order_money, order_amount) if x is not None])
+            != 1
+        ):
             # ⚠️ SAST Risk (Low): Method raises NotImplementedError, which is expected for abstract methods but should be implemented in subclasses
             # ✅ Best Practice: Method signature is clear and self-explanatory
             assert False
@@ -97,12 +104,15 @@ class TradingSignal:
         self.order_money = order_money
         # ✅ Best Practice: Method docstring should describe all parameters and return values
         self.order_amount = order_amount
+
+
 # ✅ Best Practice: Docstring provides a brief description of the method's purpose
 
 
 class TradingListener(object):
     def on_trading_open(self, timestamp):
         raise NotImplementedError
+
     # ✅ Best Practice: Define the method to perform its intended functionality or remove it if not needed.
 
     # 🧠 ML Signal: Use of 'pass' indicates an unimplemented or abstract method
@@ -130,6 +140,7 @@ class TradingListener(object):
 class AccountService(TradingListener):
     def get_positions(self):
         pass
+
     # ✅ Best Practice: Use of 'pass' indicates a placeholder for future implementation
 
     def get_current_position(self, entity_id, create_if_not_exist=False):
@@ -157,6 +168,7 @@ class AccountService(TradingListener):
     ):
         # ⚠️ SAST Risk (Medium): Importing all symbols with '*' can lead to namespace pollution and potential conflicts
         pass
+
     # ✅ Best Practice: Aliasing __all__ to avoid overwriting
     # ✅ Best Practice: Extending __all__ to include symbols from imported modules
     # ⚠️ SAST Risk (Medium): Importing all symbols with '*' can lead to namespace pollution and potential conflicts
@@ -183,7 +195,13 @@ class AccountService(TradingListener):
 
 
 # the __all__ is generated
-__all__ = ["TradingSignalType", "TradingListener", "OrderType", "AccountService", "trading_signal_type_to_order_type"]
+__all__ = [
+    "TradingSignalType",
+    "TradingListener",
+    "OrderType",
+    "AccountService",
+    "trading_signal_type_to_order_type",
+]
 
 # __init__.py structure:
 # common code of the package

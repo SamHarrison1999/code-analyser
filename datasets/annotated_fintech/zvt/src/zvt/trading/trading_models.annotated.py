@@ -11,15 +11,19 @@ from zvt.common.query_models import TimeRange, OrderByType
 from zvt.contract import IntervalLevel, AdjustType
 from zvt.contract.model import MixinModel, CustomModel
 from zvt.tag.tag_utils import get_stock_pool_names
+
 # ✅ Best Practice: Grouping imports from the same module in a single line improves readability.
 from zvt.trader import TradingSignalType
+
 # 🧠 ML Signal: Use of Pydantic BaseModel for data validation and serialization
 from zvt.trading.common import ExecutionStatus
 from zvt.utils.time_utils import date_time_by_interval, current_date
+
 # 🧠 ML Signal: List of strings for entity IDs, common pattern for handling multiple identifiers
 from zvt.utils.time_utils import tomorrow_date, to_pd_timestamp
 
 # ✅ Best Practice: Default value for data_provider improves usability and reduces errors
+
 
 class KdataRequestModel(BaseModel):
     # ⚠️ SAST Risk (Low): Potential timezone issues with datetime defaults
@@ -27,7 +31,9 @@ class KdataRequestModel(BaseModel):
     # ✅ Best Practice: Class should inherit from BaseModel for data validation and parsing
     # ✅ Best Practice: Use of Field with default value for start_timestamp ensures consistent initialization
     data_provider: str = Field(default="qmt")
-    start_timestamp: datetime = Field(default=date_time_by_interval(current_date(), -500))
+    start_timestamp: datetime = Field(
+        default=date_time_by_interval(current_date(), -500)
+    )
     # ✅ Best Practice: Use of Optional for end_timestamp indicates that it can be None
     # 🧠 ML Signal: Use of string type for entity_id, indicating unique identifiers
     end_timestamp: Optional[datetime] = Field(default=None)
@@ -36,9 +42,11 @@ class KdataRequestModel(BaseModel):
     # 🧠 ML Signal: Use of string type for code, indicating stock or asset codes
     adjust_type: AdjustType = Field(default=AdjustType.qfq)
 
+
 # 🧠 ML Signal: Use of Pydantic BaseModel for data validation and model definition
 # ✅ Best Practice: Default value for adjust_type provides a sensible default for adjustment type
 # 🧠 ML Signal: Use of string type for name, indicating descriptive labels
+
 
 class KdataModel(BaseModel):
     # 🧠 ML Signal: List of strings indicating entity identifiers
@@ -52,6 +60,8 @@ class KdataModel(BaseModel):
     level: IntervalLevel = Field(default=IntervalLevel.LEVEL_1DAY)
     # 🧠 ML Signal: Default value for days_count indicating a common or preferred time range
     datas: List
+
+
 # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
 
 
@@ -73,8 +83,10 @@ class TSModel(BaseModel):
     # ✅ Best Practice: Inheriting from a custom model class suggests a structured approach to model definition
     datas: List
 
+
 # ✅ Best Practice: Using Optional for fields that can be None improves code clarity and type safety.
 # ✅ Best Practice: Using Optional type hints improves code readability and indicates that the field can be None
+
 
 class QuoteStatsModel(BaseModel):
     # ✅ Best Practice: Using Optional type hints improves code readability and indicates that the field can be None
@@ -110,6 +122,8 @@ class QuoteStatsModel(BaseModel):
     # 🧠 ML Signal: Use of Optional fields indicates handling of missing or default values
     #: 同比
     turnover_change: Optional[float] = Field(default=None)
+
+
 # 🧠 ML Signal: Use of Optional fields indicates handling of missing or default values
 # 🧠 ML Signal: Definition of a data model class, useful for understanding data structures in ML models
 
@@ -122,8 +136,10 @@ class QueryStockQuoteSettingModel(CustomModel):
     # 🧠 ML Signal: Use of type annotations for attributes, helps in understanding data types for ML features
     main_tags: Optional[List[str]] = Field(default=None)
 
+
 # 🧠 ML Signal: Use of Optional fields indicates handling of missing or default values
 # 🧠 ML Signal: Use of type annotations for attributes, helps in understanding data types for ML features
+
 
 class BuildQueryStockQuoteSettingModel(CustomModel):
     # 🧠 ML Signal: Use of type annotations for attributes, helps in understanding data types for ML features
@@ -141,7 +157,9 @@ class BuildQueryStockQuoteSettingModel(CustomModel):
         # 🧠 ML Signal: Use of type annotations for attributes, helps in understanding data types for ML features
         return v
 
+
 # 🧠 ML Signal: Use of Optional type for attributes, indicates nullable fields in data models
+
 
 # ✅ Best Practice: Class definition should inherit from a base class for consistency and potential reuse
 class QueryTagQuoteModel(CustomModel):
@@ -149,9 +167,12 @@ class QueryTagQuoteModel(CustomModel):
     stock_pool_name: str
     # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability
     main_tags: List[str]
+
+
 # 🧠 ML Signal: Use of Optional type for attributes, indicates nullable fields in data models
 
 # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability
+
 
 # 🧠 ML Signal: Use of type annotations for attributes, helps in understanding data types for ML features
 class QueryStockQuoteModel(CustomModel):
@@ -172,9 +193,12 @@ class QueryStockQuoteModel(CustomModel):
     order_by_type: Optional[OrderByType] = Field(default=OrderByType.desc)
     # 🧠 ML Signal: Use of Optional type for attributes, indicates nullable fields in data models
     order_by_field: Optional[str] = Field(default="change_pct")
+
+
 # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability
 
 # 🧠 ML Signal: Use of Union type for attributes, indicates multiple possible types for a field
+
 
 # ✅ Best Practice: Use of type annotations for complex types like lists enhances code clarity.
 class StockQuoteModel(MixinModel):

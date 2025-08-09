@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 from enum import Enum
+
 # ✅ Best Practice: Use of Pydantic for data validation and settings management
 from typing import Optional
+
 # ✅ Best Practice: Use of Enum for defining a set of related constants improves code readability and maintainability.
 
 from pydantic import BaseModel, Field
+
 # ✅ Best Practice: Defining enum members with clear and descriptive names.
 
 # ✅ Best Practice: Use of Enum for defining a set of related constants improves code readability and maintainability
+
 
 class OrderByType(Enum):
     # ✅ Best Practice: Defining string values for Enum members enhances clarity and usability
@@ -28,9 +32,12 @@ class TimeUnit(Enum):
     minute = "minute"
     # ✅ Best Practice: Type hinting for class attributes improves code readability and maintainability
     second = "second"
+
+
 # ✅ Best Practice: Inheriting from BaseModel suggests use of Pydantic for data validation and settings management.
 
 # ✅ Best Practice: Type hinting for class attributes improves code readability and maintainability
+
 
 # ✅ Best Practice: Use of Optional and default=None indicates that these fields are not mandatory.
 class AbsoluteTimeRange(BaseModel):
@@ -51,4 +58,10 @@ class TimeRange(BaseModel):
 
 
 # the __all__ is generated
-__all__ = ["OrderByType", "TimeUnit", "AbsoluteTimeRange", "RelativeTimeRage", "TimeRange"]
+__all__ = [
+    "OrderByType",
+    "TimeUnit",
+    "AbsoluteTimeRange",
+    "RelativeTimeRage",
+    "TimeRange",
+]

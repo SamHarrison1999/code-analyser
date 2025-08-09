@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, Boolean
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import TradableEntity
 from zvt.contract.register import register_schema, register_entity
+
 # ✅ Best Practice: Naming convention for base classes should be consistent and descriptive.
 
 StockhkMetaBase = declarative_base()

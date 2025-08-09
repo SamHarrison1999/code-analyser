@@ -2,9 +2,11 @@
 # Licensed under the MIT License.
 
 import os
+
 # ✅ Best Practice: Use of Path from pathlib for path operations improves code readability and cross-platform compatibility.
 import numpy as np
 import pandas as pd
+
 # ✅ Best Practice: Use of Path from pathlib for path operations improves code readability and cross-platform compatibility.
 # ⚠️ SAST Risk (Medium): Missing import statement for 'pd' (pandas), which can lead to NameError if not imported elsewhere.
 
@@ -28,7 +30,11 @@ def generate_order(stock: str, start_idx: int, end_idx: int) -> bool:
     df["date"] = df["datetime"].dt.date.astype("datetime64")
     # ⚠️ SAST Risk (Medium): Potential KeyError if the expected levels are not present in the index.
     df = df.set_index(["instrument", "datetime", "date"])
-    df = df.groupby("date", group_keys=False).take(range(start_idx, end_idx)).droplevel(level=0)
+    df = (
+        df.groupby("date", group_keys=False)
+        .take(range(start_idx, end_idx))
+        .droplevel(level=0)
+    )
     # ⚠️ SAST Risk (Medium): Potential KeyError if '$volume0' column is missing in df.
 
     order_all = pd.DataFrame(df.groupby(level=(2, 0), group_keys=False).mean().dropna())
@@ -39,13 +45,24 @@ def generate_order(stock: str, start_idx: int, end_idx: int) -> bool:
     order_all = order_all.drop(columns=["$volume0"])
     # ⚠️ SAST Risk (Medium): Potential KeyError if the expected levels are not present in the index.
 
-    order_train = order_all[order_all.index.get_level_values(0) <= pd.Timestamp("2021-06-30")]
-    order_test = order_all[order_all.index.get_level_values(0) > pd.Timestamp("2021-06-30")]
-    order_valid = order_test[order_test.index.get_level_values(0) <= pd.Timestamp("2021-09-30")]
-    order_test = order_test[order_test.index.get_level_values(0) > pd.Timestamp("2021-09-30")]
+    order_train = order_all[
+        order_all.index.get_level_values(0) <= pd.Timestamp("2021-06-30")
+    ]
+    order_test = order_all[
+        order_all.index.get_level_values(0) > pd.Timestamp("2021-06-30")
+    ]
+    order_valid = order_test[
+        order_test.index.get_level_values(0) <= pd.Timestamp("2021-09-30")
+    ]
+    order_test = order_test[
+        order_test.index.get_level_values(0) > pd.Timestamp("2021-09-30")
+    ]
     # 🧠 ML Signal: Iterating over different data splits (train, valid, test) is a common pattern in ML workflows.
 
-    for order, tag in zip((order_train, order_valid, order_test, order_all), ("train", "valid", "test", "all")):
+    for order, tag in zip(
+        (order_train, order_valid, order_test, order_all),
+        ("train", "valid", "test", "all"),
+    ):
         # ⚠️ SAST Risk (Medium): OUTPUT_PATH is used without being defined in this scope, which can lead to NameError.
         path = OUTPUT_PATH / tag
         os.makedirs(path, exist_ok=True)

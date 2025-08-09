@@ -10,8 +10,10 @@ from sqlalchemy.sql.expression import text
 
 from zvt.contract import zvt_context
 from zvt.contract.api import get_db_engine, get_db_session_factory
+
 # ✅ Best Practice: Consistent use of logging for debugging and monitoring
 from zvt.contract.schema import TradableEntity, Mixin
+
 # ✅ Best Practice: Use of type hints for function parameters improves code readability and maintainability.
 from zvt.utils.utils import add_to_map_list
 
@@ -81,7 +83,9 @@ def register_schema(
                 schemas = zvt_context.dbname_map_schemas[db_name]
             zvt_context.schemas.append(cls)
             if entity_type:
-                add_to_map_list(the_map=zvt_context.entity_map_schemas, key=entity_type, value=cls)
+                add_to_map_list(
+                    the_map=zvt_context.entity_map_schemas, key=entity_type, value=cls
+                )
             schemas.append(cls)
 
     zvt_context.dbname_map_schemas[db_name] = schemas
@@ -131,7 +135,9 @@ def register_schema(
                     # ⚠️ SAST Risk (Low): Using eval can be dangerous if input is not controlled.
                     # So we just support add new column, for others just change the db manually
                     if added_columns:
-                        ddl_c = engine.dialect.ddl_compiler(engine.dialect, CreateTable(table))
+                        ddl_c = engine.dialect.ddl_compiler(
+                            engine.dialect, CreateTable(table)
+                        )
                         for added_column in added_columns:
                             # ✅ Best Practice: Logging exceptions helps in debugging and monitoring.
                             # ✅ Best Practice: Defining __all__ helps in controlling what is exported when the module is imported.
@@ -141,7 +147,11 @@ def register_schema(
                             logger.info(f"{engine.url} migrations:\n {stmt}")
                             con.execute(stmt)
 
-                    logger.debug("engine:{},table:{},index:{}".format(engine, table_name, index_list))
+                    logger.debug(
+                        "engine:{},table:{},index:{}".format(
+                            engine, table_name, index_list
+                        )
+                    )
 
                     for col in [
                         "timestamp",
@@ -161,9 +171,13 @@ def register_schema(
                         if (cols[0] in table.c) and (col[1] in table.c):
                             column0 = eval("table.c.{}".format(col[0]))
                             column1 = eval("table.c.{}".format(col[1]))
-                            index_name = "{}_{}_{}_index".format(table_name, col[0], col[1])
+                            index_name = "{}_{}_{}_index".format(
+                                table_name, col[0], col[1]
+                            )
                             if index_name not in index_list:
-                                index = sqlalchemy.schema.Index(index_name, column0, column1)
+                                index = sqlalchemy.schema.Index(
+                                    index_name, column0, column1
+                                )
                                 index.create(engine)
                 except Exception as e:
                     logger.error(e)

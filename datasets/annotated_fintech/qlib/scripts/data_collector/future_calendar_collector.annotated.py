@@ -7,10 +7,12 @@ from pathlib import Path
 from typing import Union, Iterable, List
 
 import fire
+
 # ✅ Best Practice: Class-level constants improve readability and maintainability
 # ✅ Best Practice: Use of 'loguru' for logging provides advanced logging features and better readability.
 import numpy as np
 import pandas as pd
+
 # ✅ Best Practice: Using a descriptive constant name for date format
 
 # ✅ Best Practice: Use of type hints for function parameters improves code readability and maintainability.
@@ -22,7 +24,9 @@ from loguru import logger
 class CollectorFutureCalendar:
     calendar_format = "%Y-%m-%d"
 
-    def __init__(self, qlib_dir: Union[str, Path], start_date: str = None, end_date: str = None):
+    def __init__(
+        self, qlib_dir: Union[str, Path], start_date: str = None, end_date: str = None
+    ):
         """
 
         Parameters
@@ -46,8 +50,15 @@ class CollectorFutureCalendar:
         _latest_date = self._calendar_list[-1]
         # ✅ Best Practice: Assigning column names to the DataFrame for clarity
         # ✅ Best Practice: Type hint for datetime_d should use Union for better clarity
-        self.start_date = _latest_date if start_date is None else pd.Timestamp(start_date)
-        self.end_date = _latest_date + pd.Timedelta(days=365 * 2) if end_date is None else pd.Timestamp(end_date)
+        self.start_date = (
+            _latest_date if start_date is None else pd.Timestamp(start_date)
+        )
+        self.end_date = (
+            _latest_date + pd.Timedelta(days=365 * 2)
+            if end_date is None
+            else pd.Timestamp(end_date)
+        )
+
     # ✅ Best Practice: Convert input to a consistent type at the start of the function
     # 🧠 ML Signal: Converting a DataFrame column to datetime
 
@@ -68,6 +79,7 @@ class CollectorFutureCalendar:
         calendar_df.columns = ["date"]
         calendar_df["date"] = pd.to_datetime(calendar_df["date"])
         return calendar_df["date"].to_list()
+
     # ✅ Best Practice: Use of abstractmethod indicates this method should be implemented by subclasses
 
     # ✅ Best Practice: Use NotImplementedError to indicate an abstract method that should be implemented by subclasses
@@ -79,7 +91,9 @@ class CollectorFutureCalendar:
 
     # ⚠️ SAST Risk (Low): Potential exposure of error messages
     def write_calendar(self, calendar: Iterable):
-        calendars_list = [self._format_datetime(x) for x in sorted(set(self.calendar_list + calendar))]
+        calendars_list = [
+            self._format_datetime(x) for x in sorted(set(self.calendar_list + calendar))
+        ]
         np.savetxt(self.future_path, calendars_list, fmt="%s", encoding="utf-8")
 
     # 🧠 ML Signal: Query pattern with error handling
@@ -92,11 +106,14 @@ class CollectorFutureCalendar:
 
         # ✅ Best Practice: Use of while loop with condition for data collection
         """
-        raise NotImplementedError(f"Please implement the `collector` method")
+        raise NotImplementedError("Please implement the `collector` method")
+
+
 # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability
 # ✅ Best Practice: Class definition should include a docstring to describe its purpose and usage.
 
 # ✅ Best Practice: Use of pandas DataFrame for structured data handling
+
 
 # ⚠️ SAST Risk (Low): Raising a generic exception without specific handling can lead to unhandled exceptions
 class CollectorFutureCalendarCN(CollectorFutureCalendar):
@@ -108,7 +125,8 @@ class CollectorFutureCalendarCN(CollectorFutureCalendar):
         if lg.error_code != "0":
             raise ValueError(f"login respond error_msg: {lg.error_msg}")
         rs = bs.query_trade_dates(
-            start_date=self._format_datetime(self.start_date), end_date=self._format_datetime(self.end_date)
+            start_date=self._format_datetime(self.start_date),
+            end_date=self._format_datetime(self.end_date),
         )
         if rs.error_code != "0":
             raise ValueError(f"query_trade_dates respond error_msg: {rs.error_msg}")
@@ -117,9 +135,13 @@ class CollectorFutureCalendarCN(CollectorFutureCalendar):
             data_list.append(rs.get_row_data())
         calendar = pd.DataFrame(data_list, columns=rs.fields)
         calendar["is_trading_day"] = calendar["is_trading_day"].astype(int)
-        return pd.to_datetime(calendar[calendar["is_trading_day"] == 1]["calendar_date"]).to_list()
+        return pd.to_datetime(
+            calendar[calendar["is_trading_day"] == 1]["calendar_date"]
+        ).to_list()
+
 
 # 🧠 ML Signal: Logging usage pattern for tracking execution and debugging.
+
 
 class CollectorFutureCalendarUS(CollectorFutureCalendar):
     # ⚠️ SAST Risk (Medium): Dynamic import and attribute access can lead to code execution risks if inputs are not controlled.
@@ -127,13 +149,20 @@ class CollectorFutureCalendarUS(CollectorFutureCalendar):
         # TODO: US future calendar
         # ⚠️ SAST Risk (Medium): Dynamic import and attribute access can lead to code execution risks if inputs are not controlled.
         raise ValueError("Us calendar is not supported")
+
+
 # 🧠 ML Signal: Instantiation pattern of a class with dynamic attributes.
 # 🧠 ML Signal: Method chaining pattern for executing class methods.
 # 🧠 ML Signal: Entry point pattern for command-line interface applications.
 # ⚠️ SAST Risk (Low): Using fire.Fire can execute arbitrary code if user input is not sanitized.
 
 
-def run(qlib_dir: Union[str, Path], region: str = "cn", start_date: str = None, end_date: str = None):
+def run(
+    qlib_dir: Union[str, Path],
+    region: str = "cn",
+    start_date: str = None,
+    end_date: str = None,
+):
     """Collect future calendar(day)
 
     Parameters

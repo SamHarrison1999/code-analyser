@@ -5,6 +5,7 @@ from zvt.domain import Stock, Stockhk
 
 # 🧠 ML Signal: Testing boundary conditions for trading time
 
+
 def test_stock_trading_time():
     # 🧠 ML Signal: Testing within trading hours
     assert Stock.in_real_trading_time(timestamp="2024-09-02 08:00") is False
@@ -41,7 +42,9 @@ def test_stock_trading_time():
     # 🧠 ML Signal: Testing within trading hours
     assert Stock.in_trading_time(timestamp="2024-09-02 16:10") is False
 
+
 # 🧠 ML Signal: Testing exact start of trading hours
+
 
 def test_stock_hk_trading_time():
     # 🧠 ML Signal: Testing within trading hours

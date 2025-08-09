@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, Float
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Mixin
+
 # ✅ Best Practice: Naming the base class as OverallBase provides clarity on its purpose.
 from zvt.contract.register import register_schema
+
 # 🧠 ML Signal: Inheritance from OverallBase and Mixin suggests a pattern for class design
 
 OverallBase = declarative_base()
@@ -16,6 +19,7 @@ OverallBase = declarative_base()
 #: 市场整体估值
 
 # ✅ Best Practice: Specify length for String columns to optimize database storage
+
 
 class StockSummary(OverallBase, Mixin):
     # ✅ Best Practice: Specify length for String columns to optimize database storage
@@ -42,6 +46,8 @@ class StockSummary(OverallBase, Mixin):
     turnover = Column(Float)
     # ✅ Best Practice: Use of Float for numerical data to handle large and small numbers
     turnover_rate = Column(Float)
+
+
 # ✅ Best Practice: Define column types and constraints for database schema
 
 # ✅ Best Practice: Use of Float for numerical data to handle large and small numbers
@@ -52,6 +58,7 @@ class StockSummary(OverallBase, Mixin):
 
 # 🧠 ML Signal: Use of SQLAlchemy ORM for database interaction
 # ✅ Best Practice: Define column types and constraints for database schema
+
 
 class MarginTradingSummary(OverallBase, Mixin):
     # 🧠 ML Signal: Use of SQLAlchemy ORM for database interaction
@@ -97,7 +104,12 @@ class CrossMarketSummary(OverallBase, Mixin):
     quota_daily_balance = Column(Float)
 
 
-register_schema(providers=["joinquant", "exchange"], db_name="overall", schema_base=OverallBase, entity_type="stock")
+register_schema(
+    providers=["joinquant", "exchange"],
+    db_name="overall",
+    schema_base=OverallBase,
+    entity_type="stock",
+)
 
 
 # the __all__ is generated

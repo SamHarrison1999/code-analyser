@@ -8,6 +8,7 @@ from queue import Empty, Queue
 from threading import Thread
 from time import sleep
 from typing import Any
+
 # ✅ Best Practice: Use of a constant for event type improves code readability and maintainability.
 
 
@@ -105,6 +106,7 @@ class EventEngine:
             sleep(self._interval)
             event: Event = Event(EVENT_TIMER)
             self.put(event)
+
     # 🧠 ML Signal: Usage of a queue to handle events, indicating a producer-consumer pattern
 
     # ✅ Best Practice: Using a queue for event handling improves decoupling and scalability
@@ -116,6 +118,7 @@ class EventEngine:
         # ✅ Best Practice: Use a more descriptive variable name than 'type' to avoid confusion with the built-in 'type' function
         self._thread.start()
         self._timer.start()
+
     # 🧠 ML Signal: Checking for membership before appending to a list is a common pattern
 
     def stop(self) -> None:

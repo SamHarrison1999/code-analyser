@@ -29,6 +29,7 @@ from zvt.utils.time_utils import (
     # ✅ Best Practice: Use a consistent naming convention for base classes.
     to_pd_timestamp,
 )
+
 # 🧠 ML Signal: Use of SQLAlchemy ORM for database interaction
 
 TopStocksBase = declarative_base()
@@ -69,13 +70,18 @@ register_schema(providers=["zvt"], db_name="top_stocks", schema_base=TopStocksBa
 # ⚠️ SAST Risk (Low): Assertion without error message
 # 🧠 ML Signal: Filtering based on provided entity IDs
 
+
 def get_vol_up_stocks(target_date, provider="em", stock_type="small", entity_ids=None):
     if stock_type == "small":
-        current_entity_pool = get_mini_and_small_stock(timestamp=target_date, provider=provider)
+        current_entity_pool = get_mini_and_small_stock(
+            timestamp=target_date, provider=provider
+        )
         turnover_threshold = 300000000
         turnover_rate_threshold = 0.02
     elif stock_type == "big":
-        current_entity_pool = get_middle_and_big_stock(timestamp=target_date, provider=provider)
+        current_entity_pool = get_middle_and_big_stock(
+            timestamp=target_date, provider=provider
+        )
         turnover_threshold = 300000000
         # 🧠 ML Signal: Querying data with specific filters
         turnover_rate_threshold = 0.01
@@ -93,7 +99,10 @@ def get_vol_up_stocks(target_date, provider="em", stock_type="small", entity_ids
         kdata_schema.turnover_rate >= turnover_rate_threshold,
     ]
     kdata_df = kdata_schema.query_data(
-        provider=provider, filters=filters, columns=["entity_id", "timestamp"], index="entity_id"
+        provider=provider,
+        filters=filters,
+        columns=["entity_id", "timestamp"],
+        index="entity_id",
     )
     if current_entity_pool:
         current_entity_pool = set(current_entity_pool) & set(kdata_df.index.tolist())
@@ -121,13 +130,15 @@ def get_vol_up_stocks(target_date, provider="em", stock_type="small", entity_ids
         turnover_threshold=turnover_threshold,
         # 🧠 ML Signal: Usage of a specific database session provider and schema
         turnover_rate_threshold=turnover_rate_threshold,
-    # 🧠 ML Signal: Querying data with specific parameters
-    # ✅ Best Practice: Directly assigning the length of a list to a variable
+        # 🧠 ML Signal: Querying data with specific parameters
+        # ✅ Best Practice: Directly assigning the length of a list to a variable
     )
 
     stocks = factor.get_targets(timestamp=target_date, target_type=TargetType.positive)
     # ✅ Best Practice: Using session.add_all for bulk operations
     return stocks
+
+
 # ⚠️ SAST Risk (Medium): Committing changes to the database without error handling
 
 
@@ -183,15 +194,23 @@ def update_vol_up():
         # 🧠 ML Signal: Counting intervals for business logic
         # 🧠 ML Signal: Creating a new TopStocks object
         small_vol_up_stocks = get_vol_up_stocks(
-            target_date=target_date, provider="em", stock_type="small", entity_ids=entity_ids
+            target_date=target_date,
+            provider="em",
+            stock_type="small",
+            entity_ids=entity_ids,
         )
         top_stock.small_vol_up_count = len(small_vol_up_stocks)
-        top_stock.small_vol_up_stocks = json.dumps(small_vol_up_stocks, ensure_ascii=False)
+        top_stock.small_vol_up_stocks = json.dumps(
+            small_vol_up_stocks, ensure_ascii=False
+        )
 
         big_vol_up_stocks = get_vol_up_stocks(
-            target_date=target_date, provider="em", stock_type="big", entity_ids=entity_ids
-        # 🧠 ML Signal: Conditional logic based on count
-        # 🧠 ML Signal: Fetching entity IDs with specific filters
+            target_date=target_date,
+            provider="em",
+            stock_type="big",
+            entity_ids=entity_ids,
+            # 🧠 ML Signal: Conditional logic based on count
+            # 🧠 ML Signal: Fetching entity IDs with specific filters
         )
         top_stock.big_vol_up_count = len(big_vol_up_stocks)
         top_stock.big_vol_up_stocks = json.dumps(big_vol_up_stocks, ensure_ascii=False)
@@ -201,9 +220,13 @@ def update_vol_up():
 
 
 def compute_top_stocks(provider="em", start="2024-01-01"):
-    latest = TopStocks.query_data(limit=1, order=TopStocks.timestamp.desc(), return_type="domain")
+    latest = TopStocks.query_data(
+        limit=1, order=TopStocks.timestamp.desc(), return_type="domain"
+    )
     if latest:
-        start = date_time_by_interval(to_time_str(latest[0].timestamp, fmt=TIME_FORMAT_DAY))
+        start = date_time_by_interval(
+            to_time_str(latest[0].timestamp, fmt=TIME_FORMAT_DAY)
+        )
 
     trade_days = get_trade_dates(start=start, end=today())
 
@@ -212,9 +235,11 @@ def compute_top_stocks(provider="em", start="2024-01-01"):
         print(f"to {target_date}")
         session = get_db_session(provider="zvt", data_schema=TopStocks)
         top_stocks = TopStocks(
-            id=f"block_zvt_000001_{target_date}", entity_id="block_zvt_000001", timestamp=target_date
-        # 🧠 ML Signal: Fetching limit up stocks
-        # 🧠 ML Signal: Combining and deduplicating stock lists
+            id=f"block_zvt_000001_{target_date}",
+            entity_id="block_zvt_000001",
+            timestamp=target_date,
+            # 🧠 ML Signal: Fetching limit up stocks
+            # 🧠 ML Signal: Combining and deduplicating stock lists
         )
 
         count_bj = count_interval("2023-09-01", target_date)
@@ -280,7 +305,7 @@ def compute_top_stocks(provider="em", start="2024-01-01"):
             turnover_rate_threshold=0,
             # ✅ Best Practice: Use set to remove duplicates
             return_type=TopType.positive,
-        # ⚠️ SAST Risk (Low): Potential JSON injection if big_vol_up_stocks contains untrusted data
+            # ⚠️ SAST Risk (Low): Potential JSON injection if big_vol_up_stocks contains untrusted data
         )
         top_stocks.long_count = len(long_selected)
         # 🧠 ML Signal: Storing total count of all stocks
@@ -289,12 +314,17 @@ def compute_top_stocks(provider="em", start="2024-01-01"):
 
         # ✅ Best Practice: Logging or printing the top_stocks object
         small_vol_up_stocks = get_vol_up_stocks(
-            target_date=target_date, provider=provider, stock_type="small", entity_ids=entity_ids
-        # 🧠 ML Signal: Adding and committing to the database session
-        # ⚠️ SAST Risk (Low): Use of json.loads without validation
+            target_date=target_date,
+            provider=provider,
+            stock_type="small",
+            entity_ids=entity_ids,
+            # 🧠 ML Signal: Adding and committing to the database session
+            # ⚠️ SAST Risk (Low): Use of json.loads without validation
         )
         top_stocks.small_vol_up_count = len(small_vol_up_stocks)
-        top_stocks.small_vol_up_stocks = json.dumps(small_vol_up_stocks, ensure_ascii=False)
+        top_stocks.small_vol_up_stocks = json.dumps(
+            small_vol_up_stocks, ensure_ascii=False
+        )
         # ⚠️ SAST Risk (Low): Use of json.loads without validation
 
         # ⚠️ SAST Risk (Low): Use of assert for runtime checks
@@ -302,7 +332,10 @@ def compute_top_stocks(provider="em", start="2024-01-01"):
         # ⚠️ SAST Risk (Low): Use of json.loads without validation
         # ✅ Best Practice: Use of main guard for script execution
         big_vol_up_stocks = get_vol_up_stocks(
-            target_date=target_date, provider=provider, stock_type="big", entity_ids=entity_ids
+            target_date=target_date,
+            provider=provider,
+            stock_type="big",
+            entity_ids=entity_ids,
         )
         top_stocks.big_vol_up_count = len(big_vol_up_stocks)
         top_stocks.big_vol_up_stocks = json.dumps(big_vol_up_stocks, ensure_ascii=False)
@@ -327,7 +360,11 @@ def get_top_stocks(target_date, return_type="short"):
             long_stocks = json.loads(top_stock.long_stocks)
             small_vol_up_stocks = json.loads(top_stock.small_vol_up_stocks)
             big_vol_up_stocks = json.loads(top_stock.big_vol_up_stocks)
-            all_stocks = list(set(short_stocks + long_stocks + small_vol_up_stocks + big_vol_up_stocks))
+            all_stocks = list(
+                set(
+                    short_stocks + long_stocks + small_vol_up_stocks + big_vol_up_stocks
+                )
+            )
             return all_stocks
         elif return_type == "short":
             stocks = json.loads(top_stock.short_stocks)

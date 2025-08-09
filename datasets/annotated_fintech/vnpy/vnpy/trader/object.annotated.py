@@ -3,11 +3,21 @@ Basic data structure used for general trading function in the trading platform.
 """
 
 from dataclasses import dataclass, field
+
 # ✅ Best Practice: Use of specific imports to avoid namespace pollution and improve readability.
 from datetime import datetime as Datetime
 
 # ✅ Best Practice: Use of a set for ACTIVE_STATUSES for O(1) average time complexity for lookups.
-from .constant import Direction, Exchange, Interval, Offset, Status, Product, OptionType, OrderType
+from .constant import (
+    Direction,
+    Exchange,
+    Interval,
+    Offset,
+    Status,
+    Product,
+    OptionType,
+    OrderType,
+)
 
 # ✅ Best Practice: Use of docstring to describe the purpose and attributes of the class
 
@@ -18,6 +28,7 @@ INFO: int = 20
 ACTIVE_STATUSES = set([Status.SUBMITTING, Status.NOTTRADED, Status.PARTTRADED])
 
 # ✅ Best Practice: Type hinting for class attributes improves code readability and maintainability
+
 
 @dataclass
 # ✅ Best Practice: Type hinting for class attributes improves code readability and maintainability
@@ -31,6 +42,8 @@ class BaseData:
     # ✅ Best Practice: Type annotations improve code readability and maintainability.
 
     extra: dict | None = field(default=None, init=False)
+
+
 # ✅ Best Practice: Type annotations improve code readability and maintainability.
 
 
@@ -43,6 +56,7 @@ class TickData(BaseData):
         * orderbook snapshot
         * intraday market statistics.
     """
+
     # ✅ Best Practice: Default values for attributes improve code readability and maintainability.
 
     symbol: str
@@ -127,6 +141,8 @@ class TickData(BaseData):
         """"""
         # 🧠 ML Signal: Use of f-string for string formatting
         self.vt_symbol: str = f"{self.symbol}.{self.exchange.value}"
+
+
 # ✅ Best Practice: Default values for attributes improve code readability and maintainability.
 # 🧠 ML Signal: Use of default values for class attributes
 # ✅ Best Practice: Use of f-string for more readable and efficient string formatting
@@ -170,6 +186,8 @@ class BarData(BaseData):
     def __post_init__(self) -> None:
         """"""
         self.vt_symbol: str = f"{self.symbol}.{self.exchange.value}"
+
+
 # ✅ Best Practice: Type annotations improve code readability and maintainability
 
 
@@ -182,6 +200,7 @@ class OrderData(BaseData):
     Order data contains information for tracking lastest status
     of a specific order.
     """
+
     # 🧠 ML Signal: Usage of object attributes to initialize another object.
 
     symbol: str
@@ -210,6 +229,7 @@ class OrderData(BaseData):
         self.vt_symbol: str = f"{self.symbol}.{self.exchange.value}"
         # 🧠 ML Signal: Usage of f-strings for string formatting
         self.vt_orderid: str = f"{self.gateway_name}.{self.orderid}"
+
     # 🧠 ML Signal: Use of default values for class attributes
 
     # 🧠 ML Signal: Use of default values for class attributes
@@ -229,10 +249,14 @@ class OrderData(BaseData):
         """
         # ✅ Best Practice: Type annotations improve code readability and maintainability.
         req: CancelRequest = CancelRequest(
-            orderid=self.orderid, symbol=self.symbol, exchange=self.exchange
-        # ✅ Best Practice: Type annotations improve code readability and maintainability.
+            orderid=self.orderid,
+            symbol=self.symbol,
+            exchange=self.exchange,
+            # ✅ Best Practice: Type annotations improve code readability and maintainability.
         )
         return req
+
+
 # ✅ Best Practice: Type annotations improve code readability and maintainability.
 
 
@@ -271,16 +295,20 @@ class TradeData(BaseData):
         self.vt_orderid: str = f"{self.gateway_name}.{self.orderid}"
         # ✅ Best Practice: Use of dataclass for automatic generation of special methods
         self.vt_tradeid: str = f"{self.gateway_name}.{self.tradeid}"
+
+
 # 🧠 ML Signal: Use of default values for class attributes.
 
 # ✅ Best Practice: Use of constants for default values improves readability and maintainability.
 # ✅ Best Practice: Use of __post_init__ to initialize fields that depend on other fields
+
 
 @dataclass
 class PositionData(BaseData):
     """
     Position data is used for tracking each individual position holding.
     """
+
     # ✅ Best Practice: Type annotations improve code readability and maintainability.
 
     symbol: str
@@ -303,9 +331,13 @@ class PositionData(BaseData):
         """"""
         self.vt_symbol: str = f"{self.symbol}.{self.exchange.value}"
         # ✅ Best Practice: Type annotations improve code readability and maintainability.
-        self.vt_positionid: str = f"{self.gateway_name}.{self.vt_symbol}.{self.direction.value}"
+        self.vt_positionid: str = (
+            f"{self.gateway_name}.{self.vt_symbol}.{self.direction.value}"
+        )
+
 
 # ✅ Best Practice: Type annotations improve code readability and maintainability.
+
 
 @dataclass
 # ✅ Best Practice: Type annotations improve code readability and maintainability.
@@ -316,6 +348,7 @@ class AccountData(BaseData):
     available.
     # ✅ Best Practice: Type annotations improve code readability and maintainability.
     """
+
     # ✅ Best Practice: Type annotations improve code readability and maintainability.
 
     accountid: str
@@ -333,9 +366,12 @@ class AccountData(BaseData):
         self.available: float = self.balance - self.frozen
         # ✅ Best Practice: Type annotations improve code readability and maintainability.
         self.vt_accountid: str = f"{self.gateway_name}.{self.accountid}"
+
+
 # ✅ Best Practice: Default values for attributes provide clarity on expected initial state.
 
 # ✅ Best Practice: Type annotations improve code readability and maintainability.
+
 
 # ✅ Best Practice: Default values for attributes provide clarity on expected initial state.
 @dataclass
@@ -357,9 +393,12 @@ class LogData(BaseData):
     def __post_init__(self) -> None:
         """"""
         self.time: Datetime = Datetime.now()
+
+
 # ✅ Best Practice: Type annotations improve code readability and maintainability.
 
 # 🧠 ML Signal: Usage of 'in' keyword to check membership in a collection.
+
 
 # ✅ Best Practice: Include a docstring to describe the method's purpose.
 # ✅ Best Practice: Default values for attributes provide clarity on expected initial state.
@@ -379,30 +418,32 @@ class ContractData(BaseData):
     pricetick: float
     # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
 
-    min_volume: float = 1                   # minimum order volume
+    min_volume: float = 1  # minimum order volume
     # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
     # ✅ Best Practice: Use of __post_init__ in dataclass for additional initialization
-    max_volume: float | None = None      # maximum order volume
-    stop_supported: bool = False            # whether server supports stop order
+    max_volume: float | None = None  # maximum order volume
+    stop_supported: bool = False  # whether server supports stop order
     # ✅ Best Practice: Type hinting for class attributes
-    net_position: bool = False              # whether gateway uses net position volume
-    history_data: bool = False              # whether gateway provides bar history data
+    net_position: bool = False  # whether gateway uses net position volume
+    history_data: bool = False  # whether gateway provides bar history data
 
     option_strike: float | None = None
-    option_underlying: str | None = None     # vt_symbol of underlying contract
+    option_underlying: str | None = None  # vt_symbol of underlying contract
     option_type: OptionType | None = None
     # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
     option_listed: Datetime | None = None
     option_expiry: Datetime | None = None
     # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
     option_portfolio: str | None = None
-    option_index: str | None = None          # for identifying options with same strike price
+    option_index: str | None = None  # for identifying options with same strike price
     # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
 
     def __post_init__(self) -> None:
         # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
         """"""
         self.vt_symbol: str = f"{self.symbol}.{self.exchange.value}"
+
+
 # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
 
 
@@ -437,6 +478,7 @@ class QuoteData(BaseData):
         # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
         self.vt_symbol: str = f"{self.symbol}.{self.exchange.value}"
         self.vt_quoteid: str = f"{self.gateway_name}.{self.quoteid}"
+
     # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
 
     def is_active(self) -> bool:
@@ -451,21 +493,27 @@ class QuoteData(BaseData):
         """
         # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
         req: CancelRequest = CancelRequest(
-            orderid=self.quoteid, symbol=self.symbol, exchange=self.exchange
-        # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
+            orderid=self.quoteid,
+            symbol=self.symbol,
+            exchange=self.exchange,
+            # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
         )
         # ✅ Best Practice: Use of __post_init__ in dataclass for additional initialization
         return req
+
+
 # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
 
 # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
 # ✅ Best Practice: Type hinting for class attributes
+
 
 @dataclass
 class SubscribeRequest:
     """
     Request sending to specific gateway for subscribing tick data update.
     """
+
     # ✅ Best Practice: Type annotations improve code readability and maintainability.
 
     symbol: str
@@ -478,7 +526,9 @@ class SubscribeRequest:
         # ✅ Best Practice: Type annotations improve code readability and maintainability.
         self.vt_symbol: str = f"{self.symbol}.{self.exchange.value}"
 
+
 # ✅ Best Practice: Type annotations improve code readability and maintainability.
+
 
 @dataclass
 # ✅ Best Practice: Type annotations improve code readability and maintainability.

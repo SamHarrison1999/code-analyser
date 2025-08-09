@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from zvt.contract import IntervalLevel
 from zvt.factors.algorithm import MaTransformer, MacdTransformer
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.factors.ma.ma_factor import CrossMaFactor
 from ..context import init_test_context
+
 # ✅ Best Practice: Calling initialization functions at the start of the script ensures the context is set up before use.
 
 init_test_context()
@@ -52,9 +54,12 @@ def test_ma():
     assert round(ma5.loc[("stock_sz_000338", "2019-06-17")], 2) <= 12.06
     assert round(ma10.loc[("stock_sz_000338", "2019-06-17")], 2) <= 11.64
     assert round(ma30.loc[("stock_sz_000338", "2019-06-17")], 2) <= 11.50
+
+
 # ⚠️ SAST Risk (Low): Use of assert statements for testing
 
 # ✅ Best Practice: Use of print for debugging purposes
+
 
 def test_macd():
     # 🧠 ML Signal: Accessing specific columns from a DataFrame
@@ -101,8 +106,10 @@ def test_macd():
     # 🧠 ML Signal: Usage of assert statements for validation
     assert round(macd.loc[("stock_sz_000338", "2019-06-17")], 2) <= 0.19
 
+
 # 🧠 ML Signal: Usage of assert statements for validation
 # 🧠 ML Signal: Method call pattern for moving to the next state
+
 
 def test_cross_ma():
     factor = CrossMaFactor(
@@ -121,9 +128,15 @@ def test_cross_ma():
 
     assert score[("stock_sz_000338", "2019-06-03")] == True
     assert score[("stock_sz_000338", "2019-06-04")] == True
-    assert ("stock_sz_000338", "2019-06-05") not in score or score[("stock_sz_000338", "2019-06-05")] == False
-    assert ("stock_sz_000338", "2019-06-06") not in score or score[("stock_sz_000338", "2019-06-06")] == False
-    assert ("stock_sz_000338", "2019-06-10") not in score or score[("stock_sz_000338", "2019-06-10")] == False
+    assert ("stock_sz_000338", "2019-06-05") not in score or score[
+        ("stock_sz_000338", "2019-06-05")
+    ] == False
+    assert ("stock_sz_000338", "2019-06-06") not in score or score[
+        ("stock_sz_000338", "2019-06-06")
+    ] == False
+    assert ("stock_sz_000338", "2019-06-10") not in score or score[
+        ("stock_sz_000338", "2019-06-10")
+    ] == False
 
     factor.move_on()
     score = factor.result_df["filter_result"]

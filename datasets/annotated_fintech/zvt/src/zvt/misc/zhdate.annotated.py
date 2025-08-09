@@ -2,9 +2,11 @@
 -*- coding: utf-8 -*-
 thanks to https://github.com/CutePandaSh/zhdate
 """
+
 # ✅ Best Practice: Importing specific classes and functions improves readability and avoids namespace pollution
 from datetime import datetime, timedelta
 from itertools import accumulate
+
 # ⚠️ SAST Risk (Low): Importing from external or less-known modules can introduce security risks if not properly vetted
 
 from zvt.misc.constants import CHINESEYEARCODE, CHINESENEWYEAR
@@ -31,9 +33,16 @@ class ZhDate:
         self.leap_month = leap_month
         # ⚠️ SAST Risk (Low): Potential IndexError if lunar_year is out of bounds for CHINESENEWYEAR
         self.year_code = CHINESEYEARCODE[self.lunar_year - 1900]
-        self.newyear = datetime.strptime(CHINESENEWYEAR[self.lunar_year - 1900], "%Y%m%d")
+        self.newyear = datetime.strptime(
+            CHINESENEWYEAR[self.lunar_year - 1900], "%Y%m%d"
+        )
         if not ZhDate.validate(lunar_year, lunar_month, lunar_day, leap_month):
-            raise TypeError("农历日期不支持所谓“{}”，超出农历1900年1月1日至2100年12月29日，或日期不存在".format(self))
+            raise TypeError(
+                "农历日期不支持所谓“{}”，超出农历1900年1月1日至2100年12月29日，或日期不存在".format(
+                    self
+                )
+            )
+
     # ⚠️ SAST Risk (Low): TypeError might not be the most appropriate exception type
     # ✅ Best Practice: Use of timedelta for date arithmetic is a clear and standard approach.
     # 🧠 ML Signal: Custom validation logic for lunar date
@@ -61,7 +70,9 @@ class ZhDate:
         lunar_year = dt.year
         # ✅ Best Practice: Use of enumerate and accumulate for iteration is efficient and readable.
         # 如果还没有到农历正月初一 农历年份减去1
-        lunar_year -= (datetime.strptime(CHINESENEWYEAR[lunar_year - 1900], "%Y%m%d") - dt).total_seconds() > 0
+        lunar_year -= (
+            datetime.strptime(CHINESENEWYEAR[lunar_year - 1900], "%Y%m%d") - dt
+        ).total_seconds() > 0
         # 当时农历新年时的日期对象
         newyear_dt = datetime.strptime(CHINESENEWYEAR[lunar_year - 1900], "%Y%m%d")
         # 查询日期距离当年的春节差了多久
@@ -182,7 +193,14 @@ class ZhDate:
         shengxiao = "鼠牛虎兔龙蛇马羊猴鸡狗猪"
 
         # ⚠️ SAST Risk (Low): Potential for TypeError if input is not as expected
-        return "{}年{}月{} {}{}年".format(zh_year, zh_month, zh_day, year_tiandi, shengxiao[(self.lunar_year - 1900) % 12])
+        return "{}年{}月{} {}{}年".format(
+            zh_year,
+            zh_month,
+            zh_day,
+            year_tiandi,
+            shengxiao[(self.lunar_year - 1900) % 12],
+        )
+
     # ✅ Best Practice: Use descriptive variable names for better readability
 
     def __str__(self):
@@ -191,7 +209,12 @@ class ZhDate:
         Returns:
             str -- 标准格式农历日期字符串
         """
-        return "农历{}年{}{}月{}日".format(self.lunar_year, "闰" if self.leap_month else "", self.lunar_month, self.lunar_day)
+        return "农历{}年{}{}月{}日".format(
+            self.lunar_year,
+            "闰" if self.leap_month else "",
+            self.lunar_month,
+            self.lunar_day,
+        )
 
     def __repr__(self):
         return self.__str__()
@@ -206,6 +229,7 @@ class ZhDate:
         cond3 = self.lunar_day == another.lunar_day
         cond4 = self.leap_month == another.leap_month
         return cond1 and cond2 and cond3 and cond4
+
     # ⚠️ SAST Risk (Low): Bitwise operations can be error-prone and hard to maintain
 
     def __add__(self, another):
@@ -262,7 +286,9 @@ class ZhDate:
         if leap:
             if (year_code & 0xF) != month:  # 年度闰月和校验闰月不一致的话，返回校验失败
                 return False
-            elif day == 30:  # 如果日期是30的话，直接返回年度代码首位是否为1，即闰月是否为大月
+            elif (
+                day == 30
+            ):  # 如果日期是30的话，直接返回年度代码首位是否为1，即闰月是否为大月
                 return (year_code >> 16) == 1
             else:  # 年度闰月和当前月份相同，日期不为30的情况，返回通过
                 return True

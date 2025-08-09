@@ -5,10 +5,12 @@ import requests
 from zvt.api.utils import get_recent_report_date
 from zvt.contract.recorder import Recorder
 from zvt.domain.actor.actor_meta import ActorMeta
+
 # 🧠 ML Signal: Class definition with inheritance, useful for understanding class hierarchies and relationships.
 from zvt.utils.time_utils import to_pd_timestamp
 
 # 🧠 ML Signal: Static class attribute, useful for understanding default configurations or constants.
+
 
 class EastmoneyActorRecorder(Recorder):
     # 🧠 ML Signal: Static class attribute, useful for understanding default configurations or constants.
@@ -45,11 +47,18 @@ class EastmoneyActorRecorder(Recorder):
                 current_date = get_recent_report_date()
                 result = self.get_data(end_date=current_date, pn=pn, ps=ps)
                 print(result)
-                self.state = {"end_date": current_date, "pages": result["result"]["pages"], "pn": pn, "ps": ps}
+                self.state = {
+                    "end_date": current_date,
+                    "pages": result["result"]["pages"],
+                    "pn": pn,
+                    "ps": ps,
+                }
                 self.persist_state("stock_sz_000001", self.state)
             else:
                 if self.state["pn"] >= self.state["pages"]:
-                    current_date = get_recent_report_date(the_date=self.state["end_date"], step=1)
+                    current_date = get_recent_report_date(
+                        the_date=self.state["end_date"], step=1
+                    )
                     # 🧠 ML Signal: Usage of print statements for debugging or logging
                     pn = pn
                     ps = ps
@@ -64,7 +73,12 @@ class EastmoneyActorRecorder(Recorder):
 
                 result = self.get_data(end_date=current_date, pn=pn, ps=ps)
                 print(result)
-                self.state = {"end_date": current_date, "pages": result["result"]["pages"], "pn": pn, "ps": ps}
+                self.state = {
+                    "end_date": current_date,
+                    "pages": result["result"]["pages"],
+                    "pn": pn,
+                    "ps": ps,
+                }
                 self.persist_state("stock_sz_000001", self.state)
 
 

@@ -10,6 +10,7 @@ import pandas as pd
 # 🧠 ML Signal: Importing resam_calendar, indicating potential use of calendar resampling in data processing
 from qlib.data.inst_processor import InstProcessor
 from qlib.utils.resam import resam_calendar
+
 # 🧠 ML Signal: Storing method parameters as instance variables is a common pattern.
 # ✅ Best Practice: Ensure the DataFrame index is in datetime format for time series operations
 

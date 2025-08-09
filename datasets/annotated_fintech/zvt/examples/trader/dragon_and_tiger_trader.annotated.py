@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from typing import List, Union
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 
 import pandas as pd
 
 from zvt.contract import IntervalLevel
+
 # 🧠 ML Signal: Class definition for a custom factor, useful for model training on class-based patterns
 from zvt.contract.factor import Factor, Transformer, Accumulator
+
 # ⚠️ SAST Risk (Low): Using mutable default arguments like lists can lead to unexpected behavior.
 from zvt.domain import Stock, DragonAndTiger
 from zvt.trader import StockTrader
@@ -72,8 +75,8 @@ class DragonTigerFactor(Factor):
             clear_state,
             # 🧠 ML Signal: Setting a DataFrame column to a constant value, indicates data manipulation pattern
             only_load_factor,
-        # 🧠 ML Signal: Use of super() to call a method from a parent class, useful for understanding inheritance patterns
-        # 🧠 ML Signal: Inheritance from a base class, indicating a pattern of extending functionality
+            # 🧠 ML Signal: Use of super() to call a method from a parent class, useful for understanding inheritance patterns
+            # 🧠 ML Signal: Inheritance from a base class, indicating a pattern of extending functionality
         )
 
     def compute_result(self):
@@ -84,7 +87,14 @@ class DragonTigerFactor(Factor):
 
 class MyTrader(StockTrader):
     def init_factors(
-        self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp, adjust_type=None
+        self,
+        entity_ids,
+        entity_schema,
+        exchanges,
+        codes,
+        start_timestamp,
+        end_timestamp,
+        adjust_type=None,
     ):
         return [
             DragonTigerFactor(

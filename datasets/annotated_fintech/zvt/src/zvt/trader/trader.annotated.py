@@ -12,12 +12,20 @@ from zvt.contract.normal_data import NormalData
 from zvt.domain import Stock
 from zvt.trader import TradingSignal, TradingSignalType, TradingListener
 from zvt.trader.sim_account import SimAccountService
+
 # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local application sections improves readability.
 from zvt.trader.trader_info_api import AccountStatsReader
 from zvt.trader.trader_schemas import AccountStats, Position
+
 # ✅ Best Practice: Type hinting for class attributes helps with static analysis and IDE support.
-from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp, to_time_str, is_same_date, date_time_by_interval
+from zvt.utils.time_utils import (
+    to_pd_timestamp,
+    now_pd_timestamp,
+    to_time_str,
+    is_same_date,
+    date_time_by_interval,
+)
 
 
 class Trader(object):
@@ -44,7 +52,7 @@ class Trader(object):
         keep_history=False,
         # ⚠️ SAST Risk (Medium): Use of assert statements for input validation can be bypassed if Python is run with optimizations.
         pre_load_days=365,
-    # ✅ Best Practice: Use a logger for tracking and debugging instead of print statements.
+        # ✅ Best Practice: Use a logger for tracking and debugging instead of print statements.
     ) -> None:
         assert self.entity_schema is not None
         assert start_timestamp is not None
@@ -71,14 +79,15 @@ class Trader(object):
         self.pre_load_days = pre_load_days
 
         self.trading_dates = self.entity_schema.get_trading_dates(
-            start_date=self.start_timestamp, end_date=self.end_timestamp
-        # ⚠️ SAST Risk (Medium): Use of assert statements for input validation can be bypassed if Python is run with optimizations.
+            start_date=self.start_timestamp,
+            end_date=self.end_timestamp,
+            # ⚠️ SAST Risk (Medium): Use of assert statements for input validation can be bypassed if Python is run with optimizations.
         )
 
         if real_time:
             self.logger.info(
                 "real_time mode, end_timestamp should be future,you could set it big enough for running forever"
-            # 🧠 ML Signal: Initialization of trading signals list.
+                # 🧠 ML Signal: Initialization of trading signals list.
             )
             assert self.end_timestamp >= now_pd_timestamp()
 
@@ -122,7 +131,9 @@ class Trader(object):
             exchanges=self.exchanges,
             # ⚠️ SAST Risk (Low): Raising a generic exception without specific error type or message.
             codes=self.codes,
-            start_timestamp=date_time_by_interval(self.start_timestamp, -self.pre_load_days),
+            start_timestamp=date_time_by_interval(
+                self.start_timestamp, -self.pre_load_days
+            ),
             end_timestamp=self.end_timestamp,
             adjust_type=self.adjust_type,
         )
@@ -130,13 +141,17 @@ class Trader(object):
 
         if self.factors:
             # ⚠️ SAST Risk (Low): Potential exposure of sensitive information in logs
-            self.trading_level_asc = list(set([IntervalLevel(factor.level) for factor in self.factors]))
+            self.trading_level_asc = list(
+                set([IntervalLevel(factor.level) for factor in self.factors])
+            )
             self.trading_level_asc.sort()
 
             # ✅ Best Practice: Docstring provides a brief description of the method's purpose and parameters.
             # 🧠 ML Signal: Hook for initialization completion.
             # ⚠️ SAST Risk (Low): Returning potentially uninitialized or sensitive data
-            self.logger.info(f"trader level:{self.level},factors level:{self.trading_level_asc}")
+            self.logger.info(
+                f"trader level:{self.level},factors level:{self.trading_level_asc}"
+            )
 
             if self.level != self.trading_level_asc[0]:
                 raise Exception("trader level should be the min of the factors")
@@ -163,14 +178,22 @@ class Trader(object):
         """
         self.logger.info(f"timestamp: {timestamp} init_entities")
         return self.entity_ids
+
     # ✅ Best Practice: Use of logging for debugging and tracking state changes
 
     # 🧠 ML Signal: Method definition with specific parameter and return type hints
     def init_factors(
-        self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp, adjust_type=None
-    # 🧠 ML Signal: Pattern of updating a dictionary with new values
-    # ✅ Best Practice: Use of dictionary get method for safe access
-    # ✅ Best Practice: Include a docstring to describe the function's purpose and parameters
+        self,
+        entity_ids,
+        entity_schema,
+        exchanges,
+        codes,
+        start_timestamp,
+        end_timestamp,
+        adjust_type=None,
+        # 🧠 ML Signal: Pattern of updating a dictionary with new values
+        # ✅ Best Practice: Use of dictionary get method for safe access
+        # ✅ Best Practice: Include a docstring to describe the function's purpose and parameters
     ):
         """
         overwrite it to init factors if you want to use factor computing model
@@ -205,6 +228,7 @@ class Trader(object):
             f"level:{level},old short targets:{self.level_map_short_targets.get(level)},new short targets:{short_targets}"
         )
         self.level_map_short_targets[level] = short_targets
+
     # 🧠 ML Signal: Converting list to set for union operation
     # 🧠 ML Signal: Method signature and return type hint can be used to infer method behavior and expected output
 
@@ -212,6 +236,7 @@ class Trader(object):
         # ✅ Best Practice: Include type hints for method return values for better readability and maintainability
         # 🧠 ML Signal: Usage of self indicates this is an instance method, suggesting object-oriented design
         return self.level_map_long_targets.get(level)
+
     # 🧠 ML Signal: Calling a method on self.account_service can indicate a service-oriented architecture
 
     # 🧠 ML Signal: Method chaining pattern, common in fluent interfaces
@@ -313,13 +338,17 @@ class Trader(object):
                         # 🧠 ML Signal: Conditional logic based on a class attribute (self.draw_result) can indicate feature usage patterns.
                         close_long_entity_ids.append(position.entity_id)
                         # 🧠 ML Signal: Appending to trading_signals list could indicate a record of actions or decisions.
-                        self.logger.info(f"close profit {position.profit_rate} for {position.entity_id}")
+                        self.logger.info(
+                            f"close profit {position.profit_rate} for {position.entity_id}"
+                        )
                     # 🧠 ML Signal: Instantiating objects with specific parameters can indicate common usage patterns.
                     # 止损
                     # 🧠 ML Signal: Accessing a specific attribute (data_df) of an object can indicate common usage patterns.
                     if position.profit_rate <= negative:
                         close_long_entity_ids.append(position.entity_id)
-                        self.logger.info(f"cut lost {position.profit_rate} for {position.entity_id}")
+                        self.logger.info(
+                            f"cut lost {position.profit_rate} for {position.entity_id}"
+                        )
             # 🧠 ML Signal: Instantiating objects with specific parameters can indicate common usage patterns.
 
             # 🧠 ML Signal: Using specific DataFrame operations (e.g., copy, selection) can indicate common data manipulation patterns.
@@ -336,7 +365,7 @@ class Trader(object):
                     position.entity_id
                     for position in account.positions
                     if position != None and position.available_long > 0
-                # 🧠 ML Signal: Logging usage pattern for monitoring or debugging
+                    # 🧠 ML Signal: Logging usage pattern for monitoring or debugging
                 ]
 
             # ✅ Best Practice: Limit the number of long targets to a maximum of 10 for manageability
@@ -350,7 +379,9 @@ class Trader(object):
             # 🧠 ML Signal: Usage of a helper function to_time_str suggests a pattern of converting timestamps to strings
 
             # ⚠️ SAST Risk (Low): Potential risk if to_time_str does not handle invalid timestamps properly
-            due_timestamp = to_pd_timestamp(timestamp) + pd.Timedelta(seconds=self.level.to_second())
+            due_timestamp = to_pd_timestamp(timestamp) + pd.Timedelta(
+                seconds=self.level.to_second()
+            )
             for entity_id in entity_ids:
                 trading_signal = TradingSignal(
                     entity_id=entity_id,
@@ -362,10 +393,11 @@ class Trader(object):
                     # 🧠 ML Signal: Iterating over listeners to propagate trading signals, indicating an event-driven architecture.
                     trading_level=self.level,
                     position_pct=position_pct,
-                # 🧠 ML Signal: Iterating over a list of listeners to trigger an event
-                # 🧠 ML Signal: Calling a method on listeners with trading signals, showing a pattern of event notification.
+                    # 🧠 ML Signal: Iterating over a list of listeners to trigger an event
+                    # 🧠 ML Signal: Calling a method on listeners with trading signals, showing a pattern of event notification.
                 )
                 self.trading_signals.append(trading_signal)
+
     # ✅ Best Practice: Resetting the trading signals list after processing to avoid stale data.
     # 🧠 ML Signal: Notifying multiple listeners about an event
 
@@ -383,8 +415,10 @@ class Trader(object):
             # 🧠 ML Signal: Method call on listener object, useful for ML models predicting method invocation patterns
             current_holdings = [
                 # 🧠 ML Signal: Iterating over a list of listeners to propagate an event
-                position.entity_id for position in account.positions if position != None and position.available_long > 0
-            # 🧠 ML Signal: Calling a method on each listener object, indicating a publish-subscribe pattern
+                position.entity_id
+                for position in account.positions
+                if position != None and position.available_long > 0
+                # 🧠 ML Signal: Calling a method on each listener object, indicating a publish-subscribe pattern
             ]
         # 🧠 ML Signal: Propagating an error event to multiple listeners
 
@@ -399,7 +433,9 @@ class Trader(object):
             position_pct = self.short_position_control()
             # ✅ Best Practice: List comprehension for concise and readable filtering
 
-            due_timestamp = to_pd_timestamp(timestamp) + pd.Timedelta(seconds=self.level.to_second())
+            due_timestamp = to_pd_timestamp(timestamp) + pd.Timedelta(
+                seconds=self.level.to_second()
+            )
             for entity_id in shorted:
                 trading_signal = TradingSignal(
                     entity_id=entity_id,
@@ -423,13 +459,21 @@ class Trader(object):
             reader = AccountStatsReader(trader_names=[self.trader_name])
             df = reader.data_df
             drawer = Drawer(
-                main_data=NormalData(df.copy()[["trader_name", "timestamp", "all_value"]], category_field="trader_name")
+                main_data=NormalData(
+                    df.copy()[["trader_name", "timestamp", "all_value"]],
+                    category_field="trader_name",
+                )
             )
             # 🧠 ML Signal: Filtering factor targets
             drawer.draw_line(show=True)
 
     def on_factor_targets_filtered(
-        self, timestamp, level, factor: Factor, long_targets: List[str], short_targets: List[str]
+        self,
+        timestamp,
+        level,
+        factor: Factor,
+        long_targets: List[str],
+        short_targets: List[str],
     ) -> Tuple[List[str], List[str]]:
         """
         overwrite it to filter the targets from factor
@@ -454,6 +498,7 @@ class Trader(object):
 
     def in_trading_date(self, timestamp):
         return to_time_str(timestamp) in self.trading_dates
+
     # 🧠 ML Signal: Processing trading signals
 
     def on_time(self, timestamp: pd.Timestamp):
@@ -495,6 +540,7 @@ class Trader(object):
 
     def get_factors_by_level(self, level):
         return [factor for factor in self.factors if factor.level == level]
+
     # 🧠 ML Signal: Handling factors if present
 
     def handle_factor_targets(self, timestamp: pd.Timestamp):
@@ -525,15 +571,21 @@ class Trader(object):
             # 🧠 ML Signal: Executing buy actions
             # 🧠 ML Signal: Handling trading close conditions
             # ✅ Best Practice: Consistent logging format for better readability
-            if self.entity_schema.is_finished_kdata_timestamp(timestamp=timestamp, level=level):
+            if self.entity_schema.is_finished_kdata_timestamp(
+                timestamp=timestamp, level=level
+            ):
                 all_long_targets = []
                 all_short_targets = []
 
                 # 从该level的factor中过滤targets
                 current_level_factors = self.get_factors_by_level(level=level)
                 for factor in current_level_factors:
-                    long_targets = factor.get_targets(timestamp=timestamp, target_type=TargetType.positive)
-                    short_targets = factor.get_targets(timestamp=timestamp, target_type=TargetType.negative)
+                    long_targets = factor.get_targets(
+                        timestamp=timestamp, target_type=TargetType.positive
+                    )
+                    short_targets = factor.get_targets(
+                        timestamp=timestamp, target_type=TargetType.negative
+                    )
 
                     # 🧠 ML Signal: Finalizing process with on_finish
                     if long_targets or short_targets:
@@ -558,9 +610,11 @@ class Trader(object):
         # iterate timestamp of the min level,e.g,9:30,9:35,9.40...for 5min level
         # timestamp represents the timestamp in kdata
         for timestamp in self.entity_schema.get_interval_timestamps(
-            start_date=self.start_timestamp, end_date=self.end_timestamp, level=self.level
+            start_date=self.start_timestamp,
+            end_date=self.end_timestamp,
+            level=self.level,
         ):
-            self.logger.info(f">>>>>>>>>>")
+            self.logger.info(">>>>>>>>>>")
 
             # 🧠 ML Signal: Use of __all__ to define public API of the module
             self.entity_ids = self.init_entities(timestamp=timestamp)
@@ -572,7 +626,8 @@ class Trader(object):
 
             # on_trading_open to set the account
             if self.level >= IntervalLevel.LEVEL_1DAY or (
-                self.level != IntervalLevel.LEVEL_1DAY and self.entity_schema.is_open_timestamp(timestamp)
+                self.level != IntervalLevel.LEVEL_1DAY
+                and self.entity_schema.is_open_timestamp(timestamp)
             ):
                 self.on_trading_open(timestamp=timestamp)
 
@@ -591,7 +646,9 @@ class Trader(object):
             if self.level == IntervalLevel.LEVEL_1DAY:
                 if is_same_date(timestamp, now_pd_timestamp()):
                     while True:
-                        self.logger.info(f"time is:{now_pd_timestamp()},just smoke for minutes")
+                        self.logger.info(
+                            f"time is:{now_pd_timestamp()},just smoke for minutes"
+                        )
                         time.sleep(600)
                         current = now_pd_timestamp()
                         if current.hour >= 19:
@@ -601,7 +658,9 @@ class Trader(object):
             elif self.real_time:
                 # all factor move on to handle the coming data
                 if self.kdata_use_begin_time:
-                    real_end_timestamp = timestamp + pd.Timedelta(seconds=self.level.to_second())
+                    real_end_timestamp = timestamp + pd.Timedelta(
+                        seconds=self.level.to_second()
+                    )
                 else:
                     real_end_timestamp = timestamp
 
@@ -612,17 +671,23 @@ class Trader(object):
             if waiting_seconds > 0:
                 # iterate the factor from min to max which in finished timestamp kdata
                 for level in self.trading_level_asc:
-                    if self.entity_schema.is_finished_kdata_timestamp(timestamp=timestamp, level=level):
+                    if self.entity_schema.is_finished_kdata_timestamp(
+                        timestamp=timestamp, level=level
+                    ):
                         factors = self.get_factors_by_level(level=level)
                         for factor in factors:
-                            factor.move_on(to_timestamp=timestamp, timeout=waiting_seconds + 20)
+                            factor.move_on(
+                                to_timestamp=timestamp, timeout=waiting_seconds + 20
+                            )
 
             if self.factors:
                 self.handle_factor_targets(timestamp=timestamp)
 
             self.on_time(timestamp=timestamp)
 
-            long_selected, short_selected = self.on_targets_selected_from_levels(timestamp)
+            long_selected, short_selected = self.on_targets_selected_from_levels(
+                timestamp
+            )
 
             # 处理 止赢 止损
             passive_short, _ = self.on_profit_control()
@@ -639,11 +704,12 @@ class Trader(object):
 
             # on_trading_close to calculate date account
             if self.level >= IntervalLevel.LEVEL_1DAY or (
-                self.level != IntervalLevel.LEVEL_1DAY and self.entity_schema.is_close_timestamp(timestamp)
+                self.level != IntervalLevel.LEVEL_1DAY
+                and self.entity_schema.is_close_timestamp(timestamp)
             ):
                 self.on_trading_close(timestamp)
 
-            self.logger.info(f"<<<<<<<<<<\n")
+            self.logger.info("<<<<<<<<<<\n")
 
         self.on_finish(timestamp)
 

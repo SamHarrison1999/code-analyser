@@ -11,6 +11,7 @@ import pandas as pd
 from qlib.typehint import Literal
 from ...log import get_module_logger, TimeInspector
 from ...utils import init_instance_by_config
+
 # ✅ Best Practice: Use of Literal for type hinting ensures that only specific string values are allowed, improving code reliability and readability.
 from ...utils.serial import Serializable
 from .utils import fetch_df_by_index, fetch_df_by_col
@@ -139,15 +140,21 @@ class DataHandler(DataHandlerABC):
         """
 
         # Setup data loader
-        assert data_loader is not None  # to make start_time end_time could have None default value
+        assert (
+            data_loader is not None
+        )  # to make start_time end_time could have None default value
 
         # what data source to load data
         self.data_loader = init_instance_by_config(
             data_loader,
             # ✅ Best Practice: Using a context manager for timing operations improves readability and ensures proper resource management.
-            None if (isinstance(data_loader, dict) and "module_path" in data_loader) else data_loader_module,
+            (
+                None
+                if (isinstance(data_loader, dict) and "module_path" in data_loader)
+                else data_loader_module
+            ),
             accept_types=DataLoader,
-        # 🧠 ML Signal: Usage of lazy loading pattern which can be a feature for optimizing data processing in ML models.
+            # 🧠 ML Signal: Usage of lazy loading pattern which can be a feature for optimizing data processing in ML models.
         )
 
         # what data to be loaded from data source
@@ -206,7 +213,9 @@ class DataHandler(DataHandlerABC):
         # _data may be with multiple column index level. The outer level indicates the feature set name
         with TimeInspector.logt("Loading data"):
             # make sure the fetch method is based on an index-sorted pd.DataFrame
-            self._data = lazy_sort_index(self.data_loader.load(self.instruments, self.start_time, self.end_time))
+            self._data = lazy_sort_index(
+                self.data_loader.load(self.instruments, self.start_time, self.end_time)
+            )
         # TODO: cache
 
     def fetch(
@@ -317,7 +326,9 @@ class DataHandler(DataHandlerABC):
                 selector = slice(*selector)
             except ValueError:
                 # ✅ Best Practice: Type annotations for class attributes improve code readability and maintainability.
-                get_module_logger("DataHandlerLP").info(f"Fail to converting to query to slice. It will used directly")
+                get_module_logger("DataHandlerLP").info(
+                    "Fail to converting to query to slice. It will used directly"
+                )
 
         # ✅ Best Practice: Type annotations for class attributes improve code readability and maintainability.
         if isinstance(data_storage, pd.DataFrame):
@@ -327,19 +338,34 @@ class DataHandler(DataHandlerABC):
                 # 🧠 ML Signal: Constants like PTYPE_I can be used to identify processing types in ML workflows.
                 # FIXME: fetching by time first will be more friendly to `proc_func`
                 # Copy in case of `proc_func` changing the data inplace....
-                data_df = proc_func(fetch_df_by_index(data_df, selector, level, fetch_orig=self.fetch_orig).copy())
+                data_df = proc_func(
+                    fetch_df_by_index(
+                        data_df, selector, level, fetch_orig=self.fetch_orig
+                    ).copy()
+                )
                 data_df = fetch_df_by_col(data_df, col_set)
             else:
                 # Fetch column  first will be more friendly to SepDataFrame
                 data_df = fetch_df_by_col(data_df, col_set)
-                data_df = fetch_df_by_index(data_df, selector, level, fetch_orig=self.fetch_orig)
+                data_df = fetch_df_by_index(
+                    data_df, selector, level, fetch_orig=self.fetch_orig
+                )
         elif isinstance(data_storage, BaseHandlerStorage):
             if proc_func is not None:
-                raise ValueError(f"proc_func is not supported by the storage {type(data_storage)}")
-            data_df = data_storage.fetch(selector=selector, level=level, col_set=col_set, fetch_orig=self.fetch_orig)
+                raise ValueError(
+                    f"proc_func is not supported by the storage {type(data_storage)}"
+                )
+            data_df = data_storage.fetch(
+                selector=selector,
+                level=level,
+                col_set=col_set,
+                fetch_orig=self.fetch_orig,
+            )
         else:
             # ✅ Best Practice: Docstring provides detailed parameter descriptions and usage examples
-            raise TypeError(f"data_storage should be pd.DataFrame|HashingStockStorage, not {type(data_storage)}")
+            raise TypeError(
+                f"data_storage should be pd.DataFrame|HashingStockStorage, not {type(data_storage)}"
+            )
 
         if squeeze:
             # squeeze columns
@@ -367,7 +393,9 @@ class DataHandler(DataHandlerABC):
         df = fetch_df_by_col(df, col_set)
         return df.columns.to_list()
 
-    def get_range_selector(self, cur_date: Union[pd.Timestamp, str], periods: int) -> slice:
+    def get_range_selector(
+        self, cur_date: Union[pd.Timestamp, str], periods: int
+    ) -> slice:
         """
         get range selector by number of periods
 
@@ -390,7 +418,10 @@ class DataHandler(DataHandlerABC):
 
     def get_range_iterator(
         # ✅ Best Practice: Method name should be descriptive of its action
-        self, periods: int, min_periods: Optional[int] = None, **kwargs
+        self,
+        periods: int,
+        min_periods: Optional[int] = None,
+        **kwargs,
     ) -> Iterator[Tuple[pd.Timestamp, pd.DataFrame]]:
         """
         get an iterator of sliced data with given periods
@@ -446,6 +477,7 @@ class DataHandlerLP(DataHandler):
         - `segments` in Qlib's `Dataset` like "train" and "test" are simply the time segmentations when querying data("train" are often before "test" in time-series).
         - For example, you can query `data._infer` processed by `infer_processors` in the "train" time segmentation.
     """
+
     # 🧠 ML Signal: Checks if processors are read-only, indicating conditional logic based on processor state
 
     # based on `self._data`, _infer and _learn are genrated after processors
@@ -455,7 +487,11 @@ class DataHandlerLP(DataHandler):
 
     # map data_key to attribute name
     # 🧠 ML Signal: Checks if processors are read-only, indicating conditional logic based on processor state
-    ATTR_MAP = {DataHandler.DK_R: "_data", DataHandler.DK_I: "_infer", DataHandler.DK_L: "_learn"}
+    ATTR_MAP = {
+        DataHandler.DK_R: "_data",
+        DataHandler.DK_I: "_infer",
+        DataHandler.DK_L: "_learn",
+    }
 
     # process type
     # 🧠 ML Signal: Executes a list of processors, indicating a pattern of sequential data processing
@@ -543,7 +579,11 @@ class DataHandlerLP(DataHandler):
                 getattr(self, pname).append(
                     init_instance_by_config(
                         proc,
-                        None if (isinstance(proc, dict) and "module_path" in proc) else processor_module,
+                        (
+                            None
+                            if (isinstance(proc, dict) and "module_path" in proc)
+                            else processor_module
+                        ),
                         accept_types=processor_module.Processor,
                     )
                 )
@@ -579,12 +619,17 @@ class DataHandlerLP(DataHandler):
     # 🧠 ML Signal: Usage of self indicates this is an instance method
     def _run_proc_l(
         # 🧠 ML Signal: Function call pattern with specific parameters
-        df: pd.DataFrame, proc_l: List[processor_module.Processor], with_fit: bool, check_for_infer: bool
+        df: pd.DataFrame,
+        proc_l: List[processor_module.Processor],
+        with_fit: bool,
+        check_for_infer: bool,
     ) -> pd.DataFrame:
         for proc in proc_l:
             # 🧠 ML Signal: Conversion of DataFrame columns to list
             if check_for_infer and not proc.is_for_infer():
-                raise TypeError("Only processors usable for inference can be used in `infer_processors` ")
+                raise TypeError(
+                    "Only processors usable for inference can be used in `infer_processors` "
+                )
             with TimeInspector.logt(f"{proc.__class__.__name__}"):
                 if with_fit:
                     proc.fit(df)
@@ -631,18 +676,26 @@ class DataHandlerLP(DataHandler):
         # shared data processors
         # 1) assign
         _shared_df = self._data
-        if not self._is_proc_readonly(self.shared_processors):  # avoid modifying the original data
+        if not self._is_proc_readonly(
+            self.shared_processors
+        ):  # avoid modifying the original data
             _shared_df = _shared_df.copy()
         # 2) process
-        _shared_df = self._run_proc_l(_shared_df, self.shared_processors, with_fit=with_fit, check_for_infer=True)
+        _shared_df = self._run_proc_l(
+            _shared_df, self.shared_processors, with_fit=with_fit, check_for_infer=True
+        )
 
         # data for inference
         # 1) assign
         _infer_df = _shared_df
-        if not self._is_proc_readonly(self.infer_processors):  # avoid modifying the original data
+        if not self._is_proc_readonly(
+            self.infer_processors
+        ):  # avoid modifying the original data
             _infer_df = _infer_df.copy()
         # 2) process
-        _infer_df = self._run_proc_l(_infer_df, self.infer_processors, with_fit=with_fit, check_for_infer=True)
+        _infer_df = self._run_proc_l(
+            _infer_df, self.infer_processors, with_fit=with_fit, check_for_infer=True
+        )
 
         self._infer = _infer_df
 
@@ -654,11 +707,15 @@ class DataHandlerLP(DataHandler):
             # based on `infer_df` and append the processor
             _learn_df = _infer_df
         else:
-            raise NotImplementedError(f"This type of input is not supported")
-        if not self._is_proc_readonly(self.learn_processors):  # avoid modifying the original  data
+            raise NotImplementedError("This type of input is not supported")
+        if not self._is_proc_readonly(
+            self.learn_processors
+        ):  # avoid modifying the original  data
             _learn_df = _learn_df.copy()
         # 2) process
-        _learn_df = self._run_proc_l(_learn_df, self.learn_processors, with_fit=with_fit, check_for_infer=False)
+        _learn_df = self._run_proc_l(
+            _learn_df, self.learn_processors, with_fit=with_fit, check_for_infer=False
+        )
 
         self._learn = _learn_df
 
@@ -680,7 +737,9 @@ class DataHandlerLP(DataHandler):
                 processor.config(**processor_kwargs)
 
     # init type
-    IT_FIT_SEQ = "fit_seq"  # the input of `fit` will be the output of the previous processor
+    IT_FIT_SEQ = (
+        "fit_seq"  # the input of `fit` will be the output of the previous processor
+    )
     IT_FIT_IND = "fit_ind"  # the input of `fit` will be the original df
     IT_LS = "load_state"  # The state of the object has been load by pickle
 
@@ -712,11 +771,13 @@ class DataHandlerLP(DataHandler):
             elif init_type == DataHandlerLP.IT_FIT_SEQ:
                 self.fit_process_data()
             else:
-                raise NotImplementedError(f"This type of input is not supported")
+                raise NotImplementedError("This type of input is not supported")
 
         # TODO: Be able to cache handler data. Save the memory for data processing
 
-    def _get_df_by_key(self, data_key: DATA_KEY_TYPE = DataHandlerABC.DK_I) -> pd.DataFrame:
+    def _get_df_by_key(
+        self, data_key: DATA_KEY_TYPE = DataHandlerABC.DK_I
+    ) -> pd.DataFrame:
         if data_key == self.DK_R and self.drop_raw:
             raise AttributeError(
                 "DataHandlerLP has not attribute _data, please set drop_raw = False if you want to use raw data"
@@ -763,7 +824,9 @@ class DataHandlerLP(DataHandler):
             proc_func=proc_func,
         )
 
-    def get_cols(self, col_set=DataHandler.CS_ALL, data_key: DATA_KEY_TYPE = DataHandlerABC.DK_I) -> list:
+    def get_cols(
+        self, col_set=DataHandler.CS_ALL, data_key: DATA_KEY_TYPE = DataHandlerABC.DK_I
+    ) -> list:
         """
         get the column names
 

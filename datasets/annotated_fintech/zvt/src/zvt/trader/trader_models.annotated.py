@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 # ✅ Best Practice: Import only necessary components to avoid namespace pollution
 from typing import List
+
 # 🧠 ML Signal: Definition of a class with multiple attributes, useful for understanding data structure patterns
 
 from zvt.contract.model import MixinModel
+
 # 🧠 ML Signal: Use of type annotations for class attributes, indicating expected data types
 
 

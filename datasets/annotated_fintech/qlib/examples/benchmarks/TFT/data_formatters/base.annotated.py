@@ -32,6 +32,7 @@ These dataset-specific methods:
 # ✅ Best Practice: Method decorator indicates that this method must be implemented by subclasses
 import abc
 import enum
+
 # ✅ Best Practice: Raising NotImplementedError in a method indicates it's intended to be overridden in subclasses.
 
 
@@ -47,7 +48,9 @@ class DataTypes(enum.IntEnum):
     CATEGORICAL = 1
     DATE = 2
 
+
 # ⚠️ SAST Risk (Low): Method is not implemented, which could lead to runtime errors if not overridden
+
 
 class InputTypes(enum.IntEnum):
     # ✅ Best Practice: Use of @abc.abstractmethod indicates this method must be implemented by subclasses
@@ -88,6 +91,7 @@ class GenericDataFormatter(abc.ABC):
     def format_predictions(self, df):
         """Reverts any normalisation to give predictions in original scale."""
         raise NotImplementedError()
+
     # 🧠 ML Signal: Method related to handling categorical input for ML models.
 
     # ✅ Best Practice: Docstring provides a clear explanation of the method's purpose and return value
@@ -103,6 +107,7 @@ class GenericDataFormatter(abc.ABC):
         """Defines order, input type and data type of each column."""
         # 🧠 ML Signal: Method returning a specific data structure or format
         raise NotImplementedError()
+
     # ✅ Best Practice: Consider renaming the function to indicate its purpose more clearly.
 
     @abc.abstractmethod
@@ -181,7 +186,11 @@ class GenericDataFormatter(abc.ABC):
             # 🧠 ML Signal: Identifying known categorical inputs for time series forecasting
             if length != 1:
                 # ⚠️ SAST Risk (Low): Potential KeyError if get_fixed_params() does not return a dictionary-like object
-                raise ValueError("Illegal number of inputs ({}) of type {}".format(length, input_type))
+                raise ValueError(
+                    "Illegal number of inputs ({}) of type {}".format(
+                        length, input_type
+                    )
+                )
 
         # ⚠️ SAST Risk (Low): Error message could expose internal parameter names
         _check_single_column(InputTypes.ID)
@@ -194,45 +203,66 @@ class GenericDataFormatter(abc.ABC):
         real_inputs = [
             tup
             for tup in column_definition
-            if tup[1] == DataTypes.REAL_VALUED and tup[2] not in {InputTypes.ID, InputTypes.TIME}
+            if tup[1] == DataTypes.REAL_VALUED
+            and tup[2] not in {InputTypes.ID, InputTypes.TIME}
         ]
         categorical_inputs = [
             tup
             for tup in column_definition
-            if tup[1] == DataTypes.CATEGORICAL and tup[2] not in {InputTypes.ID, InputTypes.TIME}
+            if tup[1] == DataTypes.CATEGORICAL
+            and tup[2] not in {InputTypes.ID, InputTypes.TIME}
         ]
 
         return identifier + time + real_inputs + categorical_inputs
 
     def _get_input_columns(self):
         """Returns names of all input columns."""
-        return [tup[0] for tup in self.get_column_definition() if tup[2] not in {InputTypes.ID, InputTypes.TIME}]
+        return [
+            tup[0]
+            for tup in self.get_column_definition()
+            if tup[2] not in {InputTypes.ID, InputTypes.TIME}
+        ]
 
     def _get_tft_input_indices(self):
         """Returns the relevant indexes and input sizes required by TFT."""
 
         # Functions
         def _extract_tuples_from_data_type(data_type, defn):
-            return [tup for tup in defn if tup[1] == data_type and tup[2] not in {InputTypes.ID, InputTypes.TIME}]
+            return [
+                tup
+                for tup in defn
+                if tup[1] == data_type
+                and tup[2] not in {InputTypes.ID, InputTypes.TIME}
+            ]
 
         def _get_locations(input_types, defn):
             return [i for i, tup in enumerate(defn) if tup[2] in input_types]
 
         # Start extraction
         column_definition = [
-            tup for tup in self.get_column_definition() if tup[2] not in {InputTypes.ID, InputTypes.TIME}
+            tup
+            for tup in self.get_column_definition()
+            if tup[2] not in {InputTypes.ID, InputTypes.TIME}
         ]
 
-        categorical_inputs = _extract_tuples_from_data_type(DataTypes.CATEGORICAL, column_definition)
-        real_inputs = _extract_tuples_from_data_type(DataTypes.REAL_VALUED, column_definition)
+        categorical_inputs = _extract_tuples_from_data_type(
+            DataTypes.CATEGORICAL, column_definition
+        )
+        real_inputs = _extract_tuples_from_data_type(
+            DataTypes.REAL_VALUED, column_definition
+        )
 
         locations = {
             "input_size": len(self._get_input_columns()),
             "output_size": len(_get_locations({InputTypes.TARGET}, column_definition)),
             "category_counts": self.num_classes_per_cat_input,
             "input_obs_loc": _get_locations({InputTypes.TARGET}, column_definition),
-            "static_input_loc": _get_locations({InputTypes.STATIC_INPUT}, column_definition),
-            "known_regular_inputs": _get_locations({InputTypes.STATIC_INPUT, InputTypes.KNOWN_INPUT}, real_inputs),
+            "static_input_loc": _get_locations(
+                {InputTypes.STATIC_INPUT}, column_definition
+            ),
+            "known_regular_inputs": _get_locations(
+                {InputTypes.STATIC_INPUT, InputTypes.KNOWN_INPUT}, real_inputs
+            ),
             "known_categorical_inputs": _get_locations(
                 {InputTypes.STATIC_INPUT, InputTypes.KNOWN_INPUT}, categorical_inputs
             ),
@@ -255,7 +285,9 @@ class GenericDataFormatter(abc.ABC):
 
         for k in required_keys:
             if k not in fixed_params:
-                raise ValueError("Field {}".format(k) + " missing from fixed parameter definitions!")
+                raise ValueError(
+                    "Field {}".format(k) + " missing from fixed parameter definitions!"
+                )
 
         fixed_params["column_definition"] = self.get_column_definition()
 

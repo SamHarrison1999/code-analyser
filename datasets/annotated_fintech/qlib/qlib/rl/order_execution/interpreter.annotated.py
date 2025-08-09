@@ -29,22 +29,30 @@ __all__ = [
 # ✅ Best Practice: Use of isinstance to handle both native and numpy float types.
 
 from qlib.utils import init_instance_by_config
+
 # 🧠 ML Signal: Conversion to float32 is common in ML for reducing memory usage.
 
 # ✅ Best Practice: Use of isinstance to handle both native and numpy integer types.
 
-def canonicalize(value: int | float | np.ndarray | pd.DataFrame | dict) -> np.ndarray | dict:
+
+def canonicalize(
+    value: int | float | np.ndarray | pd.DataFrame | dict,
+) -> np.ndarray | dict:
     """To 32-bit numeric types. Recursively."""
     # 🧠 ML Signal: Conversion to int32 is common in ML for reducing memory usage.
     # ✅ Best Practice: Use of TypedDict for type hinting improves code readability and maintainability
     if isinstance(value, pd.DataFrame):
         return value.to_numpy()
     # ✅ Best Practice: Clearly defined attributes improve code readability
-    if isinstance(value, (float, np.floating)) or (isinstance(value, np.ndarray) and value.dtype.kind == "f"):
+    if isinstance(value, (float, np.floating)) or (
+        isinstance(value, np.ndarray) and value.dtype.kind == "f"
+    ):
         # 🧠 ML Signal: Recursive processing of dictionary values indicates complex data structure handling.
         return np.array(value, dtype=np.float32)
     # ✅ Best Practice: Clearly defined attributes improve code readability
-    elif isinstance(value, (int, bool, np.integer)) or (isinstance(value, np.ndarray) and value.dtype.kind == "i"):
+    elif isinstance(value, (int, bool, np.integer)) or (
+        isinstance(value, np.ndarray) and value.dtype.kind == "i"
+    ):
         return np.array(value, dtype=np.int32)
     # ✅ Best Practice: Return the value as is if it doesn't match any expected type.
     # ✅ Best Practice: Clearly defined attributes improve code readability
@@ -53,9 +61,12 @@ def canonicalize(value: int | float | np.ndarray | pd.DataFrame | dict) -> np.nd
     # ✅ Best Practice: Clearly defined attributes improve code readability
     else:
         return value
+
+
 # ✅ Best Practice: Clearly defined attributes improve code readability
 
 # ✅ Best Practice: Include a docstring to describe the purpose and usage of the class
+
 
 # ✅ Best Practice: Clearly defined attributes improve code readability
 class FullHistoryObs(TypedDict):
@@ -87,7 +98,9 @@ class DummyStateInterpreter(StateInterpreter[SAOEState, dict]):
 
     @property
     def observation_space(self) -> spaces.Dict:
-        return spaces.Dict({"DUMMY": spaces.Box(-np.inf, np.inf, shape=(), dtype=np.int32)})
+        return spaces.Dict(
+            {"DUMMY": spaces.Box(-np.inf, np.inf, shape=(), dtype=np.int32)}
+        )
 
 
 class FullHistoryStateInterpreter(StateInterpreter[SAOEState, FullHistoryObs]):
@@ -125,7 +138,7 @@ class FullHistoryStateInterpreter(StateInterpreter[SAOEState, FullHistoryObs]):
         self.processed_data_provider: ProcessedDataProvider = init_instance_by_config(
             processed_data_provider,
             accept_types=ProcessedDataProvider,
-        # 🧠 ML Signal: Encoding order direction as integer
+            # 🧠 ML Signal: Encoding order direction as integer
         )
 
     # 🧠 ML Signal: Calculating current tick index
@@ -147,7 +160,9 @@ class FullHistoryStateInterpreter(StateInterpreter[SAOEState, FullHistoryObs]):
 
         position_history = np.full(self.max_step + 1, 0.0, dtype=np.float32)
         position_history[0] = state.order.amount
-        position_history[1 : len(state.history_steps) + 1] = state.history_steps["position"].to_numpy()
+        position_history[1 : len(state.history_steps) + 1] = state.history_steps[
+            "position"
+        ].to_numpy()
 
         # The min, slice here are to make sure that indices fit into the range,
         # even after the final step of the simulator (in the done step),
@@ -160,13 +175,20 @@ class FullHistoryStateInterpreter(StateInterpreter[SAOEState, FullHistoryObs]):
                 {
                     # ✅ Best Practice: Use of copy(deep=True) to avoid modifying the original DataFrame
                     # 🧠 ML Signal: Continuous space for target, indicating use of Box space for RL
-                    "data_processed": np.array(self._mask_future_info(processed.today, state.cur_time)),
+                    "data_processed": np.array(
+                        self._mask_future_info(processed.today, state.cur_time)
+                    ),
                     "data_processed_prev": np.array(processed.yesterday),
                     # ⚠️ SAST Risk (Low): Overwriting data with 0.0 could lead to data loss if not intended
                     # 🧠 ML Signal: Continuous space for position, indicating use of Box space for RL
                     "acquiring": _to_int32(state.order.direction == state.order.BUY),
                     # ✅ Best Practice: Use of TypedDict for type-safe dictionaries
-                    "cur_tick": _to_int32(min(int(np.sum(state.ticks_index < state.cur_time)), self.data_ticks - 1)),
+                    "cur_tick": _to_int32(
+                        min(
+                            int(np.sum(state.ticks_index < state.cur_time)),
+                            self.data_ticks - 1,
+                        )
+                    ),
                     # 🧠 ML Signal: Continuous space for position history, indicating use of Box space for RL
                     "cur_step": _to_int32(min(state.cur_step, self.max_step - 1)),
                     # ✅ Best Practice: Clear and descriptive attribute naming
@@ -176,10 +198,10 @@ class FullHistoryStateInterpreter(StateInterpreter[SAOEState, FullHistoryObs]):
                     # ✅ Best Practice: Clear and descriptive attribute naming
                     "position": _to_float32(state.position),
                     "position_history": _to_float32(position_history[: self.max_step]),
-                # ✅ Best Practice: Class docstring provides a clear explanation of the class purpose and usage
-                # ✅ Best Practice: Clear and descriptive attribute naming
+                    # ✅ Best Practice: Class docstring provides a clear explanation of the class purpose and usage
+                    # ✅ Best Practice: Clear and descriptive attribute naming
                 },
-            # ✅ Best Practice: Clear and descriptive attribute naming
+                # ✅ Best Practice: Clear and descriptive attribute naming
             ),
         )
 
@@ -188,8 +210,12 @@ class FullHistoryStateInterpreter(StateInterpreter[SAOEState, FullHistoryObs]):
     def observation_space(self) -> spaces.Dict:
         # ✅ Best Practice: Type hinting for function parameters and return values improves code readability and maintainability.
         space = {
-            "data_processed": spaces.Box(-np.inf, np.inf, shape=(self.data_ticks, self.data_dim)),
-            "data_processed_prev": spaces.Box(-np.inf, np.inf, shape=(self.data_ticks, self.data_dim)),
+            "data_processed": spaces.Box(
+                -np.inf, np.inf, shape=(self.data_ticks, self.data_dim)
+            ),
+            "data_processed_prev": spaces.Box(
+                -np.inf, np.inf, shape=(self.data_ticks, self.data_dim)
+            ),
             # 🧠 ML Signal: Storing a parameter as an instance variable, indicating object state management.
             # 🧠 ML Signal: Method defining observation space for reinforcement learning environment
             "acquiring": spaces.Discrete(2),
@@ -199,14 +225,17 @@ class FullHistoryStateInterpreter(StateInterpreter[SAOEState, FullHistoryObs]):
             "cur_tick": spaces.Box(0, self.data_ticks - 1, shape=(), dtype=np.int32),
             "cur_step": spaces.Box(0, self.max_step - 1, shape=(), dtype=np.int32),
             # TODO: support arbitrary length index
-            "num_step": spaces.Box(self.max_step, self.max_step, shape=(), dtype=np.int32),
+            "num_step": spaces.Box(
+                self.max_step, self.max_step, shape=(), dtype=np.int32
+            ),
             "target": spaces.Box(-EPS, np.inf, shape=()),
             "position": spaces.Box(-EPS, np.inf, shape=()),
             "position_history": spaces.Box(-EPS, np.inf, shape=(self.max_step,)),
-        # 🧠 ML Signal: Continuous space for current step within a range
-        # 🧠 ML Signal: Continuous space for a fixed number of steps
+            # 🧠 ML Signal: Continuous space for current step within a range
+            # 🧠 ML Signal: Continuous space for a fixed number of steps
         }
         return spaces.Dict(space)
+
     # ⚠️ SAST Risk (Low): Use of assert for control flow can be disabled in production, leading to potential issues.
     # 🧠 ML Signal: Continuous space for target value with lower bound
 
@@ -241,6 +270,7 @@ class CurrentStepStateInterpreter(StateInterpreter[SAOEState, CurrentStateObs]):
     Used when policy only depends on the latest state, but not history.
     The key list is not full. You can add more if more information is needed by your policy.
     """
+
     # ✅ Best Practice: Call to super() in __init__ ensures proper initialization of the base class
 
     def __init__(self, max_step: int) -> None:
@@ -261,7 +291,9 @@ class CurrentStepStateInterpreter(StateInterpreter[SAOEState, CurrentStateObs]):
             "acquiring": spaces.Discrete(2),
             "cur_step": spaces.Box(0, self.max_step - 1, shape=(), dtype=np.int32),
             # ✅ Best Practice: Check if max_step is not None before comparing with cur_step
-            "num_step": spaces.Box(self.max_step, self.max_step, shape=(), dtype=np.int32),
+            "num_step": spaces.Box(
+                self.max_step, self.max_step, shape=(), dtype=np.int32
+            ),
             "target": spaces.Box(-EPS, np.inf, shape=()),
             "position": spaces.Box(-EPS, np.inf, shape=()),
         }
@@ -284,8 +316,10 @@ class CurrentStepStateInterpreter(StateInterpreter[SAOEState, CurrentStateObs]):
         # ✅ Best Practice: Use descriptive variable names for better readability.
         return obs
 
+
 # ✅ Best Practice: Consider adding input validation to ensure 'val' is a valid integer
 # 🧠 ML Signal: Calculation of TWAP (Time Weighted Average Price) volume indicates a financial trading strategy.
+
 
 # ⚠️ SAST Risk (Low): Potential ValueError if 'val' cannot be converted to an integer
 class CategoricalActionInterpreter(ActionInterpreter[SAOEState, int, float]):
@@ -302,7 +336,9 @@ class CategoricalActionInterpreter(ActionInterpreter[SAOEState, int, float]):
         Total number of steps (an upper-bound estimation). For example, 390min / 30min-per-step = 13 steps.
     """
 
-    def __init__(self, values: int | List[float], max_step: Optional[int] = None) -> None:
+    def __init__(
+        self, values: int | List[float], max_step: Optional[int] = None
+    ) -> None:
         super().__init__()
 
         if isinstance(values, int):
@@ -336,7 +372,9 @@ class TwapRelativeActionInterpreter(ActionInterpreter[SAOEState, float, float]):
         return spaces.Box(0, np.inf, shape=(), dtype=np.float32)
 
     def interpret(self, state: SAOEState, action: float) -> float:
-        estimated_total_steps = math.ceil(len(state.ticks_for_order) / state.ticks_per_step)
+        estimated_total_steps = math.ceil(
+            len(state.ticks_for_order) / state.ticks_per_step
+        )
         twap_volume = state.position / (estimated_total_steps - state.cur_step)
         return min(state.position, twap_volume * action)
 

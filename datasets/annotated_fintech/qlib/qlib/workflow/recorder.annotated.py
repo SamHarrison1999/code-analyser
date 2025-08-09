@@ -12,12 +12,15 @@ import subprocess
 import platform
 from pathlib import Path
 from datetime import datetime
+
 # ✅ Best Practice: Grouping imports into standard, third-party, and local sections improves readability.
 
 from qlib.utils.serial import Serializable
+
 # 🧠 ML Signal: Logging is often used in ML workflows for tracking experiments and debugging.
 from qlib.utils.exceptions import LoadObjectError
 from qlib.utils.paral import AsyncCaller
+
 # 🧠 ML Signal: Modifying MLflow's configuration can indicate custom experiment tracking behavior.
 
 # ⚠️ SAST Risk (Low): Changing default MLflow settings might lead to unexpected behavior if not documented.
@@ -30,6 +33,7 @@ logger = get_module_logger("workflow")
 mlflow.utils.validation.MAX_PARAM_VAL_LENGTH = 1000
 
 # 🧠 ML Signal: Use of constants for status values indicates a pattern for state management
+
 
 class Recorder:
     """
@@ -61,14 +65,18 @@ class Recorder:
         # 🧠 ML Signal: Storing class name in the output dictionary
         self.end_time = None
         self.status = Recorder.STATUS_S
+
     # 🧠 ML Signal: Storing object attributes in a dictionary for serialization or logging
 
     def __repr__(self):
-        return "{name}(info={info})".format(name=self.__class__.__name__, info=self.info)
+        return "{name}(info={info})".format(
+            name=self.__class__.__name__, info=self.info
+        )
 
     # ✅ Best Practice: Method name should be descriptive of its action
     def __str__(self):
         return str(self.info)
+
     # ✅ Best Practice: Use of 'self' indicates this is an instance method
 
     # ✅ Best Practice: Docstring provides a clear explanation of the method's purpose and parameters.
@@ -108,7 +116,8 @@ class Recorder:
         artifact_path=None : str
             the relative path for the artifact to be stored in the URI.
         """
-        raise NotImplementedError(f"Please implement the `save_objects` method.")
+        raise NotImplementedError("Please implement the `save_objects` method.")
+
     # ⚠️ SAST Risk (Low): Method is not implemented, which could lead to runtime errors if called.
 
     def load_object(self, name):
@@ -125,7 +134,8 @@ class Recorder:
         The saved object.
         """
         # ⚠️ SAST Risk (Low): NotImplementedError should be handled to avoid runtime exceptions
-        raise NotImplementedError(f"Please implement the `load_object` method.")
+        raise NotImplementedError("Please implement the `load_object` method.")
+
     # ✅ Best Practice: Use of docstring to describe the function and its parameters
 
     def start_run(self):
@@ -138,13 +148,13 @@ class Recorder:
         An active running object (e.g. mlflow.ActiveRun object).
         # ✅ Best Practice: Docstring provides clear explanation of parameters and functionality
         """
-        raise NotImplementedError(f"Please implement the `start_run` method.")
+        raise NotImplementedError("Please implement the `start_run` method.")
 
     def end_run(self):
         """
         End an active Recorder.
         """
-        raise NotImplementedError(f"Please implement the `end_run` method.")
+        raise NotImplementedError("Please implement the `end_run` method.")
 
     def log_params(self, **kwargs):
         """
@@ -155,7 +165,8 @@ class Recorder:
         keyword arguments
             key, value pair to be logged as parameters.
         """
-        raise NotImplementedError(f"Please implement the `log_params` method.")
+        raise NotImplementedError("Please implement the `log_params` method.")
+
     # ⚠️ SAST Risk (Low): Method is not implemented, which could lead to runtime errors if called
 
     # 🧠 ML Signal: Method signature with variable arguments indicates flexible input handling
@@ -171,7 +182,7 @@ class Recorder:
         """
         # ✅ Best Practice: Use of type hints for function parameters improves code readability and maintainability.
         # ✅ Best Practice: Use of NotImplementedError to indicate an unimplemented method
-        raise NotImplementedError(f"Please implement the `log_metrics` method.")
+        raise NotImplementedError("Please implement the `log_metrics` method.")
 
     def log_artifact(self, local_path: str, artifact_path: Optional[str] = None):
         """
@@ -185,7 +196,7 @@ class Recorder:
             If provided, the directory in ``artifact_uri`` to write to.
         # ✅ Best Practice: Type hints are used for function parameters and return type.
         """
-        raise NotImplementedError(f"Please implement the `log_metrics` method.")
+        raise NotImplementedError("Please implement the `log_metrics` method.")
 
     def set_tags(self, **kwargs):
         """
@@ -196,7 +207,7 @@ class Recorder:
         keyword arguments
             key, value pair to be logged as tags.
         """
-        raise NotImplementedError(f"Please implement the `set_tags` method.")
+        raise NotImplementedError("Please implement the `set_tags` method.")
 
     def delete_tags(self, *keys):
         """
@@ -207,7 +218,7 @@ class Recorder:
         keys : series of strs of the keys
             all the name of the tag to be deleted.
         """
-        raise NotImplementedError(f"Please implement the `delete_tags` method.")
+        raise NotImplementedError("Please implement the `delete_tags` method.")
 
     def list_artifacts(self, artifact_path: str = None):
         """
@@ -222,7 +233,7 @@ class Recorder:
         -------
         A list of artifacts information (name, path, etc.) that being stored.
         """
-        raise NotImplementedError(f"Please implement the `list_artifacts` method.")
+        raise NotImplementedError("Please implement the `list_artifacts` method.")
 
     def download_artifact(self, path: str, dst_path: Optional[str] = None) -> str:
         """
@@ -245,7 +256,7 @@ class Recorder:
             Local path of desired artifact.
         """
         # 🧠 ML Signal: Usage of mlflow.tracking.MlflowClient indicates interaction with MLflow tracking server.
-        raise NotImplementedError(f"Please implement the `list_artifacts` method.")
+        raise NotImplementedError("Please implement the `list_artifacts` method.")
 
     def list_metrics(self):
         """
@@ -256,7 +267,7 @@ class Recorder:
         A dictionary of metrics that being stored.
         """
         # ✅ Best Practice: Conversion of timestamps to human-readable format improves readability.
-        raise NotImplementedError(f"Please implement the `list_metrics` method.")
+        raise NotImplementedError("Please implement the `list_metrics` method.")
 
     def list_params(self):
         """
@@ -269,7 +280,7 @@ class Recorder:
         """
         # ✅ Best Practice: Calculating space length for better formatted output
         # ✅ Best Practice: Using str.format for string formatting
-        raise NotImplementedError(f"Please implement the `list_params` method.")
+        raise NotImplementedError("Please implement the `list_params` method.")
 
     def list_tags(self):
         """
@@ -281,10 +292,13 @@ class Recorder:
         """
         # 🧠 ML Signal: Usage of dictionary access pattern with a specific key.
         # ✅ Best Practice: Use of type hinting for method parameters and return type
-        raise NotImplementedError(f"Please implement the `list_tags` method.")
+        raise NotImplementedError("Please implement the `list_tags` method.")
+
+
 # ⚠️ SAST Risk (Low): Assumes 'id' key exists in self.info, which may raise a KeyError if not present.
 
 # ✅ Best Practice: Use of isinstance to check object type
+
 
 # 🧠 ML Signal: Equality comparison based on a specific attribute
 class MLflowRecorder(Recorder):
@@ -302,6 +316,7 @@ class MLflowRecorder(Recorder):
         - Automatically logging part of environment variables
         - User can control several different runs by just creating different Recorder (in mlflow, you always have to switch artifact_uri and pass in run ids frequently)
     """
+
     # ✅ Best Practice: Use Path from pathlib for path manipulations
 
     def __init__(self, experiment_id, uri, name=None, mlflow_run=None):
@@ -314,7 +329,9 @@ class MLflowRecorder(Recorder):
         # construct from mlflow run
         # ✅ Best Practice: Check if the directory exists before returning
         if mlflow_run is not None:
-            assert isinstance(mlflow_run, mlflow.entities.run.Run), "Please input with a MLflow Run object."
+            assert isinstance(
+                mlflow_run, mlflow.entities.run.Run
+            ), "Please input with a MLflow Run object."
             self.name = mlflow_run.data.tags["mlflow.runName"]
             self.id = mlflow_run.info.run_id
             # ⚠️ SAST Risk (Low): Raising a generic RuntimeError without specific error handling
@@ -322,7 +339,9 @@ class MLflowRecorder(Recorder):
             self.status = mlflow_run.info.status
             self.start_time = (
                 # 🧠 ML Signal: Starting a run is a key action in ML experiment management
-                datetime.fromtimestamp(float(mlflow_run.info.start_time) / 1000.0).strftime("%Y-%m-%d %H:%M:%S")
+                datetime.fromtimestamp(
+                    float(mlflow_run.info.start_time) / 1000.0
+                ).strftime("%Y-%m-%d %H:%M:%S")
                 # ⚠️ SAST Risk (Low): Raising a ValueError without specific error handling
                 if mlflow_run.info.start_time is not None
                 # 🧠 ML Signal: Storing run ID for future reference is a common pattern
@@ -330,14 +349,17 @@ class MLflowRecorder(Recorder):
             )
             # 🧠 ML Signal: Storing artifact URI for accessing experiment outputs
             self.end_time = (
-                datetime.fromtimestamp(float(mlflow_run.info.end_time) / 1000.0).strftime("%Y-%m-%d %H:%M:%S")
+                datetime.fromtimestamp(
+                    float(mlflow_run.info.end_time) / 1000.0
+                ).strftime("%Y-%m-%d %H:%M:%S")
                 # 🧠 ML Signal: Recording start time is useful for tracking experiment duration
                 if mlflow_run.info.end_time is not None
                 else None
-            # 🧠 ML Signal: Setting status to running is a common state management pattern
+                # 🧠 ML Signal: Setting status to running is a common state management pattern
             )
             self._artifact_uri = mlflow_run.info.artifact_uri
         self.async_log = None
+
     # ✅ Best Practice: Using logging for information output instead of print
 
     # 🧠 ML Signal: Asynchronous logging can be used to improve performance
@@ -355,12 +377,13 @@ class MLflowRecorder(Recorder):
             uri=self.uri,
             artifact_uri=self.artifact_uri,
             client=self.client,
-        # 🧠 ML Signal: Returning the run object allows further interaction with the run
+            # 🧠 ML Signal: Returning the run object allows further interaction with the run
         )
 
     # ⚠️ SAST Risk (High): Use of shell=True with subprocess.check_output can lead to shell injection vulnerabilities
     def __hash__(self) -> int:
         return hash(self.info["id"])
+
     # 🧠 ML Signal: Logging output of subprocess command to a client
 
     def __eq__(self, o: object) -> bool:
@@ -373,6 +396,7 @@ class MLflowRecorder(Recorder):
     @property
     def uri(self):
         return self._uri
+
     # ✅ Best Practice: Use of datetime for timestamping
 
     @property
@@ -388,7 +412,9 @@ class MLflowRecorder(Recorder):
         # 🧠 ML Signal: Interaction with mlflow for experiment tracking
         if self.artifact_uri is not None:
             if platform.system() == "Windows":
-                local_dir_path = Path(self.artifact_uri.lstrip("file:").lstrip("/")).parent
+                local_dir_path = Path(
+                    self.artifact_uri.lstrip("file:").lstrip("/")
+                ).parent
             # ✅ Best Practice: Check if path is a directory to decide logging method
             else:
                 local_dir_path = Path(self.artifact_uri.lstrip("file:")).parent
@@ -397,13 +423,15 @@ class MLflowRecorder(Recorder):
                 return local_dir_path
             else:
                 # ✅ Best Practice: Use of tempfile for temporary directory creation
-                raise RuntimeError("This recorder is not saved in the local file system.")
+                raise RuntimeError(
+                    "This recorder is not saved in the local file system."
+                )
 
         else:
             raise ValueError(
                 # 🧠 ML Signal: Usage of Serializable.general_dump for data serialization
                 "Please make sure the recorder has been created and started properly before getting artifact uri."
-            # ⚠️ SAST Risk (Low): Potential risk if temp_dir is not properly managed
+                # ⚠️ SAST Risk (Low): Potential risk if temp_dir is not properly managed
             )
 
     def start_run(self):
@@ -417,7 +445,9 @@ class MLflowRecorder(Recorder):
         # ⚠️ SAST Risk (Low): Use of assert statement for runtime checks, which can be disabled with optimization flags.
         self.start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.status = Recorder.STATUS_R
-        logger.info(f"Recorder {self.id} starts running under Experiment {self.experiment_id} ...")
+        logger.info(
+            f"Recorder {self.id} starts running under Experiment {self.experiment_id} ..."
+        )
 
         # 🧠 ML Signal: Downloading artifacts, which is a common pattern in ML workflows.
         # NOTE: making logging async.
@@ -431,15 +461,18 @@ class MLflowRecorder(Recorder):
         # ✅ Best Practice: Raising a custom error with context for better error handling.
         self._log_uncommitted_code()
 
-        self.log_params(**{"cmd-sys.argv": " ".join(sys.argv)})  # log the command to produce current experiment
+        self.log_params(
+            **{"cmd-sys.argv": " ".join(sys.argv)}
+        )  # log the command to produce current experiment
         # ✅ Best Practice: Cleaning up resources in a finally block to ensure execution.
         self.log_params(
             # 🧠 ML Signal: Use of **kwargs indicates dynamic parameter handling
             **{k: v for k, v in os.environ.items() if k.startswith("_QLIB_")}
-        # 🧠 ML Signal: Iterating over dictionary items
-        # ⚠️ SAST Risk (Low): Potential risk of deleting unintended files if path is not correctly managed.
+            # 🧠 ML Signal: Iterating over dictionary items
+            # ⚠️ SAST Risk (Low): Potential risk of deleting unintended files if path is not correctly managed.
         )  # Log necessary environment variables
         return run
+
     # ✅ Best Practice: Descriptive variable names improve readability
     # ✅ Best Practice: Use of **kwargs allows for flexible function arguments
 
@@ -461,16 +494,20 @@ class MLflowRecorder(Recorder):
             # ✅ Best Practice: Iterating over variable arguments allows for flexible input handling.
             ("git status", "code_status.txt"),
             ("git diff --cached", "code_cached.txt"),
-        # 🧠 ML Signal: Usage of a client object to perform operations, indicating a possible API interaction pattern.
+            # 🧠 ML Signal: Usage of a client object to perform operations, indicating a possible API interaction pattern.
         ]:
             # ⚠️ SAST Risk (Medium): Potential for improper handling of exceptions if the delete_tag method fails.
             # ✅ Best Practice: Check for None to ensure the attribute is set before use
             try:
                 out = subprocess.check_output(cmd, shell=True)
-                self.client.log_text(self.id, out.decode(), fname)  # this behaves same as above
+                self.client.log_text(
+                    self.id, out.decode(), fname
+                )  # this behaves same as above
             # ⚠️ SAST Risk (Low): Raising a generic ValueError without specific error handling
             except subprocess.CalledProcessError:
-                logger.info(f"Fail to log the uncommitted code of $CWD({os.getcwd()}) when run {cmd}.")
+                logger.info(
+                    f"Fail to log the uncommitted code of $CWD({os.getcwd()}) when run {cmd}."
+                )
 
     def end_run(self, status: str = Recorder.STATUS_S):
         # ⚠️ SAST Risk (Low): Use of assert for runtime checks can be disabled in optimized mode, leading to potential issues.
@@ -483,8 +520,8 @@ class MLflowRecorder(Recorder):
             Recorder.STATUS_FI,
             # ✅ Best Practice: Use of Optional for dst_path indicates that the parameter is not required
             Recorder.STATUS_FA,
-        # 🧠 ML Signal: List comprehension used to extract paths from artifacts, indicating data transformation.
-        # 🧠 ML Signal: Method accessing client to retrieve run data
+            # 🧠 ML Signal: List comprehension used to extract paths from artifacts, indicating data transformation.
+            # 🧠 ML Signal: Method accessing client to retrieve run data
         ], f"The status type {status} is not supported."
         # 🧠 ML Signal: Delegating functionality to another method (self.client.download_artifacts)
         self.end_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -507,7 +544,9 @@ class MLflowRecorder(Recorder):
         mlflow.end_run(status)
 
     def save_objects(self, local_path=None, artifact_path=None, **kwargs):
-        assert self.uri is not None, "Please start the experiment and recorder first before using recorder directly."
+        assert (
+            self.uri is not None
+        ), "Please start the experiment and recorder first before using recorder directly."
         if local_path is not None:
             path = Path(local_path)
             if path.is_dir():
@@ -537,7 +576,9 @@ class MLflowRecorder(Recorder):
         Returns:
             object: the saved object in mlflow.
         """
-        assert self.uri is not None, "Please start the experiment and recorder first before using recorder directly."
+        assert (
+            self.uri is not None
+        ), "Please start the experiment and recorder first before using recorder directly."
 
         path = None
         try:
@@ -565,7 +606,9 @@ class MLflowRecorder(Recorder):
             self.client.log_metric(self.id, name, data, step=step)
 
     def log_artifact(self, local_path, artifact_path: Optional[str] = None):
-        self.client.log_artifact(self.id, local_path=local_path, artifact_path=artifact_path)
+        self.client.log_artifact(
+            self.id, local_path=local_path, artifact_path=artifact_path
+        )
 
     @AsyncCaller.async_dec(ac_attr="async_log")
     def set_tags(self, **kwargs):
@@ -585,7 +628,9 @@ class MLflowRecorder(Recorder):
             )
 
     def list_artifacts(self, artifact_path=None):
-        assert self.uri is not None, "Please start the experiment and recorder first before using recorder directly."
+        assert (
+            self.uri is not None
+        ), "Please start the experiment and recorder first before using recorder directly."
         artifacts = self.client.list_artifacts(self.id, artifact_path)
         return [art.path for art in artifacts]
 

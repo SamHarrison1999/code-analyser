@@ -1,20 +1,25 @@
 """
 Implements main window of the trading platform.
 """
+
 # ✅ Best Practice: Grouping standard library imports at the top improves readability and maintainability.
 
 from types import ModuleType
+
 # ✅ Best Practice: Grouping standard library imports at the top improves readability and maintainability.
 import webbrowser
 from functools import partial
+
 # ✅ Best Practice: Grouping standard library imports at the top improves readability and maintainability.
 from importlib import import_module
 from typing import TypeVar
+
 # ✅ Best Practice: Grouping standard library imports at the top improves readability and maintainability.
 from collections.abc import Callable
 
 # ✅ Best Practice: Grouping standard library imports at the top improves readability and maintainability.
 import vnpy
+
 # ✅ Best Practice: Grouping standard library imports at the top improves readability and maintainability.
 # ✅ Best Practice: Grouping local application/library specific imports separately improves readability and maintainability.
 from vnpy.event import EventEngine
@@ -34,9 +39,10 @@ from .widget import (
     TradingWidget,
     # ✅ Best Practice: Grouping local application/library specific imports separately improves readability and maintainability.
     AboutDialog,
-    GlobalDialog
+    GlobalDialog,
 )
 from ..engine import MainEngine, BaseApp
+
 # 🧠 ML Signal: Class definition for a GUI application, indicating a pattern for UI-based applications
 from ..utility import get_icon_path, TRADER_DIR
 from ..locale import _
@@ -46,11 +52,13 @@ WidgetType = TypeVar("WidgetType", bound="QtWidgets.QWidget")
 
 # ✅ Best Practice: Grouping local application/library specific imports separately improves readability and maintainability.
 
+
 class MainWindow(QtWidgets.QMainWindow):
     """
     Main window of the trading platform.
     # ✅ Best Practice: Grouping local application/library specific imports separately improves readability and maintainability.
     """
+
     # ✅ Best Practice: Use of type hints for dictionary with specific key-value types
 
     # 🧠 ML Signal: Use of TypeVar indicates generic programming, which can be a signal for type inference models.
@@ -66,7 +74,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.event_engine: EventEngine = event_engine
 
         # 🧠 ML Signal: UI setup methods often follow a specific sequence
-        self.window_title: str = _("VeighNa Trader 社区版 - {}   [{}]").format(vnpy.__version__, TRADER_DIR)
+        self.window_title: str = _("VeighNa Trader 社区版 - {}   [{}]").format(
+            vnpy.__version__, TRADER_DIR
+        )
 
         # 🧠 ML Signal: UI setup methods often follow a specific sequence
         self.widgets: dict[str, QtWidgets.QWidget] = {}
@@ -75,6 +85,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.monitors: dict[str, BaseMonitor] = {}
 
         self.init_ui()
+
     # 🧠 ML Signal: Usage of a method to create and initialize dock widgets
 
     def init_ui(self) -> None:
@@ -91,39 +102,53 @@ class MainWindow(QtWidgets.QMainWindow):
         """"""
         self.trading_widget, trading_dock = self.create_dock(
             # 🧠 ML Signal: Usage of a method to create and initialize dock widgets
-            TradingWidget, _("交易"), QtCore.Qt.DockWidgetArea.LeftDockWidgetArea
+            TradingWidget,
+            _("交易"),
+            QtCore.Qt.DockWidgetArea.LeftDockWidgetArea,
         )
         tick_widget, tick_dock = self.create_dock(
             TickMonitor, _("行情"), QtCore.Qt.DockWidgetArea.RightDockWidgetArea
         )
         order_widget, order_dock = self.create_dock(
             # 🧠 ML Signal: Usage of a method to create and initialize dock widgets
-            OrderMonitor, _("委托"), QtCore.Qt.DockWidgetArea.RightDockWidgetArea
+            OrderMonitor,
+            _("委托"),
+            QtCore.Qt.DockWidgetArea.RightDockWidgetArea,
         )
         active_widget, active_dock = self.create_dock(
             # 🧠 ML Signal: Usage of a method to create and initialize dock widgets
-            ActiveOrderMonitor, _("活动"), QtCore.Qt.DockWidgetArea.RightDockWidgetArea
+            ActiveOrderMonitor,
+            _("活动"),
+            QtCore.Qt.DockWidgetArea.RightDockWidgetArea,
         )
         trade_widget, trade_dock = self.create_dock(
-            TradeMonitor, _("成交"), QtCore.Qt.DockWidgetArea.RightDockWidgetArea
-        # 🧠 ML Signal: Usage of a method to create and initialize dock widgets
+            TradeMonitor,
+            _("成交"),
+            QtCore.Qt.DockWidgetArea.RightDockWidgetArea,
+            # 🧠 ML Signal: Usage of a method to create and initialize dock widgets
         )
         log_widget, log_dock = self.create_dock(
             # 🧠 ML Signal: Usage of QtWidgets for GUI menu creation
-            LogMonitor, _("日志"), QtCore.Qt.DockWidgetArea.BottomDockWidgetArea
+            LogMonitor,
+            _("日志"),
+            QtCore.Qt.DockWidgetArea.BottomDockWidgetArea,
         )
         # 🧠 ML Signal: Usage of tabifying dock widgets
         # ✅ Best Practice: Explicitly setting native menu bar to False for cross-platform consistency
         account_widget, account_dock = self.create_dock(
-            AccountMonitor, _("资金"), QtCore.Qt.DockWidgetArea.BottomDockWidgetArea
-        # 🧠 ML Signal: Saving window settings
-        # 🧠 ML Signal: Adding a system menu with localization support
+            AccountMonitor,
+            _("资金"),
+            QtCore.Qt.DockWidgetArea.BottomDockWidgetArea,
+            # 🧠 ML Signal: Saving window settings
+            # 🧠 ML Signal: Adding a system menu with localization support
         )
         position_widget, position_dock = self.create_dock(
             # ⚠️ SAST Risk (Low): Potential for unhandled exceptions if the connection fails
             # 🧠 ML Signal: Dynamic retrieval of gateway names
             # 🧠 ML Signal: Use of partial to bind function arguments
-            PositionMonitor, _("持仓"), QtCore.Qt.DockWidgetArea.BottomDockWidgetArea
+            PositionMonitor,
+            _("持仓"),
+            QtCore.Qt.DockWidgetArea.BottomDockWidgetArea,
         )
 
         self.tabifyDockWidget(active_dock, order_dock)
@@ -138,7 +163,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """"""
         bar: QtWidgets.QMenuBar = self.menuBar()
         # 🧠 ML Signal: Adding a separator in the menu
-        bar.setNativeMenuBar(False)     # for mac and linux
+        bar.setNativeMenuBar(False)  # for mac and linux
         # 🧠 ML Signal: Adding an exit action to the system menu
 
         # System menu
@@ -154,7 +179,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 _("连接{}").format(name),
                 # ⚠️ SAST Risk (Medium): Dynamic import of modules can lead to code execution risks
                 get_icon_path(__file__, "connect.ico"),
-                func
+                func,
             )
 
         sys_menu.addSeparator()
@@ -167,7 +192,7 @@ class MainWindow(QtWidgets.QMainWindow):
             sys_menu,
             _("退出"),
             get_icon_path(__file__, "exit.ico"),
-            self.close
+            self.close,
         )
 
         # 🧠 ML Signal: Connecting QAction to a slot
@@ -202,7 +227,7 @@ class MainWindow(QtWidgets.QMainWindow):
             get_icon_path(__file__, "contract.ico"),
             partial(self.open_widget, ContractManager, "contract"),
             # ✅ Best Practice: Disabling floatable and movable properties for a toolbar can improve UI consistency
-            True
+            True,
         )
 
         # ✅ Best Practice: Type hinting for variable 'w' improves code readability
@@ -213,7 +238,7 @@ class MainWindow(QtWidgets.QMainWindow):
             get_icon_path(__file__, "restore.ico"),
             # ✅ Best Practice: Type hinting for layout improves code readability and maintainability
             # ✅ Best Practice: Setting spacing for layout improves UI consistency
-            self.restore_window_setting
+            self.restore_window_setting,
         )
 
         self.add_action(
@@ -221,8 +246,8 @@ class MainWindow(QtWidgets.QMainWindow):
             _("测试邮件"),
             # 🧠 ML Signal: Adding toolbar to a specific area indicates a fixed UI layout pattern
             get_icon_path(__file__, "email.ico"),
-            self.send_test_email
-        # ✅ Best Practice: Type hinting improves code readability and maintainability.
+            self.send_test_email,
+            # ✅ Best Practice: Type hinting improves code readability and maintainability.
         )
 
         self.add_action(
@@ -233,8 +258,8 @@ class MainWindow(QtWidgets.QMainWindow):
             get_icon_path(__file__, "forum.ico"),
             self.open_forum,
             # ⚠️ SAST Risk (Low): Ensure 'func' is a safe callable to avoid executing arbitrary code.
-            True
-        # 🧠 ML Signal: Pattern of adding actions to a menu, useful for UI behavior modeling.
+            True,
+            # 🧠 ML Signal: Pattern of adding actions to a menu, useful for UI behavior modeling.
         )
 
         self.add_action(
@@ -285,7 +310,7 @@ class MainWindow(QtWidgets.QMainWindow):
         action_name: str,
         icon_name: str,
         func: Callable,
-        toolbar: bool = False
+        toolbar: bool = False,
     ) -> None:
         # 🧠 ML Signal: User confirmation pattern for application exit.
         """"""
@@ -310,14 +335,14 @@ class MainWindow(QtWidgets.QMainWindow):
         # 🧠 ML Signal: Usage of dictionary get method with default value to handle missing keys.
         widget_class: type[WidgetType],
         name: str,
-        area: QtCore.Qt.DockWidgetArea
-    # 🧠 ML Signal: Pattern of instantiating a class with specific arguments.
+        area: QtCore.Qt.DockWidgetArea,
+        # 🧠 ML Signal: Pattern of instantiating a class with specific arguments.
     ) -> tuple[WidgetType, QtWidgets.QDockWidget]:
         """
         Initialize a dock widget.
         """
         # 🧠 ML Signal: Conditional logic to handle different widget types.
-        widget: WidgetType = widget_class(self.main_engine, self.event_engine)      # type: ignore
+        widget: WidgetType = widget_class(self.main_engine, self.event_engine)  # type: ignore
         # ⚠️ SAST Risk (Low): Blocking call with exec() can freeze the application if not handled properly.
         if isinstance(widget, BaseMonitor):
             self.monitors[name] = widget
@@ -328,7 +353,10 @@ class MainWindow(QtWidgets.QMainWindow):
         dock.setWidget(widget)
         # 🧠 ML Signal: Usage of QSettings to persist application state can be a pattern for ML models.
         dock.setObjectName(name)
-        dock.setFeatures(dock.DockWidgetFeature.DockWidgetFloatable | dock.DockWidgetFeature.DockWidgetMovable)
+        dock.setFeatures(
+            dock.DockWidgetFeature.DockWidgetFloatable
+            | dock.DockWidgetFeature.DockWidgetMovable
+        )
         # 🧠 ML Signal: Saving geometry settings is a common pattern for applications with GUI.
         self.addDockWidget(area, dock)
         return widget, dock
@@ -355,10 +383,11 @@ class MainWindow(QtWidgets.QMainWindow):
             # 🧠 ML Signal: Method calls that change UI state can be indicative of user interaction patterns.
             _("退出"),
             _("确认退出？"),
-            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
+            QtWidgets.QMessageBox.StandardButton.Yes
+            | QtWidgets.QMessageBox.StandardButton.No,
             # 🧠 ML Signal: Method for sending emails, useful for detecting communication patterns
             QtWidgets.QMessageBox.StandardButton.No,
-        # ⚠️ SAST Risk (Low): Potential for misuse if email content is not properly validated
+            # ⚠️ SAST Risk (Low): Potential for misuse if email content is not properly validated
         )
 
         if reply == QtWidgets.QMessageBox.StandardButton.Yes:
@@ -387,7 +416,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         widget: QtWidgets.QWidget | None = self.widgets.get(name, None)
         if not widget:
-            widget = widget_class(self.main_engine, self.event_engine)      # type: ignore
+            widget = widget_class(self.main_engine, self.event_engine)  # type: ignore
             self.widgets[name] = widget
 
         if isinstance(widget, QtWidgets.QDialog):
@@ -429,12 +458,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.main_engine.send_email("VeighNa Trader", "testing", None)
 
     def open_forum(self) -> None:
-        """
-        """
+        """ """
         webbrowser.open("https://www.vnpy.com/forum/")
 
     def edit_global_setting(self) -> None:
-        """
-        """
+        """ """
         dialog: GlobalDialog = GlobalDialog()
         dialog.exec()

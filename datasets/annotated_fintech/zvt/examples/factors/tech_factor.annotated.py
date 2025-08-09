@@ -6,6 +6,7 @@ from typing import Type, List, Union
 import pandas as pd
 
 from zvt.contract import AdjustType, TradableEntity, IntervalLevel
+
 # ✅ Best Practice: Class definition should follow PEP 8 naming conventions, which this does.
 from zvt.contract.factor import Transformer, Accumulator
 from zvt.domain import Stock
@@ -83,6 +84,7 @@ class BullAndUpFactor(MacdFactor):
             only_load_factor,
             adjust_type,
         )
+
     # 🧠 ML Signal: Use of thresholds to filter data is a common pattern in data analysis
     # ✅ Best Practice: Use of chaining and to_frame for concise DataFrame operations
 
@@ -93,4 +95,6 @@ class BullAndUpFactor(MacdFactor):
         s = (self.factor_df["turnover"] > self.turnover_threshold) & (
             self.factor_df["turnover_rate"] > self.turnover_rate_threshold
         )
-        self.result_df = (self.factor_df["filter_result"] & self.factor_df["bull"] & s).to_frame(name="filter_result")
+        self.result_df = (
+            self.factor_df["filter_result"] & self.factor_df["bull"] & s
+        ).to_frame(name="filter_result")

@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, Float
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Naming convention for classes should follow CamelCase.
 # ✅ Best Practice: Define a class-level attribute for the table name to ensure consistency and easy maintenance.
 
@@ -57,6 +59,8 @@ class ManagerTrading(TradingBase, Mixin):
     # ✅ Best Practice: Specifying column types improves database schema clarity
     #: 与高管关系
     relationship_with_manager = Column(String(length=32))
+
+
 # ✅ Best Practice: Specifying column types improves database schema clarity
 # ✅ Best Practice: Class name should be descriptive and follow CamelCase naming convention
 
@@ -87,6 +91,8 @@ class HolderTrading(TradingBase, Mixin):
     # 🧠 ML Signal: Usage of SQLAlchemy ORM for database modeling
     #: 变动后持股比例
     holding_pct = Column(Float)
+
+
 # ✅ Best Practice: Use descriptive column names and specify data types for ORM mapping
 # 🧠 ML Signal: Usage of SQLAlchemy ORM for database modeling
 
@@ -116,6 +122,8 @@ class BigDealTrading(TradingBase, Mixin):
     # 🧠 ML Signal: Usage of SQLAlchemy ORM for database modeling
     #: 折/溢价率
     compare_rate = Column(Float)
+
+
 # 🧠 ML Signal: Usage of SQLAlchemy ORM for database modeling
 
 
@@ -146,6 +154,8 @@ class MarginTrading(TradingBase, Mixin):
     # 🧠 ML Signal: Usage of SQLAlchemy ORM for database modeling
     #: 融资融券余额（元）
     fin_sec_value = Column(Float)
+
+
 # 🧠 ML Signal: Usage of SQLAlchemy ORM for database modeling
 
 
@@ -223,9 +233,18 @@ class DragonAndTiger(TradingBase, Mixin):
 
 
 register_schema(
-    providers=["em", "eastmoney", "joinquant"], db_name="trading", schema_base=TradingBase, entity_type="stock"
+    providers=["em", "eastmoney", "joinquant"],
+    db_name="trading",
+    schema_base=TradingBase,
+    entity_type="stock",
 )
 
 
 # the __all__ is generated
-__all__ = ["ManagerTrading", "HolderTrading", "BigDealTrading", "MarginTrading", "DragonAndTiger"]
+__all__ = [
+    "ManagerTrading",
+    "HolderTrading",
+    "BigDealTrading",
+    "MarginTrading",
+    "DragonAndTiger",
+]

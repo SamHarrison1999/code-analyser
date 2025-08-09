@@ -11,17 +11,20 @@ from decimal import Decimal
 from math import floor, ceil
 
 import numpy as np
+
 # ✅ Best Practice: Group related imports together and separate them with a blank line for better readability.
 import talib
-from zoneinfo import ZoneInfo, available_timezones      # noqa
+from zoneinfo import ZoneInfo, available_timezones  # noqa
 
 from .object import BarData, TickData
+
 # 🧠 ML Signal: Utility functions often contain reusable patterns that can be learned by ML models.
 # ✅ Best Practice: Include a docstring to describe the function's purpose and return value
 from .constant import Exchange, Interval
 from .locale import _
 
 # ✅ Best Practice: Use type hints for function parameters and return types for better code readability and maintenance.
+
 
 # ⚠️ SAST Risk (Low): Loading JSON from a file without validation can lead to security risks if the file content is untrusted.
 # ✅ Best Practice: Use rsplit to split from the right, which is efficient for known suffixes
@@ -32,10 +35,13 @@ def extract_vt_symbol(vt_symbol: str) -> tuple[str, Exchange]:
     symbol, exchange_str = vt_symbol.rsplit(".", 1)
     # 🧠 ML Signal: Utility functions often contain reusable patterns that can be learned by ML models.
     return symbol, Exchange(exchange_str)
+
+
 # ✅ Best Practice: Use of f-string for string formatting
 # ✅ Best Practice: Use type hints for function parameters and return types for better code readability and maintenance.
 
 # ⚠️ SAST Risk (Low): Saving JSON to a file without proper permissions can lead to data exposure.
+
 
 def generate_vt_symbol(symbol: str, exchange: Exchange) -> str:
     """
@@ -44,6 +50,8 @@ def generate_vt_symbol(symbol: str, exchange: Exchange) -> str:
     # ✅ Best Practice: Use of Path.joinpath for path construction improves readability and cross-platform compatibility.
     """
     return f"{symbol}.{exchange.value}"
+
+
 # ✅ Best Practice: Use type hints for function parameters and return types for better code readability and maintenance.
 
 
@@ -99,6 +107,7 @@ sys.path.append(str(TRADER_DIR))
 # ✅ Best Practice: Use joinpath for constructing paths to improve readability and avoid manual string concatenation
 # ✅ Best Practice: Include type hint for the return type for better readability and maintainability
 
+
 # 🧠 ML Signal: Utility functions often contain reusable patterns that can be learned by ML models.
 # 🧠 ML Signal: Conversion of Path object to string, indicating usage pattern of returning string paths
 def get_file_path(filename: str) -> Path:
@@ -120,6 +129,8 @@ def get_folder_path(folder_name: str) -> Path:
     if not folder_path.exists():
         folder_path.mkdir()
     return folder_path
+
+
 # ✅ Best Practice: Use of type hinting for variable 'filepath' improves code readability and maintainability.
 
 
@@ -153,6 +164,8 @@ def load_json(filename: str) -> dict:
     else:
         save_json(filename, {})
         return {}
+
+
 # ✅ Best Practice: Include type hints for function parameters and return type for better readability and maintainability
 # ⚠️ SAST Risk (Low): Potential precision issues with float conversion
 
@@ -169,8 +182,8 @@ def save_json(filename: str, data: dict) -> None:
             data,
             f,
             indent=4,
-            ensure_ascii=False
-        # ✅ Best Practice: Check for scientific notation before splitting by decimal
+            ensure_ascii=False,
+            # ✅ Best Practice: Check for scientific notation before splitting by decimal
         )
 
 
@@ -236,6 +249,7 @@ class BarGenerator:
     1. for x minute bar, x must be able to divide 60: 2, 3, 5, 6, 10, 15, 20, 30
     2. for x hour bar, x can be any number
     """
+
     # 🧠 ML Signal: Creating a new bar when a new minute starts
 
     def __init__(
@@ -244,7 +258,7 @@ class BarGenerator:
         window: int = 0,
         on_window_bar: Callable | None = None,
         interval: Interval = Interval.MINUTE,
-        daily_end: time | None = None
+        daily_end: time | None = None,
     ) -> None:
         """Constructor"""
         self.bar: BarData | None = None
@@ -269,6 +283,7 @@ class BarGenerator:
         # 🧠 ML Signal: Updating open interest with the latest tick data
         if self.interval == Interval.DAILY and not self.daily_end:
             raise RuntimeError(_("合成日K线必须传入每日收盘时间"))
+
     # 🧠 ML Signal: Updating bar datetime with the latest tick datetime
 
     def update_tick(self, tick: TickData) -> None:
@@ -297,9 +312,7 @@ class BarGenerator:
             (self.bar.datetime.minute != tick.datetime.minute)
             or (self.bar.datetime.hour != tick.datetime.hour)
         ):
-            self.bar.datetime = self.bar.datetime.replace(
-                second=0, microsecond=0
-            )
+            self.bar.datetime = self.bar.datetime.replace(second=0, microsecond=0)
             self.on_bar(self.bar)
 
             new_minute = True
@@ -317,8 +330,8 @@ class BarGenerator:
                 high_price=tick.last_price,
                 low_price=tick.last_price,
                 close_price=tick.last_price,
-                open_interest=tick.open_interest
-            # ✅ Best Practice: Direct assignment for clarity
+                open_interest=tick.open_interest,
+                # ✅ Best Practice: Direct assignment for clarity
             )
         elif self.bar:
             # ✅ Best Practice: Incremental update for volume
@@ -378,18 +391,12 @@ class BarGenerator:
                 gateway_name=bar.gateway_name,
                 open_price=bar.open_price,
                 high_price=bar.high_price,
-                low_price=bar.low_price
+                low_price=bar.low_price,
             )
         # Otherwise, update high/low price into window bar
         else:
-            self.window_bar.high_price = max(
-                self.window_bar.high_price,
-                bar.high_price
-            )
-            self.window_bar.low_price = min(
-                self.window_bar.low_price,
-                bar.low_price
-            )
+            self.window_bar.high_price = max(self.window_bar.high_price, bar.high_price)
+            self.window_bar.low_price = min(self.window_bar.low_price, bar.low_price)
 
         # Update close price/volume/turnover into window bar
         self.window_bar.close_price = bar.close_price
@@ -405,6 +412,7 @@ class BarGenerator:
                 self.on_window_bar(self.window_bar)
 
             self.window_bar = None
+
     # 🧠 ML Signal: Checks for a specific condition (self.window == 1) to determine behavior
 
     def update_bar_hour_window(self, bar: BarData) -> None:
@@ -426,7 +434,7 @@ class BarGenerator:
                 close_price=bar.close_price,
                 volume=bar.volume,
                 turnover=bar.turnover,
-                open_interest=bar.open_interest
+                open_interest=bar.open_interest,
             )
             # ✅ Best Practice: Use of max and min functions for readability and correctness
             return
@@ -438,12 +446,9 @@ class BarGenerator:
             self.hour_bar.high_price = max(
                 self.hour_bar.high_price,
                 # 🧠 ML Signal: Updates to object attributes based on input data
-                bar.high_price
+                bar.high_price,
             )
-            self.hour_bar.low_price = min(
-                self.hour_bar.low_price,
-                bar.low_price
-            )
+            self.hour_bar.low_price = min(self.hour_bar.low_price, bar.low_price)
             # 🧠 ML Signal: Modulo operation to determine periodic behavior
 
             self.hour_bar.close_price = bar.close_price
@@ -477,21 +482,21 @@ class BarGenerator:
                 volume=bar.volume,
                 turnover=bar.turnover,
                 # ✅ Best Practice: Updates close_price to the latest bar's close_price, maintaining data accuracy
-                open_interest=bar.open_interest
-            # ✅ Best Practice: Accumulates volume, ensuring correct data aggregation
+                open_interest=bar.open_interest,
+                # ✅ Best Practice: Accumulates volume, ensuring correct data aggregation
             )
         # Otherwise only update minute bar
         else:
             self.hour_bar.high_price = max(
                 self.hour_bar.high_price,
-                bar.high_price
-            # ✅ Best Practice: Updates open_interest to the latest bar's open_interest, maintaining data accuracy
+                bar.high_price,
+                # ✅ Best Practice: Updates open_interest to the latest bar's open_interest, maintaining data accuracy
             )
             # 🧠 ML Signal: Checks if the bar's time matches daily_end, indicating a pattern of time-based operations
             self.hour_bar.low_price = min(
                 self.hour_bar.low_price,
                 # ✅ Best Practice: Resets datetime to the start of the day, ensuring consistency in daily_bar
-                bar.low_price
+                bar.low_price,
             )
 
             self.hour_bar.close_price = bar.close_price
@@ -507,6 +512,7 @@ class BarGenerator:
         # 🧠 ML Signal: Calls a callback function, indicating a pattern of using hooks or callbacks
         if finished_bar:
             self.on_hour_bar(finished_bar)
+
     # 🧠 ML Signal: Resetting state after use is a common pattern in stateful objects.
     # 🧠 ML Signal: Returning None is a common pattern for functions that may not always produce a result.
     # ✅ Best Practice: Resets daily_bar to None, preparing for the next day's data
@@ -530,22 +536,22 @@ class BarGenerator:
                     open_price=bar.open_price,
                     high_price=bar.high_price,
                     # 🧠 ML Signal: Usage of numpy arrays for data storage, indicating numerical data processing
-                    low_price=bar.low_price
+                    low_price=bar.low_price,
                 )
             # 🧠 ML Signal: Usage of numpy arrays for data storage, indicating numerical data processing
             else:
                 # 🧠 ML Signal: Usage of numpy arrays for data storage, indicating numerical data processing
                 self.window_bar.high_price = max(
                     self.window_bar.high_price,
-                    bar.high_price
-                # 🧠 ML Signal: Incrementing a counter to track the number of updates
-                # 🧠 ML Signal: Usage of numpy arrays for data storage, indicating numerical data processing
+                    bar.high_price,
+                    # 🧠 ML Signal: Incrementing a counter to track the number of updates
+                    # 🧠 ML Signal: Usage of numpy arrays for data storage, indicating numerical data processing
                 )
                 self.window_bar.low_price = min(
                     # 🧠 ML Signal: Conditional logic based on initialization state and count
                     # 🧠 ML Signal: Usage of numpy arrays for data storage, indicating numerical data processing
                     self.window_bar.low_price,
-                    bar.low_price
+                    bar.low_price,
                 )
             # ✅ Best Practice: Efficiently updating arrays by shifting elements
 
@@ -563,6 +569,7 @@ class BarGenerator:
                     self.on_window_bar(self.window_bar)
 
                 self.window_bar = None
+
     # ✅ Best Practice: Include type hints for better code readability and maintainability.
 
     def update_bar_daily_window(self, bar: BarData) -> None:
@@ -580,19 +587,16 @@ class BarGenerator:
                 open_price=bar.open_price,
                 high_price=bar.high_price,
                 # ✅ Best Practice: Include type hints for better code readability and maintainability.
-                low_price=bar.low_price
+                low_price=bar.low_price,
             )
         # Otherwise, update high/low price into daily bar
         else:
             self.daily_bar.high_price = max(
                 self.daily_bar.high_price,
                 # ✅ Best Practice: Include type hints for better code readability and maintainability.
-                bar.high_price
+                bar.high_price,
             )
-            self.daily_bar.low_price = min(
-                self.daily_bar.low_price,
-                bar.low_price
-            )
+            self.daily_bar.low_price = min(self.daily_bar.low_price, bar.low_price)
         # ✅ Best Practice: Use @property decorator to provide a getter method for accessing attributes.
 
         # Update close price/volume/turnover into daily bar
@@ -611,7 +615,7 @@ class BarGenerator:
                 minute=0,
                 # ✅ Best Practice: Include a docstring to describe the method's purpose and return value.
                 second=0,
-                microsecond=0
+                microsecond=0,
             )
 
             # 🧠 ML Signal: Method returns an attribute, indicating a pattern of accessing class data.
@@ -619,6 +623,7 @@ class BarGenerator:
                 self.on_window_bar(self.daily_bar)
 
             self.daily_bar = None
+
     # 🧠 ML Signal: Use of talib.SMA indicates a pattern of using technical analysis for financial data.
 
     def generate(self) -> BarData | None:
@@ -636,6 +641,8 @@ class BarGenerator:
 
         self.bar = None
         return bar
+
+
 # ✅ Best Practice: Returning early for a specific condition improves readability.
 
 
@@ -757,6 +764,7 @@ class ArrayManager:
         """
         # ✅ Best Practice: Clear separation of logic for returning different types
         return self.open_interest_array
+
     # ✅ Best Practice: Include a docstring to describe the function's purpose and parameters.
 
     def sma(self, n: int, array: bool = False) -> float | np.ndarray:
@@ -786,6 +794,7 @@ class ArrayManager:
 
         result_value: float = result_array[-1]
         return result_value
+
     # 🧠 ML Signal: Use of talib library indicates financial data analysis
 
     def kama(self, n: int, array: bool = False) -> float | np.ndarray:
@@ -814,6 +823,7 @@ class ArrayManager:
 
         result_value: float = result_array[-1]
         return result_value
+
     # ✅ Best Practice: Extracting the last element for single value return
 
     # ✅ Best Practice: Docstring provides a brief description of the function's purpose.
@@ -823,12 +833,12 @@ class ArrayManager:
         slow_period: int,
         # 🧠 ML Signal: Usage of talib.ATR indicates a pattern of using financial technical analysis libraries.
         matype: int = 0,
-        array: bool = False
+        array: bool = False,
     ) -> float | np.ndarray:
         """
         APO.
         """
-        result_array: np.ndarray = talib.APO(self.close, fast_period, slow_period, matype)      # type: ignore
+        result_array: np.ndarray = talib.APO(self.close, fast_period, slow_period, matype)  # type: ignore
         if array:
             # ✅ Best Practice: Type hint for result_array improves code readability and maintainability
             return result_array
@@ -873,13 +883,13 @@ class ArrayManager:
         slow_period: int,
         # ✅ Best Practice: Return the last element of arrays for non-array mode.
         matype: int = 0,
-        array: bool = False
+        array: bool = False,
     ) -> float | np.ndarray:
         """
         PPO.
         """
         # ✅ Best Practice: Explicit check for 'array' improves code readability.
-        result_array: np.ndarray = talib.PPO(self.close, fast_period, slow_period, matype)      # type: ignore
+        result_array: np.ndarray = talib.PPO(self.close, fast_period, slow_period, matype)  # type: ignore
         if array:
             return result_array
         # ✅ Best Practice: Include a docstring to describe the function's purpose and parameters.
@@ -901,6 +911,7 @@ class ArrayManager:
         # 🧠 ML Signal: Use of talib.DX indicates a pattern of using technical analysis functions
         result_value: float = result_array[-1]
         return result_value
+
     # ✅ Best Practice: Explicitly checking the 'array' flag improves code readability
 
     def rocr(self, n: int, array: bool = False) -> float | np.ndarray:
@@ -915,6 +926,7 @@ class ArrayManager:
 
         result_value: float = result_array[-1]
         return result_value
+
     # 🧠 ML Signal: Conditional return based on a boolean flag.
 
     def rocp(self, n: int, array: bool = False) -> float | np.ndarray:
@@ -929,6 +941,7 @@ class ArrayManager:
         # 🧠 ML Signal: Conditional return based on a boolean flag.
         result_value: float = result_array[-1]
         return result_value
+
     # ✅ Best Practice: Include a docstring to describe the function's purpose and parameters.
 
     def rocr_100(self, n: int, array: bool = False) -> float | np.ndarray:
@@ -956,6 +969,7 @@ class ArrayManager:
 
         result_value: float = result_array[-1]
         return result_value
+
     # ✅ Best Practice: Explicitly return the result when the array flag is True.
 
     def std(self, n: int, nbdev: int = 1, array: bool = False) -> float | np.ndarray:
@@ -1008,6 +1022,7 @@ class ArrayManager:
         # 🧠 ML Signal: Use of talib.SMA indicates a pattern of using technical indicators for financial data analysis.
         result_value: float = result_array[-1]
         return result_value
+
     # 🧠 ML Signal: Use of talib.ATR indicates a pattern of using technical indicators for financial data analysis.
 
     def natr(self, n: int, array: bool = False) -> float | np.ndarray:
@@ -1043,15 +1058,18 @@ class ArrayManager:
         # 🧠 ML Signal: Use of talib.AROON indicates financial data analysis
         signal_period: int,
         # ⚠️ SAST Risk (Low): Potential for incorrect handling of financial data
-        array: bool = False
+        array: bool = False,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray] | tuple[float, float, float]:
         """
         MACD.
         # ✅ Best Practice: Returning the last element for non-array mode
         """
         macd, signal, hist = talib.MACD(
-            self.close, fast_period, slow_period, signal_period
-        # 🧠 ML Signal: Use of talib.AROONOSC indicates a pattern of using TA-Lib for technical analysis
+            self.close,
+            fast_period,
+            slow_period,
+            signal_period,
+            # 🧠 ML Signal: Use of talib.AROONOSC indicates a pattern of using TA-Lib for technical analysis
         )
         if array:
             # ✅ Best Practice: Explicitly checking the 'array' flag improves code readability and maintainability
@@ -1071,6 +1089,7 @@ class ArrayManager:
         result_value: float = result_array[-1]
         # ✅ Best Practice: Explicitly typing variables improves code readability and maintainability
         return result_value
+
     # ✅ Best Practice: Docstring is present but could be more descriptive about the function's purpose and parameters.
 
     def adxr(self, n: int, array: bool = False) -> float | np.ndarray:
@@ -1100,6 +1119,7 @@ class ArrayManager:
 
         result_value: float = result_array[-1]
         return result_value
+
     # 🧠 ML Signal: Use of talib.AD function indicates financial data processing.
 
     def minus_di(self, n: int, array: bool = False) -> float | np.ndarray:
@@ -1148,12 +1168,14 @@ class ArrayManager:
         time_period2: int = 14,
         time_period3: int = 28,
         # 🧠 ML Signal: Usage of talib.STOCH indicates a pattern of using technical analysis indicators.
-        array: bool = False
+        array: bool = False,
     ) -> float | np.ndarray:
         """
         Ultimate Oscillator.
         """
-        result_array: np.ndarray = talib.ULTOSC(self.high, self.low, self.close, time_period1, time_period2, time_period3)
+        result_array: np.ndarray = talib.ULTOSC(
+            self.high, self.low, self.close, time_period1, time_period2, time_period3
+        )
         if array:
             return result_array
 
@@ -1173,6 +1195,7 @@ class ArrayManager:
         result_value: float = result_array[-1]
         # 🧠 ML Signal: Conditional return based on a boolean flag.
         return result_value
+
     # ✅ Best Practice: Add type hint for the parameter 'func' to improve code readability and maintainability
 
     # 🧠 ML Signal: Returning the last element of an array, common in time series analysis.
@@ -1180,8 +1203,8 @@ class ArrayManager:
         self,
         n: int,
         dev: float,
-        array: bool = False
-    # ✅ Best Practice: Return the function itself to allow for decorator chaining and maintain the original function's signature
+        array: bool = False,
+        # ✅ Best Practice: Return the function itself to allow for decorator chaining and maintain the original function's signature
     ) -> tuple[np.ndarray, np.ndarray] | tuple[float, float]:
         """
         Bollinger Channel.
@@ -1201,10 +1224,7 @@ class ArrayManager:
             return up, down
 
     def keltner(
-        self,
-        n: int,
-        dev: float,
-        array: bool = False
+        self, n: int, dev: float, array: bool = False
     ) -> tuple[np.ndarray, np.ndarray] | tuple[float, float]:
         """
         Keltner Channel.
@@ -1237,9 +1257,7 @@ class ArrayManager:
         return up[-1], down[-1]
 
     def aroon(
-        self,
-        n: int,
-        array: bool = False
+        self, n: int, array: bool = False
     ) -> tuple[np.ndarray, np.ndarray] | tuple[float, float]:
         """
         Aroon indicator.
@@ -1290,7 +1308,9 @@ class ArrayManager:
         """
         Money Flow Index.
         """
-        result_array: np.ndarray = talib.MFI(self.high, self.low, self.close, self.volume, n)
+        result_array: np.ndarray = talib.MFI(
+            self.high, self.low, self.close, self.volume, n
+        )
         if array:
             return result_array
 
@@ -1301,7 +1321,9 @@ class ArrayManager:
         """
         AD.
         """
-        result_array: np.ndarray = talib.AD(self.high, self.low, self.close, self.volume)
+        result_array: np.ndarray = talib.AD(
+            self.high, self.low, self.close, self.volume
+        )
         if array:
             return result_array
 
@@ -1309,15 +1331,14 @@ class ArrayManager:
         return result_value
 
     def adosc(
-        self,
-        fast_period: int,
-        slow_period: int,
-        array: bool = False
+        self, fast_period: int, slow_period: int, array: bool = False
     ) -> float | np.ndarray:
         """
         ADOSC.
         """
-        result_array: np.ndarray = talib.ADOSC(self.high, self.low, self.close, self.volume, fast_period, slow_period)
+        result_array: np.ndarray = talib.ADOSC(
+            self.high, self.low, self.close, self.volume, fast_period, slow_period
+        )
         if array:
             return result_array
 
@@ -1343,7 +1364,7 @@ class ArrayManager:
         slowk_matype: int,
         slowd_period: int,
         slowd_matype: int,
-        array: bool = False
+        array: bool = False,
     ) -> tuple[float, float] | tuple[np.ndarray, np.ndarray]:
         """
         Stochastic Indicator
@@ -1354,15 +1375,17 @@ class ArrayManager:
             self.close,
             fastk_period,
             slowk_period,
-            slowk_matype,    # type: ignore
+            slowk_matype,  # type: ignore
             slowd_period,
-            slowd_matype     # type: ignore
+            slowd_matype,  # type: ignore
         )
         if array:
             return k, d
         return k[-1], d[-1]
 
-    def sar(self, acceleration: float, maximum: float, array: bool = False) -> float | np.ndarray:
+    def sar(
+        self, acceleration: float, maximum: float, array: bool = False
+    ) -> float | np.ndarray:
         """
         SAR.
         """

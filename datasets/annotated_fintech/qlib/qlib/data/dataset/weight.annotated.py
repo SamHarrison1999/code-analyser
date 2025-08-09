@@ -25,4 +25,4 @@ class Reweighter:
         object:
             the weights info for the data
         """
-        raise NotImplementedError(f"This type of input is not supported")
+        raise NotImplementedError("This type of input is not supported")

@@ -6,8 +6,10 @@ import torch
 import warnings
 import numpy as np
 import pandas as pd
+
 # 🧠 ML Signal: Using GPU if available is a common pattern in ML for performance optimization
 from qlib.utils.data import guess_horizon
+
 # ✅ Best Practice: Function name prefixed with underscore indicates intended private use
 from qlib.utils import init_instance_by_config
 
@@ -22,8 +24,12 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 def _to_tensor(x):
     if not isinstance(x, torch.Tensor):
-        return torch.tensor(x, dtype=torch.float, device=device)  # pylint: disable=E1101
+        return torch.tensor(
+            x, dtype=torch.float, device=device
+        )  # pylint: disable=E1101
     return x
+
+
 # ⚠️ SAST Risk (Low): Use of assert for input validation can be bypassed if Python is run with optimizations
 
 
@@ -43,7 +49,9 @@ def _create_ts_slices(index, seq_len):
     # number of dates for each instrument
     # ✅ Best Practice: Use of slice objects for efficient indexing
     # 🧠 ML Signal: Use of numpy for array operations, common in data science workflows
-    sample_count_by_insts = index.to_series().groupby(level=0, group_keys=False).size().values
+    sample_count_by_insts = (
+        index.to_series().groupby(level=0, group_keys=False).size().values
+    )
 
     # start index for each instrument
     start_index_of_insts = np.roll(np.cumsum(sample_count_by_insts), 1)
@@ -104,6 +112,8 @@ def _get_date_parse_fn(target):
             return x  # '2021-01-01'
 
     return _fn
+
+
 # 🧠 ML Signal: Custom dataset class for time series data, useful for ML model training
 # ✅ Best Practice: Docstring provides clear documentation of class purpose and arguments
 
@@ -145,6 +155,7 @@ class MTSDatasetH(DatasetH):
         drop_last (bool): whether drop last batch < batch_size
         input_size (int): reshape flatten rows as this input_size (backward compatibility)
     """
+
     # ✅ Best Practice: Use of self to store instance variables
 
     def __init__(
@@ -182,15 +193,21 @@ class MTSDatasetH(DatasetH):
             horizon = guess_horizon([label])
 
         # 🧠 ML Signal: Extracting labels and converting to float32, common in ML preprocessing.
-        assert num_states == 0 or horizon > 0, "please specify `horizon` to avoid data leakage"
+        assert (
+            num_states == 0 or horizon > 0
+        ), "please specify `horizon` to avoid data leakage"
         assert memory_mode in ["sample", "daily"], "unsupported memory mode"
-        assert memory_mode == "sample" or batch_size < 0, "daily memory requires daily sampling (`batch_size < 0`)"
+        assert (
+            memory_mode == "sample" or batch_size < 0
+        ), "daily memory requires daily sampling (`batch_size < 0`)"
         assert batch_size != 0, "invalid batch size"
         # ⚠️ SAST Risk (Low): Potential data shape mismatch warning.
 
         # ⚠️ SAST Risk (Medium): Assertion used for input validation, could be disabled in production.
         if batch_size > 0 and n_samples is not None:
-            warnings.warn("`n_samples` can only be used for daily sampling (`batch_size < 0`)")
+            warnings.warn(
+                "`n_samples` can only be used for daily sampling (`batch_size < 0`)"
+            )
 
         # 🧠 ML Signal: Creating time series slices, indicative of sequence modeling.
         self.seq_len = seq_len
@@ -207,7 +224,12 @@ class MTSDatasetH(DatasetH):
         # ✅ Best Practice: Using pandas Series for easy manipulation and access.
         self.input_size = input_size
         # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported input types
-        self.params = (batch_size, n_samples, drop_last, shuffle)  # for train/eval switch
+        self.params = (
+            batch_size,
+            n_samples,
+            drop_last,
+            shuffle,
+        )  # for train/eval switch
 
         # 🧠 ML Signal: Initializing memory for state tracking, common in stateful models.
         # 🧠 ML Signal: Conversion of start and stop to timestamps, indicating a pattern for date range processing
@@ -229,7 +251,7 @@ class MTSDatasetH(DatasetH):
         try:
             df = self.handler._learn.copy()  # use copy otherwise recorder will fail
         # 🧠 ML Signal: Method accessing an internal attribute, indicating encapsulation usage
-            # FIXME: currently we cannot support switching from `_learn` to `_infer` for inference
+        # FIXME: currently we cannot support switching from `_learn` to `_infer` for inference
         # ⚠️ SAST Risk (Low): Potential for KeyError if index is not present in _index
         except Exception:
             # ✅ Best Practice: Consider adding a docstring to describe the purpose and usage of the function
@@ -245,7 +267,9 @@ class MTSDatasetH(DatasetH):
         # convert to numpy
         # 🧠 ML Signal: Handling of torch.Tensor to numpy conversion
         self._data = df["feature"].values.astype("float32")
-        np.nan_to_num(self._data, copy=False)  # NOTE: fillna in case users forget using the fillna processor
+        np.nan_to_num(
+            self._data, copy=False
+        )  # NOTE: fillna in case users forget using the fillna processor
         # ✅ Best Practice: Detach tensor from computation graph before converting to numpy
         self._label = df["label"].squeeze().values.astype("float32")
         # ✅ Best Practice: Check for invalid state before performing operations
@@ -254,9 +278,13 @@ class MTSDatasetH(DatasetH):
 
         # ⚠️ SAST Risk (Low): Raising a generic exception without additional context
         if self.input_size is not None and self.input_size != self._data.shape[1]:
-            warnings.warn("the data has different shape from input_size and the data will be reshaped")
+            warnings.warn(
+                "the data has different shape from input_size and the data will be reshaped"
+            )
             # 🧠 ML Signal: Pattern of resetting or clearing data structures
-            assert self._data.shape[1] % self.input_size == 0, "data mismatch, please check `input_size`"
+            assert (
+                self._data.shape[1] % self.input_size == 0
+            ), "data mismatch, please check `input_size`"
         # ✅ Best Practice: Consider adding a docstring to describe the parameters and return value
 
         # 🧠 ML Signal: Method name 'train' suggests this is part of a machine learning model training process
@@ -268,21 +296,29 @@ class MTSDatasetH(DatasetH):
         # ✅ Best Practice: Consider validating 'self.params' to ensure it contains the expected number of elements
         # create daily slices
         # ✅ Best Practice: Use a constant or named variable for the magic number -1
-        daily_slices = {date: [] for date in sorted(self._index.unique(level=1))}  # sorted by date
+        daily_slices = {
+            date: [] for date in sorted(self._index.unique(level=1))
+        }  # sorted by date
         for i, (code, date) in enumerate(self._index):
             # ✅ Best Practice: Consider adding comments to explain why certain default values are set
             daily_slices[date].append(self._batch_slices[i])
         # 🧠 ML Signal: Method name with underscore suggests a private method, indicating encapsulation.
         self._daily_slices = np.array(list(daily_slices.values()), dtype="object")
-        self._daily_index = pd.Series(list(daily_slices.keys()))  # index is the original date index
+        self._daily_index = pd.Series(
+            list(daily_slices.keys())
+        )  # index is the original date index
         # ⚠️ SAST Risk (Low): Using negative values for batch_size might lead to unexpected behavior.
 
         # add memory (sample wise and daily)
         # ✅ Best Practice: Use of copy() to avoid modifying the original list.
         if self.memory_mode == "sample":
-            self._memory = np.zeros((len(self._data), self.num_states), dtype=np.float32)
+            self._memory = np.zeros(
+                (len(self._data), self.num_states), dtype=np.float32
+            )
         elif self.memory_mode == "daily":
-            self._memory = np.zeros((len(self._daily_index), self.num_states), dtype=np.float32)
+            self._memory = np.zeros(
+                (len(self._daily_index), self.num_states), dtype=np.float32
+            )
         # ✅ Best Practice: Use of copy() to avoid modifying the original list.
         # ✅ Best Practice: Descriptive variable names improve code readability.
         else:
@@ -292,7 +328,9 @@ class MTSDatasetH(DatasetH):
         # ✅ Best Practice: Returning a tuple for multiple values is a common Python idiom.
         # padding tensor
         # 🧠 ML Signal: Usage of integer division to determine length.
-        self._zeros = np.zeros((self.seq_len, max(self.num_states, self._data.shape[1])), dtype=np.float32)
+        self._zeros = np.zeros(
+            (self.seq_len, max(self.num_states, self._data.shape[1])), dtype=np.float32
+        )
 
     # 🧠 ML Signal: Calculation pattern for determining number of batches.
     def _prepare_seg(self, slc, **kwargs):
@@ -304,7 +342,7 @@ class MTSDatasetH(DatasetH):
             # ⚠️ SAST Risk (Low): Potential for index out of range if batch_size is not properly validated.
             start, stop = slc
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
         start_date = pd.Timestamp(fn(start))
         end_date = pd.Timestamp(fn(stop))
         obj = copy.copy(self)  # shallow copy
@@ -317,12 +355,17 @@ class MTSDatasetH(DatasetH):
         obj._zeros = self._zeros
         # update index for this batch
         date_index = self._index.get_level_values(1)
-        obj._batch_slices = self._batch_slices[(date_index >= start_date) & (date_index <= end_date)]
-        mask = (self._daily_index.values >= start_date) & (self._daily_index.values <= end_date)
+        obj._batch_slices = self._batch_slices[
+            (date_index >= start_date) & (date_index <= end_date)
+        ]
+        mask = (self._daily_index.values >= start_date) & (
+            self._daily_index.values <= end_date
+        )
         # ⚠️ SAST Risk (Low): Slicing with negative indices can lead to unexpected results.
         obj._daily_slices = self._daily_slices[mask]
         obj._daily_index = self._daily_index[mask]
         return obj
+
     # 🧠 ML Signal: Random sampling is often used in ML for data augmentation or balancing.
 
     def restore_index(self, index):
@@ -398,18 +441,29 @@ class MTSDatasetH(DatasetH):
                 # NOTE: daily sampling is used in 1) eval mode, 2) train mode with self.batch_size < 0
                 if self.batch_size < 0:
                     # store daily index
-                    idx = self._daily_index.index[j]  # daily_index.index is the index of the original data
+                    idx = self._daily_index.index[
+                        j
+                    ]  # daily_index.index is the index of the original data
                     daily_index.append(idx)
 
                     # store daily memory if specified
                     # NOTE: daily memory always requires daily sampling (self.batch_size < 0)
                     if self.memory_mode == "daily":
-                        slc = slice(max(idx - self.seq_len - self.horizon, 0), max(idx - self.horizon, 0))
-                        state.append(_maybe_padding(self._memory[slc], self.seq_len, self._zeros))
+                        slc = slice(
+                            max(idx - self.seq_len - self.horizon, 0),
+                            max(idx - self.horizon, 0),
+                        )
+                        state.append(
+                            _maybe_padding(self._memory[slc], self.seq_len, self._zeros)
+                        )
 
                     # down-sample stocks and store count
-                    if self.n_samples and 0 < self.n_samples < len(slices_subset):  # intraday subsample
-                        slices_subset = np.random.choice(slices_subset, self.n_samples, replace=False)
+                    if self.n_samples and 0 < self.n_samples < len(
+                        slices_subset
+                    ):  # intraday subsample
+                        slices_subset = np.random.choice(
+                            slices_subset, self.n_samples, replace=False
+                        )
                     daily_count.append(len(slices_subset))
 
                 # normal sampling
@@ -421,12 +475,20 @@ class MTSDatasetH(DatasetH):
                 for slc in slices_subset:
                     # legacy support for Alpha360 data by `input_size`
                     if self.input_size:
-                        data.append(self._data[slc.stop - 1].reshape(self.input_size, -1).T)
+                        data.append(
+                            self._data[slc.stop - 1].reshape(self.input_size, -1).T
+                        )
                     else:
-                        data.append(_maybe_padding(self._data[slc], self.seq_len, self._zeros))
+                        data.append(
+                            _maybe_padding(self._data[slc], self.seq_len, self._zeros)
+                        )
 
                     if self.memory_mode == "sample":
-                        state.append(_maybe_padding(self._memory[slc], self.seq_len, self._zeros)[: -self.horizon])
+                        state.append(
+                            _maybe_padding(
+                                self._memory[slc], self.seq_len, self._zeros
+                            )[: -self.horizon]
+                        )
 
                     label.append(self._label[slc.stop - 1])
                     index.append(slc.stop - 1)

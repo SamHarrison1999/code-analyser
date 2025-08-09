@@ -2,13 +2,16 @@
 # Licensed under the MIT License.
 import unittest
 import numpy as np
+
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local can improve readability.
 # ✅ Best Practice: Inheriting from unittest.TestCase to create a test case class
 import pandas as pd
+
 # ✅ Best Practice: Method name 'to_str' suggests conversion to string, which aligns with the function's purpose.
 from qlib.contrib.data.utils.sepdf import SepDataFrame
 
 # 🧠 ML Signal: Usage of str() indicates conversion of an object to a string, a common pattern.
+
 
 # ✅ Best Practice: Using str() ensures that the object is converted to a string, which is necessary for the join operation.
 class SepDF(unittest.TestCase):

@@ -11,6 +11,7 @@ import copy
 import fire
 import qlib
 from qlib.constant import REG_CN
+
 # ✅ Best Practice: Use deepcopy to avoid modifying the original task object
 from qlib.model.trainer import task_train
 from qlib.workflow.online.utils import OnlineToolR
@@ -22,7 +23,7 @@ task = copy.deepcopy(CSI300_GBDT_TASK)
 task["record"] = {
     "class": "SignalRecord",
     "module_path": "qlib.workflow.record_temp",
-# 🧠 ML Signal: Default parameter values indicate common usage patterns.
+    # 🧠 ML Signal: Default parameter values indicate common usage patterns.
 }
 # ✅ Best Practice: Use of default parameter values for flexibility and ease of use.
 
@@ -32,7 +33,11 @@ class UpdatePredExample:
     def __init__(
         # 🧠 ML Signal: Storing experiment name for later use.
         # 🧠 ML Signal: Function definition with a specific task and experiment name, useful for understanding function usage patterns
-        self, provider_uri="~/.qlib/qlib_data/cn_data", region=REG_CN, experiment_name="online_srv", task_config=task
+        self,
+        provider_uri="~/.qlib/qlib_data/cn_data",
+        region=REG_CN,
+        experiment_name="online_srv",
+        task_config=task,
     ):
         # 🧠 ML Signal: Method call pattern for updating predictions
         # 🧠 ML Signal: Instantiation of an object with a specific experiment name.
@@ -46,6 +51,7 @@ class UpdatePredExample:
         # 🧠 ML Signal: Method likely involves training a model
         # 🧠 ML Signal: Method call on an object, useful for understanding object interaction patterns
         self.task_config = task_config
+
     # ⚠️ SAST Risk (Low): Potential risk if reset_online_tag method is not properly handling inputs
 
     # 🧠 ML Signal: Method likely involves updating predictions

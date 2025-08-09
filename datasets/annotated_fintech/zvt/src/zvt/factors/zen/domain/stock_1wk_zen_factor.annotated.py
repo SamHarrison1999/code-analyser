@@ -3,6 +3,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract.register import register_schema
+
 # 🧠 ML Signal: Usage of SQLAlchemy's declarative_base indicates ORM pattern.
 from zvt.factors.zen.domain.common import ZenFactorCommon
 
@@ -19,7 +20,10 @@ class Stock1wkZenFactor(Stock1wkZenFactorBase, ZenFactorCommon):
 
 
 register_schema(
-    providers=["zvt"], db_name="stock_1wk_zen_factor", schema_base=Stock1wkZenFactorBase, entity_type="stock"
+    providers=["zvt"],
+    db_name="stock_1wk_zen_factor",
+    schema_base=Stock1wkZenFactorBase,
+    entity_type="stock",
 )
 
 

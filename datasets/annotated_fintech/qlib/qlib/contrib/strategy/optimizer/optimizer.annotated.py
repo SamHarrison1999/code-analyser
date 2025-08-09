@@ -4,6 +4,7 @@
 
 import warnings
 import numpy as np
+
 # 🧠 ML Signal: Class definition with multiple optimization strategies could be used to train models on financial data optimization.
 import pandas as pd
 import scipy.optimize as so
@@ -51,18 +52,23 @@ class PortfolioOptimizer(BaseOptimizer):
         # ⚠️ SAST Risk (Low): Use of assert for input validation can be bypassed if Python is run with optimizations
         # 🧠 ML Signal: Tracking the delta parameter can help in understanding turnover preferences
         """
-        assert method in [self.OPT_GMV, self.OPT_MVO, self.OPT_RP, self.OPT_INV], f"method `{method}` is not supported"
+        assert method in [
+            self.OPT_GMV,
+            self.OPT_MVO,
+            self.OPT_RP,
+            self.OPT_INV,
+        ], f"method `{method}` is not supported"
         self.method = method
 
         # 🧠 ML Signal: Tracking the alpha parameter can help in understanding regularization preferences
-        assert lamb >= 0, f"risk aversion parameter `lamb` should be positive"
+        assert lamb >= 0, "risk aversion parameter `lamb` should be positive"
         self.lamb = lamb
         # 🧠 ML Signal: Tracking the tol parameter can help in understanding tolerance preferences
 
-        assert delta >= 0, f"turnover limit `delta` should be positive"
+        assert delta >= 0, "turnover limit `delta` should be positive"
         self.delta = delta
 
-        assert alpha >= 0, f"l2 norm regularizer `alpha` should be positive"
+        assert alpha >= 0, "l2 norm regularizer `alpha` should be positive"
         self.alpha = alpha
 
         self.tol = tol
@@ -131,7 +137,12 @@ class PortfolioOptimizer(BaseOptimizer):
 
         return w
 
-    def _optimize(self, S: np.ndarray, r: Optional[np.ndarray] = None, w0: Optional[np.ndarray] = None) -> np.ndarray:
+    def _optimize(
+        self,
+        S: np.ndarray,
+        r: Optional[np.ndarray] = None,
+        w0: Optional[np.ndarray] = None,
+    ) -> np.ndarray:
         # 🧠 ML Signal: Usage of optimization techniques in financial contexts
         # ⚠️ SAST Risk (Low): Ensure that the covariance matrix `S` is validated to prevent potential misuse
         # inverse volatility
@@ -176,7 +187,9 @@ class PortfolioOptimizer(BaseOptimizer):
         w /= w.sum()
         return w
 
-    def _optimize_gmv(self, S: np.ndarray, w0: Optional[np.ndarray] = None) -> np.ndarray:
+    def _optimize_gmv(
+        self, S: np.ndarray, w0: Optional[np.ndarray] = None
+    ) -> np.ndarray:
         """optimize global minimum variance portfolio
 
         This method solves the following optimization problem
@@ -186,12 +199,17 @@ class PortfolioOptimizer(BaseOptimizer):
         # 🧠 ML Signal: Return statement with arithmetic operations
         # ⚠️ SAST Risk (Low): Potential for misuse if 'self.lamb' is not validated
         """
-        return self._solve(len(S), self._get_objective_gmv(S), *self._get_constrains(w0))
+        return self._solve(
+            len(S), self._get_objective_gmv(S), *self._get_constrains(w0)
+        )
 
     def _optimize_mvo(
         # ✅ Best Practice: Consider adding type hints for better readability and maintainability
-        self, S: np.ndarray, r: Optional[np.ndarray] = None, w0: Optional[np.ndarray] = None
-    # 🧠 ML Signal: Function definition with a single parameter
+        self,
+        S: np.ndarray,
+        r: Optional[np.ndarray] = None,
+        w0: Optional[np.ndarray] = None,
+        # 🧠 ML Signal: Function definition with a single parameter
     ) -> np.ndarray:
         """optimize mean-variance portfolio
 
@@ -201,9 +219,13 @@ class PortfolioOptimizer(BaseOptimizer):
         where `S` is the covariance matrix, `u` is the expected returns,
         and `lamb` is the risk aversion parameter.
         """
-        return self._solve(len(S), self._get_objective_mvo(S, r), *self._get_constrains(w0))
+        return self._solve(
+            len(S), self._get_objective_mvo(S, r), *self._get_constrains(w0)
+        )
 
-    def _optimize_rp(self, S: np.ndarray, w0: Optional[np.ndarray] = None) -> np.ndarray:
+    def _optimize_rp(
+        self, S: np.ndarray, w0: Optional[np.ndarray] = None
+    ) -> np.ndarray:
         """optimize risk parity portfolio
 
         This method solves the following optimization problem
@@ -277,11 +299,15 @@ class PortfolioOptimizer(BaseOptimizer):
 
         # turnover constraint
         if w0 is not None:
-            cons.append({"type": "ineq", "fun": lambda x: self.delta - np.sum(np.abs(x - w0))})  # >= 0
+            cons.append(
+                {"type": "ineq", "fun": lambda x: self.delta - np.sum(np.abs(x - w0))}
+            )  # >= 0
 
         return bounds, cons
 
-    def _solve(self, n: int, obj: Callable, bounds: so.Bounds, cons: List) -> np.ndarray:
+    def _solve(
+        self, n: int, obj: Callable, bounds: so.Bounds, cons: List
+    ) -> np.ndarray:
         """solve optimization
 
         Args:
@@ -301,7 +327,9 @@ class PortfolioOptimizer(BaseOptimizer):
 
         # solve
         x0 = np.ones(n) / n  # init results
-        sol = so.minimize(wrapped_obj, x0, bounds=bounds, constraints=cons, tol=self.tol)
+        sol = so.minimize(
+            wrapped_obj, x0, bounds=bounds, constraints=cons, tol=self.tol
+        )
         if not sol.success:
             warnings.warn(f"optimization not success ({sol.status})")
 

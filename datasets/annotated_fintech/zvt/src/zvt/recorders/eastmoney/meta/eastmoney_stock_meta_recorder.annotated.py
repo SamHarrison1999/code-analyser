@@ -6,14 +6,20 @@ import requests
 from zvt.contract.api import get_entities
 from zvt.contract.recorder import Recorder
 from zvt.domain.meta.stock_meta import StockDetail, Stock
+
 # 🧠 ML Signal: Custom class definition for stock recording
-from zvt.recorders.exchange.exchange_stock_meta_recorder import ExchangeStockMetaRecorder
+from zvt.recorders.exchange.exchange_stock_meta_recorder import (
+    ExchangeStockMetaRecorder,
+)
 from zvt.utils.time_utils import to_pd_timestamp
+
 # 🧠 ML Signal: Class attribute for data schema
 from zvt.utils.utils import to_float, pct_to_float
+
 # ✅ Best Practice: Class definition should follow PEP 8 naming conventions, using CamelCase for class names.
 
 # 🧠 ML Signal: Class attribute for provider information
+
 
 # ✅ Best Practice: Class attributes should be defined at the top of the class for better readability.
 class EastmoneyStockRecorder(ExchangeStockMetaRecorder):
@@ -22,14 +28,18 @@ class EastmoneyStockRecorder(ExchangeStockMetaRecorder):
     # ✅ Best Practice: Class attributes should be defined at the top of the class for better readability.
     provider = "eastmoney"
 
+
 # 🧠 ML Signal: Instantiating and running a specific recorder class, indicating a pattern of data collection.
+
 
 # ✅ Best Practice: Use of conditional logic to handle mutually exclusive parameters.
 class EastmoneyStockDetailRecorder(Recorder):
     provider = "eastmoney"
     data_schema = StockDetail
 
-    def __init__(self, force_update=False, sleeping_time=5, code=None, codes=None) -> None:
+    def __init__(
+        self, force_update=False, sleeping_time=5, code=None, codes=None
+    ) -> None:
         super().__init__(force_update, sleeping_time)
         # ✅ Best Practice: Use of conditional logic to set filters based on the force_update flag.
         # 🧠 ML Signal: Fetching entities with specific filters and parameters, indicating a pattern of data retrieval.
@@ -74,13 +84,15 @@ class EastmoneyStockDetailRecorder(Recorder):
             param = {
                 "type": "RPT_F10_ORG_BASICINFO",
                 "sty": "ORG_PROFIE,MAIN_BUSINESS,FOUND_DATE,EM2016,BLGAINIAN,REGIONBK",
-                "filter": f"(SECUCODE=\"{securities_code}\")",
+                "filter": f'(SECUCODE="{securities_code}")',
                 "client": "app",
                 "source": "SECURITIES",
                 "pageNumber": 1,
-                "pageSize": 1
+                "pageSize": 1,
             }
-            resp = requests.get("https://datacenter.eastmoney.com/securities/api/data/get", params=param)
+            resp = requests.get(
+                "https://datacenter.eastmoney.com/securities/api/data/get", params=param
+            )
             resp.encoding = "utf8"
 
             # ⚠️ SAST Risk (Medium): Potential for injection if securities_code is not properly sanitized
@@ -88,7 +100,9 @@ class EastmoneyStockDetailRecorder(Recorder):
 
             security_item.profile = resp_json["ORG_PROFIE"]
             security_item.main_business = resp_json["MAIN_BUSINESS"]
-            security_item.date_of_establishment = to_pd_timestamp(resp_json["FOUND_DATE"])
+            security_item.date_of_establishment = to_pd_timestamp(
+                resp_json["FOUND_DATE"]
+            )
 
             # ⚠️ SAST Risk (Low): No error handling for network request failures
             # 关联行业
@@ -113,13 +127,16 @@ class EastmoneyStockDetailRecorder(Recorder):
             param = {
                 "reportName": "RPT_F10_ORG_ISSUEINFO",
                 "columns": "AFTER_ISSUE_PE,ISSUE_PRICE,TOTAL_ISSUE_NUM,NET_RAISE_FUNDS,ONLINE_ISSUE_LWR",
-                "filter": f"(SECUCODE=\"{securities_code}\")(TYPENEW=\"4\")",
+                "filter": f'(SECUCODE="{securities_code}")(TYPENEW="4")',
                 "client": "app",
                 "source": "SECURITIES",
                 "pageNumber": 1,
-                "pageSize": 1
+                "pageSize": 1,
             }
-            resp = requests.get("https://datacenter.eastmoney.com/securities/api/data/v1/get", params=param)
+            resp = requests.get(
+                "https://datacenter.eastmoney.com/securities/api/data/v1/get",
+                params=param,
+            )
             resp.encoding = "utf8"
 
             resp_json = resp.json()["result"]["data"][0]
@@ -132,7 +149,9 @@ class EastmoneyStockDetailRecorder(Recorder):
 
             self.session.commit()
 
-            self.logger.info("finish recording stock meta for:{}".format(security_item.code))
+            self.logger.info(
+                "finish recording stock meta for:{}".format(security_item.code)
+            )
 
             self.sleep()
 

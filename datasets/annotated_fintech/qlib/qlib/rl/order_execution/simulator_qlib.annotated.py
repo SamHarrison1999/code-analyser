@@ -14,6 +14,7 @@ import pandas as pd
 # ✅ Best Practice: Importing specific classes for clarity and to avoid namespace pollution
 from qlib.backtest import collect_data_loop, get_strategy_executor
 from qlib.backtest.decision import BaseTradeDecision, Order, TradeRangeByTime
+
 # ✅ Best Practice: Importing specific classes for clarity and to avoid namespace pollution
 # ✅ Best Practice: Relative imports for modules within the same package for better modularity
 from qlib.backtest.executor import NestedExecutor
@@ -55,21 +56,32 @@ class SingleAssetOrderExecution(Simulator[Order, SAOEState, float]):
 
         # ✅ Best Practice: Type hinting for _collect_data_loop improves code readability and maintainability.
         # 🧠 ML Signal: Resetting with various configurations suggests dynamic strategy adjustments.
-        assert order.start_time.date() == order.end_time.date(), "Start date and end date must be the same."
+        assert (
+            order.start_time.date() == order.end_time.date()
+        ), "Start date and end date must be the same."
 
         strategy_config = {
             "class": "SingleOrderStrategy",
             "module_path": "qlib.rl.strategy.single_order",
             "kwargs": {
                 "order": order,
-                "trade_range": TradeRangeByTime(order.start_time.time(), order.end_time.time()),
+                "trade_range": TradeRangeByTime(
+                    order.start_time.time(), order.end_time.time()
+                ),
             },
-        # ✅ Best Practice: Check if qlib_config is not None before calling init_qlib
+            # ✅ Best Practice: Check if qlib_config is not None before calling init_qlib
         }
 
         # 🧠 ML Signal: Usage of get_strategy_executor function with multiple parameters
         self._collect_data_loop: Optional[Generator] = None
-        self.reset(order, strategy_config, executor_config, exchange_config, qlib_config, cash_limit)
+        self.reset(
+            order,
+            strategy_config,
+            executor_config,
+            exchange_config,
+            qlib_config,
+            cash_limit,
+        )
 
     def reset(
         self,
@@ -96,7 +108,7 @@ class SingleAssetOrderExecution(Simulator[Order, SAOEState, float]):
             account=cash_limit if cash_limit is not None else int(1e12),
             exchange_kwargs=exchange_config,
             pos_type="Position" if cash_limit is not None else "InfPosition",
-        # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability.
+            # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability.
         )
 
         # ⚠️ SAST Risk (Low): Use of assert for type checking, which can be disabled in production
@@ -130,6 +142,7 @@ class SingleAssetOrderExecution(Simulator[Order, SAOEState, float]):
 
     def _get_adapter(self) -> SAOEStateAdapter:
         return self._last_yielded_saoe_strategy.adapter_dict[self._order.key_by_day]
+
     # ⚠️ SAST Risk (Low): The use of assert for control flow can be disabled with optimized execution (-O), potentially bypassing this check.
 
     @property
@@ -146,11 +159,19 @@ class SingleAssetOrderExecution(Simulator[Order, SAOEState, float]):
         # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability
 
         # 🧠 ML Signal: Method delegation to another object's method
-        obj = next(self._collect_data_loop) if action is None else self._collect_data_loop.send(action)
+        obj = (
+            next(self._collect_data_loop)
+            if action is None
+            else self._collect_data_loop.send(action)
+        )
         while not isinstance(obj, SAOEStrategy):
             if isinstance(obj, BaseTradeDecision):
                 self.decisions.append(obj)
-            obj = next(self._collect_data_loop) if action is None else self._collect_data_loop.send(action)
+            obj = (
+                next(self._collect_data_loop)
+                if action is None
+                else self._collect_data_loop.send(action)
+            )
         assert isinstance(obj, SAOEStrategy)
         return obj
 

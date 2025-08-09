@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, Float, DateTime, Integer
 from sqlalchemy import String, JSON
+
 # ✅ Best Practice: Grouping related imports together improves readability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Mixin
+
 # ✅ Best Practice: Naming convention for base classes should be consistent and descriptive.
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Use of class-level variable for table name improves maintainability and readability.
 
 TradingBase = declarative_base()
@@ -31,9 +34,12 @@ class TagQuoteStats(Mixin, TradingBase):
     change_pct = Column(Float)
     # 🧠 ML Signal: Column definitions indicate a pattern for database schema design
     turnover = Column(Float)
+
+
 # ✅ Best Practice: Defining columns with types improves readability and ensures correct data handling.
 
 # 🧠 ML Signal: Column definitions indicate a pattern for database schema design
+
 
 # ✅ Best Practice: Defining columns with types improves readability and ensures correct data handling.
 class TradingPlan(TradingBase, Mixin):

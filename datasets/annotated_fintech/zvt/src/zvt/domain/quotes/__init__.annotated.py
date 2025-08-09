@@ -7,6 +7,7 @@ from zvt.contract import Mixin
 
 # 🧠 ML Signal: Use of SQLAlchemy's Column to define database schema
 
+
 class KdataCommon(Mixin):
     # 🧠 ML Signal: Use of SQLAlchemy's Column to define database schema
     provider = Column(String(length=32))
@@ -50,10 +51,13 @@ class KdataCommon(Mixin):
     # 换手率
     # 🧠 ML Signal: Use of SQLAlchemy Column for ORM mapping
     turnover_rate = Column(Float)
+
+
 # ✅ Best Practice: Use of 'pass' to indicate an intentionally empty class definition
 # ✅ Best Practice: Use of inheritance to extend functionality from a base class
 
 # 🧠 ML Signal: Use of SQLAlchemy Column for ORM mapping
+
 
 # ✅ Best Practice: Use of inheritance to extend functionality from a base class
 # ✅ Best Practice: Use of 'pass' to indicate an intentionally empty class
@@ -106,12 +110,16 @@ class BlockKdataCommon(KdataCommon):
 
 class IndexKdataCommon(KdataCommon):
     pass
+
+
 # ⚠️ SAST Risk (Low): Using wildcard imports can lead to namespace pollution
 
 
 # 🧠 ML Signal: Use of __all__ to manage namespace exports
 class IndexusKdataCommon(KdataCommon):
     pass
+
+
 # 🧠 ML Signal: Extending __all__ with imported module's __all__
 
 
@@ -124,25 +132,33 @@ class EtfKdataCommon(KdataCommon):
     # 🧠 ML Signal: Extending __all__ with imported module's __all__
     cumulative_net_value = Column(Float)
 
+
 # ⚠️ SAST Risk (Low): Using wildcard imports can lead to namespace pollution
+
 
 class StockKdataCommon(KdataCommon):
     # 🧠 ML Signal: Use of __all__ to manage namespace exports
     pass
 
+
 # 🧠 ML Signal: Extending __all__ with imported module's __all__
+
 
 class StockusKdataCommon(KdataCommon):
     # ⚠️ SAST Risk (Low): Using wildcard imports can lead to namespace pollution
     pass
 
+
 # 🧠 ML Signal: Use of __all__ to manage namespace exports
+
 
 class StockhkKdataCommon(KdataCommon):
     # 🧠 ML Signal: Extending __all__ with imported module's __all__
     pass
 
+
 # ⚠️ SAST Risk (Low): Using wildcard imports can lead to namespace pollution
+
 
 # future common kdata
 # 🧠 ML Signal: Use of __all__ to manage namespace exports

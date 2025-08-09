@@ -5,13 +5,17 @@ import pandas as pd
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.domain import Stock
 from zvt.domain.misc.stock_news import StockNews
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.recorders.em import em_api
+
 # 🧠 ML Signal: Hardcoded URLs can indicate a pattern of static resource access.
 from zvt.utils.time_utils import count_interval, now_pd_timestamp, recent_year_date
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 # ⚠️ SAST Risk (Low): Hardcoded URL may lead to maintenance issues if the URL changes.
 
@@ -63,7 +67,12 @@ class EMStockNewsRecorder(FixedCycleDataRecorder):
         if news:
             df = pd.DataFrame.from_records(news)
             self.logger.info(df)
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(
+                df=df,
+                data_schema=self.data_schema,
+                provider=self.provider,
+                force_update=self.force_update,
+            )
 
 
 if __name__ == "__main__":

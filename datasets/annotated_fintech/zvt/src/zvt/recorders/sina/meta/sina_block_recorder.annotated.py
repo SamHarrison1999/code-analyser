@@ -2,20 +2,27 @@
 import json
 
 import demjson3
+
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 import pandas as pd
 import requests
+
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 
 from zvt.api.utils import china_stock_code_to_id
+
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 from zvt.contract.api import df_to_db
+
 # 🧠 ML Signal: Class definition with inheritance, useful for understanding class hierarchies and relationships
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
+
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 from zvt.domain import BlockStock, BlockCategory, Block
+
 # 🧠 ML Signal: Class attribute indicating a constant value, useful for understanding class-specific configurations
 from zvt.utils.time_utils import now_pd_timestamp
+
 # 🧠 ML Signal: Class attribute indicating a schema, useful for understanding data structure expectations
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 
@@ -32,9 +39,9 @@ class SinaBlockRecorder(Recorder):
     category_map_url = {
         # ✅ Best Practice: Set encoding explicitly to ensure correct text decoding
         BlockCategory.industry: "http://vip.stock.finance.sina.com.cn/q/view/newSinaHy.php",
-        BlockCategory.concept: "http://money.finance.sina.com.cn/q/view/newFLJK.php?param=class"
+        BlockCategory.concept: "http://money.finance.sina.com.cn/q/view/newFLJK.php?param=class",
         # StockCategory.area: 'http://money.finance.sina.com.cn/q/view/newFLJK.php?param=area',
-    # ⚠️ SAST Risk (High): Potential for ValueError if "{" or "}" not found in string
+        # ⚠️ SAST Risk (High): Potential for ValueError if "{" or "}" not found in string
     }
 
     # ⚠️ SAST Risk (Medium): No error handling for JSON decoding
@@ -70,19 +77,26 @@ class SinaBlockRecorder(Recorder):
                         "name": name,
                         # 🧠 ML Signal: Class attribute definition, useful for understanding default values and configurations
                         "category": category.value,
-                    # ✅ Best Practice: Use logging for tracking execution flow
+                        # ✅ Best Practice: Use logging for tracking execution flow
                     }
-                # 🧠 ML Signal: Class attribute definition, useful for understanding default values and configurations
-                # 🧠 ML Signal: Iterating over a fixed range of pages
+                    # 🧠 ML Signal: Class attribute definition, useful for understanding default values and configurations
+                    # 🧠 ML Signal: Iterating over a fixed range of pages
                 )
             if the_list:
                 # ⚠️ SAST Risk (Low): Hardcoded URL, potential for misuse if not validated or sanitized
                 # ⚠️ SAST Risk (Medium): No timeout specified in requests.get
                 df = pd.DataFrame.from_records(the_list)
                 # 🧠 ML Signal: Class attribute definition, useful for understanding default values and configurations
-                df_to_db(data_schema=self.data_schema, df=df, provider=self.provider, force_update=True)
+                df_to_db(
+                    data_schema=self.data_schema,
+                    df=df,
+                    provider=self.provider,
+                    force_update=True,
+                )
 
             self.logger.info(f"finish record sina blocks:{category.value}")
+
+
 # ⚠️ SAST Risk (Low): Potential for demjson3.decode to raise an exception if resp.text is not valid JSON
 
 
@@ -132,9 +146,18 @@ class SinaChinaBlockStockRecorder(TimeSeriesDataRecorder):
                     )
                 if the_list:
                     df = pd.DataFrame.from_records(the_list)
-                    df_to_db(data_schema=self.data_schema, df=df, provider=self.provider, force_update=True)
+                    df_to_db(
+                        data_schema=self.data_schema,
+                        df=df,
+                        provider=self.provider,
+                        force_update=True,
+                    )
 
-                self.logger.info("finish recording BlockStock:{},{}".format(entity.category, entity.name))
+                self.logger.info(
+                    "finish recording BlockStock:{},{}".format(
+                        entity.category, entity.name
+                    )
+                )
 
             except Exception as e:
                 self.logger.error("error:,resp.text:", e, resp.text)

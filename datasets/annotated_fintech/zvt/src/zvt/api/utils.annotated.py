@@ -5,10 +5,12 @@ from typing import Type
 # ✅ Best Practice: Group imports from the same module together for better readability.
 from zvt.contract import Mixin
 from zvt.domain import ReportPeriod
+
 # ✅ Best Practice: Group imports from the same module together for better readability.
 # 🧠 ML Signal: Function to_report_period_type converts a date to a specific report period type, indicating a pattern of date-based classification.
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
+
 # ✅ Best Practice: Group imports from the same module together for better readability.
 # ✅ Best Practice: Using a helper function to convert report_date to a consistent format improves code readability and maintainability.
 
@@ -66,10 +68,13 @@ def get_recent_report_date(the_date=now_pd_timestamp(), step=0):
 def get_recent_report_period(the_date=now_pd_timestamp(), step=0):
     # ✅ Best Practice: Use of format method for string formatting
     return to_report_period_type(get_recent_report_date(the_date, step=step))
+
+
 # ✅ Best Practice: Consider adding type hints for function parameters and return type for clarity.
 
 # 🧠 ML Signal: Pattern for generating unique identifiers for stocks
 # 🧠 ML Signal: Function with default parameter value, indicating optional input handling.
+
 
 # ⚠️ SAST Risk (Low): Division by zero risk if value is not a number; consider input validation.
 # ⚠️ SAST Risk (Low): Potential risk if get_china_exchange is not validated or sanitized
@@ -90,6 +95,8 @@ def get_china_exchange(code):
         return "bj"
     else:
         return "sz"
+
+
 # 🧠 ML Signal: Iterative pattern to find a recent report date
 
 
@@ -101,6 +108,8 @@ def china_stock_code_to_id(code):
 # ✅ Best Practice: Initialize filters as a list if not provided
 def value_to_pct(value, default=0):
     return value / 100 if value else default
+
+
 # 🧠 ML Signal: Querying data with dynamic filters
 # ⚠️ SAST Risk (Low): Ensure pd_is_not_null is correctly implemented to avoid false positives
 # ✅ Best Practice: Increment loop counter in a separate line for readability
@@ -115,12 +124,16 @@ def float_to_pct_str(value):
     return f"{round(value * 100, 2)}%"
 
 
-def get_recent_report(data_schema: Type[Mixin], timestamp, entity_id=None, filters=None, max_step=2):
+def get_recent_report(
+    data_schema: Type[Mixin], timestamp, entity_id=None, filters=None, max_step=2
+):
     i = 0
     while i < max_step:
         report_date = get_recent_report_date(the_date=timestamp, step=i)
         if filters:
-            filters = filters + [data_schema.report_date == to_pd_timestamp(report_date)]
+            filters = filters + [
+                data_schema.report_date == to_pd_timestamp(report_date)
+            ]
         else:
             filters = [data_schema.report_date == to_pd_timestamp(report_date)]
         df = data_schema.query_data(entity_id=entity_id, filters=filters)

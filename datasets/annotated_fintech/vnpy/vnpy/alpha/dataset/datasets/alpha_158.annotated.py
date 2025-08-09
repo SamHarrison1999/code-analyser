@@ -1,4 +1,5 @@
 import polars as pl
+
 # ✅ Best Practice: Grouping imports from the same library together improves readability and maintainability.
 
 from vnpy.alpha import AlphaDataset
@@ -13,7 +14,7 @@ class Alpha158(AlphaDataset):
         train_period: tuple[str, str],
         # ✅ Best Practice: Call to super() ensures proper initialization of the base class
         valid_period: tuple[str, str],
-        test_period: tuple[str, str]
+        test_period: tuple[str, str],
     ) -> None:
         """Constructor"""
         super().__init__(
@@ -22,7 +23,7 @@ class Alpha158(AlphaDataset):
             # 🧠 ML Signal: Adding features to the dataset, indicating feature engineering
             valid_period=valid_period,
             test_period=test_period,
-        # 🧠 ML Signal: Adding features to the dataset, indicating feature engineering
+            # 🧠 ML Signal: Adding features to the dataset, indicating feature engineering
         )
 
         # 🧠 ML Signal: Adding features to the dataset, indicating feature engineering
@@ -33,10 +34,14 @@ class Alpha158(AlphaDataset):
         self.add_feature("kmid_2", "(close - open) / (high - low + 1e-12)")
         # 🧠 ML Signal: Adding features to the dataset, indicating feature engineering
         self.add_feature("kup", "(high - ts_greater(open, close)) / open")
-        self.add_feature("kup_2", "(high - ts_greater(open, close)) / (high - low + 1e-12)")
+        self.add_feature(
+            "kup_2", "(high - ts_greater(open, close)) / (high - low + 1e-12)"
+        )
         # 🧠 ML Signal: Adding features to the dataset, indicating feature engineering
         self.add_feature("klow", "(ts_less(open, close) - low) / open")
-        self.add_feature("klow_2", "((ts_less(open, close) - low) / (high - low + 1e-12))")
+        self.add_feature(
+            "klow_2", "((ts_less(open, close) - low) / (high - low + 1e-12))"
+        )
         # 🧠 ML Signal: Adding features to the dataset, indicating feature engineering
         self.add_feature("ksft", "(close * 2 - high - low) / open")
         self.add_feature("ksft_2", "(close * 2 - high - low) / (high - low + 1e-12)")
@@ -98,7 +103,10 @@ class Alpha158(AlphaDataset):
 
         for w in windows:
             # 🧠 ML Signal: Iterating over windows to add features, indicating feature engineering
-            self.add_feature(f"rsv_{w}", f"(close - ts_min(low, {w})) / (ts_max(high, {w}) - ts_min(low, {w}) + 1e-12)")
+            self.add_feature(
+                f"rsv_{w}",
+                f"(close - ts_min(low, {w})) / (ts_max(high, {w}) - ts_min(low, {w}) + 1e-12)",
+            )
 
         for w in windows:
             # 🧠 ML Signal: Iterating over windows to add features, indicating feature engineering
@@ -110,7 +118,9 @@ class Alpha158(AlphaDataset):
 
         for w in windows:
             # 🧠 ML Signal: Iterating over windows to add features, indicating feature engineering
-            self.add_feature(f"imxd_{w}", f"(ts_argmax(high, {w}) - ts_argmin(low, {w})) / {w}")
+            self.add_feature(
+                f"imxd_{w}", f"(ts_argmax(high, {w}) - ts_argmin(low, {w})) / {w}"
+            )
 
         for w in windows:
             # 🧠 ML Signal: Iterating over windows to add features, indicating feature engineering
@@ -119,7 +129,10 @@ class Alpha158(AlphaDataset):
         # 🧠 ML Signal: Setting a label for the dataset, indicating supervised learning
 
         for w in windows:
-            self.add_feature(f"cord_{w}", f"ts_corr(close / ts_delay(close, 1), ts_log(volume / ts_delay(volume, 1) + 1), {w})")
+            self.add_feature(
+                f"cord_{w}",
+                f"ts_corr(close / ts_delay(close, 1), ts_log(volume / ts_delay(volume, 1) + 1), {w})",
+            )
 
         for w in windows:
             self.add_feature(f"cntp_{w}", f"ts_mean(close > ts_delay(close, 1), {w})")
@@ -128,16 +141,28 @@ class Alpha158(AlphaDataset):
             self.add_feature(f"cntn_{w}", f"ts_mean(close < ts_delay(close, 1), {w})")
 
         for w in windows:
-            self.add_feature(f"cntd_{w}", f"ts_mean(close > ts_delay(close, 1), {w}) - ts_mean(close < ts_delay(close, 1), {w})")
+            self.add_feature(
+                f"cntd_{w}",
+                f"ts_mean(close > ts_delay(close, 1), {w}) - ts_mean(close < ts_delay(close, 1), {w})",
+            )
 
         for w in windows:
-            self.add_feature(f"sump_{w}", f"ts_sum(ts_greater(close - ts_delay(close, 1), 0), {w}) / (ts_sum(ts_abs(close - ts_delay(close, 1)), {w}) + 1e-12)")
+            self.add_feature(
+                f"sump_{w}",
+                f"ts_sum(ts_greater(close - ts_delay(close, 1), 0), {w}) / (ts_sum(ts_abs(close - ts_delay(close, 1)), {w}) + 1e-12)",
+            )
 
         for w in windows:
-            self.add_feature(f"sumn_{w}", f"ts_sum(ts_greater(ts_delay(close, 1) - close, 0), {w}) / (ts_sum(ts_abs(close - ts_delay(close, 1)), {w}) + 1e-12)")
+            self.add_feature(
+                f"sumn_{w}",
+                f"ts_sum(ts_greater(ts_delay(close, 1) - close, 0), {w}) / (ts_sum(ts_abs(close - ts_delay(close, 1)), {w}) + 1e-12)",
+            )
 
         for w in windows:
-            self.add_feature(f"sumd_{w}", f"(ts_sum(ts_greater(close - ts_delay(close, 1), 0), {w}) - ts_sum(ts_greater(ts_delay(close, 1) - close, 0), {w})) / (ts_sum(ts_abs(close - ts_delay(close, 1)), {w}) + 1e-12)")
+            self.add_feature(
+                f"sumd_{w}",
+                f"(ts_sum(ts_greater(close - ts_delay(close, 1), 0), {w}) - ts_sum(ts_greater(ts_delay(close, 1) - close, 0), {w})) / (ts_sum(ts_abs(close - ts_delay(close, 1)), {w}) + 1e-12)",
+            )
 
         for w in windows:
             self.add_feature(f"vma_{w}", f"ts_mean(volume, {w}) / (volume + 1e-12)")
@@ -146,16 +171,28 @@ class Alpha158(AlphaDataset):
             self.add_feature(f"vstd_{w}", f"ts_std(volume, {w}) / (volume + 1e-12)")
 
         for w in windows:
-            self.add_feature(f"wvma_{w}", f"ts_std(ts_abs(close / ts_delay(close, 1) - 1) * volume, {w}) / (ts_mean(ts_abs(close / ts_delay(close, 1) - 1) * volume, {w}) + 1e-12)")
+            self.add_feature(
+                f"wvma_{w}",
+                f"ts_std(ts_abs(close / ts_delay(close, 1) - 1) * volume, {w}) / (ts_mean(ts_abs(close / ts_delay(close, 1) - 1) * volume, {w}) + 1e-12)",
+            )
 
         for w in windows:
-            self.add_feature(f"vsump_{w}", f"ts_sum(ts_greater(volume - ts_delay(volume, 1), 0), {w}) / (ts_sum(ts_abs(volume - ts_delay(volume, 1)), {w}) + 1e-12)")
+            self.add_feature(
+                f"vsump_{w}",
+                f"ts_sum(ts_greater(volume - ts_delay(volume, 1), 0), {w}) / (ts_sum(ts_abs(volume - ts_delay(volume, 1)), {w}) + 1e-12)",
+            )
 
         for w in windows:
-            self.add_feature(f"vsumn_{w}", f"ts_sum(ts_greater(ts_delay(volume, 1) - volume, 0), {w}) / (ts_sum(ts_abs(volume - ts_delay(volume, 1)), {w}) + 1e-12)")
+            self.add_feature(
+                f"vsumn_{w}",
+                f"ts_sum(ts_greater(ts_delay(volume, 1) - volume, 0), {w}) / (ts_sum(ts_abs(volume - ts_delay(volume, 1)), {w}) + 1e-12)",
+            )
 
         for w in windows:
-            self.add_feature(f"vsumd_{w}", f"(ts_sum(ts_greater(volume - ts_delay(volume, 1), 0), {w}) - ts_sum(ts_greater(ts_delay(volume, 1) - volume, 0), {w})) / (ts_sum(ts_abs(volume - ts_delay(volume, 1)), {w}) + 1e-12)")
+            self.add_feature(
+                f"vsumd_{w}",
+                f"(ts_sum(ts_greater(volume - ts_delay(volume, 1), 0), {w}) - ts_sum(ts_greater(ts_delay(volume, 1) - volume, 0), {w})) / (ts_sum(ts_abs(volume - ts_delay(volume, 1)), {w}) + 1e-12)",
+            )
 
         # Set label
         self.set_label("ts_delay(close, -3) / ts_delay(close, -1) - 1")

@@ -1,6 +1,8 @@
 from qlib.data.dataset.handler import DataHandler, DataHandlerLP
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from qlib.contrib.data.handler import check_transform_proc
+
 # 🧠 ML Signal: Inheritance from a class, indicating a pattern of extending functionality
 
 
@@ -18,8 +20,12 @@ class HighFreqHandler(DataHandlerLP):
         drop_raw=True,
     ):
         # ⚠️ SAST Risk (Low): Using mutable default arguments like lists can lead to unexpected behavior.
-        infer_processors = check_transform_proc(infer_processors, fit_start_time, fit_end_time)
-        learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
+        infer_processors = check_transform_proc(
+            infer_processors, fit_start_time, fit_end_time
+        )
+        learn_processors = check_transform_proc(
+            learn_processors, fit_start_time, fit_end_time
+        )
 
         data_loader = {
             "class": "QlibDataLoader",
@@ -62,7 +68,11 @@ class HighFreqHandler(DataHandlerLP):
             if shift == 0:
                 template_norm = "Cut({0}/Ref(DayLast({1}), 240), 240, None)"
             else:
-                template_norm = "Cut(Ref({0}, " + str(shift) + ")/Ref(DayLast({1}), 240), 240, None)"
+                template_norm = (
+                    "Cut(Ref({0}, "
+                    + str(shift)
+                    + ")/Ref(DayLast({1}), 240), 240, None)"
+                )
 
             feature_ops = template_norm.format(
                 # 🧠 ML Signal: Repeated function calls with similar parameters
@@ -116,8 +126,8 @@ class HighFreqHandler(DataHandlerLP):
                     template_paused.format("$low"),
                     template_paused.format("$high"),
                 )
-            # 🧠 ML Signal: Default parameter values can indicate common usage patterns.
-            # ✅ Best Practice: Use of default parameter values for flexibility and ease of use.
+                # 🧠 ML Signal: Default parameter values can indicate common usage patterns.
+                # ✅ Best Practice: Use of default parameter values for flexibility and ease of use.
             )
         ]
         names += ["$volume_1"]
@@ -143,7 +153,7 @@ class HighFreqBacktestHandler(DataHandler):
                 "swap_level": False,
                 "freq": "1min",
             },
-        # 🧠 ML Signal: Usage of list operations to accumulate field configurations
+            # 🧠 ML Signal: Usage of list operations to accumulate field configurations
         }
         super().__init__(
             instruments=instruments,
@@ -164,7 +174,9 @@ class HighFreqBacktestHandler(DataHandler):
         # Because there is no vwap field in the yahoo data, a method similar to Simpson integration is used to approximate vwap
         simpson_vwap = "($open + 2*$high + 2*$low + $close)/6"
         fields += [
-            "Cut({0}, 240, None)".format(template_fillnan.format(template_paused.format("$close"))),
+            "Cut({0}, 240, None)".format(
+                template_fillnan.format(template_paused.format("$close"))
+            ),
         ]
         names += ["$close0"]
         fields += [

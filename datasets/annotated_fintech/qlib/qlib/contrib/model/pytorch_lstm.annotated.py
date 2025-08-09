@@ -4,19 +4,23 @@
 
 from __future__ import division
 from __future__ import print_function
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 
 import numpy as np
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 import pandas as pd
 from typing import Text, Union
 import copy
 from ...utils import get_or_create_path
 from ...log import get_module_logger
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 
 # 🧠 ML Signal: Definition of a class inheriting from Model, indicating a custom ML model implementation
 import torch
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 import torch.nn as nn
 import torch.optim as optim
@@ -79,7 +83,9 @@ class LSTM(Model):
         self.early_stop = early_stop
         self.optimizer = optimizer.lower()
         self.loss = loss
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.seed = seed
 
         self.logger.info(
@@ -134,8 +140,8 @@ class LSTM(Model):
             num_layers=self.num_layers,
             # 🧠 ML Signal: Use of torch.mean, indicating integration with PyTorch for tensor operations
             dropout=self.dropout,
-        # 🧠 ML Signal: Moving model to the specified device
-        # ⚠️ SAST Risk (Low): Potential for unhandled exceptions if `label` is not a tensor
+            # 🧠 ML Signal: Moving model to the specified device
+            # ⚠️ SAST Risk (Low): Potential for unhandled exceptions if `label` is not a tensor
         )
         if optimizer.lower() == "adam":
             # 🧠 ML Signal: Conditional logic based on loss type
@@ -147,12 +153,15 @@ class LSTM(Model):
         # 🧠 ML Signal: Use of torch.isfinite to create a mask for valid label values
         else:
             # ⚠️ SAST Risk (Low): Error message may expose internal state
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
         # 🧠 ML Signal: Conditional logic based on self.metric value
 
         self.fitted = False
         # 🧠 ML Signal: Use of mask to filter predictions and labels
         self.lstm_model.to(self.device)
+
     # ⚠️ SAST Risk (Low): Potential for negative loss values if not handled properly
 
     # 🧠 ML Signal: Indicates usage of a model training loop
@@ -164,6 +173,7 @@ class LSTM(Model):
     def mse(self, pred, label):
         loss = (pred - label) ** 2
         return torch.mean(loss)
+
     # ⚠️ SAST Risk (Low): Potential for device mismatch if `self.device` is not set correctly
 
     def loss_fn(self, pred, label):
@@ -208,9 +218,17 @@ class LSTM(Model):
             if len(indices) - i < self.batch_size:
                 break
 
-            feature = torch.from_numpy(x_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            feature = (
+                torch.from_numpy(x_train_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
             # 🧠 ML Signal: Returning the mean loss and score as evaluation metrics.
-            label = torch.from_numpy(y_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            label = (
+                torch.from_numpy(y_train_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
 
             pred = self.lstm_model(feature)
             loss = self.loss_fn(pred, label)
@@ -236,8 +254,16 @@ class LSTM(Model):
             if len(indices) - i < self.batch_size:
                 break
 
-            feature = torch.from_numpy(x_values[indices[i : i + self.batch_size]]).float().to(self.device)
-            label = torch.from_numpy(y_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            feature = (
+                torch.from_numpy(x_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
+            label = (
+                torch.from_numpy(y_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
 
             pred = self.lstm_model(feature)
             loss = self.loss_fn(pred, label)
@@ -264,7 +290,9 @@ class LSTM(Model):
         )
         if df_train.empty or df_valid.empty:
             # 🧠 ML Signal: Model evaluation mode set before prediction
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
 
         x_train, y_train = df_train["feature"], df_train["label"]
         x_valid, y_valid = df_valid["feature"], df_valid["label"]
@@ -334,7 +362,9 @@ class LSTM(Model):
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
 
-        x_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        x_test = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
         index = x_test.index
         self.lstm_model.eval()
         x_values = x_test.values

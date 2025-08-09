@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 from __future__ import annotations
+
 # 🧠 ML Signal: Importing pandas indicates data manipulation or analysis tasks
 
 from abc import abstractmethod
@@ -21,12 +22,14 @@ class BaseIntradayBacktestData:
     @abstractmethod
     def __repr__(self) -> str:
         raise NotImplementedError
+
     # ✅ Best Practice: Use of @abstractmethod decorator indicates this method should be implemented by subclasses
 
     @abstractmethod
     # ✅ Best Practice: Method signature includes type hinting for return type, improving code readability and maintainability.
     def __len__(self) -> int:
         raise NotImplementedError
+
     # 🧠 ML Signal: Class definition for processed market data, indicating usage in financial ML models
     # ✅ Best Practice: Raising NotImplementedError is a clear way to indicate that this method should be overridden in a subclass.
 
@@ -44,9 +47,12 @@ class BaseIntradayBacktestData:
     def get_time_index(self) -> pd.DatetimeIndex:
         # ⚠️ SAST Risk (Low): Type hinting without import statement for pd.DataFrame
         raise NotImplementedError
+
+
 # ✅ Best Practice: Use type hints for class attributes to improve code readability and maintainability
 
 # ✅ Best Practice: Use of type hints for function parameters and return type improves code readability and maintainability
+
 
 class BaseIntradayProcessedData:
     """Processed market data after data cleanup and feature engineering.
@@ -54,6 +60,7 @@ class BaseIntradayProcessedData:
     It contains both processed data for "today" and "yesterday", as some algorithms
     might use the market information of the previous day to assist decision making.
     """
+
     # ✅ Best Practice: Raising NotImplementedError in abstract methods is a common pattern to indicate that subclasses should implement this method
 
     today: pd.DataFrame

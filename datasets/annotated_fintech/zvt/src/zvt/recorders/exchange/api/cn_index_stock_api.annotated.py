@@ -5,9 +5,11 @@ import pandas as pd
 import requests
 
 from zvt.api.utils import china_stock_code_to_id, value_to_pct, value_multiply
+
 # ✅ Best Practice: Use a logger for handling log messages instead of print statements
 from zvt.recorders.consts import DEFAULT_HEADER
 from zvt.utils.time_utils import to_pd_timestamp, to_time_str, TIME_FORMAT_MON
+
 # ⚠️ SAST Risk (Medium): Potential KeyError if "data" key is not present in the JSON response
 
 # 🧠 ML Signal: Hardcoded URLs can indicate fixed data sources or endpoints
@@ -15,7 +17,9 @@ from zvt.utils.time_utils import to_pd_timestamp, to_time_str, TIME_FORMAT_MON
 logger = logging.getLogger(__name__)
 
 # ⚠️ SAST Risk (Medium): raise_for_status() will raise an HTTPError for bad responses, which should be handled
-original_page_url = "http://www.cnindex.com.cn/module/index-detail.html?act_menu=1&indexCode=399001"
+original_page_url = (
+    "http://www.cnindex.com.cn/module/index-detail.html?act_menu=1&indexCode=399001"
+)
 # 🧠 ML Signal: Hardcoded URLs can indicate fixed data sources or endpoints
 url = "http://www.cnindex.com.cn/sample-detail/detail?indexcode={}&dateStr={}&pageNum=1&rows=5000"
 # 🧠 ML Signal: Accessing JSON data from HTTP response, common in web API interactions
@@ -27,7 +31,9 @@ def _get_resp_data(resp: requests.Response):
     # ⚠️ SAST Risk (Medium): Potential for URL injection if `url` is not properly sanitized
     return resp.json()["data"]
 
+
 # ⚠️ SAST Risk (Low): No error handling for network request failures
+
 
 def get_cn_index_stock(code, timestamp, name=None):
     entity_type = "index"

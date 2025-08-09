@@ -3,10 +3,12 @@
 # 🧠 ML Signal: Usage of custom base class for ORM models
 from sqlalchemy import Column, String, DateTime, BigInteger, Float
 from sqlalchemy.orm import declarative_base
+
 # 🧠 ML Signal: Usage of custom schema registration
 
 from zvt.contract import TradableEntity
 from zvt.contract.register import register_schema, register_entity
+
 # 🧠 ML Signal: Custom base class for SQLAlchemy models
 # ✅ Best Practice: Use of class-level variable for table name improves maintainability
 
@@ -14,6 +16,7 @@ StockMetaBase = declarative_base()
 # ✅ Best Practice: Use of DateTime for date fields is appropriate for storing timestamps
 
 # 🧠 ML Signal: Decorator usage for entity registration
+
 
 # ✅ Best Practice: Use of String for text fields is appropriate for storing string data
 #: 个股
@@ -66,7 +69,9 @@ class StockDetail(StockMetaBase, TradableEntity):
 
 
 register_schema(
-    providers=["exchange", "joinquant", "eastmoney", "em", "qmt"], db_name="stock_meta", schema_base=StockMetaBase
+    providers=["exchange", "joinquant", "eastmoney", "em", "qmt"],
+    db_name="stock_meta",
+    schema_base=StockMetaBase,
 )
 
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import List, Union, Type
+
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local can improve readability.
 
 import pandas as pd
@@ -9,22 +10,29 @@ from zvt.contract.api import get_schema_by_name
 from zvt.contract.factor import Accumulator
 from zvt.contract.factor import Transformer
 from zvt.domain import Stock
+
 # ✅ Best Practice: Consider importing Union from typing for type hinting
 from zvt.factors.algorithm import MaTransformer, MaAndVolumeTransformer
 from zvt.factors.technical_factor import TechnicalFactor
+
 # ✅ Best Practice: Use isinstance() instead of type() for type checking
 from zvt.utils.time_utils import now_pd_timestamp
 
 # ✅ Best Practice: Consider handling exceptions when converting string to IntervalLevel
 
+
 # ✅ Best Practice: Class definition should follow PEP 8 naming conventions, which is CamelCase.
-def get_ma_factor_schema(entity_type: str, level: Union[IntervalLevel, str] = IntervalLevel.LEVEL_1DAY):
+def get_ma_factor_schema(
+    entity_type: str, level: Union[IntervalLevel, str] = IntervalLevel.LEVEL_1DAY
+):
     # 🧠 ML Signal: Usage of string formatting to create schema names
     # 🧠 ML Signal: Function call pattern to retrieve schema by name
     if type(level) == str:
         level = IntervalLevel(level)
 
-    schema_str = "{}{}MaFactor".format(entity_type.capitalize(), level.value.capitalize())
+    schema_str = "{}{}MaFactor".format(
+        entity_type.capitalize(), level.value.capitalize()
+    )
 
     return get_schema_by_name(schema_str)
 
@@ -65,7 +73,9 @@ class MaFactor(TechnicalFactor):
         windows=None,
     ) -> None:
         if need_persist:
-            self.factor_schema = get_ma_factor_schema(entity_type=entity_schema.__name__, level=level)
+            self.factor_schema = get_ma_factor_schema(
+                entity_type=entity_schema.__name__, level=level
+            )
 
         if not windows:
             windows = [5, 10, 34, 55, 89, 144, 120, 250]
@@ -103,11 +113,13 @@ class MaFactor(TechnicalFactor):
             clear_state,
             only_load_factor,
             adjust_type,
-        # 🧠 ML Signal: Iterative boolean condition refinement
+            # 🧠 ML Signal: Iterative boolean condition refinement
         )
+
 
 # ⚠️ SAST Risk (Low): Use of print statement for debugging can expose data in production
 # ✅ Best Practice: Converting boolean Series to DataFrame for consistent data handling
+
 
 class CrossMaFactor(MaFactor):
     def compute_result(self):
@@ -175,7 +187,9 @@ class VolumeUpMaFactor(TechnicalFactor):
         self.up_intervals = up_intervals
         self.over_mode = over_mode
 
-        transformer: Transformer = MaAndVolumeTransformer(windows=windows, vol_windows=vol_windows)
+        transformer: Transformer = MaAndVolumeTransformer(
+            windows=windows, vol_windows=vol_windows
+        )
 
         super().__init__(
             entity_schema,
@@ -243,7 +257,9 @@ class VolumeUpMaFactor(TechnicalFactor):
             vol_cols = [f"vol_ma{window}" for window in self.vol_windows]
             filter_vol = self.factor_df["volume"] > 2 * self.factor_df[vol_cols[0]]
             for col in vol_cols[1:]:
-                filter_vol = filter_vol & (self.factor_df["volume"] > 2 * self.factor_df[col])
+                filter_vol = filter_vol & (
+                    self.factor_df["volume"] > 2 * self.factor_df[col]
+                )
 
         # 成交额，换手率过滤
         filter_turnover = (self.factor_df["turnover"] > self.turnover_threshold) & (
@@ -375,4 +391,10 @@ if __name__ == "__main__":
 
 
 # the __all__ is generated
-__all__ = ["get_ma_factor_schema", "MaFactor", "CrossMaFactor", "VolumeUpMaFactor", "CrossMaVolumeFactor"]
+__all__ = [
+    "get_ma_factor_schema",
+    "MaFactor",
+    "CrossMaFactor",
+    "VolumeUpMaFactor",
+    "CrossMaVolumeFactor",
+]

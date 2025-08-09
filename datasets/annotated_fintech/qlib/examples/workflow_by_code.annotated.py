@@ -10,12 +10,15 @@ The interface of (1) is `qrun XXX.yaml`.  The interface of (2) is script like th
 """
 import qlib
 from qlib.constant import REG_CN
+
 # ⚠️ SAST Risk (Low): Potential path traversal if provider_uri is influenced by user input.
 from qlib.utils import init_instance_by_config, flatten_dict
 from qlib.workflow import R
+
 # 🧠 ML Signal: Initialization of a data provider, indicating a setup phase for ML experiments.
 from qlib.workflow.record_temp import SignalRecord, PortAnaRecord, SigAnaRecord
 from qlib.tests.data import GetData
+
 # 🧠 ML Signal: Model initialization from a configuration, a common pattern in ML workflows.
 from qlib.tests.config import CSI300_BENCH, CSI300_GBDT_TASK
 
@@ -64,7 +67,7 @@ if __name__ == "__main__":
                 # 🧠 ML Signal: Use of experiment tracking, a common practice in ML for reproducibility and analysis.
                 "min_cost": 5,
             },
-        # 🧠 ML Signal: Logging parameters for experiment tracking.
+            # 🧠 ML Signal: Logging parameters for experiment tracking.
         },
     }
     # 🧠 ML Signal: Model training step, a core part of ML workflows.

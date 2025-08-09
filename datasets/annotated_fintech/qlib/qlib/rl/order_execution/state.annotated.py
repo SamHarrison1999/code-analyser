@@ -9,8 +9,10 @@ import typing
 from typing import NamedTuple, Optional
 
 import numpy as np
+
 # ✅ Best Practice: Importing libraries with common aliases improves code readability.
 import pandas as pd
+
 # 🧠 ML Signal: Importing specific classes from a module indicates focused usage of the library.
 from qlib.backtest import Order
 from qlib.typehint import TypedDict
@@ -30,6 +32,7 @@ class SAOEMetrics(TypedDict):
     The type hints are for single elements. In lots of times, they can be vectorized.
     For example, ``market_volume`` could be a list of float (or ndarray) rather tahn a single float.
     """
+
     # ✅ Best Practice: Use of type hints improves code readability and maintainability.
 
     stock_id: str

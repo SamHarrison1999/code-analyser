@@ -2,6 +2,7 @@
 from zvt.contract import IntervalLevel
 from zvt.factors.ma.ma_factor import CrossMaFactor
 from zvt.factors.macd.macd_factor import BullFactor
+
 # 🧠 ML Signal: Importing specific classes from a module indicates which functionalities are being utilized.
 
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
@@ -14,7 +15,14 @@ from zvt.trader.trader import StockTrader
 # 🧠 ML Signal: Instantiation of CrossMaFactor with specific parameters, indicating a pattern of factor initialization.
 class MyMaTrader(StockTrader):
     def init_factors(
-        self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp, adjust_type=None
+        self,
+        entity_ids,
+        entity_schema,
+        exchanges,
+        codes,
+        start_timestamp,
+        end_timestamp,
+        adjust_type=None,
     ):
         return [
             CrossMaFactor(
@@ -32,13 +40,22 @@ class MyMaTrader(StockTrader):
                 need_persist=False,
             )
         ]
+
+
 # 🧠 ML Signal: Use of a list to store and return initialized factors
 # 🧠 ML Signal: Instantiation of BullFactor with specific parameters
 
 
 class MyBullTrader(StockTrader):
     def init_factors(
-        self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp, adjust_type=None
+        self,
+        entity_ids,
+        entity_schema,
+        exchanges,
+        codes,
+        start_timestamp,
+        end_timestamp,
+        adjust_type=None,
     ):
         return [
             BullFactor(

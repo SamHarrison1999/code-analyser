@@ -3,6 +3,7 @@
 import pandas as pd
 
 from zvt.utils.pd_utils import drop_continue_duplicate
+
 # 🧠 ML Signal: Usage of pd.Series to create a pandas Series from a list
 
 

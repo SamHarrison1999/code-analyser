@@ -12,9 +12,14 @@ import pandas as pd
 from pathlib import Path
 from qlib.backtest.decision import Order, OrderDir
 from qlib.constant import EPS, EPS_T, float_or_ndarray
+
 # ✅ Best Practice: Relative imports can make the code more modular and easier to refactor.
 from qlib.rl.data.base import BaseIntradayBacktestData
-from qlib.rl.data.native import DataframeIntradayBacktestData, load_handler_intraday_processed_data
+from qlib.rl.data.native import (
+    DataframeIntradayBacktestData,
+    load_handler_intraday_processed_data,
+)
+
 # ✅ Best Practice: Using __all__ to define public API of the module.
 from qlib.rl.data.pickle_styled import load_simple_intraday_backtest_data
 from qlib.rl.simulator import Simulator
@@ -94,7 +99,7 @@ class SingleAssetOrderExecutionSimple(Simulator[Order, SAOEState, float]):
         data_granularity: int = 1,
         ticks_per_step: int = 30,
         vol_threshold: Optional[float] = None,
-    # 🧠 ML Signal: Calculation of average price could be used as a feature or target in ML models.
+        # 🧠 ML Signal: Calculation of average price could be used as a feature or target in ML models.
     ) -> None:
         super().__init__(initial=order)
 
@@ -115,7 +120,9 @@ class SingleAssetOrderExecutionSimple(Simulator[Order, SAOEState, float]):
 
         # 🧠 ML Signal: Usage of a data loading function with specific parameters
         # Get time index available for trading
-        self.ticks_for_order = self._get_ticks_slice(self.order.start_time, self.order.end_time)
+        self.ticks_for_order = self._get_ticks_slice(
+            self.order.start_time, self.order.end_time
+        )
         # ⚠️ SAST Risk (Low): Broad exception handling may hide other issues
         # ✅ Best Practice: Consider logging the exception for better traceability
 
@@ -123,11 +130,18 @@ class SingleAssetOrderExecutionSimple(Simulator[Order, SAOEState, float]):
         self.cur_step = 0
         # NOTE: astype(float) is necessary in some systems.
         # this will align the precision with `.to_numpy()` in `_split_exec_vol`
-        self.twap_price = float(self.backtest_data.get_deal_price().loc[self.ticks_for_order].astype(float).mean())
+        self.twap_price = float(
+            self.backtest_data.get_deal_price()
+            .loc[self.ticks_for_order]
+            .astype(float)
+            .mean()
+        )
 
         self.position = order.amount
 
-        metric_keys = list(SAOEMetrics.__annotations__.keys())  # pylint: disable=no-member
+        metric_keys = list(
+            SAOEMetrics.__annotations__.keys()
+        )  # pylint: disable=no-member
         # NOTE: can empty dataframe contain index?
         self.history_exec = pd.DataFrame(columns=metric_keys).set_index("datetime")
         self.history_steps = pd.DataFrame(columns=metric_keys).set_index("datetime")
@@ -194,7 +208,9 @@ class SingleAssetOrderExecutionSimple(Simulator[Order, SAOEState, float]):
         if abs(self.position) < 1e-6:
             self.position = 0.0
         if self.position < -EPS or (exec_vol < -EPS).any():
-            raise ValueError(f"Execution volume is invalid: {exec_vol} (position = {self.position})")
+            raise ValueError(
+                f"Execution volume is invalid: {exec_vol} (position = {self.position})"
+            )
 
         # 🧠 ML Signal: Method returning an object with multiple attributes, indicating a complex state representation
         # Get time index available for this step
@@ -233,9 +249,11 @@ class SingleAssetOrderExecutionSimple(Simulator[Order, SAOEState, float]):
                 # 🧠 ML Signal: Usage of self attributes to construct a state object
                 # 🧠 ML Signal: Incrementing index location by a fixed step size
                 ffr=exec_vol / self.order.amount,
-                pa=price_advantage(self.market_price, self.twap_price, self.order.direction),
-            # 🧠 ML Signal: Usage of self attributes to construct a state object
-            # ✅ Best Practice: Aligning next_loc to the nearest step boundary
+                pa=price_advantage(
+                    self.market_price, self.twap_price, self.order.direction
+                ),
+                # 🧠 ML Signal: Usage of self attributes to construct a state object
+                # ✅ Best Practice: Aligning next_loc to the nearest step boundary
             ),
         )
         # 🧠 ML Signal: Usage of self attributes to construct a state object
@@ -244,15 +262,23 @@ class SingleAssetOrderExecutionSimple(Simulator[Order, SAOEState, float]):
         # ✅ Best Practice: Include type hints for better code readability and maintainability
         self.history_steps = self._dataframe_append(
             self.history_steps,
-            [self._metrics_collect(self.cur_time, self.market_vol, self.market_price, amount, exec_vol)],
-        # 🧠 ML Signal: Use of subtraction operation on datetime objects
+            [
+                self._metrics_collect(
+                    self.cur_time, self.market_vol, self.market_price, amount, exec_vol
+                )
+            ],
+            # 🧠 ML Signal: Use of subtraction operation on datetime objects
         )
 
         if self.done():
             if self.env is not None:
-                self.env.logger.add_any("history_steps", self.history_steps, loglevel=LogLevel.DEBUG)
+                self.env.logger.add_any(
+                    "history_steps", self.history_steps, loglevel=LogLevel.DEBUG
+                )
                 # 🧠 ML Signal: Usage of time-based volume splitting strategy (TWAP) for trading
-                self.env.logger.add_any("history_exec", self.history_exec, loglevel=LogLevel.DEBUG)
+                self.env.logger.add_any(
+                    "history_exec", self.history_exec, loglevel=LogLevel.DEBUG
+                )
 
             # 🧠 ML Signal: Accessing historical market volume data for decision making
             self.metrics = self._metrics_collect(
@@ -263,7 +289,7 @@ class SingleAssetOrderExecutionSimple(Simulator[Order, SAOEState, float]):
                 # ⚠️ SAST Risk (Low): Assert statements can be disabled in production, leading to potential issues
                 self.history_steps["amount"].sum(),
                 self.history_exec["deal_amount"],
-            # 🧠 ML Signal: Repeating execution volume based on market price length
+                # 🧠 ML Signal: Repeating execution volume based on market price length
             )
 
             # 🧠 ML Signal: Applying volume threshold constraints to execution volume
@@ -291,6 +317,7 @@ class SingleAssetOrderExecutionSimple(Simulator[Order, SAOEState, float]):
         self.cur_time = self._next_time()
         # ✅ Best Practice: Use of numpy average with weights for calculating weighted average
         self.cur_step += 1
+
     # ✅ Best Practice: Check if exec_avg_price has 'item' method to convert numpy scalar to Python float
     # 🧠 ML Signal: Use of self.order attributes indicates a pattern of accessing order-related data
 
@@ -308,6 +335,7 @@ class SingleAssetOrderExecutionSimple(Simulator[Order, SAOEState, float]):
             ticks_index=self.ticks_index,
             ticks_for_order=self.ticks_for_order,
         )
+
     # 🧠 ML Signal: Use of self.order attributes indicates a pattern of accessing order-related data
     # ✅ Best Practice: Use of numpy sum for efficient array summation
 
@@ -315,6 +343,7 @@ class SingleAssetOrderExecutionSimple(Simulator[Order, SAOEState, float]):
     def done(self) -> bool:
         # ✅ Best Practice: Use of numpy sum for efficient array summation
         return self.position < EPS or self.cur_time >= self.order.end_time
+
     # ⚠️ SAST Risk (Low): Potential issue if EPS_T is not defined or not a valid timedelta, which could lead to runtime errors.
 
     def _next_time(self) -> pd.Timestamp:
@@ -340,7 +369,10 @@ class SingleAssetOrderExecutionSimple(Simulator[Order, SAOEState, float]):
         next_loc = next_loc - next_loc % self.ticks_per_step
 
         # ⚠️ SAST Risk (Medium): Division by zero check, but returning zero might not be appropriate for all contexts.
-        if next_loc < len(self.ticks_index) and self.ticks_index[next_loc] < self.order.end_time:
+        if (
+            next_loc < len(self.ticks_index)
+            and self.ticks_index[next_loc] < self.order.end_time
+        ):
             return self.ticks_index[next_loc]
         else:
             return self.order.end_time
@@ -362,16 +394,30 @@ class SingleAssetOrderExecutionSimple(Simulator[Order, SAOEState, float]):
         next_time = self._next_time()
 
         # get the backtest data for next interval
-        self.market_vol = self.backtest_data.get_volume().loc[self.cur_time : next_time - EPS_T].to_numpy()
-        self.market_price = self.backtest_data.get_deal_price().loc[self.cur_time : next_time - EPS_T].to_numpy()
+        self.market_vol = (
+            self.backtest_data.get_volume()
+            .loc[self.cur_time : next_time - EPS_T]
+            .to_numpy()
+        )
+        self.market_price = (
+            self.backtest_data.get_deal_price()
+            .loc[self.cur_time : next_time - EPS_T]
+            .to_numpy()
+        )
 
         assert self.market_vol is not None and self.market_price is not None
 
         # split the volume equally into each minute
-        exec_vol = np.repeat(exec_vol_sum / len(self.market_price), len(self.market_price))
+        exec_vol = np.repeat(
+            exec_vol_sum / len(self.market_price), len(self.market_price)
+        )
 
         # apply the volume threshold
-        market_vol_limit = self.vol_threshold * self.market_vol if self.vol_threshold is not None else np.inf
+        market_vol_limit = (
+            self.vol_threshold * self.market_vol
+            if self.vol_threshold is not None
+            else np.inf
+        )
         exec_vol = np.minimum(exec_vol, market_vol_limit)  # type: ignore
 
         # Complete all the order amount at the last moment.
@@ -394,7 +440,9 @@ class SingleAssetOrderExecutionSimple(Simulator[Order, SAOEState, float]):
         if np.abs(np.sum(exec_vol)) < EPS:
             exec_avg_price = 0.0
         else:
-            exec_avg_price = cast(float, np.average(market_price, weights=exec_vol))  # could be nan
+            exec_avg_price = cast(
+                float, np.average(market_price, weights=exec_vol)
+            )  # could be nan
             if hasattr(exec_avg_price, "item"):  # could be numpy scalar
                 exec_avg_price = exec_avg_price.item()  # type: ignore
 
@@ -414,7 +462,9 @@ class SingleAssetOrderExecutionSimple(Simulator[Order, SAOEState, float]):
             pa=price_advantage(exec_avg_price, self.twap_price, self.order.direction),
         )
 
-    def _get_ticks_slice(self, start: pd.Timestamp, end: pd.Timestamp, include_end: bool = False) -> pd.DatetimeIndex:
+    def _get_ticks_slice(
+        self, start: pd.Timestamp, end: pd.Timestamp, include_end: bool = False
+    ) -> pd.DatetimeIndex:
         if not include_end:
             end = end - EPS_T
         return self.ticks_index[self.ticks_index.slice_indexer(start, end)]

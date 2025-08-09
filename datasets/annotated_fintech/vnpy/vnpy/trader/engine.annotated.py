@@ -7,9 +7,11 @@ from queue import Empty, Queue
 from threading import Thread
 from typing import TypeVar
 from collections.abc import Callable
+
 # 🧠 ML Signal: Importing specific modules from a package
 
 from vnpy.event import Event, EventEngine
+
 # 🧠 ML Signal: Importing specific modules from a package
 from .app import BaseApp
 from .event import (
@@ -20,8 +22,9 @@ from .event import (
     EVENT_ACCOUNT,
     EVENT_CONTRACT,
     EVENT_LOG,
-    EVENT_QUOTE
+    EVENT_QUOTE,
 )
+
 # 🧠 ML Signal: Importing specific modules from a package
 from .gateway import BaseGateway
 from .object import (
@@ -39,12 +42,13 @@ from .object import (
     PositionData,
     AccountData,
     ContractData,
-    Exchange
+    Exchange,
 )
 from .setting import SETTINGS
 from .utility import TRADER_DIR
 from .converter import OffsetConverter
 from .logger import logger, DEBUG, INFO, WARNING, ERROR, CRITICAL
+
 # 🧠 ML Signal: Importing specific modules from a package
 from .locale import _
 
@@ -59,6 +63,7 @@ class BaseEngine(ABC):
     """
     Abstract class for implementing a function engine.
     """
+
     # 🧠 ML Signal: Usage of TypeVar for generic programming
 
     @abstractmethod
@@ -69,8 +74,8 @@ class BaseEngine(ABC):
         # ✅ Best Practice: Type annotations improve code readability and maintainability.
         event_engine: EventEngine,
         engine_name: str,
-    # ✅ Best Practice: Type annotations improve code readability and maintainability.
-    # ✅ Best Practice: Include a docstring to describe the purpose and behavior of the method
+        # ✅ Best Practice: Type annotations improve code readability and maintainability.
+        # ✅ Best Practice: Include a docstring to describe the purpose and behavior of the method
     ) -> None:
         """"""
         self.main_engine: MainEngine = main_engine
@@ -87,6 +92,7 @@ class MainEngine:
     """
     Acts as the core of the trading platform.
     """
+
     # 🧠 ML Signal: Usage of dictionaries to store gateway, engine, and app instances
 
     def __init__(self, event_engine: EventEngine | None = None) -> None:
@@ -111,8 +117,8 @@ class MainEngine:
         # 🧠 ML Signal: Returning an object after adding it to a collection
         self.exchanges: list[Exchange] = []
 
-        os.chdir(TRADER_DIR)    # Change working directory
-        self.init_engines()     # Initialize function engines
+        os.chdir(TRADER_DIR)  # Change working directory
+        self.init_engines()  # Initialize function engines
 
     # ✅ Best Practice: Use of default attribute value if no gateway_name is provided.
     def add_engine(self, engine_class: type[EngineType]) -> EngineType:
@@ -120,13 +126,16 @@ class MainEngine:
         Add function engine.
         """
         # 🧠 ML Signal: Storing an object in a dictionary with a dynamic key.
-        engine: EngineType = engine_class(self, self.event_engine)      # type: ignore
+        engine: EngineType = engine_class(self, self.event_engine)  # type: ignore
         self.engines[engine.engine_name] = engine
         return engine
+
     # 🧠 ML Signal: Checking for membership in a list before appending.
     # ✅ Best Practice: Docstring provides a brief description of the method's purpose.
 
-    def add_gateway(self, gateway_class: type[BaseGateway], gateway_name: str = "") -> BaseGateway:
+    def add_gateway(
+        self, gateway_class: type[BaseGateway], gateway_name: str = ""
+    ) -> BaseGateway:
         """
         Add gateway.
         # 🧠 ML Signal: Returning an instance of a class.
@@ -176,10 +185,14 @@ class MainEngine:
         # 🧠 ML Signal: Assigning methods from an engine to instance variables can indicate a pattern of engine usage.
         self.get_trade: Callable[[str], TradeData | None] = oms_engine.get_trade
         # ✅ Best Practice: Type hinting improves code readability and maintainability.
-        self.get_position: Callable[[str], PositionData | None] = oms_engine.get_position
+        self.get_position: Callable[[str], PositionData | None] = (
+            oms_engine.get_position
+        )
         self.get_account: Callable[[str], AccountData | None] = oms_engine.get_account
         # 🧠 ML Signal: Usage of custom data structures like LogData can indicate logging patterns.
-        self.get_contract: Callable[[str], ContractData | None] = oms_engine.get_contract
+        self.get_contract: Callable[[str], ContractData | None] = (
+            oms_engine.get_contract
+        )
         # 🧠 ML Signal: Usage of custom event systems can indicate event-driven architecture patterns.
         # ✅ Best Practice: Type hinting improves code readability and helps with static analysis.
         self.get_quote: Callable[[str], QuoteData | None] = oms_engine.get_quote
@@ -188,22 +201,41 @@ class MainEngine:
         # 🧠 ML Signal: Interaction with an event engine can indicate asynchronous or decoupled system design.
         self.get_all_trades: Callable[[], list[TradeData]] = oms_engine.get_all_trades
         # 🧠 ML Signal: Usage of dictionary get method with default value.
-        self.get_all_positions: Callable[[], list[PositionData]] = oms_engine.get_all_positions
-        self.get_all_accounts: Callable[[], list[AccountData]] = oms_engine.get_all_accounts
-        self.get_all_contracts: Callable[[], list[ContractData]] = oms_engine.get_all_contracts
+        self.get_all_positions: Callable[[], list[PositionData]] = (
+            oms_engine.get_all_positions
+        )
+        self.get_all_accounts: Callable[[], list[AccountData]] = (
+            oms_engine.get_all_accounts
+        )
+        self.get_all_contracts: Callable[[], list[ContractData]] = (
+            oms_engine.get_all_contracts
+        )
         # ⚠️ SAST Risk (Low): Potential information disclosure if log message is exposed to users.
         self.get_all_quotes: Callable[[], list[QuoteData]] = oms_engine.get_all_quotes
-        self.get_all_active_orders: Callable[[], list[OrderData]] = oms_engine.get_all_active_orders
-        self.get_all_active_quotes: Callable[[], list[QuoteData]] = oms_engine.get_all_active_quotes
-        self.update_order_request: Callable[[OrderRequest, str, str], None] = oms_engine.update_order_request
+        self.get_all_active_orders: Callable[[], list[OrderData]] = (
+            oms_engine.get_all_active_orders
+        )
+        self.get_all_active_quotes: Callable[[], list[QuoteData]] = (
+            oms_engine.get_all_active_quotes
+        )
+        self.update_order_request: Callable[[OrderRequest, str, str], None] = (
+            oms_engine.update_order_request
+        )
         # 🧠 ML Signal: Usage of dictionary get method with default value
-        self.convert_order_request: Callable[[OrderRequest, str, bool, bool], list[OrderRequest]] = oms_engine.convert_order_request
-        self.get_converter: Callable[[str], OffsetConverter | None] = oms_engine.get_converter
+        self.convert_order_request: Callable[
+            [OrderRequest, str, bool, bool], list[OrderRequest]
+        ] = oms_engine.convert_order_request
+        self.get_converter: Callable[[str], OffsetConverter | None] = (
+            oms_engine.get_converter
+        )
         # ⚠️ SAST Risk (Low): Potential information disclosure if engine_name is sensitive
 
         email_engine: EmailEngine = self.add_engine(EmailEngine)
         # ✅ Best Practice: Use of logging for error or status messages
-        self.send_email: Callable[[str, str, str | None], None] = email_engine.send_email
+        self.send_email: Callable[[str, str, str | None], None] = (
+            email_engine.send_email
+        )
+
     # ✅ Best Practice: Type hinting improves code readability and helps with static analysis.
 
     def write_log(self, msg: str, source: str = "") -> None:
@@ -215,6 +247,7 @@ class MainEngine:
         event: Event = Event(EVENT_LOG, log)
         # 🧠 ML Signal: Checking for None before proceeding is a common pattern for handling optional values.
         self.event_engine.put(event)
+
     # 🧠 ML Signal: Method calls on objects can indicate usage patterns and dependencies.
     # ✅ Best Practice: Docstring provides a clear description of the function's purpose
 
@@ -228,6 +261,7 @@ class MainEngine:
         if not gateway:
             self.write_log(_("找不到底层接口：{}").format(gateway_name))
         return gateway
+
     # 🧠 ML Signal: Usage of list conversion from dictionary values
 
     # ✅ Best Practice: Include a docstring to describe the method's purpose.
@@ -240,9 +274,12 @@ class MainEngine:
         if not engine:
             self.write_log(_("找不到引擎：{}").format(engine_name))
         return engine
+
     # ✅ Best Practice: Type hinting improves code readability and maintainability
 
-    def get_default_setting(self, gateway_name: str) -> dict[str, str | bool | int | float] | None:
+    def get_default_setting(
+        self, gateway_name: str
+    ) -> dict[str, str | bool | int | float] | None:
         """
         Get default setting dict of a specific gateway.
         # 🧠 ML Signal: Method invocation on an object is a common pattern
@@ -252,6 +289,7 @@ class MainEngine:
             # 🧠 ML Signal: Usage of type hinting for variable 'gateway' with union type
             return gateway.get_default_setting()
         return None
+
     # ⚠️ SAST Risk (Low): Potential NoneType dereference if 'gateway' is None
 
     def get_all_gateway_names(self) -> list[str]:
@@ -275,6 +313,7 @@ class MainEngine:
         # ⚠️ SAST Risk (Low): Potential NoneType dereference if 'gateway' is None and not handled properly.
         """
         return self.exchanges
+
     # 🧠 ML Signal: Method call pattern 'gateway.cancel_order(req)' can be used to train models on API usage.
 
     def connect(self, setting: dict, gateway_name: str) -> None:
@@ -296,6 +335,7 @@ class MainEngine:
         # 🧠 ML Signal: Checking if 'gateway' is not None before proceeding is a common pattern.
         if gateway:
             gateway.subscribe(req)
+
     # 🧠 ML Signal: Method call on an object, useful for understanding object interactions.
     # ✅ Best Practice: Docstring provides a clear description of the function's purpose.
 
@@ -344,6 +384,7 @@ class MainEngine:
         if gateway:
             # 🧠 ML Signal: Registration of event handlers or listeners
             gateway.cancel_quote(req)
+
     # ✅ Best Practice: Early return pattern improves readability by reducing nested code
 
     def query_history(self, req: HistoryRequest, gateway_name: str) -> list[BarData]:
@@ -380,6 +421,8 @@ class MainEngine:
         # 🧠 ML Signal: Usage of dictionary to store PositionData objects, indicating a pattern of data management.
         for gateway in self.gateways.values():
             gateway.close()
+
+
 # 🧠 ML Signal: Usage of dictionary to store AccountData objects, indicating a pattern of data management.
 
 
@@ -388,6 +431,7 @@ class LogEngine(BaseEngine):
     """
     Provides log event output function.
     """
+
     # 🧠 ML Signal: Usage of dictionary to store active OrderData objects, indicating a pattern of data management.
     # 🧠 ML Signal: Registering specific event handlers, useful for understanding event handling patterns.
 
@@ -404,7 +448,7 @@ class LogEngine(BaseEngine):
         # ✅ Best Practice: Method call to register events, indicating a pattern of event-driven architecture.
         # 🧠 ML Signal: Registering specific event handlers, useful for understanding event handling patterns.
         CRITICAL: "CRITICAL",
-    # 🧠 ML Signal: Type hinting is used, which is a good practice for ML models to learn about data types.
+        # 🧠 ML Signal: Type hinting is used, which is a good practice for ML models to learn about data types.
     }
     # 🧠 ML Signal: Registering specific event handlers, useful for understanding event handling patterns.
 
@@ -443,6 +487,8 @@ class LogEngine(BaseEngine):
     def register_log(self, event_type: str) -> None:
         """Register log event handler"""
         self.event_engine.register(event_type, self.process_log_event)
+
+
 # 🧠 ML Signal: Conditional logic to handle optional objects
 # 🧠 ML Signal: Method processes events, indicating an event-driven architecture.
 
@@ -529,7 +575,9 @@ class OmsEngine(BaseEngine):
         # 🧠 ML Signal: Usage of dictionary get method with default value
         # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability
         # Update to offset converter
-        converter: OffsetConverter | None = self.offset_converters.get(order.gateway_name, None)
+        converter: OffsetConverter | None = self.offset_converters.get(
+            order.gateway_name, None
+        )
         if converter:
             converter.update_order(order)
 
@@ -543,7 +591,9 @@ class OmsEngine(BaseEngine):
         # ✅ Best Practice: Type hinting improves code readability and maintainability
         # 🧠 ML Signal: Usage of list conversion to return a list of values from a dictionary
         # Update to offset converter
-        converter: OffsetConverter | None = self.offset_converters.get(trade.gateway_name, None)
+        converter: OffsetConverter | None = self.offset_converters.get(
+            trade.gateway_name, None
+        )
         if converter:
             converter.update_trade(trade)
 
@@ -557,7 +607,9 @@ class OmsEngine(BaseEngine):
         # 🧠 ML Signal: Usage of instance variable 'self.trades' indicates a pattern of accessing class attributes
         # ✅ Best Practice: Include a docstring to describe the method's purpose
         # Update to offset converter
-        converter: OffsetConverter | None = self.offset_converters.get(position.gateway_name, None)
+        converter: OffsetConverter | None = self.offset_converters.get(
+            position.gateway_name, None
+        )
         if converter:
             converter.update_position(position)
 
@@ -620,6 +672,7 @@ class OmsEngine(BaseEngine):
         """
         # 🧠 ML Signal: Usage of a dictionary to retrieve an object based on a key
         return self.trades.get(vt_tradeid, None)
+
     # ⚠️ SAST Risk (Low): Potential KeyError if gateway_name is not in offset_converters
 
     def get_position(self, vt_positionid: str) -> PositionData | None:
@@ -650,6 +703,7 @@ class OmsEngine(BaseEngine):
         Get latest quote data by vt_orderid.
         """
         return self.quotes.get(vt_quoteid, None)
+
     # 🧠 ML Signal: Default value assignment for receiver
 
     def get_all_ticks(self) -> list[TickData]:
@@ -691,6 +745,7 @@ class OmsEngine(BaseEngine):
         # ✅ Best Practice: Explicitly closing the SMTP connection
         """
         return list(self.accounts.values())
+
     # 🧠 ML Signal: Starting a thread, indicating concurrent execution
 
     # 🧠 ML Signal: Logging of exceptions with traceback
@@ -722,25 +777,27 @@ class OmsEngine(BaseEngine):
         """
         return list(self.active_quotes.values())
 
-    def update_order_request(self, req: OrderRequest, vt_orderid: str, gateway_name: str) -> None:
+    def update_order_request(
+        self, req: OrderRequest, vt_orderid: str, gateway_name: str
+    ) -> None:
         """
         Update order request to offset converter.
         """
-        converter: OffsetConverter | None = self.offset_converters.get(gateway_name, None)
+        converter: OffsetConverter | None = self.offset_converters.get(
+            gateway_name, None
+        )
         if converter:
             converter.update_order_request(req, vt_orderid)
 
     def convert_order_request(
-        self,
-        req: OrderRequest,
-        gateway_name: str,
-        lock: bool,
-        net: bool = False
+        self, req: OrderRequest, gateway_name: str, lock: bool, net: bool = False
     ) -> list[OrderRequest]:
         """
         Convert original order request according to given mode.
         """
-        converter: OffsetConverter | None = self.offset_converters.get(gateway_name, None)
+        converter: OffsetConverter | None = self.offset_converters.get(
+            gateway_name, None
+        )
         if not converter:
             return [req]
 
@@ -767,7 +824,9 @@ class EmailEngine(BaseEngine):
         self.queue: Queue = Queue()
         self.active: bool = False
 
-    def send_email(self, subject: str, content: str, receiver: str | None = None) -> None:
+    def send_email(
+        self, subject: str, content: str, receiver: str | None = None
+    ) -> None:
         """"""
         # Start email engine when sending first email.
         if not self.active:

@@ -39,6 +39,7 @@ class StructuredCovEstimator(RiskModel):
             Mining Latent Risk Factors to Improve Covariance Matrix Estimation. arXiv preprint arXiv:2107.05201.
     # ⚠️ SAST Risk (Low): Potential for KeyError if DEFAULT_NAN_OPTION is not defined in the class
     """
+
     # ⚠️ SAST Risk (Low): Use of assert for argument validation can be bypassed if Python is run with optimizations
 
     FACTOR_MODEL_PCA = "pca"
@@ -56,9 +57,9 @@ class StructuredCovEstimator(RiskModel):
             # ✅ Best Practice: Docstring provides a clear explanation of the function's purpose, arguments, and return values.
             # 🧠 ML Signal: Conditional logic to select a model based on input parameters
             # 🧠 ML Signal: Storing the number of factors, which may influence model complexity
-            assert kwargs["nan_option"] in [self.DEFAULT_NAN_OPTION], "nan_option={} is not supported".format(
-                kwargs["nan_option"]
-            )
+            assert kwargs["nan_option"] in [
+                self.DEFAULT_NAN_OPTION
+            ], "nan_option={} is not supported".format(kwargs["nan_option"])
         else:
             kwargs["nan_option"] = self.DEFAULT_NAN_OPTION
 
@@ -68,15 +69,18 @@ class StructuredCovEstimator(RiskModel):
             # 🧠 ML Signal: Usage of a solver model to fit data, indicating a machine learning pattern.
             self.FACTOR_MODEL_PCA,
             self.FACTOR_MODEL_FA,
-        # 🧠 ML Signal: Extraction of components from a fitted model, common in dimensionality reduction techniques.
+            # 🧠 ML Signal: Extraction of components from a fitted model, common in dimensionality reduction techniques.
         ], "factor_model={} is not supported".format(factor_model)
         self.solver = PCA if factor_model == self.FACTOR_MODEL_PCA else FactorAnalysis
         # 🧠 ML Signal: Transformation of data using a fitted model, indicating a prediction or transformation step.
 
         self.num_factors = num_factors
+
     # ✅ Best Practice: Use of matrix operations for efficient computation.
 
-    def _predict(self, X: np.ndarray, return_decomposed_components=False) -> Union[np.ndarray, tuple]:
+    def _predict(
+        self, X: np.ndarray, return_decomposed_components=False
+    ) -> Union[np.ndarray, tuple]:
         """
         covariance estimation implementation
 

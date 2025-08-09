@@ -3,6 +3,7 @@
 
 
 from __future__ import division
+
 # ✅ Best Practice: Use of relative imports for internal modules
 from __future__ import print_function
 
@@ -16,9 +17,11 @@ from ...log import get_module_logger
 # ✅ Best Practice: Use of relative imports for internal modules
 import torch
 import torch.nn as nn
+
 # ✅ Best Practice: Use of relative imports for internal modules
 # 🧠 ML Signal: Class definition for a machine learning model, useful for identifying model patterns
 import torch.optim as optim
+
 # ✅ Best Practice: Use of relative imports for internal modules
 from torch.utils.data import DataLoader
 
@@ -83,7 +86,9 @@ class TCN(Model):
         self.early_stop = early_stop
         self.optimizer = optimizer.lower()
         self.loss = loss
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.n_jobs = n_jobs
         self.seed = seed
 
@@ -143,14 +148,16 @@ class TCN(Model):
             kernel_size=self.kernel_size,
             # 🧠 ML Signal: Use of mean squared error (MSE) indicates a regression task
             dropout=self.dropout,
-        # 🧠 ML Signal: Custom loss function implementation
-        # 🧠 ML Signal: Model training state
+            # 🧠 ML Signal: Custom loss function implementation
+            # 🧠 ML Signal: Model training state
         )
         # ⚠️ SAST Risk (Low): Ensure 'torch' is imported to avoid runtime errors
         self.logger.info("model:\n{:}".format(self.TCN_model))
         # 🧠 ML Signal: Model deployment to device
         # 🧠 ML Signal: Handling missing values in labels
-        self.logger.info("model size: {:.4f} MB".format(count_parameters(self.TCN_model)))
+        self.logger.info(
+            "model size: {:.4f} MB".format(count_parameters(self.TCN_model))
+        )
 
         # 🧠 ML Signal: Conditional logic based on loss type
         if optimizer.lower() == "adam":
@@ -162,7 +169,9 @@ class TCN(Model):
         # ⚠️ SAST Risk (Low): Potential for unhandled loss types leading to exceptions
         # 🧠 ML Signal: Conditional logic based on metric type
         else:
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
         # ⚠️ SAST Risk (Low): Potential for negative loss values if not handled elsewhere
 
         self.fitted = False
@@ -180,6 +189,7 @@ class TCN(Model):
         # 🧠 ML Signal: Model prediction step
         loss = (pred - label) ** 2
         return torch.mean(loss)
+
     # 🧠 ML Signal: Calculating loss for model training
 
     def loss_fn(self, pred, label):
@@ -194,6 +204,7 @@ class TCN(Model):
         # ⚠️ SAST Risk (Low): Clipping gradients to prevent exploding gradients
 
         raise ValueError("unknown loss `%s`" % self.loss)
+
     # 🧠 ML Signal: Optimizer step to update model weights
     # ⚠️ SAST Risk (Low): Potential for data shape mismatch during transpose
 
@@ -206,6 +217,7 @@ class TCN(Model):
         # 🧠 ML Signal: Model inference without gradient computation
 
         raise ValueError("unknown metric `%s`" % self.metric)
+
     # 🧠 ML Signal: Calculating loss for model evaluation
     # ✅ Best Practice: Convert loss to a scalar for storage
 
@@ -257,8 +269,12 @@ class TCN(Model):
         evals_result=dict(),
         save_path=None,
     ):
-        dl_train = dataset.prepare("train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
-        dl_valid = dataset.prepare("valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
+        dl_train = dataset.prepare(
+            "train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
+        dl_valid = dataset.prepare(
+            "valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
 
         # process nan brought by dataloader
         # ⚠️ SAST Risk (Low): Ensure save_path is validated to prevent path traversal vulnerabilities
@@ -270,12 +286,20 @@ class TCN(Model):
 
         train_loader = DataLoader(
             # 🧠 ML Signal: Usage of dataset preparation with specific column sets
-            dl_train, batch_size=self.batch_size, shuffle=True, num_workers=self.n_jobs, drop_last=True
+            dl_train,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=self.n_jobs,
+            drop_last=True,
         )
         # 🧠 ML Signal: Configuration of data handling with fillna_type
         valid_loader = DataLoader(
-            dl_valid, batch_size=self.batch_size, shuffle=False, num_workers=self.n_jobs, drop_last=True
-        # 🧠 ML Signal: Usage of DataLoader with specific batch size and number of workers
+            dl_valid,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.n_jobs,
+            drop_last=True,
+            # 🧠 ML Signal: Usage of DataLoader with specific batch size and number of workers
         )
 
         # 🧠 ML Signal: Model evaluation mode set before prediction
@@ -337,9 +361,13 @@ class TCN(Model):
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
 
-        dl_test = dataset.prepare("test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I)
+        dl_test = dataset.prepare(
+            "test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I
+        )
         dl_test.config(fillna_type="ffill+bfill")
-        test_loader = DataLoader(dl_test, batch_size=self.batch_size, num_workers=self.n_jobs)
+        test_loader = DataLoader(
+            dl_test, batch_size=self.batch_size, num_workers=self.n_jobs
+        )
         self.TCN_model.eval()
         preds = []
 
@@ -358,7 +386,9 @@ class TCNModel(nn.Module):
     def __init__(self, num_input, output_size, num_channels, kernel_size, dropout):
         super().__init__()
         self.num_input = num_input
-        self.tcn = TemporalConvNet(num_input, num_channels, kernel_size, dropout=dropout)
+        self.tcn = TemporalConvNet(
+            num_input, num_channels, kernel_size, dropout=dropout
+        )
         self.linear = nn.Linear(num_channels[-1], output_size)
 
     def forward(self, x):

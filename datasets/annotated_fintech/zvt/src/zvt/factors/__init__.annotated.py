@@ -13,6 +13,7 @@ __all__ = []
 
 # import all from submodule algorithm
 from .algorithm import *
+
 # ✅ Best Practice: Explicitly importing all from a module can lead to namespace pollution; consider importing only necessary components.
 from .algorithm import __all__ as _algorithm_all
 
@@ -23,6 +24,7 @@ __all__ += _algorithm_all
 # ✅ Best Practice: Explicitly importing all from a module can lead to namespace pollution; consider importing only necessary components.
 from .top_stocks import *
 from .top_stocks import __all__ as _top_stocks_all
+
 # 🧠 ML Signal: Usage of __all__ to manage module exports.
 
 __all__ += _top_stocks_all
@@ -30,6 +32,7 @@ __all__ += _top_stocks_all
 # ✅ Best Practice: Explicitly importing all from a module can lead to namespace pollution; consider importing only necessary components.
 # import all from submodule ma
 from .ma import *
+
 # 🧠 ML Signal: Usage of __all__ to manage module exports.
 from .ma import __all__ as _ma_all
 
@@ -48,6 +51,7 @@ __all__ += _transformers_all
 # import all from submodule macd
 from .macd import *
 from .macd import __all__ as _macd_all
+
 # ✅ Best Practice: Explicitly importing all from a module can lead to namespace pollution; consider importing only necessary components.
 # 🧠 ML Signal: Usage of __all__ to manage module exports.
 

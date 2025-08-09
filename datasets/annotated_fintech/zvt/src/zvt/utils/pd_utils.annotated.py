@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from typing import List, Union
+
 # ✅ Best Practice: Consider using isinstance() instead of type() for type checking
 
 import pandas as pd
+
 # ✅ Best Practice: Consider using isinstance() instead of type() for type checking
 
 
@@ -22,23 +24,31 @@ def drop_continue_duplicate(s: Union[pd.Series, pd.DataFrame], col=None):
         # ⚠️ SAST Risk (Low): Assumes df is a valid DataFrame, may raise AttributeError if not
         # ✅ Best Practice: Use of descriptive function name for clarity
         return s.loc[selected.index, :]
+
+
 # 🧠 ML Signal: Function checks for non-null and non-empty DataFrame or Series
 
 # ✅ Best Practice: Use of helper function for null check increases readability
 # ✅ Best Practice: Explicitly checking for None and emptiness improves code readability
 
+
 # 🧠 ML Signal: Function that groups data by entity ID, indicating a common data processing pattern
 def is_filter_result_df(df: pd.DataFrame):
     # ✅ Best Practice: Function definition without type hints for input and output
     return pd_is_not_null(df) and "filter_result" in df.columns
+
+
 # 🧠 ML Signal: Function definition with specific parameter usage
 
 # 🧠 ML Signal: Use of DataFrame's groupby method, a common operation in data analysis
+
 
 # ⚠️ SAST Risk (Low): Assumes input_df has a multi-index with entity_id at level 0
 # 🧠 ML Signal: Conditional check on DataFrame index levels
 def is_score_result_df(df: pd.DataFrame):
     return pd_is_not_null(df) and "score_result" in df.columns
+
+
 # 🧠 ML Signal: Function definition with specific parameters can indicate common data processing patterns
 # ✅ Best Practice: Resetting index for DataFrame manipulation
 
@@ -46,12 +56,16 @@ def is_score_result_df(df: pd.DataFrame):
 # ✅ Best Practice: Checking the type or structure of input data before processing
 def pd_is_not_null(df: Union[pd.DataFrame, pd.Series]):
     return df is not None and not df.empty
+
+
 # ⚠️ SAST Risk (Low): Potential KeyError if 'filter_result' column does not exist in input_df
 
 
 # 🧠 ML Signal: Function parameterization with default values
 def group_by_entity_id(input_df: pd.DataFrame):
     return input_df.groupby(level=0)
+
+
 # 🧠 ML Signal: Returning modified DataFrame is a common pattern in data manipulation functions
 # 🧠 ML Signal: Conditional logic based on parameter presence
 
@@ -62,6 +76,8 @@ def normalize_group_compute_result(group_result):
         # 🧠 ML Signal: Conditional logic based on parameter value
         return group_result.reset_index(level=0, drop=True)
     return group_result
+
+
 # ⚠️ SAST Risk (Low): Modifies the original DataFrame if inplace is True
 
 
@@ -78,7 +94,9 @@ def merge_filter_result(input_df: pd.DataFrame, filter_result: pd.Series):
     # ✅ Best Practice: Use isinstance() for type checking
     return input_df
 
+
 # 🧠 ML Signal: Conversion of Series to DataFrame
+
 
 def index_df(df, index="timestamp", inplace=True, drop=False, time_field="timestamp"):
     # 🧠 ML Signal: Use of list to define index
@@ -107,12 +125,21 @@ def index_df(df, index="timestamp", inplace=True, drop=False, time_field="timest
         df = df.sort_index(level=level)
     # 🧠 ML Signal: Function definition with optional parameters
     return df
+
+
 # 🧠 ML Signal: Validates index names against expected values
 
 # ✅ Best Practice: Check if 'columns' is provided before using it
 # 🧠 ML Signal: Function call with multiple parameters
 
-def normal_index_df(df, category_field="entity_id", time_filed="timestamp", drop=True, default_entity="entity"):
+
+def normal_index_df(
+    df,
+    category_field="entity_id",
+    time_filed="timestamp",
+    drop=True,
+    default_entity="entity",
+):
     # 🧠 ML Signal: Use of DataFrame's loc method to select columns
     # ✅ Best Practice: Consider adding type hints for the function's return type for better readability and maintainability.
     if type(df) == pd.Series:
@@ -136,6 +163,8 @@ def normal_index_df(df, category_field="entity_id", time_filed="timestamp", drop
 
     # ⚠️ SAST Risk (Low): Ensure that the DataFrame creation handles potential large memory usage if `added_index` is large.
     return index_df(df=df, index=index, drop=drop, time_field="timestamp")
+
+
 # ✅ Best Practice: Using `__all__` to define public API of the module improves code readability and maintainability.
 # ✅ Best Practice: Using `pd.concat` is a standard and efficient way to concatenate DataFrames.
 # ✅ Best Practice: Sorting the DataFrame by index ensures that the data is in the expected order.

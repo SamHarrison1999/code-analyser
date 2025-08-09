@@ -22,7 +22,7 @@ from zvt.trading.trading_models import (
     TSModel,
     TSRequestModel,
     QuoteStatsModel,
-# ✅ Best Practice: Use of APIRouter for organizing routes in FastAPI applications
+    # ✅ Best Practice: Use of APIRouter for organizing routes in FastAPI applications
 )
 from zvt.trading.trading_schemas import QueryStockQuoteSetting
 
@@ -30,8 +30,8 @@ trading_router = APIRouter(
     prefix="/api/trading",
     tags=["trading"],
     responses={404: {"description": "Not found"}},
-# ✅ Best Practice: Use of type hinting for response_model improves code readability and maintainability
-# 🧠 ML Signal: Function that interacts with a service to query data
+    # ✅ Best Practice: Use of type hinting for response_model improves code readability and maintainability
+    # 🧠 ML Signal: Function that interacts with a service to query data
 )
 
 
@@ -40,6 +40,8 @@ trading_router = APIRouter(
 @trading_router.post("/query_kdata", response_model=Optional[List[KdataModel]])
 def query_kdata(kdata_request_model: KdataRequestModel):
     return trading_service.query_kdata(kdata_request_model)
+
+
 # 🧠 ML Signal: Function returning a service call result, indicating a pattern of service interaction
 
 
@@ -58,9 +60,14 @@ def get_quote_stats():
 
 # ⚠️ SAST Risk (Low): Potential exposure of sensitive data through API endpoint
 # 🧠 ML Signal: Function uses a service to build a query, indicating a pattern of service delegation
-@trading_router.get("/get_query_stock_quote_setting", response_model=Optional[QueryStockQuoteSettingModel])
+@trading_router.get(
+    "/get_query_stock_quote_setting",
+    response_model=Optional[QueryStockQuoteSettingModel],
+)
 def get_query_stock_quote_setting():
-    with contract_api.DBSession(provider="zvt", data_schema=QueryStockQuoteSetting)() as session:
+    with contract_api.DBSession(
+        provider="zvt", data_schema=QueryStockQuoteSetting
+    )() as session:
         # ✅ Best Practice: Use of decorators to define HTTP endpoints improves code organization and readability
         # 🧠 ML Signal: Function uses a service to query data, indicating a pattern of data retrieval.
         query_setting: List[QueryStockQuoteSetting] = QueryStockQuoteSetting.query_data(
@@ -72,20 +79,31 @@ def get_query_stock_quote_setting():
             return query_setting[0]
         # 🧠 ML Signal: Usage of a service to query stock quotes, indicating a common pattern in trading applications
         return None
+
+
 # 🧠 ML Signal: Function signature indicates a pattern of using service classes for business logic
 
 
 # 🧠 ML Signal: Endpoint definition for building a trading plan, useful for identifying API usage patterns
-@trading_router.post("/build_query_stock_quote_setting", response_model=QueryStockQuoteSettingModel)
+@trading_router.post(
+    "/build_query_stock_quote_setting", response_model=QueryStockQuoteSettingModel
+)
 # ✅ Best Practice: Use of decorators for routing improves code organization and readability
 # 🧠 ML Signal: Function that interacts with a service to query trading plans
 # ✅ Best Practice: Use of decorators for defining API endpoints improves code readability and organization
-def build_query_stock_quote_setting(build_query_stock_quote_setting_model: BuildQueryStockQuoteSettingModel):
-    return trading_service.build_query_stock_quote_setting(build_query_stock_quote_setting_model)
+def build_query_stock_quote_setting(
+    build_query_stock_quote_setting_model: BuildQueryStockQuoteSettingModel,
+):
+    return trading_service.build_query_stock_quote_setting(
+        build_query_stock_quote_setting_model
+    )
+
+
 # 🧠 ML Signal: Function definition for retrieving current trading plan
 
 # ✅ Best Practice: Use of decorators to define HTTP endpoints
 # 🧠 ML Signal: Usage of trading_service to get trading plan
+
 
 @trading_router.post("/query_tag_quotes", response_model=List[TagQuoteStatsModel])
 def query_tag_quotes(query_tag_quote_model: QueryTagQuoteModel):
@@ -96,22 +114,29 @@ def query_tag_quotes(query_tag_quote_model: QueryTagQuoteModel):
 
 # ✅ Best Practice: Use of decorators to define HTTP endpoints in a web framework
 # 🧠 ML Signal: Conditional import based on platform, indicating platform-specific behavior
-@trading_router.post("/query_stock_quotes", response_model=Optional[StockQuoteStatsModel])
+@trading_router.post(
+    "/query_stock_quotes", response_model=Optional[StockQuoteStatsModel]
+)
 def query_stock_quotes(query_stock_quote_model: QueryStockQuoteModel):
     # ⚠️ SAST Risk (Medium): Dynamic import based on condition, could lead to import errors or security issues
     return trading_service.query_stock_quotes(query_stock_quote_model)
 
+
 # 🧠 ML Signal: Platform-specific method call, indicating usage pattern for Windows
+
 
 @trading_router.post("/build_trading_plan", response_model=TradingPlanModel)
 # 🧠 ML Signal: Function definition with specific parameter type hints
 def build_trading_plan(build_trading_plan_model: BuildTradingPlanModel):
     # ⚠️ SAST Risk (Low): Generic exception message, could be more informative
     return trading_service.build_trading_plan(build_trading_plan_model)
+
+
 # 🧠 ML Signal: Checking for platform-specific conditions
 
 # ✅ Best Practice: Decorator usage for route definition, improves code organization and readability
 # ⚠️ SAST Risk (Low): Dynamic import based on platform condition
+
 
 @trading_router.post("/query_trading_plan", response_model=Page[TradingPlanModel])
 # 🧠 ML Signal: Platform-specific method call

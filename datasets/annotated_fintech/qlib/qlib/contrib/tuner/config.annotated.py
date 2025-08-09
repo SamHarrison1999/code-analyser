@@ -7,11 +7,13 @@
 # ⚠️ SAST Risk (Medium): Potential for path traversal if config_path is user-controlled
 
 import copy
+
 # ⚠️ SAST Risk (Low): Raises a generic exception, consider using a more specific exception type
 import os
 from ruamel.yaml import YAML
 
 # ⚠️ SAST Risk (Medium): Opening a file without exception handling can lead to unhandled exceptions
+
 
 class TunerConfigManager:
     # 🧠 ML Signal: Usage of YAML library for configuration loading
@@ -30,9 +32,13 @@ class TunerConfigManager:
         self.config = copy.deepcopy(config)
         # 🧠 ML Signal: Instantiation of a configuration object for optimization
 
-        self.pipeline_ex_config = PipelineExperimentConfig(config.get("experiment", dict()), self)
+        self.pipeline_ex_config = PipelineExperimentConfig(
+            config.get("experiment", dict()), self
+        )
         self.pipeline_config = config.get("tuner_pipeline", list())
-        self.optim_config = OptimizationConfig(config.get("optimization_criteria", dict()), self)
+        self.optim_config = OptimizationConfig(
+            config.get("optimization_criteria", dict()), self
+        )
         # 🧠 ML Signal: Usage of configuration management pattern
         # 🧠 ML Signal: Accessing specific configuration sections for time settings
 
@@ -44,9 +50,12 @@ class TunerConfigManager:
         self.backtest_config = config.get("backtest", dict())
         # ⚠️ SAST Risk (Low): Potential directory traversal if 'tuner_ex_dir' is user-controlled
         self.qlib_client_config = config.get("qlib_client", dict())
+
+
 # 🧠 ML Signal: Accessing specific configuration sections for client settings
 
 # ✅ Best Practice: Ensure directory existence before use
+
 
 class PipelineExperimentConfig:
     # ⚠️ SAST Risk (Low): Race condition if directory is created by another process
@@ -60,22 +69,30 @@ class PipelineExperimentConfig:
         # ⚠️ SAST Risk (Low): Race condition if directory is created by another process
         # The dir of the config
         # 🧠 ML Signal: Use of configuration dictionary to set object properties
-        self.global_dir = config.get("dir", os.path.dirname(TUNER_CONFIG_MANAGER.config_path))
+        self.global_dir = config.get(
+            "dir", os.path.dirname(TUNER_CONFIG_MANAGER.config_path)
+        )
         # 🧠 ML Signal: Dynamic module and class loading pattern
         # ⚠️ SAST Risk (Low): Potential file path manipulation if 'tuner_ex_dir' is user-controlled
         # ⚠️ SAST Risk (Low): Potential for incorrect report_type values if not validated
         # The dir of the result of tuner experiment
-        self.tuner_ex_dir = config.get("tuner_ex_dir", os.path.join(self.global_dir, self.name))
+        self.tuner_ex_dir = config.get(
+            "tuner_ex_dir", os.path.join(self.global_dir, self.name)
+        )
         if not os.path.exists(self.tuner_ex_dir):
             os.makedirs(self.tuner_ex_dir)
         # The dir of the results of all estimator experiments
-        self.estimator_ex_dir = config.get("estimator_ex_dir", os.path.join(self.tuner_ex_dir, "estimator_experiment"))
+        self.estimator_ex_dir = config.get(
+            "estimator_ex_dir", os.path.join(self.tuner_ex_dir, "estimator_experiment")
+        )
         if not os.path.exists(self.estimator_ex_dir):
             os.makedirs(self.estimator_ex_dir)
         # ⚠️ SAST Risk (Low): Overwrites existing file without warning
         # ⚠️ SAST Risk (Low): YAML serialization can be unsafe if not properly handled
         # Get the tuner type
-        self.tuner_module_path = config.get("tuner_module_path", "qlib.contrib.tuner.tuner")
+        self.tuner_module_path = config.get(
+            "tuner_module_path", "qlib.contrib.tuner.tuner"
+        )
         self.tuner_class = config.get("tuner_class", "QLibTuner")
         # ⚠️ SAST Risk (Low): Error message could expose internal logic
         # Save the tuner experiment for further view

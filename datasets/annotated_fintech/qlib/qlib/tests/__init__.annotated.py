@@ -3,18 +3,30 @@ import unittest
 import pandas as pd
 import numpy as np
 import io
+
 # ⚠️ SAST Risk (Low): Relative imports can lead to issues if the module is executed as a standalone script.
 
 from .data import GetData
+
 # ⚠️ SAST Risk (Low): Relative imports can lead to issues if the module is executed as a standalone script.
 from .. import init
 from ..constant import REG_CN, REG_TW
+
 # ⚠️ SAST Risk (Low): Relative imports can lead to issues if the module is executed as a standalone script.
 from qlib.data.filter import NameDFilter
 from qlib.data import D
+
 # ⚠️ SAST Risk (Low): Importing from external libraries can introduce security risks if the library is compromised.
 from qlib.data.data import Cal, DatasetD
-from qlib.data.storage import CalendarStorage, InstrumentStorage, FeatureStorage, CalVT, InstKT, InstVT
+from qlib.data.storage import (
+    CalendarStorage,
+    InstrumentStorage,
+    FeatureStorage,
+    CalVT,
+    InstKT,
+    InstVT,
+)
+
 # 🧠 ML Signal: Use of class variables for configuration
 # ⚠️ SAST Risk (Low): Importing from external libraries can introduce security risks if the library is compromised.
 
@@ -44,7 +56,7 @@ class TestAutoData(unittest.TestCase):
             provider_uri_day = cls.provider_uri_1day
             name_day = "qlib_data"
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
 
         GetData().qlib_data(
             name=name_day,
@@ -81,8 +93,10 @@ class TestAutoData(unittest.TestCase):
             # 🧠 ML Signal: Use of regex for filtering, indicating pattern matching
             dataset_cache=None,
             **cls._setup_kwargs,
-        # 🧠 ML Signal: Use of filtering in data retrieval
+            # 🧠 ML Signal: Use of filtering in data retrieval
         )
+
+
 # ✅ Best Practice: Test method name clearly indicates the purpose of the test
 
 
@@ -252,14 +266,17 @@ class MockInstrumentStorage(MockStorageBase, InstrumentStorage):
 
 class MockFeatureStorage(MockStorageBase, FeatureStorage):
     def __init__(self, instrument: str, field: str, freq: str, db_region: str = None, **kwargs):  # type: ignore
-        super().__init__(instrument=instrument, field=field, freq=freq, db_region=db_region, **kwargs)
+        super().__init__(
+            instrument=instrument, field=field, freq=freq, db_region=db_region, **kwargs
+        )
         self.field = field
         calendar = sorted(self.df["datetime"].unique())
         df_calendar = pd.DataFrame(calendar, columns=["datetime"]).set_index("datetime")
         df = self.df[self.df["symbol"] == instrument]
         data_dt_field = "datetime"
         cal_df = df_calendar[
-            (df_calendar.index >= df[data_dt_field].min()) & (df_calendar.index <= df[data_dt_field].max())
+            (df_calendar.index >= df[data_dt_field].min())
+            & (df_calendar.index <= df[data_dt_field].max())
         ]
         df = df.set_index(data_dt_field)
         df_data = df.reindex(cal_df.index)
@@ -315,21 +332,36 @@ class TestMockData(unittest.TestCase):
         "calendar_provider": {
             "class": "LocalCalendarProvider",
             "module_path": "qlib.data.data",
-            "kwargs": {"backend": {"class": "MockCalendarStorage", "module_path": "qlib.tests"}},
+            "kwargs": {
+                "backend": {"class": "MockCalendarStorage", "module_path": "qlib.tests"}
+            },
         },
         "instrument_provider": {
             "class": "LocalInstrumentProvider",
             "module_path": "qlib.data.data",
-            "kwargs": {"backend": {"class": "MockInstrumentStorage", "module_path": "qlib.tests"}},
+            "kwargs": {
+                "backend": {
+                    "class": "MockInstrumentStorage",
+                    "module_path": "qlib.tests",
+                }
+            },
         },
         "feature_provider": {
             "class": "LocalFeatureProvider",
             "module_path": "qlib.data.data",
-            "kwargs": {"backend": {"class": "MockFeatureStorage", "module_path": "qlib.tests"}},
+            "kwargs": {
+                "backend": {"class": "MockFeatureStorage", "module_path": "qlib.tests"}
+            },
         },
     }
 
     @classmethod
     def setUpClass(cls) -> None:
         provider_uri = "Not necessary."
-        init(region=REG_TW, provider_uri=provider_uri, expression_cache=None, dataset_cache=None, **cls._setup_kwargs)
+        init(
+            region=REG_TW,
+            provider_uri=provider_uri,
+            expression_cache=None,
+            dataset_cache=None,
+            **cls._setup_kwargs,
+        )

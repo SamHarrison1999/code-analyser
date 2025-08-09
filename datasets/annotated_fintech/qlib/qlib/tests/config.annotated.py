@@ -52,7 +52,7 @@ RECORD_CONFIG = [
         },
     },
     SA_RC,
-# 🧠 ML Signal: Default parameters for dataset configuration can indicate common usage patterns.
+    # 🧠 ML Signal: Default parameters for dataset configuration can indicate common usage patterns.
 ]
 
 
@@ -116,9 +116,13 @@ def get_gbdt_task(dataset_kwargs={}, handler_kwargs={"instruments": CSI300_MARKE
         "dataset": get_dataset_config(**dataset_kwargs, handler_kwargs=handler_kwargs),
     }
 
+
 # 🧠 ML Signal: Creating dataset configuration for a specific market
 
-def get_record_lgb_config(dataset_kwargs={}, handler_kwargs={"instruments": CSI300_MARKET}):
+
+def get_record_lgb_config(
+    dataset_kwargs={}, handler_kwargs={"instruments": CSI300_MARKET}
+):
     return {
         "model": {
             "class": "LGBModel",
@@ -131,7 +135,9 @@ def get_record_lgb_config(dataset_kwargs={}, handler_kwargs={"instruments": CSI3
 
 
 # 🧠 ML Signal: Defining time range for rolling handler configuration
-def get_record_xgboost_config(dataset_kwargs={}, handler_kwargs={"instruments": CSI300_MARKET}):
+def get_record_xgboost_config(
+    dataset_kwargs={}, handler_kwargs={"instruments": CSI300_MARKET}
+):
     return {
         "model": {
             "class": "XGBModel",
@@ -143,12 +149,18 @@ def get_record_xgboost_config(dataset_kwargs={}, handler_kwargs={"instruments": 
     }
 
 
-CSI300_DATASET_CONFIG = get_dataset_config(handler_kwargs={"instruments": CSI300_MARKET})
+CSI300_DATASET_CONFIG = get_dataset_config(
+    handler_kwargs={"instruments": CSI300_MARKET}
+)
 CSI300_GBDT_TASK = get_gbdt_task(handler_kwargs={"instruments": CSI300_MARKET})
 # 🧠 ML Signal: Creating rolling XGBoost task configuration
 
-CSI100_RECORD_XGBOOST_TASK_CONFIG = get_record_xgboost_config(handler_kwargs={"instruments": CSI100_MARKET})
-CSI100_RECORD_LGB_TASK_CONFIG = get_record_lgb_config(handler_kwargs={"instruments": CSI100_MARKET})
+CSI100_RECORD_XGBOOST_TASK_CONFIG = get_record_xgboost_config(
+    handler_kwargs={"instruments": CSI100_MARKET}
+)
+CSI100_RECORD_LGB_TASK_CONFIG = get_record_lgb_config(
+    handler_kwargs={"instruments": CSI100_MARKET}
+)
 
 # use for rolling_online_managment.py
 # 🧠 ML Signal: Creating rolling LGB task configuration

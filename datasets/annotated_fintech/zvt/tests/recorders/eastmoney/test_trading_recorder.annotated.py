@@ -1,6 +1,7 @@
 # 🧠 ML Signal: Importing specific modules and functions indicates usage patterns and dependencies
 # -*- coding: utf-8 -*-
 from ...context import init_test_context
+
 # 🧠 ML Signal: Function call to initialize context, indicating setup or configuration pattern
 
 init_test_context()
@@ -8,14 +9,21 @@ init_test_context()
 
 # 🧠 ML Signal: Function definition for testing a specific component
 from zvt.consts import SAMPLE_STOCK_CODES
+
 # 🧠 ML Signal: Importing specific classes indicates usage patterns and dependencies
 
 # 🧠 ML Signal: Instantiation of a class with specific parameters
-from zvt.recorders.eastmoney.trading.eastmoney_manager_trading_recorder import ManagerTradingRecorder
+from zvt.recorders.eastmoney.trading.eastmoney_manager_trading_recorder import (
+    ManagerTradingRecorder,
+)
+
 # 🧠 ML Signal: Importing specific classes indicates usage patterns and dependencies
-from zvt.recorders.eastmoney.trading.eastmoney_holder_trading_recorder import HolderTradingRecorder
+from zvt.recorders.eastmoney.trading.eastmoney_holder_trading_recorder import (
+    HolderTradingRecorder,
+)
 
 # 🧠 ML Signal: Method invocation on an object
+
 
 def test_manager_trading_recorder():
     recorder = ManagerTradingRecorder(codes=SAMPLE_STOCK_CODES)

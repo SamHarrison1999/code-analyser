@@ -5,6 +5,7 @@ import pandas as pd
 import requests
 
 from zvt.domain import IndexCategory
+
 # ✅ Best Practice: Use a logger for consistent and configurable logging throughout the module.
 from zvt.recorders.consts import DEFAULT_HEADER
 from zvt.utils.time_utils import to_pd_timestamp
@@ -14,7 +15,9 @@ from zvt.utils.time_utils import to_pd_timestamp
 logger = logging.getLogger(__name__)
 # ✅ Best Practice: Consider handling exceptions for robustness
 
-original_page_url = "https://www.csindex.com.cn/zh-CN#/indices/family/list?index_series=2"
+original_page_url = (
+    "https://www.csindex.com.cn/zh-CN#/indices/family/list?index_series=2"
+)
 # 🧠 ML Signal: Hardcoded URLs can indicate a pattern of accessing specific web resources.
 # ⚠️ SAST Risk (Medium): Raises HTTPError if the HTTP request returned an unsuccessful status code
 
@@ -23,7 +26,11 @@ url = "https://www.csindex.com.cn/csindex-home/index-list/query-index-item"
 # 🧠 ML Signal: Accessing JSON data from HTTP response
 
 # 🧠 ML Signal: Mapping categories to specific codes can indicate a pattern of data categorization.
-index_category_map = {IndexCategory.scope: "17", IndexCategory.industry: "18", IndexCategory.style: "19"}
+index_category_map = {
+    IndexCategory.scope: "17",
+    IndexCategory.industry: "18",
+    IndexCategory.style: "19",
+}
 # 🧠 ML Signal: Use of conditional logic to determine index_series based on index_type
 
 
@@ -31,6 +38,8 @@ def _get_resp_data(resp: requests.Response):
     resp.raise_for_status()
     # ⚠️ SAST Risk (Low): Use of assert for control flow can be disabled in optimized mode
     return resp.json()["data"]
+
+
 # 🧠 ML Signal: Use of external mapping to determine index_classify
 # ✅ Best Practice: Use of descriptive keys for dictionary improves readability
 
@@ -64,7 +73,7 @@ def _get_params(index_type, category: IndexCategory):
             "region": None,
             "indexSeries": index_series,
             "undefined": None,
-        # ✅ Best Practice: Use a session object for HTTP requests
+            # ✅ Best Practice: Use a session object for HTTP requests
         },
     }
 
@@ -72,7 +81,11 @@ def _get_params(index_type, category: IndexCategory):
 def get_cs_index(index_type="sh"):
     # ⚠️ SAST Risk (Medium): No error handling for HTTP request
     if index_type == "csi":
-        category_list = [IndexCategory.scope, IndexCategory.industry, IndexCategory.style]
+        category_list = [
+            IndexCategory.scope,
+            IndexCategory.industry,
+            IndexCategory.style,
+        ]
     elif index_type == "sh":
         category_list = [IndexCategory.scope]
     else:

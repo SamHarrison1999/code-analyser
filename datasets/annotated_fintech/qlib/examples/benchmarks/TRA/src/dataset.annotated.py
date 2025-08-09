@@ -3,14 +3,18 @@
 
 import copy
 import torch
+
 # 🧠 ML Signal: Using GPU if available is a common pattern in ML for performance optimization
 import numpy as np
+
 # 🧠 ML Signal: Function to convert input to tensor, common in ML preprocessing
 import pandas as pd
+
 # ✅ Best Practice: Use of isinstance to check if x is already a tensor
 
 # ⚠️ SAST Risk (Low): Potential issue if 'device' is not defined in the scope
 from qlib.data.dataset import DatasetH
+
 # ✅ Best Practice: Explicitly specifying dtype and device for tensor creation
 
 # ✅ Best Practice: Function name is descriptive and uses snake_case
@@ -22,6 +26,8 @@ def _to_tensor(x):
     if not isinstance(x, torch.Tensor):
         return torch.tensor(x, dtype=torch.float, device=device)
     return x
+
+
 # ⚠️ SAST Risk (Low): Use of assert for input validation can be disabled in optimized mode
 
 
@@ -40,7 +46,9 @@ def _create_ts_slices(index, seq_len):
     # 🧠 ML Signal: Use of slice objects for indexing
     # 🧠 ML Signal: Conversion of list to numpy array
     # number of dates for each code
-    sample_count_by_codes = pd.Series(0, index=index).groupby(level=0, group_keys=False).size().values
+    sample_count_by_codes = (
+        pd.Series(0, index=index).groupby(level=0, group_keys=False).size().values
+    )
 
     # start_index for each code
     start_index_of_codes = np.roll(np.cumsum(sample_count_by_codes), 1)
@@ -142,6 +150,7 @@ class MTSDatasetH(DatasetH):
         self.params = (batch_size, drop_last, shuffle)  # for train/eval switch
 
         super().__init__(handler, segments, **kwargs)
+
     # ⚠️ SAST Risk (Low): Use of NotImplementedError can expose internal logic details
 
     def setup_data(self, handler_kwargs: dict = None, **kwargs):
@@ -162,7 +171,9 @@ class MTSDatasetH(DatasetH):
         self._index = df.index
 
         # add memory to feature
-        self._data = np.c_[self._data, np.zeros((len(self._data), self.num_states), dtype=np.float32)]
+        self._data = np.c_[
+            self._data, np.zeros((len(self._data), self.num_states), dtype=np.float32)
+        ]
         # 🧠 ML Signal: Use of numpy array for batch slices, indicating structured data handling
 
         # padding tensor
@@ -217,7 +228,7 @@ class MTSDatasetH(DatasetH):
             start, stop = slc
         else:
             # ⚠️ SAST Risk (Low): Multiplying by -1 to handle negative batch_size might lead to unexpected behavior if not properly validated elsewhere.
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
         start_date = fn(start)
         end_date = fn(stop)
         # ✅ Best Practice: Use of copy() to avoid modifying the original list.
@@ -305,12 +316,20 @@ class MTSDatasetH(DatasetH):
             label = []
             index = []
             for slc in slices_subset:
-                _data = self._data[slc].clone() if self.pin_memory else self._data[slc].copy()
+                _data = (
+                    self._data[slc].clone()
+                    if self.pin_memory
+                    else self._data[slc].copy()
+                )
                 if len(_data) != self.seq_len:
                     if self.pin_memory:
-                        _data = torch.cat([self.zeros[: self.seq_len - len(_data)], _data], axis=0)
+                        _data = torch.cat(
+                            [self.zeros[: self.seq_len - len(_data)], _data], axis=0
+                        )
                     else:
-                        _data = np.concatenate([self.zeros[: self.seq_len - len(_data)], _data], axis=0)
+                        _data = np.concatenate(
+                            [self.zeros[: self.seq_len - len(_data)], _data], axis=0
+                        )
                 if self.num_states > 0:
                     _data[-self.horizon :, -self.num_states :] = 0
                 data.append(_data)

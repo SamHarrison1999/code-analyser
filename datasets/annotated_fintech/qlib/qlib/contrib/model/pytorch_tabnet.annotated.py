@@ -4,9 +4,11 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import pandas as pd
 from typing import Text, Union
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import copy
 from ...utils import get_or_create_path
@@ -15,9 +17,11 @@ from ...log import get_module_logger
 import torch
 import torch.nn as nn
 import torch.optim as optim
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import torch.nn.functional as F
 from torch.autograd import Function
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
@@ -78,7 +82,9 @@ class TabnetModel(Model):
         self.n_epochs = n_epochs
         self.logger = get_module_logger("TabNet")
         self.pretrain_n_epochs = pretrain_n_epochs
-        self.device = "cuda:%s" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        self.device = (
+            "cuda:%s" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.loss = loss
         self.metric = metric
         self.early_stop = early_stop
@@ -99,31 +105,50 @@ class TabnetModel(Model):
         torch.manual_seed(self.seed)
 
         # 🧠 ML Signal: Logging model architecture details, useful for debugging and understanding model structure.
-        self.tabnet_model = TabNet(inp_dim=self.d_feat, out_dim=self.out_dim, vbs=vbs, relax=relax).to(self.device)
-        self.tabnet_decoder = TabNet_Decoder(self.out_dim, self.d_feat, n_shared, n_ind, vbs, n_steps).to(self.device)
-        self.logger.info("model:\n{:}\n{:}".format(self.tabnet_model, self.tabnet_decoder))
+        self.tabnet_model = TabNet(
+            inp_dim=self.d_feat, out_dim=self.out_dim, vbs=vbs, relax=relax
+        ).to(self.device)
+        self.tabnet_decoder = TabNet_Decoder(
+            self.out_dim, self.d_feat, n_shared, n_ind, vbs, n_steps
+        ).to(self.device)
+        self.logger.info(
+            "model:\n{:}\n{:}".format(self.tabnet_model, self.tabnet_decoder)
+        )
         # ✅ Best Practice: Use of conditional logic to handle different optimizers.
         # 🧠 ML Signal: Logging model size, which can be important for deployment and resource allocation.
-        self.logger.info("model size: {:.4f} MB".format(count_parameters([self.tabnet_model, self.tabnet_decoder])))
+        self.logger.info(
+            "model size: {:.4f} MB".format(
+                count_parameters([self.tabnet_model, self.tabnet_decoder])
+            )
+        )
 
         if optimizer.lower() == "adam":
             self.pretrain_optimizer = optim.Adam(
                 # 🧠 ML Signal: Checks if the computation is set to use GPU, indicating hardware preference
-                list(self.tabnet_model.parameters()) + list(self.tabnet_decoder.parameters()), lr=self.lr
+                list(self.tabnet_model.parameters())
+                + list(self.tabnet_decoder.parameters()),
+                lr=self.lr,
             )
             # ✅ Best Practice: Direct comparison with torch.device for clarity
-            self.train_optimizer = optim.Adam(self.tabnet_model.parameters(), lr=self.lr)
+            self.train_optimizer = optim.Adam(
+                self.tabnet_model.parameters(), lr=self.lr
+            )
         # ✅ Best Practice: Ensure the directory for the pretrain_file exists or is created
 
         # 🧠 ML Signal: Preparing dataset for pretraining
         elif optimizer.lower() == "gd":
             self.pretrain_optimizer = optim.SGD(
-                list(self.tabnet_model.parameters()) + list(self.tabnet_decoder.parameters()), lr=self.lr
+                list(self.tabnet_model.parameters())
+                + list(self.tabnet_decoder.parameters()),
+                lr=self.lr,
             )
             self.train_optimizer = optim.SGD(self.tabnet_model.parameters(), lr=self.lr)
         # ⚠️ SAST Risk (Low): Use of NotImplementedError to handle unsupported optimizers.
         else:
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
+
     # ✅ Best Practice: Handle missing values in the training dataset
 
     @property
@@ -139,7 +164,7 @@ class TabnetModel(Model):
             # 🧠 ML Signal: Logging the current epoch index
             col_set=["feature", "label"],
             data_key=DataHandlerLP.DK_L,
-        # 🧠 ML Signal: Logging the start of pre-training
+            # 🧠 ML Signal: Logging the start of pre-training
         )
 
         df_train.fillna(df_train.mean(), inplace=True)
@@ -189,17 +214,23 @@ class TabnetModel(Model):
             self.logger.info("Pretrain...")
             self.pretrain_fn(dataset, self.pretrain_file)
             self.logger.info("Load Pretrain model")
-            self.tabnet_model.load_state_dict(torch.load(self.pretrain_file, map_location=self.device))
+            self.tabnet_model.load_state_dict(
+                torch.load(self.pretrain_file, map_location=self.device)
+            )
 
         # adding one more linear layer to fit the final output dimension
-        self.tabnet_model = FinetuneModel(self.out_dim, self.final_out_dim, self.tabnet_model).to(self.device)
+        self.tabnet_model = FinetuneModel(
+            self.out_dim, self.final_out_dim, self.tabnet_model
+        ).to(self.device)
         df_train, df_valid = dataset.prepare(
             ["train", "valid"],
             col_set=["feature", "label"],
             data_key=DataHandlerLP.DK_L,
         )
         if df_train.empty or df_valid.empty:
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
         df_train.fillna(df_train.mean(), inplace=True)
         x_train, y_train = df_train["feature"], df_train["label"]
         x_valid, y_valid = df_valid["feature"], df_valid["label"]
@@ -266,7 +297,9 @@ class TabnetModel(Model):
             raise ValueError("model is not fitted yet!")
         # 🧠 ML Signal: Use of numpy to handle indices suggests integration of numpy with PyTorch
 
-        x_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        x_test = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
         # ✅ Best Practice: Iterating in batches improves performance and memory usage
         index = x_test.index
         self.tabnet_model.eval()
@@ -380,8 +413,12 @@ class TabnetModel(Model):
                 break
 
             # 🧠 ML Signal: Random mask generation for feature selection
-            feature = x_train_values[indices[i : i + self.batch_size]].float().to(self.device)
-            label = y_train_values[indices[i : i + self.batch_size]].float().to(self.device)
+            feature = (
+                x_train_values[indices[i : i + self.batch_size]].float().to(self.device)
+            )
+            label = (
+                y_train_values[indices[i : i + self.batch_size]].float().to(self.device)
+            )
             # 🧠 ML Signal: Masking input features for training
             priors = torch.ones(self.batch_size, self.d_feat).to(self.device)
             pred = self.tabnet_model(feature, priors)
@@ -394,6 +431,7 @@ class TabnetModel(Model):
             loss.backward()
             torch.nn.utils.clip_grad_value_(self.tabnet_model.parameters(), 3.0)
             self.train_optimizer.step()
+
     # 🧠 ML Signal: Mask preparation for model input
     # ✅ Best Practice: Use descriptive variable names for better readability
 
@@ -429,7 +467,9 @@ class TabnetModel(Model):
 
             # 🧠 ML Signal: Aggregating loss values for epoch result
             # ✅ Best Practice: Consider adding type hints for function parameters and return type
-            S_mask = torch.bernoulli(torch.empty(self.batch_size, self.d_feat).fill_(self.ps))
+            S_mask = torch.bernoulli(
+                torch.empty(self.batch_size, self.d_feat).fill_(self.ps)
+            )
             # 🧠 ML Signal: Use of mask to filter predictions and labels
             x_train_values = train_set[indices[i : i + self.batch_size]] * (1 - S_mask)
             # 🧠 ML Signal: Use of mean squared error (MSE) loss function, common in regression tasks
@@ -481,7 +521,9 @@ class TabnetModel(Model):
                 break
 
             # ✅ Best Practice: Using nn.ModuleList for shared layers allows for proper parameter registration
-            S_mask = torch.bernoulli(torch.empty(self.batch_size, self.d_feat).fill_(self.ps))
+            S_mask = torch.bernoulli(
+                torch.empty(self.batch_size, self.d_feat).fill_(self.ps)
+            )
             x_train_values = train_set[indices[i : i + self.batch_size]] * (1 - S_mask)
             # 🧠 ML Signal: Use of nn.Linear indicates a fully connected layer, common in neural networks
             y_train_values = train_set[indices[i : i + self.batch_size]] * (S_mask)
@@ -505,6 +547,7 @@ class TabnetModel(Model):
         # ✅ Best Practice: Inheriting from nn.Module is standard for PyTorch models
 
         return np.mean(losses)
+
     # 🧠 ML Signal: Constructor with default hyperparameters for a neural network model
 
     def pretrain_loss_fn(self, f_hat, f, S):
@@ -521,6 +564,7 @@ class TabnetModel(Model):
         if self.loss == "mse":
             return self.mse(pred[mask], label[mask])
         raise ValueError("unknown loss `%s`" % self.loss)
+
     # ✅ Best Practice: Use of nn.ModuleList to store layers for better integration with PyTorch
 
     def metric_fn(self, pred, label):
@@ -528,11 +572,14 @@ class TabnetModel(Model):
         if self.metric in ("", "loss"):
             return -self.loss_fn(pred[mask], label[mask])
         raise ValueError("unknown metric `%s`" % self.metric)
+
     # ✅ Best Practice: Initializing the first step with a FeatureTransformer
 
     def mse(self, pred, label):
         loss = (pred - label) ** 2
         return torch.mean(loss)
+
+
 # ✅ Best Practice: Appending DecisionStep instances to a ModuleList for sequential processing
 
 
@@ -542,6 +589,7 @@ class FinetuneModel(nn.Module):
     """
     FinuetuneModel for adding a layer by the end
     """
+
     # 🧠 ML Signal: Storing model hyperparameters as instance variables
     # ✅ Best Practice: Use descriptive variable names for clarity and maintainability.
 
@@ -556,6 +604,8 @@ class FinetuneModel(nn.Module):
     def forward(self, x, priors):
         # ✅ Best Practice: Include a docstring to describe the class and its arguments
         return self.fc(self.model(x, priors)[0]).squeeze()  # take the vec out
+
+
 # 🧠 ML Signal: Use of custom step function suggests a modular or flexible model architecture.
 # ✅ Best Practice: Use in-place operations where possible to save memory.
 
@@ -567,6 +617,7 @@ class DecoderStep(nn.Module):
         # ✅ Best Practice: Update variables consistently to avoid unintended side effects.
         # ✅ Best Practice: Accumulate losses in a list for later aggregation.
         self.fc = nn.Linear(out_dim, out_dim)
+
     # ✅ Best Practice: Call to super() ensures proper initialization of the parent class
 
     # ✅ Best Practice: Return a tuple for multiple outputs to maintain consistency and clarity.
@@ -574,10 +625,13 @@ class DecoderStep(nn.Module):
         # 🧠 ML Signal: Use of BatchNorm1d indicates a pattern for normalizing inputs in neural networks
         x = self.fea_tran(x)
         return self.fc(x)
+
+
 # 🧠 ML Signal: Use of a default value for vbs suggests a common pattern or heuristic in model configuration
 # 🧠 ML Signal: Conditional logic based on input size, indicating dynamic behavior
 
 # 🧠 ML Signal: Direct return of batch normalization on input
+
 
 class TabNet_Decoder(nn.Module):
     def __init__(self, inp_dim, out_dim, n_shared, n_ind, vbs, n_steps):
@@ -593,7 +647,9 @@ class TabNet_Decoder(nn.Module):
             self.shared = nn.ModuleList()
             self.shared.append(nn.Linear(inp_dim, 2 * out_dim))
             for x in range(n_shared - 1):
-                self.shared.append(nn.Linear(out_dim, 2 * out_dim))  # preset the linear function we will use
+                self.shared.append(
+                    nn.Linear(out_dim, 2 * out_dim)
+                )  # preset the linear function we will use
         # ✅ Best Practice: Use of conditional assignment to handle optional parameters
         else:
             self.shared = None
@@ -602,6 +658,7 @@ class TabNet_Decoder(nn.Module):
         # 🧠 ML Signal: Use of nn.Linear indicates a neural network layer, common in ML models
         for x in range(n_steps):
             self.steps.append(DecoderStep(inp_dim, out_dim, self.shared, n_ind, vbs))
+
     # 🧠 ML Signal: Use of batch normalization (GBN) is a common pattern in ML models
 
     # 🧠 ML Signal: Use of batch normalization and fully connected layers indicates a common pattern in neural network design.
@@ -616,7 +673,18 @@ class TabNet_Decoder(nn.Module):
 
 
 class TabNet(nn.Module):
-    def __init__(self, inp_dim=6, out_dim=6, n_d=64, n_a=64, n_shared=2, n_ind=2, n_steps=5, relax=1.2, vbs=1024):
+    def __init__(
+        self,
+        inp_dim=6,
+        out_dim=6,
+        n_d=64,
+        n_a=64,
+        n_shared=2,
+        n_ind=2,
+        n_steps=5,
+        relax=1.2,
+        vbs=1024,
+    ):
         """
         TabNet AKA the original encoder
 
@@ -639,15 +707,21 @@ class TabNet(nn.Module):
             self.shared.append(nn.Linear(inp_dim, 2 * (n_d + n_a)))
             for x in range(n_shared - 1):
                 # 🧠 ML Signal: Iterating over shared layers to append to the module list
-                self.shared.append(nn.Linear(n_d + n_a, 2 * (n_d + n_a)))  # preset the linear function we will use
+                self.shared.append(
+                    nn.Linear(n_d + n_a, 2 * (n_d + n_a))
+                )  # preset the linear function we will use
         else:
             self.shared = None
 
-        self.first_step = FeatureTransformer(inp_dim, n_d + n_a, self.shared, n_ind, vbs)
+        self.first_step = FeatureTransformer(
+            inp_dim, n_d + n_a, self.shared, n_ind, vbs
+        )
         self.steps = nn.ModuleList()
         for x in range(n_steps - 1):
             # 🧠 ML Signal: Handling the case where no shared layers are present
-            self.steps.append(DecisionStep(inp_dim, n_d, n_a, self.shared, n_ind, relax, vbs))
+            self.steps.append(
+                DecisionStep(inp_dim, n_d, n_a, self.shared, n_ind, relax, vbs)
+            )
         self.fc = nn.Linear(n_d, out_dim)
         self.bn = nn.BatchNorm1d(inp_dim, momentum=0.01)
         # 🧠 ML Signal: Use of a forward method suggests this is part of a neural network model
@@ -668,11 +742,15 @@ class TabNet(nn.Module):
             x_te, loss = step(x, x_a, priors)
             # ✅ Best Practice: Include a docstring to describe the purpose of the class
             # ⚠️ SAST Risk (Low): Potential for unexpected behavior if glu is not a callable
-            out += F.relu(x_te[:, : self.n_d])  # split the feature from feat_transformer
+            out += F.relu(
+                x_te[:, : self.n_d]
+            )  # split the feature from feat_transformer
             x_a = x_te[:, self.n_d :]
             sparse_loss.append(loss)
         # 🧠 ML Signal: Use of element-wise operations on tensors
         return self.fc(out), sum(sparse_loss)
+
+
 # ✅ Best Practice: Call to super() ensures proper initialization of the base class
 
 
@@ -685,6 +763,7 @@ class GBN(nn.Module):
     Args:
         vbs: virtual batch size
     """
+
     # ⚠️ SAST Risk (Low): Multiplying `x` by `mask` could lead to unintended zeroing of elements
     # 🧠 ML Signal: Accessing tensor size, common operation in tensor manipulation
 
@@ -695,6 +774,7 @@ class GBN(nn.Module):
         # 🧠 ML Signal: Creating a range tensor, useful for learning tensor operations
         self.bn = nn.BatchNorm1d(inp, momentum=momentum)
         self.vbs = vbs
+
     # 🧠 ML Signal: Creating a view list for reshaping, common in tensor operations
     # 🧠 ML Signal: Modifying view for reshaping, common pattern in tensor manipulation
     # ✅ Best Practice: Use of @staticmethod decorator for methods that do not access instance or class data
@@ -710,9 +790,12 @@ class GBN(nn.Module):
             res = [self.bn(y) for y in chunk]
             # 🧠 ML Signal: Saving tensors for backward pass is a common pattern in custom autograd functions
             return torch.cat(res, 0)
+
+
 # ✅ Best Practice: In-place operation to save memory
 
 # 🧠 ML Signal: Sorting input tensor is a common operation in neural network layers
+
 
 # 🧠 ML Signal: Custom threshold and support function for sparsemax, indicating advanced ML operation
 class GLU(nn.Module):
@@ -722,6 +805,7 @@ class GLU(nn.Module):
     Args:
         vbs: virtual batch size
     """
+
     # ✅ Best Practice: Use of in-place operations to potentially save memory
     # 🧠 ML Signal: Summing over dimensions is a common pattern in tensor manipulation
 
@@ -749,6 +833,7 @@ class GLU(nn.Module):
         # 🧠 ML Signal: Creating an index-like tensor, useful for operations that require positional information.
         return torch.mul(x[:, : self.od], torch.sigmoid(x[:, self.od :]))
 
+
 # 🧠 ML Signal: Accessing saved tensors for gradient computation is a common pattern
 # 🧠 ML Signal: Creating masks based on tensor values is common in gradient calculations
 # 🧠 ML Signal: Counting non-zero elements is a common operation in custom gradients
@@ -759,6 +844,7 @@ class GLU(nn.Module):
 # 🧠 ML Signal: Gathering specific elements, common in ML for selecting top-k or thresholded values.
 # 🧠 ML Signal: Division by support size, typical in ML for averaging or normalization.
 # ✅ Best Practice: Returning multiple values as a tuple, clear and idiomatic in Python.
+
 
 class AttentionTransformer(nn.Module):
     """

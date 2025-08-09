@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
+
 # ✅ Best Practice: Group imports from the same package together for better readability.
 import string
 
 # ✅ Best Practice: Group imports from the same package together for better readability.
 # ⚠️ SAST Risk (Medium): Missing import statement for 'os' module, which is used in the function.
 from pkg_resources import resource_string
+
 # ⚠️ SAST Risk (Medium): Missing import statement for 'string' module, which is used in the function.
 
 from zvt.utils.file_utils import list_all_files
@@ -49,7 +51,7 @@ def all_tpls(project: str, entity_type: str):
             file_location = f"{project}/fill_project.py"
         # tests
         elif file_location == "test_pass.py":
-            file_location = f"tests/test_pass.py"
+            file_location = "tests/test_pass.py"
         elif file_location == "pkg_init.py":
             file_location = f"{project}/__init__.py"
 

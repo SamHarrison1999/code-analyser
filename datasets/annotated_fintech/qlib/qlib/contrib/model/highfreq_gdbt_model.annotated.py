@@ -2,6 +2,7 @@
 # Licensed under the MIT License.
 
 import warnings
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 import numpy as np
 import pandas as pd
@@ -9,16 +10,20 @@ import lightgbm as lgb
 
 from ...model.base import ModelFT
 from ...data.dataset import DatasetH
+
 # ✅ Best Practice: Class docstring provides a brief description of the class purpose
 from ...data.dataset.handler import DataHandlerLP
+
 # 🧠 ML Signal: Use of default parameter values
 from ...model.interpret.base import LightGBMFInt
+
 # ⚠️ SAST Risk (Low): Potential for misuse if 'loss' is not validated properly
 
 
 # ⚠️ SAST Risk (Low): Raises a generic exception which might not provide enough context
 class HFLGBModel(ModelFT, LightGBMFInt):
     """LightGBM Model for high frequency prediction"""
+
     # 🧠 ML Signal: Use of dictionary to store model parameters
 
     # 🧠 ML Signal: Use of dynamic parameter updates
@@ -31,6 +36,7 @@ class HFLGBModel(ModelFT, LightGBMFInt):
         # ✅ Best Practice: Initialize attributes in the constructor
         self.params.update(kwargs)
         self.model = None
+
     # 🧠 ML Signal: Iterating over unique dates in the index suggests time-series data processing
 
     def _cal_signal_metrics(self, y_test, l_cut, r_cut):
@@ -45,7 +51,9 @@ class HFLGBModel(ModelFT, LightGBMFInt):
             df_res = y_test.loc[date].sort_values("pred")
             # 🧠 ML Signal: Selecting top and bottom segments of data for analysis
             if int(l_cut * len(df_res)) < 10:
-                warnings.warn("Warning: threhold is too low or instruments number is not enough")
+                warnings.warn(
+                    "Warning: threhold is too low or instruments number is not enough"
+                )
                 continue
             # ⚠️ SAST Risk (Low): Potential division by zero if len(top) or len(bottom) is zero
             top = df_res.iloc[: int(l_cut * len(df_res))]
@@ -73,7 +81,7 @@ class HFLGBModel(ModelFT, LightGBMFInt):
             # ⚠️ SAST Risk (Low): Dropping NaN values might lead to loss of important data
             np.array(up_alpha_ll).mean(),
             np.array(down_alpha_ll).mean(),
-        # 🧠 ML Signal: Usage of features and labels for model prediction
+            # 🧠 ML Signal: Usage of features and labels for model prediction
         )
 
     # ⚠️ SAST Risk (Low): Directly modifying DataFrame column without copying can lead to SettingWithCopyWarning
@@ -85,12 +93,16 @@ class HFLGBModel(ModelFT, LightGBMFInt):
         if self.model is None:
             raise ValueError("Model hasn't been trained yet")
         # 🧠 ML Signal: Calculation of signal metrics for evaluation
-        df_test = dataset.prepare("test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I)
+        df_test = dataset.prepare(
+            "test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I
+        )
         df_test.dropna(inplace=True)
         # 🧠 ML Signal: Usage of dataset preparation method indicates a preprocessing step for ML models
         x_test, y_test = df_test["feature"], df_test["label"]
         # Convert label into alpha
-        y_test[y_test.columns[0]] = y_test[y_test.columns[0]] - y_test[y_test.columns[0]].mean(level=0)
+        y_test[y_test.columns[0]] = y_test[y_test.columns[0]] - y_test[
+            y_test.columns[0]
+        ].mean(level=0)
 
         # ⚠️ SAST Risk (Low): Potential risk if dataset.prepare does not handle exceptions internally
         # ✅ Best Practice: Clear and informative output for precision results
@@ -99,7 +111,9 @@ class HFLGBModel(ModelFT, LightGBMFInt):
         # ⚠️ SAST Risk (Low): Raising a generic ValueError without additional context
 
         # ✅ Best Practice: Clear and informative output for alpha average results
-        up_p, down_p, up_a, down_a = self._cal_signal_metrics(y_test, threhold, 1 - threhold)
+        up_p, down_p, up_a, down_a = self._cal_signal_metrics(
+            y_test, threhold, 1 - threhold
+        )
         print("===============================")
         # ✅ Best Practice: Check for dimensionality before processing data
         print("High frequency signal test")
@@ -108,14 +122,22 @@ class HFLGBModel(ModelFT, LightGBMFInt):
         print("Positive precision: {}, Negative precision: {}".format(up_p, down_p))
         # ✅ Best Practice: Use of loc for DataFrame operations ensures proper indexing
         print("Test Alpha Average in test set: ")
-        print("Positive average alpha: {}, Negative average alpha: {}".format(up_a, down_a))
+        print(
+            "Positive average alpha: {}, Negative average alpha: {}".format(
+                up_a, down_a
+            )
+        )
 
     def _prepare_data(self, dataset: DatasetH):
         df_train, df_valid = dataset.prepare(
-            ["train", "valid"], col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+            ["train", "valid"],
+            col_set=["feature", "label"],
+            data_key=DataHandlerLP.DK_L,
         )
         if df_train.empty or df_valid.empty:
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
 
         x_train, y_train = df_train["feature"], df_train["label"]
         x_valid, y_valid = df_valid["feature"], df_valid["label"]
@@ -126,11 +148,15 @@ class HFLGBModel(ModelFT, LightGBMFInt):
             # ⚠️ SAST Risk (Low): Ensure that x_valid and y_valid are properly validated and sanitized before use
             df_train.loc[:, ("label", l_name)] = (
                 df_train.loc[:, ("label", l_name)]
-                - df_train.loc[:, ("label", l_name)].groupby(level=0, group_keys=False).mean()
+                - df_train.loc[:, ("label", l_name)]
+                .groupby(level=0, group_keys=False)
+                .mean()
             )
             df_valid.loc[:, ("label", l_name)] = (
                 df_valid.loc[:, ("label", l_name)]
-                - df_valid.loc[:, ("label", l_name)].groupby(level=0, group_keys=False).mean()
+                - df_valid.loc[:, ("label", l_name)]
+                .groupby(level=0, group_keys=False)
+                .mean()
             )
 
             def mapping_fn(x):
@@ -162,8 +188,8 @@ class HFLGBModel(ModelFT, LightGBMFInt):
         verbose_eval=20,
         # ✅ Best Practice: Use of descriptive variable names for clarity
         evals_result=None,
-    # 🧠 ML Signal: Use of model's predict method indicates a prediction operation
-    # ⚠️ SAST Risk (Low): Assumes model.predict will not raise exceptions
+        # 🧠 ML Signal: Use of model's predict method indicates a prediction operation
+        # ⚠️ SAST Risk (Low): Assumes model.predict will not raise exceptions
     ):
         if evals_result is None:
             evals_result = dict()
@@ -181,7 +207,11 @@ class HFLGBModel(ModelFT, LightGBMFInt):
             # 🧠 ML Signal: The use of lgb.train indicates a machine learning model training process.
             # ✅ Best Practice: Using a callback for logging evaluation is a clean way to handle verbosity.
             # ✅ Best Practice: Using named parameters in function calls improves readability and maintainability.
-            callbacks=[early_stopping_callback, verbose_eval_callback, evals_result_callback],
+            callbacks=[
+                early_stopping_callback,
+                verbose_eval_callback,
+                evals_result_callback,
+            ],
         )
         evals_result["train"] = list(evals_result["train"].values())[0]
         evals_result["valid"] = list(evals_result["valid"].values())[0]

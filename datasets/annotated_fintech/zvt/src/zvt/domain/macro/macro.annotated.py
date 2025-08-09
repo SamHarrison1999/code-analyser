@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, Float, BIGINT
+
 # ✅ Best Practice: Group related imports together for better readability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Mixin
+
 # ✅ Best Practice: Use a consistent naming convention for base classes.
 from zvt.contract.register import register_schema
 
@@ -11,6 +13,7 @@ from zvt.contract.register import register_schema
 MacroBase = declarative_base()
 
 # 🧠 ML Signal: Use of SQLAlchemy ORM for database modeling
+
 
 class Economy(MacroBase, Mixin):
     # 🧠 ML Signal: Use of SQLAlchemy ORM for database modeling

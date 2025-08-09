@@ -2,17 +2,22 @@
 # Licensed under the MIT License.
 
 import lightgbm as lgb
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 import numpy as np
 import pandas as pd
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 from typing import Text, Union
 from ...model.base import Model
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 from ...data.dataset import DatasetH
 from ...data.dataset.handler import DataHandlerLP
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 from ...model.interpret.base import FeatureInt
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 # ✅ Best Practice: Class docstring provides a brief description of the class
 from ...log import get_module_logger
@@ -43,7 +48,9 @@ class DEnsembleModel(Model, FeatureInt):
         **kwargs,
     ):
         # 🧠 ML Signal: Storing model configuration parameters
-        self.base_model = base_model  # "gbm" or "mlp", specifically, we use lgbm for "gbm"
+        self.base_model = (
+            base_model  # "gbm" or "mlp", specifically, we use lgbm for "gbm"
+        )
         self.num_models = num_models  # the number of sub-models
         # 🧠 ML Signal: Storing model configuration parameters
         self.enable_sr = enable_sr
@@ -74,30 +81,39 @@ class DEnsembleModel(Model, FeatureInt):
         self.logger = get_module_logger("DEnsembleModel")
         # 🧠 ML Signal: Storing model configuration parameters
         self.logger.info("Double Ensemble Model...")
-        self.ensemble = []  # the current ensemble model, a list contains all the sub-models
+        self.ensemble = (
+            []
+        )  # the current ensemble model, a list contains all the sub-models
         # 🧠 ML Signal: Usage of dataset preparation method
         # ⚠️ SAST Risk (Low): Potential IndexError if sub_weights length is not equal to num_models
-        self.sub_features = []  # the features for each sub model in the form of pandas.Index
+        self.sub_features = (
+            []
+        )  # the features for each sub model in the form of pandas.Index
         self.params = {"objective": loss}
         self.params.update(kwargs)
         # 🧠 ML Signal: Storing model configuration parameters
         self.loss = loss
         # ⚠️ SAST Risk (Low): Potential for ValueError if dataset is empty
         self.early_stopping_rounds = early_stopping_rounds
+
     # 🧠 ML Signal: Storing model configuration parameters
 
     def fit(self, dataset: DatasetH):
         # 🧠 ML Signal: Separation of features and labels
         # ✅ Best Practice: Use a logger for better traceability and debugging
         df_train, df_valid = dataset.prepare(
-            ["train", "valid"], col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
-        # 🧠 ML Signal: Extraction of shape for further processing
-        # ✅ Best Practice: Log important events for better traceability
+            ["train", "valid"],
+            col_set=["feature", "label"],
+            data_key=DataHandlerLP.DK_L,
+            # 🧠 ML Signal: Extraction of shape for further processing
+            # ✅ Best Practice: Log important events for better traceability
         )
         if df_train.empty or df_valid.empty:
             # 🧠 ML Signal: Initializing ensemble-related attributes
             # ✅ Best Practice: Initialization of weights with ones
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
         x_train, y_train = df_train["feature"], df_train["label"]
         # 🧠 ML Signal: Initializing ensemble-related attributes
         # 🧠 ML Signal: Accessing column names for features
@@ -110,7 +126,9 @@ class DEnsembleModel(Model, FeatureInt):
         # 🧠 ML Signal: Allowing additional parameters to be set dynamically
         features = x_train.columns
         # 🧠 ML Signal: Appending features for each sub-model
-        pred_sub = pd.DataFrame(np.zeros((N, self.num_models), dtype=float), index=x_train.index)
+        pred_sub = pd.DataFrame(
+            np.zeros((N, self.num_models), dtype=float), index=x_train.index
+        )
         # 🧠 ML Signal: Storing model configuration parameters
         # train sub-models
         # 🧠 ML Signal: Logging training progress
@@ -118,7 +136,9 @@ class DEnsembleModel(Model, FeatureInt):
             # 🧠 ML Signal: Training of sub-model
             # 🧠 ML Signal: Storing model configuration parameters
             self.sub_features.append(features)
-            self.logger.info("Training sub-model: ({}/{})".format(k + 1, self.num_models))
+            self.logger.info(
+                "Training sub-model: ({}/{})".format(k + 1, self.num_models)
+            )
             model_k = self.train_submodel(df_train, df_valid, weights, features)
             # 🧠 ML Signal: Appending trained model to ensemble
             self.ensemble.append(model_k)
@@ -135,12 +155,16 @@ class DEnsembleModel(Model, FeatureInt):
             # ✅ Best Practice: Encapsulation of data preparation in a separate method improves readability and maintainability.
             pred_sub.iloc[:, k] = pred_k
             # 🧠 ML Signal: Prediction using sub-model
-            pred_ensemble = (pred_sub.iloc[:, : k + 1] * self.sub_weights[0 : k + 1]).sum(axis=1) / np.sum(
+            pred_ensemble = (
+                pred_sub.iloc[:, : k + 1] * self.sub_weights[0 : k + 1]
+            ).sum(axis=1) / np.sum(
                 self.sub_weights[0 : k + 1]
-            # 🧠 ML Signal: Storing predictions in DataFrame
-            # ✅ Best Practice: Use of callbacks for logging and evaluation recording improves modularity and reusability.
+                # 🧠 ML Signal: Storing predictions in DataFrame
+                # ✅ Best Practice: Use of callbacks for logging and evaluation recording improves modularity and reusability.
             )
-            loss_values = pd.Series(self.get_loss(y_train.values.squeeze(), pred_ensemble.values))
+            loss_values = pd.Series(
+                self.get_loss(y_train.values.squeeze(), pred_ensemble.values)
+            )
             # 🧠 ML Signal: Calculation of ensemble predictions
 
             # 🧠 ML Signal: Calculation of loss values
@@ -248,6 +272,7 @@ class DEnsembleModel(Model, FeatureInt):
         for b in h_avg.index:
             weights[h["bins"] == b] = 1.0 / (self.decay**k_th * h_avg[b] + 0.1)
         return weights
+
     # ⚠️ SAST Risk (Low): Division by zero risk if np.std(loss_feat - loss_values) is zero
 
     def feature_selection(self, df_train, loss_values):
@@ -275,21 +300,28 @@ class DEnsembleModel(Model, FeatureInt):
         x_train_tmp = x_train.copy()
         for i_f, feat in enumerate(features):
             # ✅ Best Practice: Handling potential multi-dimensional label arrays
-            x_train_tmp.loc[:, feat] = np.random.permutation(x_train_tmp.loc[:, feat].values)
+            x_train_tmp.loc[:, feat] = np.random.permutation(
+                x_train_tmp.loc[:, feat].values
+            )
             pred = pd.Series(np.zeros(N), index=x_train_tmp.index)
             for i_s, submodel in enumerate(self.ensemble):
                 pred += (
                     # ⚠️ SAST Risk (Low): Raising a generic exception without specific handling
                     pd.Series(
-                        submodel.predict(x_train_tmp.loc[:, self.sub_features[i_s]].values), index=x_train_tmp.index
-                    # 🧠 ML Signal: Using the number of training samples for further processing
+                        submodel.predict(
+                            x_train_tmp.loc[:, self.sub_features[i_s]].values
+                        ),
+                        index=x_train_tmp.index,
+                        # 🧠 ML Signal: Using the number of training samples for further processing
                     )
                     / M
-                # ✅ Best Practice: Initializing a DataFrame to store loss values
+                    # ✅ Best Practice: Initializing a DataFrame to store loss values
                 )
             loss_feat = self.get_loss(y_train.values.squeeze(), pred.values)
             # ✅ Best Practice: Initializing prediction array for cumulative predictions
-            g.loc[i_f, "g_value"] = np.mean(loss_feat - loss_values) / (np.std(loss_feat - loss_values) + 1e-7)
+            g.loc[i_f, "g_value"] = np.mean(loss_feat - loss_values) / (
+                np.std(loss_feat - loss_values) + 1e-7
+            )
             # ⚠️ SAST Risk (Low): No input validation for 'dataset' and 'segment', could lead to unexpected errors
             x_train_tmp.loc[:, feat] = x_train.loc[:, feat].copy()
 
@@ -314,9 +346,13 @@ class DEnsembleModel(Model, FeatureInt):
             b_feat = features[g["bins"] == b]
             num_feat = int(np.ceil(self.sample_ratios[i_b] * len(b_feat)))
             # ✅ Best Practice: Use of descriptive variable names for clarity
-            res_feat = res_feat + np.random.choice(b_feat, size=num_feat, replace=False).tolist()
+            res_feat = (
+                res_feat
+                + np.random.choice(b_feat, size=num_feat, replace=False).tolist()
+            )
         # 🧠 ML Signal: Normalizing predictions by sum of weights, typical in ensemble methods
         return pd.Index(set(res_feat))
+
     # 🧠 ML Signal: Pattern of using a model's predict method
 
     # ⚠️ SAST Risk (Low): Assumes submodel has a predict method, potential for AttributeError
@@ -344,7 +380,9 @@ class DEnsembleModel(Model, FeatureInt):
             loss_curve = pd.DataFrame(np.zeros((N, num_trees)))
             pred_tree = np.zeros(N, dtype=float)
             for i_tree in range(num_trees):
-                pred_tree += model.predict(x_train.values, start_iteration=i_tree, num_iteration=1)
+                pred_tree += model.predict(
+                    x_train.values, start_iteration=i_tree, num_iteration=1
+                )
                 loss_curve.iloc[:, i_tree] = self.get_loss(y_train, pred_tree)
         else:
             raise ValueError("not implemented yet")
@@ -353,12 +391,16 @@ class DEnsembleModel(Model, FeatureInt):
     def predict(self, dataset: DatasetH, segment: Union[Text, slice] = "test"):
         if self.ensemble is None:
             raise ValueError("model is not fitted yet!")
-        x_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        x_test = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
         pred = pd.Series(np.zeros(x_test.shape[0]), index=x_test.index)
         for i_sub, submodel in enumerate(self.ensemble):
             feat_sub = self.sub_features[i_sub]
             pred += (
-                pd.Series(submodel.predict(x_test.loc[:, feat_sub].values), index=x_test.index)
+                pd.Series(
+                    submodel.predict(x_test.loc[:, feat_sub].values), index=x_test.index
+                )
                 * self.sub_weights[i_sub]
             )
         pred = pred / np.sum(self.sub_weights)
@@ -379,5 +421,13 @@ class DEnsembleModel(Model, FeatureInt):
         """
         res = []
         for _model, _weight in zip(self.ensemble, self.sub_weights):
-            res.append(pd.Series(_model.feature_importance(*args, **kwargs), index=_model.feature_name()) * _weight)
-        return pd.concat(res, axis=1, sort=False).sum(axis=1).sort_values(ascending=False)
+            res.append(
+                pd.Series(
+                    _model.feature_importance(*args, **kwargs),
+                    index=_model.feature_name(),
+                )
+                * _weight
+            )
+        return (
+            pd.concat(res, axis=1, sort=False).sum(axis=1).sort_values(ascending=False)
+        )

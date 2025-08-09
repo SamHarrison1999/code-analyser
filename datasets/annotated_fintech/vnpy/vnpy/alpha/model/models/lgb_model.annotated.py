@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 from vnpy.alpha.dataset import AlphaDataset, Segment
 from vnpy.alpha.model import AlphaModel
+
 # ✅ Best Practice: Class docstring provides a brief description of the class purpose
 
 
@@ -21,7 +22,7 @@ class LgbModel(AlphaModel):
         num_boost_round: int = 1000,
         early_stopping_rounds: int = 50,
         log_evaluation_period: int = 1,
-        seed: int | None = None
+        seed: int | None = None,
     ):
         """
         Parameters
@@ -43,8 +44,8 @@ class LgbModel(AlphaModel):
             "objective": "mse",
             "learning_rate": learning_rate,
             "num_leaves": num_leaves,
-            "seed": seed
-        # 🧠 ML Signal: Use of num_boost_round as a hyperparameter
+            "seed": seed,
+            # 🧠 ML Signal: Use of num_boost_round as a hyperparameter
         }
         # 🧠 ML Signal: Use of early_stopping_rounds as a hyperparameter
         # 🧠 ML Signal: Use of log_evaluation_period for logging
@@ -82,7 +83,7 @@ class LgbModel(AlphaModel):
 
             # Convert to numpy arrays
             # ✅ Best Practice: Type hinting for the variable 'ds' improves code readability and maintainability.
-            data = df.select(df.columns[2: -1]).to_pandas()
+            data = df.select(df.columns[2:-1]).to_pandas()
             # 🧠 ML Signal: Usage of LightGBM's train function indicates a machine learning model training process.
             # ⚠️ SAST Risk (Low): Ensure that 'self.params' is properly validated to prevent potential security risks.
             label = np.array(df["label"])
@@ -91,6 +92,7 @@ class LgbModel(AlphaModel):
             ds.append(lgb.Dataset(data, label=label))
 
         return ds
+
     # 🧠 ML Signal: 'num_boost_round' is a hyperparameter for boosting algorithms, relevant for ML model training.
 
     def fit(self, dataset: AlphaDataset) -> None:
@@ -118,10 +120,12 @@ class LgbModel(AlphaModel):
             valid_names=["train", "valid"],
             # ⚠️ SAST Risk (Medium): Potential for runtime error if model is not checked before use
             callbacks=[
-                lgb.early_stopping(self.early_stopping_rounds),      # Early stopping callback
-                lgb.log_evaluation(self.log_evaluation_period)       # Logging callback
-            # ✅ Best Practice: Sorting data before processing ensures consistent results
-            ]
+                lgb.early_stopping(
+                    self.early_stopping_rounds
+                ),  # Early stopping callback
+                lgb.log_evaluation(self.log_evaluation_period),  # Logging callback
+                # ✅ Best Practice: Sorting data before processing ensures consistent results
+            ],
         )
 
     # 🧠 ML Signal: Use of model's predict method indicates a prediction operation
@@ -155,7 +159,7 @@ class LgbModel(AlphaModel):
         df = df.sort(["datetime", "vt_symbol"])
 
         # Convert to numpy array
-        data: np.ndarray = df.select(df.columns[2: -1]).to_numpy()
+        data: np.ndarray = df.select(df.columns[2:-1]).to_numpy()
 
         # Return prediction results
         result: np.ndarray = cast(np.ndarray, self.model.predict(data))
@@ -180,6 +184,6 @@ class LgbModel(AlphaModel):
                 self.model,
                 max_num_features=50,
                 importance_type=importance_type,
-                figsize=(10, 20)
+                figsize=(10, 20),
             )
             ax.set_title(f"Feature Importance ({importance_type})")

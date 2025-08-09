@@ -26,9 +26,12 @@ zero_values = ["不变", "--", "-", "新进"]
 # 🧠 ML Signal: List of specific string values that might be used for data cleaning or normalization
 # ✅ Best Practice: Use descriptive variable names for better readability
 
+
 def first_item_to_float(the_list):
     # ⚠️ SAST Risk (Low): Potential for overwriting existing data in the_map
     return to_float(the_list[0])
+
+
 # ✅ Best Practice: Check for empty input early to avoid unnecessary processing
 
 
@@ -43,7 +46,9 @@ def add_func_to_value(the_map, the_func):
         the_map[k] = (v, the_func)
     return the_map
 
+
 # 🧠 ML Signal: Handling of specific suffixes for scaling
+
 
 def to_float(the_str, default=None):
     if not the_str:
@@ -87,7 +92,9 @@ def to_float(the_str, default=None):
         # ✅ Best Practice: Use of division by 1e8 for conversion to '亿' is clear and concise
         return default
 
+
 # 🧠 ML Signal: Pattern of extracting JSON-like data from a string using index and rindex.
+
 
 def pct_to_float(the_str, default=None):
     if the_str in none_values:
@@ -110,11 +117,15 @@ def format_number_to_yi(number):
 
 
 def json_callback_param(the_str):
-    json_str = the_str[the_str.index("(") + 1 : the_str.rindex(")")].replace("null", "None")
+    json_str = the_str[the_str.index("(") + 1 : the_str.rindex(")")].replace(
+        "null", "None"
+    )
     return eval(json_str)
 
 
-def fill_domain_from_dict(the_domain, the_dict: dict, the_map: dict = None, default_func=lambda x: x):
+def fill_domain_from_dict(
+    the_domain, the_dict: dict, the_map: dict = None, default_func=lambda x: x
+):
     """
     use field map and related func to fill properties from the dict to the domain
 
@@ -159,6 +170,8 @@ def fill_domain_from_dict(the_domain, the_dict: dict, the_map: dict = None, defa
                 # ✅ Best Practice: Function name is descriptive and indicates the expected behavior.
                 setattr(the_domain, k, result_value)
                 exec("the_domain.{}=result_value".format(k))
+
+
 # ⚠️ SAST Risk (Low): Swallowing all exceptions can hide errors
 # 🧠 ML Signal: Checking the type of a variable before processing is a common pattern.
 
@@ -168,6 +181,7 @@ SUPPORT_ENCODINGS = ["GB2312", "GBK", "GB18030", "UTF-8"]
 # ✅ Best Practice: Use specific exception handling instead of a bare except
 
 # ✅ Best Practice: Returning a default value when input is not as expected.
+
 
 def read_csv(f, encoding, sep=None, na_values=None):
     # ⚠️ SAST Risk (Low): Bare except can catch unexpected exceptions, potentially hiding bugs
@@ -189,7 +203,9 @@ def read_csv(f, encoding, sep=None, na_values=None):
     # ✅ Best Practice: Check if the value is not already in the list before appending to avoid duplicates.
     return None
 
+
 # 🧠 ML Signal: Appending to a list conditionally is a common pattern in data processing.
+
 
 def chrome_copy_header_to_dict(src):
     lines = src.split("\n")
@@ -212,9 +228,12 @@ def chrome_copy_header_to_dict(src):
                 pass
     # ✅ Best Practice: Use of **kwargs allows for flexible function arguments
     return header
+
+
 # 🧠 ML Signal: Usage of parse_qs and urlsplit indicates parsing of URL query parameters
 
 # ✅ Best Practice: Use of all() for checking if all values are None
+
 
 def to_positive_number(number):
     if isinstance(number, numbers.Number):
@@ -224,7 +243,9 @@ def to_positive_number(number):
     # ✅ Best Practice: List comprehension for counting non-None values
     return 0
 
+
 # ✅ Best Practice: Check for empty input to avoid unnecessary processing
+
 
 # ⚠️ SAST Risk (Low): Potential information disclosure in error message
 def multiple_number(number, factor):
@@ -234,7 +255,9 @@ def multiple_number(number, factor):
         # ✅ Best Practice: Use isinstance to check for list type
         return number
 
+
 # 🧠 ML Signal: Pattern of extending lists could be used to identify list flattening operations
+
 
 def add_to_map_list(the_map, key, value):
     # ✅ Best Practice: Use isinstance to check for dict type
@@ -249,7 +272,9 @@ def add_to_map_list(the_map, key, value):
     if value not in result:
         result.append(value)
 
+
 # ✅ Best Practice: Use isinstance for type checking to ensure correct type handling
+
 
 def iterate_with_step(data, sub_size=100):
     # 🧠 ML Signal: List comprehension used for transforming list elements

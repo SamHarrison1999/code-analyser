@@ -22,9 +22,10 @@ from zvt.utils.time_utils import (
     to_time_str,
     now_pd_timestamp,
     now_time_str,
-# ✅ Best Practice: Consider adding a docstring to describe the purpose of the Meta class.
+    # ✅ Best Practice: Consider adding a docstring to describe the purpose of the Meta class.
 )
 from zvt.utils.utils import fill_domain_from_dict
+
 # ✅ Best Practice: Check for the existence of attributes before using them to avoid AttributeError.
 
 
@@ -43,6 +44,8 @@ class Meta(type):
                 # ✅ Best Practice: Type annotations for class attributes improve code readability and maintainability.
                 cls.data_schema.register_recorder_cls(cls.provider, cls)
         return cls
+
+
 # ✅ Best Practice: Consistent naming convention for class attributes improves readability.
 
 
@@ -93,7 +96,9 @@ class Recorder(OneStateService, metaclass=Meta):
         self.sleeping_time = sleeping_time
 
         #: using to do db operations
-        self.session = get_db_session(provider=self.provider, data_schema=self.data_schema)
+        self.session = get_db_session(
+            provider=self.provider, data_schema=self.data_schema
+        )
         self.http_session = requests.Session()
 
     def run(self):
@@ -189,25 +194,36 @@ class EntityEventRecorder(Recorder):
         init the entities which we would record data for
 
         """
-        if self.entity_provider == self.provider and self.entity_schema == self.data_schema:
+        if (
+            self.entity_provider == self.provider
+            and self.entity_schema == self.data_schema
+        ):
             self.entity_session = self.session
         else:
-            self.entity_session = get_db_session(provider=self.entity_provider, data_schema=self.entity_schema)
+            self.entity_session = get_db_session(
+                provider=self.entity_provider, data_schema=self.entity_schema
+            )
 
         if self.day_data:
             df = self.data_schema.query_data(
-                start_timestamp=now_time_str(), columns=["entity_id", "timestamp"], provider=self.provider
+                start_timestamp=now_time_str(),
+                columns=["entity_id", "timestamp"],
+                provider=self.provider,
             )
             if pd_is_not_null(df):
                 entity_ids = df["entity_id"].tolist()
                 self.logger.info(f"ignore entity_ids:{entity_ids}")
                 # ✅ Best Practice: Convert timestamps to a consistent format for internal use
                 if self.entity_filters:
-                    self.entity_filters.append(self.entity_schema.entity_id.notin_(entity_ids))
+                    self.entity_filters.append(
+                        self.entity_schema.entity_id.notin_(entity_ids)
+                    )
                 # ✅ Best Practice: Call the superclass constructor to ensure proper initialization
                 # ✅ Best Practice: Convert timestamps to a consistent format for internal use
                 else:
-                    self.entity_filters = [self.entity_schema.entity_id.notin_(entity_ids)]
+                    self.entity_filters = [
+                        self.entity_schema.entity_id.notin_(entity_ids)
+                    ]
 
         #: init the entity list
         self.entities = get_entities(
@@ -281,11 +297,15 @@ class TimeSeriesDataRecorder(EntityEventRecorder):
         # ✅ Best Practice: Return an empty dictionary as a default implementation
         self.real_time = real_time
         # ✅ Best Practice: Include detailed docstring to describe method functionality and parameters
-        self.close_hour, self.close_minute = self.entity_schema.get_close_hour_and_minute()
+        self.close_hour, self.close_minute = (
+            self.entity_schema.get_close_hour_and_minute()
+        )
         self.fix_duplicate_way = fix_duplicate_way
 
     def get_latest_saved_record(self, entity):
-        order = eval("self.data_schema.{}.desc()".format(self.get_evaluated_time_field()))
+        order = eval(
+            "self.data_schema.{}.desc()".format(self.get_evaluated_time_field())
+        )
 
         records = get_data(
             entity_id=entity.id,
@@ -295,8 +315,8 @@ class TimeSeriesDataRecorder(EntityEventRecorder):
             limit=1,
             return_type="domain",
             session=self.session,
-        # ⚠️ SAST Risk (Low): Method is not implemented, which may lead to runtime errors if called
-        # ✅ Best Practice: Method docstring provides a clear explanation of the method's purpose
+            # ⚠️ SAST Risk (Low): Method is not implemented, which may lead to runtime errors if called
+            # ✅ Best Practice: Method docstring provides a clear explanation of the method's purpose
         )
         if records:
             return records[0]
@@ -308,13 +328,17 @@ class TimeSeriesDataRecorder(EntityEventRecorder):
         #: not to list date yet
         # 🧠 ML Signal: Consistent return of a specific string can indicate a fixed schema or data structure.
         if entity.timestamp and (entity.timestamp >= now_pd_timestamp()):
-            self.logger.info("ignore entity: {} list date: {}", entity.id, entity.timestamp)
+            self.logger.info(
+                "ignore entity: {} list date: {}", entity.id, entity.timestamp
+            )
             return entity.timestamp, None, 0, None
 
         latest_saved_record = self.get_latest_saved_record(entity=entity)
 
         if latest_saved_record:
-            latest_timestamp = eval("latest_saved_record.{}".format(self.get_evaluated_time_field()))
+            latest_timestamp = eval(
+                "latest_saved_record.{}".format(self.get_evaluated_time_field())
+            )
         else:
             latest_timestamp = entity.timestamp
 
@@ -385,7 +409,9 @@ class TimeSeriesDataRecorder(EntityEventRecorder):
         # ⚠️ SAST Risk (Low): Catching broad exceptions can hide errors and make debugging difficult
         """
         # 🧠 ML Signal: Logging patterns can be used to train models for anomaly detection
-        timestamp = to_time_str(original_data[self.get_original_time_field()], fmt=time_fmt)
+        timestamp = to_time_str(
+            original_data[self.get_original_time_field()], fmt=time_fmt
+        )
         return "{}_{}".format(entity.id, timestamp)
 
     def generate_domain(self, entity, original_data):
@@ -423,7 +449,9 @@ class TimeSeriesDataRecorder(EntityEventRecorder):
         )
 
         if items and not self.force_update:
-            self.logger.info("ignore the data {}:{} saved before".format(self.data_schema, the_id))
+            self.logger.info(
+                "ignore the data {}:{} saved before".format(self.data_schema, the_id)
+            )
             return got_new_data, None
 
         if not items:
@@ -436,10 +464,19 @@ class TimeSeriesDataRecorder(EntityEventRecorder):
 
             if "name" in get_schema_columns(self.data_schema):
                 domain_item = self.data_schema(
-                    id=the_id, code=entity.code, name=entity.name, entity_id=entity.id, timestamp=timestamp
+                    id=the_id,
+                    code=entity.code,
+                    name=entity.name,
+                    entity_id=entity.id,
+                    timestamp=timestamp,
                 )
             else:
-                domain_item = self.data_schema(id=the_id, code=entity.code, entity_id=entity.id, timestamp=timestamp)
+                domain_item = self.data_schema(
+                    id=the_id,
+                    code=entity.code,
+                    entity_id=entity.id,
+                    timestamp=timestamp,
+                )
             got_new_data = True
         else:
             domain_item = items[0]
@@ -500,22 +537,31 @@ class TimeSeriesDataRecorder(EntityEventRecorder):
                 try:
                     self.logger.info(f"run to {index + 1}/{count}")
 
-                    start_timestamp, end_timestamp, size, timestamps = self.evaluate_start_end_size_timestamps(
-                        entity_item
+                    start_timestamp, end_timestamp, size, timestamps = (
+                        self.evaluate_start_end_size_timestamps(entity_item)
                     )
                     size = int(size)
 
                     if timestamps:
                         self.logger.info(
                             "entity_id:{},evaluate_start_end_size_timestamps result:{},{},{},{}-{}".format(
-                                entity_item.id, start_timestamp, end_timestamp, size, timestamps[0], timestamps[-1]
+                                entity_item.id,
+                                start_timestamp,
+                                end_timestamp,
+                                size,
+                                timestamps[0],
+                                timestamps[-1],
                             )
                         )
                     # ✅ Best Practice: Class definition should include a docstring to describe its purpose and usage
                     else:
                         self.logger.info(
                             "entity_id:{},evaluate_start_end_size_timestamps result:{},{},{},{}".format(
-                                entity_item.id, start_timestamp, end_timestamp, size, timestamps
+                                entity_item.id,
+                                start_timestamp,
+                                end_timestamp,
+                                size,
+                                timestamps,
                             )
                         )
 
@@ -536,7 +582,11 @@ class TimeSeriesDataRecorder(EntityEventRecorder):
 
                     # ✅ Best Practice: Use of super() to call the parent class's __init__ method
                     original_list = self.record(
-                        entity_item, start=start_timestamp, end=end_timestamp, size=size, timestamps=timestamps
+                        entity_item,
+                        start=start_timestamp,
+                        end=end_timestamp,
+                        size=size,
+                        timestamps=timestamps,
                     )
 
                     all_duplicated = True
@@ -544,27 +594,37 @@ class TimeSeriesDataRecorder(EntityEventRecorder):
                     if original_list:
                         domain_list = []
                         for original_item in original_list:
-                            got_new_data, domain_item = self.generate_domain(entity_item, original_item)
+                            got_new_data, domain_item = self.generate_domain(
+                                entity_item, original_item
+                            )
 
                             if got_new_data:
                                 all_duplicated = False
 
                             #: handle the case  generate_domain_id generate duplicate id
                             if domain_item:
-                                duplicate = [item for item in domain_list if item.id == domain_item.id]
+                                duplicate = [
+                                    item
+                                    for item in domain_list
+                                    if item.id == domain_item.id
+                                ]
                                 if duplicate:
                                     # 🧠 ML Signal: Initialization of class attributes
                                     #: regenerate the id
                                     if self.fix_duplicate_way == "add":
                                         # ⚠️ SAST Risk (High): Use of eval() can lead to code injection vulnerabilities if input is not properly sanitized.
                                         # 🧠 ML Signal: Initialization of class attributes
-                                        domain_item.id = "{}_{}".format(domain_item.id, uuid.uuid1())
+                                        domain_item.id = "{}_{}".format(
+                                            domain_item.id, uuid.uuid1()
+                                        )
                                     #: ignore
                                     # 🧠 ML Signal: Dynamic method invocation using eval() indicates complex logic that might be learned by ML models.
                                     # 🧠 ML Signal: Initialization of class attributes
                                     # 🧠 ML Signal: Usage of entity_id and provider as parameters can indicate patterns in data retrieval.
                                     else:
-                                        self.logger.info(f"ignore original duplicate item:{domain_item.id}")
+                                        self.logger.info(
+                                            f"ignore original duplicate item:{domain_item.id}"
+                                        )
                                         continue
 
                                 domain_list.append(domain_item)
@@ -572,7 +632,11 @@ class TimeSeriesDataRecorder(EntityEventRecorder):
                         if domain_list:
                             self.persist(entity_item, domain_list)
                         else:
-                            self.logger.info("just got {} duplicated data in this cycle".format(len(original_list)))
+                            self.logger.info(
+                                "just got {} duplicated data in this cycle".format(
+                                    len(original_list)
+                                )
+                            )
 
                     #: could not get more data
                     entity_finished = False
@@ -586,13 +650,19 @@ class TimeSeriesDataRecorder(EntityEventRecorder):
                         # 🧠 ML Signal: Deleting records based on conditions can indicate data management patterns.
                         # ✅ Best Practice: Check for the existence of a timestamp before comparing it to avoid potential errors.
                         #: realtime and to the close time
-                        if self.real_time and (self.close_hour is not None) and (self.close_minute is not None):
+                        if (
+                            self.real_time
+                            and (self.close_hour is not None)
+                            and (self.close_minute is not None)
+                        ):
                             current_timestamp = pd.Timestamp.now()
                             # ✅ Best Practice: Use of a helper function to get the latest saved record improves code readability and maintainability.
                             if current_timestamp.hour >= self.close_hour:
                                 if current_timestamp.minute - self.close_minute >= 5:
                                     self.logger.info(
-                                        "{} now is the close time:{}".format(entity_item.id, current_timestamp)
+                                        "{} now is the close time:{}".format(
+                                            entity_item.id, current_timestamp
+                                        )
                                     )
 
                                     # ✅ Best Practice: Use of a helper function to evaluate size from timestamp improves code readability and maintainability.
@@ -602,9 +672,15 @@ class TimeSeriesDataRecorder(EntityEventRecorder):
                     if entity_finished:
                         finished_items.append(entity_item)
 
-                        latest_saved_record = self.get_latest_saved_record(entity=entity_item)
+                        latest_saved_record = self.get_latest_saved_record(
+                            entity=entity_item
+                        )
                         if latest_saved_record:
-                            start_timestamp = eval("latest_saved_record.{}".format(self.get_evaluated_time_field()))
+                            start_timestamp = eval(
+                                "latest_saved_record.{}".format(
+                                    self.get_evaluated_time_field()
+                                )
+                            )
                         # ✅ Best Practice: Use of max function to determine the start timestamp ensures the correct value is chosen.
 
                         self.logger.info(
@@ -618,7 +694,9 @@ class TimeSeriesDataRecorder(EntityEventRecorder):
 
                 except Exception as e:
                     self.logger.exception(
-                        "recording data for entity_id:{},{},error:{}".format(entity_item.id, self.data_schema, e)
+                        "recording data for entity_id:{},{},error:{}".format(
+                            entity_item.id, self.data_schema, e
+                        )
                     )
                     raising_exception = e
                     if self.return_unfinished:
@@ -705,7 +783,9 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
         self.one_day_trading_minutes = one_day_trading_minutes
 
     def get_latest_saved_record(self, entity):
-        order = eval("self.data_schema.{}.desc()".format(self.get_evaluated_time_field()))
+        order = eval(
+            "self.data_schema.{}.desc()".format(self.get_evaluated_time_field())
+        )
 
         #: 对于k线这种数据，最后一个记录有可能是没完成的，所以取两个
         #: 同一周期内只保留最新的一个数据
@@ -722,7 +802,9 @@ class FixedCycleDataRecorder(TimeSeriesDataRecorder):
         if records:
             #: delete unfinished kdata
             if len(records) == 2:
-                if is_in_same_interval(t1=records[0].timestamp, t2=records[1].timestamp, level=self.level):
+                if is_in_same_interval(
+                    t1=records[0].timestamp, t2=records[1].timestamp, level=self.level
+                ):
                     self.session.delete(records[1])
                     self.session.flush()
             return records[0]
@@ -816,12 +898,18 @@ class TimestampsDataRecorder(TimeSeriesDataRecorder):
 
         timestamps.sort()
 
-        self.logger.info("entity_id:{},timestamps start:{},end:{}".format(entity.id, timestamps[0], timestamps[-1]))
+        self.logger.info(
+            "entity_id:{},timestamps start:{},end:{}".format(
+                entity.id, timestamps[0], timestamps[-1]
+            )
+        )
 
         latest_record = self.get_latest_saved_record(entity=entity)
 
         if latest_record:
-            self.logger.info("latest record timestamp:{}".format(latest_record.timestamp))
+            self.logger.info(
+                "latest record timestamp:{}".format(latest_record.timestamp)
+            )
             timestamps = [t for t in timestamps if t >= latest_record.timestamp]
 
             if timestamps:

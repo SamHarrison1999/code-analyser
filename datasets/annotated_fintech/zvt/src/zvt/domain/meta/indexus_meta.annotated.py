@@ -5,8 +5,10 @@ from sqlalchemy import Column, String, Float
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Portfolio
+
 # ✅ Best Practice: Naming convention for base classes should be clear and descriptive.
 from zvt.contract.register import register_schema, register_entity
+
 # 🧠 ML Signal: Inheritance from multiple classes, indicating a potential pattern for class design
 
 IndexusMetaBase = declarative_base()

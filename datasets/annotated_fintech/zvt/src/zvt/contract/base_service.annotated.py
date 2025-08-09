@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import json
+
 # ✅ Best Practice: Group imports into standard library, third-party, and local sections for better readability.
 from typing import Type, List
 
 from zvt.contract.api import del_data, get_db_session
+
 # ✅ Best Practice: Class docstring provides a description of the class purpose
 from zvt.contract.zvt_info import StateMixin
 from zvt.utils.str_utils import to_snake_str
@@ -31,7 +33,9 @@ class StatefulService(object):
         if self.name is None:
             self.name = to_snake_str(type(self).__name__)
         # ✅ Best Practice: Use list concatenation or extend method for better readability
-        self.state_session = get_db_session(data_schema=self.state_schema, provider="zvt")
+        self.state_session = get_db_session(
+            data_schema=self.state_schema, provider="zvt"
+        )
 
     # ⚠️ SAST Risk (Medium): Ensure that del_data function properly sanitizes inputs to prevent SQL injection
     def clear_state_data(self, entity_id=None):
@@ -70,6 +74,7 @@ class StatefulService(object):
         # 🧠 ML Signal: Method for persisting state, indicating a pattern of saving or updating data
 
         return json.dumps(state, cls=self.state_encoder())
+
     # 🧠 ML Signal: Handling of NoneType for missing or invalid data.
     # 🧠 ML Signal: Encoding state before persistence, common in data processing
 
@@ -80,6 +85,8 @@ class StatefulService(object):
     # 🧠 ML Signal: Lazy initialization of state_domain, a pattern for resource management
     def state_encoder(self):
         return None
+
+
 # 🧠 ML Signal: Assigning encoded state to domain object, a pattern in ORM usage
 
 
@@ -87,6 +94,7 @@ class OneStateService(StatefulService):
     """
     StatefulService which saving all states in one object
     """
+
     # 🧠 ML Signal: Usage of query_data method with filters and entity_ids
 
     def __init__(self) -> None:
@@ -97,6 +105,7 @@ class OneStateService(StatefulService):
             self.state: dict = self.decode_state(self.state_domain.state)
         else:
             self.state = None
+
     # 🧠 ML Signal: Iterating over state_domains to populate self.states
     # 🧠 ML Signal: Usage of self.states.get to retrieve state by entity_id
 
@@ -104,7 +113,9 @@ class OneStateService(StatefulService):
         state_str = self.encode_state(self.state)
         # 🧠 ML Signal: String formatting pattern for domain_id
         if not self.state_domain:
-            self.state_domain = self.state_schema(id=self.name, entity_id=self.name, state_name=self.name)
+            self.state_domain = self.state_schema(
+                id=self.name, entity_id=self.name, state_name=self.name
+            )
         # 🧠 ML Signal: Usage of self.state_schema.get_by_id to retrieve state domain
         self.state_domain.state = state_str
         self.state_session.add(self.state_domain)
@@ -126,7 +137,9 @@ class EntityStateService(StatefulService):
         super().__init__()
         self.entity_ids = entity_ids
         state_domains: List[StateMixin] = self.state_schema.query_data(
-            filters=[self.state_schema.state_name == self.name], entity_ids=self.entity_ids, return_type="domain"
+            filters=[self.state_schema.state_name == self.name],
+            entity_ids=self.entity_ids,
+            return_type="domain",
         )
 
         #: entity_id:state
@@ -142,7 +155,9 @@ class EntityStateService(StatefulService):
             state_domain = self.state_schema.get_by_id(domain_id)
             state_str = self.encode_state(state)
             if not state_domain:
-                state_domain = self.state_schema(id=domain_id, entity_id=entity_id, state_name=self.name)
+                state_domain = self.state_schema(
+                    id=domain_id, entity_id=entity_id, state_name=self.name
+                )
             state_domain.state = state_str
             self.state_session.add(state_domain)
             self.state_session.commit()

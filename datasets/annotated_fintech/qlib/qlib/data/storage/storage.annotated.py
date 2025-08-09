@@ -3,11 +3,13 @@
 
 import re
 from typing import Iterable, overload, Tuple, List, Text, Union, Dict
+
 # 🧠 ML Signal: Usage of logging can indicate important events or errors in the application flow.
 
 import numpy as np
 import pandas as pd
 from qlib.log import get_module_logger
+
 # ✅ Best Practice: Raising NotImplementedError in abstract methods is a common pattern to enforce implementation in subclasses.
 
 # calendar value type
@@ -83,10 +85,13 @@ class BaseStorage:
     @property
     def storage_name(self) -> str:
         return re.findall("[A-Z][^A-Z]*", self.__class__.__name__)[-2].lower()
+
+
 # ✅ Best Practice: Storing database URL as an instance variable
 
 # ✅ Best Practice: Method signature includes type hints for better readability and maintainability
 # ⚠️ SAST Risk (Low): Method is not implemented, which could lead to runtime errors if called
+
 
 class CalendarStorage(BaseStorage):
     """
@@ -100,6 +105,7 @@ class CalendarStorage(BaseStorage):
         self.future = future
         # 🧠 ML Signal: Private method for encapsulating connection logic
         self.kwargs = kwargs
+
     # ⚠️ SAST Risk (Medium): Potential risk if db_url is not validated or sanitized
     # ✅ Best Practice: Method signature includes type hints for better readability and maintainability
 
@@ -115,13 +121,20 @@ class CalendarStorage(BaseStorage):
         # ✅ Best Practice: Use of @overload decorator for type hinting in function overloading.
         """
         # ✅ Best Practice: Provide a clear and descriptive docstring for the method
-        raise NotImplementedError("Subclass of CalendarStorage must implement `data` method")
+        raise NotImplementedError(
+            "Subclass of CalendarStorage must implement `data` method"
+        )
 
     def clear(self) -> None:
-        raise NotImplementedError("Subclass of CalendarStorage must implement `clear` method")
+        raise NotImplementedError(
+            "Subclass of CalendarStorage must implement `clear` method"
+        )
 
     def extend(self, iterable: Iterable[CalVT]) -> None:
-        raise NotImplementedError("Subclass of CalendarStorage must implement `extend` method")
+        raise NotImplementedError(
+            "Subclass of CalendarStorage must implement `extend` method"
+        )
+
     # ✅ Best Practice: Raising NotImplementedError in abstract methods is a good practice to enforce implementation in subclasses.
 
     def index(self, value: CalVT) -> int:
@@ -133,19 +146,27 @@ class CalendarStorage(BaseStorage):
         # ✅ Best Practice: Using @overload decorator indicates function overloading, which improves code clarity and type checking.
         """
         # ✅ Best Practice: Include a docstring to describe the method's behavior
-        raise NotImplementedError("Subclass of CalendarStorage must implement `index` method")
+        raise NotImplementedError(
+            "Subclass of CalendarStorage must implement `index` method"
+        )
+
     # ✅ Best Practice: Type hinting for the return value improves code readability and maintainability
 
     def insert(self, index: int, value: CalVT) -> None:
-        raise NotImplementedError("Subclass of CalendarStorage must implement `insert` method")
+        raise NotImplementedError(
+            "Subclass of CalendarStorage must implement `insert` method"
+        )
 
     def remove(self, value: CalVT) -> None:
-        raise NotImplementedError("Subclass of CalendarStorage must implement `remove` method")
+        raise NotImplementedError(
+            "Subclass of CalendarStorage must implement `remove` method"
+        )
 
     # ✅ Best Practice: NotImplementedError is used to indicate that the method should be implemented by subclasses
     @overload
     def __setitem__(self, i: int, value: CalVT) -> None:
         """x.__setitem__(i, o) <==> (x[i] = o)"""
+
     # ✅ Best Practice: Type hinting improves code readability and maintainability
 
     @overload
@@ -155,7 +176,7 @@ class CalendarStorage(BaseStorage):
     def __setitem__(self, i, value) -> None:
         raise NotImplementedError(
             "Subclass of CalendarStorage must implement `__setitem__(i: int, o: CalVT)`/`__setitem__(s: slice, o: Iterable[CalVT])`  method"
-        # ✅ Best Practice: NotImplementedError is appropriate for abstract methods
+            # ✅ Best Practice: NotImplementedError is appropriate for abstract methods
         )
 
     # ✅ Best Practice: Use of type annotations for function parameters improves code readability and maintainability.
@@ -191,6 +212,7 @@ class CalendarStorage(BaseStorage):
     @overload
     def __getitem__(self, i: int) -> CalVT:
         """x.__getitem__(i) <==> x[i]"""
+
     # ⚠️ SAST Risk (Low): NotImplementedError indicates that this method must be overridden in subclasses, which could lead to runtime errors if not properly implemented
 
     def __getitem__(self, i) -> CalVT:
@@ -205,8 +227,8 @@ class CalendarStorage(BaseStorage):
         # ✅ Best Practice: Type hints for parameters and return value improve code readability and maintainability
         raise NotImplementedError(
             "Subclass of CalendarStorage must implement `__getitem__(i: int)`/`__getitem__(s: slice)`  method"
-        # ✅ Best Practice: Include a docstring to describe the method's purpose and behavior.
-        # ⚠️ SAST Risk (Low): Raising NotImplementedError without implementation can lead to runtime errors if not properly subclassed
+            # ✅ Best Practice: Include a docstring to describe the method's purpose and behavior.
+            # ⚠️ SAST Risk (Low): Raising NotImplementedError without implementation can lead to runtime errors if not properly subclassed
         )
 
     def __len__(self) -> int:
@@ -219,7 +241,11 @@ class CalendarStorage(BaseStorage):
 
         """
         # 🧠 ML Signal: Assignment of method parameter to instance variable
-        raise NotImplementedError("Subclass of CalendarStorage must implement `__len__`  method")
+        raise NotImplementedError(
+            "Subclass of CalendarStorage must implement `__len__`  method"
+        )
+
+
 # 🧠 ML Signal: Assignment of method parameter to instance variable
 
 
@@ -243,12 +269,16 @@ class InstrumentStorage(BaseStorage):
             If the data(storage) does not exist, raise ValueError
         # ⚠️ SAST Risk (Low): Method not implemented, could lead to runtime errors if not overridden
         """
-        raise NotImplementedError("Subclass of InstrumentStorage must implement `data` method")
+        raise NotImplementedError(
+            "Subclass of InstrumentStorage must implement `data` method"
+        )
 
     # ✅ Best Practice: Use @property decorator for getter methods to provide a cleaner interface
     # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability
     def clear(self) -> None:
-        raise NotImplementedError("Subclass of InstrumentStorage must implement `clear` method")
+        raise NotImplementedError(
+            "Subclass of InstrumentStorage must implement `clear` method"
+        )
 
     def update(self, *args, **kwargs) -> None:
         """D.update([E, ]**F) -> None.  Update D from mapping/iterable E and F.
@@ -262,11 +292,15 @@ class InstrumentStorage(BaseStorage):
             In either case, this is followed by: for k, v in F.items(): D[k] = v
 
         """
-        raise NotImplementedError("Subclass of InstrumentStorage must implement `update` method")
+        raise NotImplementedError(
+            "Subclass of InstrumentStorage must implement `update` method"
+        )
 
     def __setitem__(self, k: InstKT, v: InstVT) -> None:
         """Set self[key] to value."""
-        raise NotImplementedError("Subclass of InstrumentStorage must implement `__setitem__` method")
+        raise NotImplementedError(
+            "Subclass of InstrumentStorage must implement `__setitem__` method"
+        )
 
     def __delitem__(self, k: InstKT) -> None:
         """Delete self[key].
@@ -276,11 +310,15 @@ class InstrumentStorage(BaseStorage):
         ValueError
             If the data(storage) does not exist, raise ValueError
         """
-        raise NotImplementedError("Subclass of InstrumentStorage must implement `__delitem__` method")
+        raise NotImplementedError(
+            "Subclass of InstrumentStorage must implement `__delitem__` method"
+        )
 
     def __getitem__(self, k: InstKT) -> InstVT:
         """x.__getitem__(k) <==> x[k]"""
-        raise NotImplementedError("Subclass of InstrumentStorage must implement `__getitem__` method")
+        raise NotImplementedError(
+            "Subclass of InstrumentStorage must implement `__getitem__` method"
+        )
 
     def __len__(self) -> int:
         """
@@ -291,7 +329,9 @@ class InstrumentStorage(BaseStorage):
             If the data(storage) does not exist, raise ValueError
 
         """
-        raise NotImplementedError("Subclass of InstrumentStorage must implement `__len__`  method")
+        raise NotImplementedError(
+            "Subclass of InstrumentStorage must implement `__len__`  method"
+        )
 
 
 class FeatureStorage(BaseStorage):
@@ -310,7 +350,9 @@ class FeatureStorage(BaseStorage):
         ------
         if data(storage) does not exist, return empty pd.Series: `return pd.Series(dtype=np.float32)`
         """
-        raise NotImplementedError("Subclass of FeatureStorage must implement `data` method")
+        raise NotImplementedError(
+            "Subclass of FeatureStorage must implement `data` method"
+        )
 
     @property
     def start_index(self) -> Union[int, None]:
@@ -320,7 +362,9 @@ class FeatureStorage(BaseStorage):
         -----
         If the data(storage) does not exist, return None
         """
-        raise NotImplementedError("Subclass of FeatureStorage must implement `start_index` method")
+        raise NotImplementedError(
+            "Subclass of FeatureStorage must implement `start_index` method"
+        )
 
     @property
     def end_index(self) -> Union[int, None]:
@@ -334,10 +378,14 @@ class FeatureStorage(BaseStorage):
 
         If the data(storage) does not exist, return None
         """
-        raise NotImplementedError("Subclass of FeatureStorage must implement `end_index` method")
+        raise NotImplementedError(
+            "Subclass of FeatureStorage must implement `end_index` method"
+        )
 
     def clear(self) -> None:
-        raise NotImplementedError("Subclass of FeatureStorage must implement `clear` method")
+        raise NotImplementedError(
+            "Subclass of FeatureStorage must implement `clear` method"
+        )
 
     def write(self, data_array: Union[List, np.ndarray, Tuple], index: int = None):
         """Write data_array to FeatureStorage starting from index.
@@ -392,7 +440,9 @@ class FeatureStorage(BaseStorage):
                     9   8
 
         """
-        raise NotImplementedError("Subclass of FeatureStorage must implement `write` method")
+        raise NotImplementedError(
+            "Subclass of FeatureStorage must implement `write` method"
+        )
 
     def rebase(self, start_index: int = None, end_index: int = None):
         """Rebase the start_index and end_index of the FeatureStorage.
@@ -454,13 +504,17 @@ class FeatureStorage(BaseStorage):
         storage_si = self.start_index
         storage_ei = self.end_index
         if storage_si is None or storage_ei is None:
-            raise ValueError("storage.start_index or storage.end_index is None, storage may not exist")
+            raise ValueError(
+                "storage.start_index or storage.end_index is None, storage may not exist"
+            )
 
         start_index = storage_si if start_index is None else start_index
         end_index = storage_ei if end_index is None else end_index
 
         if start_index is None or end_index is None:
-            logger.warning("both start_index and end_index are None, or storage does not exist; rebase is ignored")
+            logger.warning(
+                "both start_index and end_index are None, or storage does not exist; rebase is ignored"
+            )
             return
 
         if start_index < 0 or end_index < 0:
@@ -534,4 +588,6 @@ class FeatureStorage(BaseStorage):
             If the data(storage) does not exist, raise ValueError
 
         """
-        raise NotImplementedError("Subclass of FeatureStorage must implement `__len__`  method")
+        raise NotImplementedError(
+            "Subclass of FeatureStorage must implement `__len__`  method"
+        )

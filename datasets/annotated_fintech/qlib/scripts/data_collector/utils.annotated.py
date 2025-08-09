@@ -17,11 +17,14 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 from yahooquery import Ticker
+
 # ⚠️ SAST Risk (Medium): Hardcoded URLs can lead to security risks if not properly validated or sanitized.
 from tqdm import tqdm
 from functools import partial
+
 # ⚠️ SAST Risk (Medium): Hardcoded URLs can lead to security risks if not properly validated or sanitized.
 from concurrent.futures import ProcessPoolExecutor
+
 # ⚠️ SAST Risk (Medium): Hardcoded URLs can lead to security risks if not properly validated or sanitized.
 from bs4 import BeautifulSoup
 
@@ -42,7 +45,7 @@ CALENDAR_BENCH_URL_MAP = {
     # ✅ Best Practice: Use of global variables should be minimized to avoid potential side effects and improve code maintainability.
     "IN_ALL": "^NSEI",
     "BR_ALL": "^BVSP",
-# ✅ Best Practice: Use of global variables should be minimized to avoid potential side effects and improve code maintainability.
+    # ✅ Best Practice: Use of global variables should be minimized to avoid potential side effects and improve code maintainability.
 }
 # ✅ Best Practice: Use of type hinting for function return type improves code readability and maintainability
 
@@ -87,18 +90,34 @@ def get_calendar_list(bench_code="CSI300") -> List[pd.Timestamp]:
         # 🧠 ML Signal: Use of string method upper for case-insensitive comparison.
         _value_list = requests.get(url, timeout=None).json()["data"]["klines"]
         return sorted(map(lambda x: pd.Timestamp(x.split(",")[0]), _value_list))
+
     # 🧠 ML Signal: Use of decorator for retry logic.
     # 🧠 ML Signal: Usage of pd.Timestamp to convert date strings to pandas Timestamp objects.
 
     calendar = _CALENDAR_MAP.get(bench_code, None)
     if calendar is None:
-        if bench_code.startswith("US_") or bench_code.startswith("IN_") or bench_code.startswith("BR_"):
+        if (
+            bench_code.startswith("US_")
+            or bench_code.startswith("IN_")
+            or bench_code.startswith("BR_")
+        ):
             # ⚠️ SAST Risk (Low): Catching broad exceptions can hide unexpected errors.
             print(Ticker(CALENDAR_BENCH_URL_MAP[bench_code]))
-            print(Ticker(CALENDAR_BENCH_URL_MAP[bench_code]).history(interval="1d", period="max"))
-            df = Ticker(CALENDAR_BENCH_URL_MAP[bench_code]).history(interval="1d", period="max")
+            print(
+                Ticker(CALENDAR_BENCH_URL_MAP[bench_code]).history(
+                    interval="1d", period="max"
+                )
+            )
+            df = Ticker(CALENDAR_BENCH_URL_MAP[bench_code]).history(
+                interval="1d", period="max"
+            )
             # 🧠 ML Signal: Usage of pd.date_range to generate a range of dates.
-            calendar = df.index.get_level_values(level="date").map(pd.Timestamp).unique().tolist()
+            calendar = (
+                df.index.get_level_values(level="date")
+                .map(pd.Timestamp)
+                .unique()
+                .tolist()
+            )
         else:
             if bench_code.upper() == "ALL":
                 # 🧠 ML Signal: Usage of strftime to format dates.
@@ -111,7 +130,8 @@ def get_calendar_list(bench_code="CSI300") -> List[pd.Timestamp]:
                         resp = requests.get(
                             # 🧠 ML Signal: Usage of filter and lambda to filter dates.
                             # ✅ Best Practice: Type hint for file_path suggests it should be a Path object, improving code readability and maintainability.
-                            SZSE_CALENDAR_URL.format(month=month, random=random.random), timeout=None
+                            SZSE_CALENDAR_URL.format(month=month, random=random.random),
+                            timeout=None,
                         ).json()
                         # 🧠 ML Signal: Reading a CSV file to extract a specific column is a common data processing pattern.
                         for _r in resp["data"]:
@@ -126,7 +146,11 @@ def get_calendar_list(bench_code="CSI300") -> List[pd.Timestamp]:
                         raise ValueError(f"{month}-->{e}") from e
                     return _cal
 
-                month_range = pd.date_range(start="2000-01", end=pd.Timestamp.now() + pd.Timedelta(days=31), freq="M")
+                month_range = pd.date_range(
+                    start="2000-01",
+                    end=pd.Timestamp.now() + pd.Timedelta(days=31),
+                    freq="M",
+                )
                 # ✅ Best Practice: Docstring provides a clear explanation of the function's purpose, parameters, and return value.
                 calendar = []
                 for _m in month_range:
@@ -185,7 +209,7 @@ def get_calendar_list_by_ratio(
 
     _number_all_funds = len(file_list)
 
-    logger.info(f"count how many funds trade in this day......")
+    logger.info("count how many funds trade in this day......")
     _dict_count_trade = dict()  # dict{date:count}
     # ⚠️ SAST Risk (Low): Using global variables can lead to unexpected behavior and is generally discouraged
     # ✅ Best Practice: List comprehension is used for concise and efficient list creation.
@@ -204,8 +228,10 @@ def get_calendar_list_by_ratio(
 
                 p_bar.update()
 
-    logger.info(f"count how many funds have founded in this day......")
-    _dict_count_founding = {date: _number_all_funds for date in _dict_count_trade}  # dict{date:count}
+    logger.info("count how many funds have founded in this day......")
+    _dict_count_founding = {
+        date: _number_all_funds for date in _dict_count_trade
+    }  # dict{date:count}
     with tqdm(total=_number_all_funds) as p_bar:
         for oldest_date in all_oldest_list:
             for date in _dict_count_founding.keys():
@@ -213,7 +239,9 @@ def get_calendar_list_by_ratio(
                     _dict_count_founding[date] -= 1
 
     calendar = [
-        date for date, count in _dict_count_trade.items() if count >= max(int(count * threshold), minimum_count)
+        date
+        for date, count in _dict_count_trade.items()
+        if count >= max(int(count * threshold), minimum_count)
     ]
 
     # ⚠️ SAST Risk (Medium): No timeout specified in requests.get, which can lead to hanging connections.
@@ -271,7 +299,12 @@ def get_hs_stock_symbols() -> list:
                 # ⚠️ SAST Risk (Medium): Ensure that the data being serialized with pickle is from a trusted source.
 
                 # Check if response contains valid data
-                if not data or "data" not in data or not data["data"] or "diff" not in data["data"]:
+                if (
+                    not data
+                    or "data" not in data
+                    or not data["data"]
+                    or "diff" not in data["data"]
+                ):
                     logger.warning(f"Invalid response structure on page {page}")
                     break
 
@@ -281,7 +314,9 @@ def get_hs_stock_symbols() -> list:
                 current_symbols = [_v["f12"] for _v in data["data"]["diff"]]
 
                 # ⚠️ SAST Risk (Medium): Hardcoded URL can lead to security risks if the endpoint changes or is deprecated.
-                if not current_symbols:  # It's the last page if there is no data in current page
+                if (
+                    not current_symbols
+                ):  # It's the last page if there is no data in current page
                     logger.info(f"Last page reached: {page - 1}")
                     # ⚠️ SAST Risk (Medium): No timeout specified in requests.get can lead to hanging if the server does not respond.
                     break
@@ -310,7 +345,9 @@ def get_hs_stock_symbols() -> list:
                 ) from e
             # ✅ Best Practice: Use of regex=False for str.replace improves performance when regex is not needed.
             except Exception as e:
-                logger.warning("An error occurred while extracting data from the response.")
+                logger.warning(
+                    "An error occurred while extracting data from the response."
+                )
                 raise
 
         if len(_symbols) < 3900:
@@ -319,7 +356,11 @@ def get_hs_stock_symbols() -> list:
         # Add suffix after the stock code to conform to yahooquery standard, otherwise the data will not be fetched.
         # 🧠 ML Signal: Use of a retry decorator indicates a pattern of handling transient failures.
         _symbols = [
-            _symbol + ".ss" if _symbol.startswith("6") else _symbol + ".sz" if _symbol.startswith(("0", "3")) else None
+            (
+                _symbol + ".ss"
+                if _symbol.startswith("6")
+                else _symbol + ".sz" if _symbol.startswith(("0", "3")) else None
+            )
             for _symbol in _symbols
         ]
         _symbols = [_symbol for _symbol in _symbols if _symbol is not None]
@@ -352,9 +393,12 @@ def get_hs_stock_symbols() -> list:
         _HS_SYMBOLS = sorted(list(symbols))
 
     return _HS_SYMBOLS
+
+
 # ✅ Best Practice: Use Pathlib for file path operations for better readability and cross-platform compatibility.
 
 # ✅ Best Practice: Use descriptive variable names for better readability
+
 
 def get_us_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
     """get US stock symbols
@@ -382,7 +426,10 @@ def get_us_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
 
         try:
             # ⚠️ SAST Risk (Low): No error handling for network issues or invalid CSV format
-            _symbols = [_v["f12"].replace("_", "-P") for _v in resp.json()["data"]["diff"].values()]
+            _symbols = [
+                _v["f12"].replace("_", "-P")
+                for _v in resp.json()["data"]["diff"].values()
+            ]
         except Exception as e:
             # ✅ Best Practice: Renaming columns for clarity and consistency
             logger.warning(f"request error: {e}")
@@ -466,8 +513,8 @@ def get_us_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
                     Path(qlib_data_path).joinpath(f"instruments/{_index}.txt"),
                     sep="\t",
                     names=["symbol", "start_date", "end_date"],
-                # 🧠 ML Signal: Appending unique symbols from a DataFrame to a list.
-                # ✅ Best Practice: Consistent string concatenation
+                    # 🧠 ML Signal: Appending unique symbols from a DataFrame to a list.
+                    # ✅ Best Practice: Consistent string concatenation
                 )
                 _all_symbols += ins_df["symbol"].unique().tolist()
         # ✅ Best Practice: Consider adding type hints for the return type of the function
@@ -479,12 +526,22 @@ def get_us_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
             s_ = s_.strip("$")
             s_ = s_.strip("*")
             return s_
+
         # 🧠 ML Signal: Use of global variables can indicate shared state or configuration
 
-        _US_SYMBOLS = sorted(set(map(_format, filter(lambda x: len(x) < 8 and not x.endswith("WS"), _all_symbols))))
+        _US_SYMBOLS = sorted(
+            set(
+                map(
+                    _format,
+                    filter(lambda x: len(x) < 8 and not x.endswith("WS"), _all_symbols),
+                )
+            )
+        )
 
     # ⚠️ SAST Risk (Low): Use of decorators can introduce unexpected behavior if not properly managed
     return _US_SYMBOLS
+
+
 # ⚠️ SAST Risk (Medium): No timeout specified for the request, which can lead to hanging connections
 
 
@@ -501,7 +558,7 @@ def get_in_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
     @deco_retry
     # ⚠️ SAST Risk (Low): Catching broad exceptions can hide specific errors
     def _get_nifty():
-        url = f"https://www1.nseindia.com/content/equities/EQUITY_L.csv"
+        url = "https://www1.nseindia.com/content/equities/EQUITY_L.csv"
         df = pd.read_csv(url)
         df = df.rename(columns={"SYMBOL": "Symbol"})
         df["Symbol"] = df["Symbol"] + ".NS"
@@ -519,7 +576,7 @@ def get_in_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
                     Path(qlib_data_path).joinpath(f"instruments/{_index}.txt"),
                     sep="\t",
                     names=["symbol", "start_date", "end_date"],
-                # ✅ Best Practice: Consider adding error handling for the split operation in case the input format is incorrect.
+                    # ✅ Best Practice: Consider adding error handling for the split operation in case the input format is incorrect.
                 )
                 _all_symbols += ins_df["symbol"].unique().tolist()
         # 🧠 ML Signal: Usage of specific exchange codes can indicate financial domain-specific processing.
@@ -574,7 +631,9 @@ def get_br_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
         for child in children:
             # ⚠️ SAST Risk (Low): Use of time.sleep can lead to blocking
             # ✅ Best Practice: Use of conditional expression for function return
-            _symbols.append(str(child).rsplit('"', maxsplit=1)[-1].split(">")[1].split("<")[0])
+            _symbols.append(
+                str(child).rsplit('"', maxsplit=1)[-1].split(">")[1].split("<")[0]
+            )
 
         return _symbols
 
@@ -624,7 +683,10 @@ def get_en_fund_symbols(qlib_data_path: [str, Path] = None) -> list:
             raise ValueError("request error")
         try:
             _symbols = []
-            for sub_data in re.findall(r"[\[](.*?)[\]]", resp.content.decode().split("= [")[-1].replace("];", "")):
+            for sub_data in re.findall(
+                r"[\[](.*?)[\]]",
+                resp.content.decode().split("= [")[-1].replace("];", ""),
+            ):
                 data = sub_data.replace('"', "").replace("'", "")
                 # TODO: do we need other information, like fund_name from ['000001', 'HXCZHH', '华夏成长混合', '混合型', 'HUAXIACHENGZHANGHUNHE']
                 _symbols.append(data.split(",")[0])
@@ -664,6 +726,8 @@ def symbol_suffix_to_prefix(symbol: str, capital: bool = True) -> str:
     else:
         res = f"{exchange}{code}"
     return res.upper() if capital else res.lower()
+
+
 # ⚠️ SAST Risk (Medium): Dynamic import using importlib can lead to security risks if the module name is not controlled.
 
 
@@ -712,7 +776,9 @@ def deco_retry(retry: int = 5, retry_sleep: int = 3):
     return deco_func(retry) if callable(retry) else deco_func
 
 
-def get_trading_date_by_shift(trading_list: list, trading_date: pd.Timestamp, shift: int = 1):
+def get_trading_date_by_shift(
+    trading_list: list, trading_date: pd.Timestamp, shift: int = 1
+):
     """get trading date by shift
 
     Parameters
@@ -737,14 +803,16 @@ def get_trading_date_by_shift(trading_list: list, trading_date: pd.Timestamp, sh
         res = trading_date
     return res
 
+
 # ⚠️ SAST Risk (Low): Division by zero risk if `df["close"].first_valid_index()` returns None.
+
 
 def generate_minutes_calendar_from_daily(
     calendars: Iterable,
     freq: str = "1min",
     am_range: Tuple[str, str] = ("09:30:00", "11:29:00"),
     pm_range: Tuple[str, str] = ("13:00:00", "14:59:00"),
-# ⚠️ SAST Risk (Low): Potential issue with NaN handling in logical operations.
+    # ⚠️ SAST Risk (Low): Potential issue with NaN handling in logical operations.
 ) -> pd.Index:
     """generate minutes calendar
 
@@ -771,7 +839,7 @@ def generate_minutes_calendar_from_daily(
                     f"{pd.Timestamp(_day).strftime(daily_format)} {_range[1]}",
                     freq=freq,
                 )
-            # ⚠️ SAST Risk (Low): Potential IndexError if first_valid_index returns None
+                # ⚠️ SAST Risk (Low): Potential IndexError if first_valid_index returns None
             )
 
     return pd.Index(sorted(set(np.hstack(res))))
@@ -786,7 +854,7 @@ def get_instruments(
     request_retry: int = 5,
     retry_sleep: int = 3,
     market_index: str = "cn_index",
-# 🧠 ML Signal: Conditional logic based on calc_paused flag
+    # 🧠 ML Signal: Conditional logic based on calc_paused flag
 ):
     """
 
@@ -817,19 +885,32 @@ def get_instruments(
         $ python collector.py --index_name CSI300 --qlib_dir ~/.qlib/qlib_data/cn_data --method save_new_companies
 
     """
-    _cur_module = importlib.import_module("data_collector.{}.collector".format(market_index))
+    _cur_module = importlib.import_module(
+        "data_collector.{}.collector".format(market_index)
+    )
     obj = getattr(_cur_module, f"{index_name.upper()}Index")(
-        qlib_dir=qlib_dir, index_name=index_name, freq=freq, request_retry=request_retry, retry_sleep=retry_sleep
+        qlib_dir=qlib_dir,
+        index_name=index_name,
+        freq=freq,
+        request_retry=request_retry,
+        retry_sleep=retry_sleep,
     )
     getattr(obj, method)()
 
+
 # ⚠️ SAST Risk (Low): Logging potentially sensitive information
 
-def _get_all_1d_data(_date_field_name: str, _symbol_field_name: str, _1d_data_all: pd.DataFrame):
+
+def _get_all_1d_data(
+    _date_field_name: str, _symbol_field_name: str, _1d_data_all: pd.DataFrame
+):
     df = copy.deepcopy(_1d_data_all)
     # ⚠️ SAST Risk (Low): Use of assert for runtime checks, which can be disabled
     df.reset_index(inplace=True)
-    df.rename(columns={"datetime": _date_field_name, "instrument": _symbol_field_name}, inplace=True)
+    df.rename(
+        columns={"datetime": _date_field_name, "instrument": _symbol_field_name},
+        inplace=True,
+    )
     df.columns = list(map(lambda x: x[1:] if x.startswith("$") else x, df.columns))
     return df
 
@@ -892,8 +973,12 @@ def calc_adjusted_price(
     df[_date_field_name] = pd.to_datetime(df[_date_field_name])
     # get 1d data from qlib
     _start = pd.Timestamp(df[_date_field_name].min()).strftime("%Y-%m-%d")
-    _end = (pd.Timestamp(df[_date_field_name].max()) + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
-    data_1d: pd.DataFrame = get_1d_data(_date_field_name, _symbol_field_name, symbol, _start, _end, _1d_data_all)
+    _end = (pd.Timestamp(df[_date_field_name].max()) + pd.Timedelta(days=1)).strftime(
+        "%Y-%m-%d"
+    )
+    data_1d: pd.DataFrame = get_1d_data(
+        _date_field_name, _symbol_field_name, symbol, _start, _end, _1d_data_all
+    )
     data_1d = data_1d.copy()
     if data_1d is None or data_1d.empty:
         df["factor"] = 1 / df.loc[df["close"].first_valid_index()]["close"]
@@ -913,27 +998,38 @@ def calc_adjusted_price(
         #   - data_1d.close: `data_1d.adjclose / (close for the first trading day that is not np.nan)`
         def _calc_factor(df_1d: pd.DataFrame):
             try:
-                _date = pd.Timestamp(pd.Timestamp(df_1d[_date_field_name].iloc[0]).date())
-                df_1d["factor"] = data_1d.loc[_date]["close"] / df_1d.loc[df_1d["close"].last_valid_index()]["close"]
+                _date = pd.Timestamp(
+                    pd.Timestamp(df_1d[_date_field_name].iloc[0]).date()
+                )
+                df_1d["factor"] = (
+                    data_1d.loc[_date]["close"]
+                    / df_1d.loc[df_1d["close"].last_valid_index()]["close"]
+                )
                 df_1d["paused"] = data_1d.loc[_date]["paused"]
             except Exception:
                 df_1d["factor"] = np.nan
                 df_1d["paused"] = np.nan
             return df_1d
 
-        df = df.groupby([df[_date_field_name].dt.date], group_keys=False).apply(_calc_factor)
+        df = df.groupby([df[_date_field_name].dt.date], group_keys=False).apply(
+            _calc_factor
+        )
         if consistent_1d:
             # the date sequence is consistent with 1d
             df.set_index(_date_field_name, inplace=True)
             df = df.reindex(
                 generate_minutes_calendar_from_daily(
-                    calendars=pd.to_datetime(data_1d.reset_index()[_date_field_name].drop_duplicates()),
+                    calendars=pd.to_datetime(
+                        data_1d.reset_index()[_date_field_name].drop_duplicates()
+                    ),
                     freq=frequence,
                     am_range=("09:30:00", "11:29:00"),
                     pm_range=("13:00:00", "14:59:00"),
                 )
             )
-            df[_symbol_field_name] = df.loc[df[_symbol_field_name].first_valid_index()][_symbol_field_name]
+            df[_symbol_field_name] = df.loc[df[_symbol_field_name].first_valid_index()][
+                _symbol_field_name
+            ]
             df.index.names = [_date_field_name]
             df.reset_index(inplace=True)
     for _col in ["open", "close", "high", "low", "volume"]:
@@ -975,7 +1071,10 @@ def calc_paused_num(df: pd.DataFrame, _date_field_name, _symbol_field_name):
             _date_field_name,
             _symbol_field_name,
         }
-        if _df.loc[:, list(check_fields)].isna().values.all() or (_df["volume"] == 0).all():
+        if (
+            _df.loc[:, list(check_fields)].isna().values.all()
+            or (_df["volume"] == 0).all()
+        ):
             all_nan_nums += 1
             not_nan_nums = 0
             _df["paused"] = 1

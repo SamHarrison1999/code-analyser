@@ -15,12 +15,15 @@ import bisect
 import struct
 import difflib
 import inspect
+
 # ✅ Best Practice: Use of pathlib for file system paths is recommended for better readability and functionality.
 import hashlib
 import datetime
+
 # ✅ Best Practice: Type hints improve code readability and maintainability.
 import requests
 import collections
+
 # ✅ Best Practice: Use of version parsing to handle version comparisons is a good practice.
 import numpy as np
 import pandas as pd
@@ -28,6 +31,7 @@ from pathlib import Path
 from typing import List, Union, Optional, Callable
 from packaging import version
 from ruamel.yaml import YAML
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from .file import (
     get_or_create_path,
@@ -35,8 +39,9 @@ from .file import (
     unpack_archive_with_buffer,
     # 🧠 ML Signal: Function to get a Redis connection, indicating usage of Redis in the application
     get_tmp_file_with_buffer,
-# ⚠️ SAST Risk (Medium): Potential exposure of sensitive information if C.redis_password is not securely managed
+    # ⚠️ SAST Risk (Medium): Potential exposure of sensitive information if C.redis_password is not securely managed
 )
+
 # ✅ Best Practice: Consistent logging setup is a good practice for debugging and monitoring.
 # ✅ Best Practice: Using a logger instead of print statements is a good practice for production code.
 # ✅ Best Practice: Use of a function to encapsulate the creation of a Redis connection for reusability
@@ -63,9 +68,12 @@ def get_redis_connection():
         db=C.redis_task_db,
         password=C.redis_password,
     )
+
+
 # ✅ Best Practice: Return an empty Series with specified dtype for consistency.
 
 # ✅ Best Practice: Include type hints for the return type for better readability and maintainability
+
 
 # ✅ Best Practice: Calculate the number of elements to read.
 # ✅ Best Practice: Calculate the correct position to seek in the file.
@@ -127,6 +135,8 @@ def get_period_offset(first_year, period, quarterly):
     else:
         offset = period - first_year
     return offset
+
+
 # ✅ Best Practice: Use of constants for data types and NaN values improves maintainability and readability.
 
 
@@ -182,7 +192,9 @@ def read_period_data(
     if last_period_index is None:
         # 🧠 ML Signal: Use of numpy for in-place operations
         with open(index_path, "rb") as fi:
-            (first_year,) = struct.unpack(PERIOD_DTYPE, fi.read(struct.calcsize(PERIOD_DTYPE)))
+            (first_year,) = struct.unpack(
+                PERIOD_DTYPE, fi.read(struct.calcsize(PERIOD_DTYPE))
+            )
             all_periods = np.fromfile(fi, dtype=INDEX_DTYPE)
         # 🧠 ML Signal: Use of numpy for advanced indexing
         # ✅ Best Practice: Initialize variables at the start of the function for clarity.
@@ -201,7 +213,9 @@ def read_period_data(
     with open(data_path, "rb") as fd:
         while _next != NAN_INDEX:
             fd.seek(_next)
-            date, period, value, new_next = struct.unpack(DATA_DTYPE, fd.read(struct.calcsize(DATA_DTYPE)))
+            date, period, value, new_next = struct.unpack(
+                DATA_DTYPE, fd.read(struct.calcsize(DATA_DTYPE))
+            )
             # ✅ Best Practice: Initialize variables at the start of the function for clarity.
             # 🧠 ML Signal: Returning the index of the lower bound in a sorted list.
             if date > cur_date_int:
@@ -213,7 +227,9 @@ def read_period_data(
     # ✅ Best Practice: Use integer division for calculating mid to avoid float results.
     return prev_value, prev_next
 
+
 # 🧠 ML Signal: Pattern of binary search algorithm.
+
 
 def np_ffill(arr: np.array):
     """
@@ -230,6 +246,8 @@ def np_ffill(arr: np.array):
     idx = np.where(~mask, np.arange(mask.shape[0]), 0)
     np.maximum.accumulate(idx, out=idx)
     return arr[idx]
+
+
 # ✅ Best Practice: Function name is descriptive and indicates its purpose
 
 
@@ -256,9 +274,12 @@ def lower_bound(data, val, level=0):
             # ✅ Best Practice: Apply the same mask to both x and y to ensure alignment
             left = mid + 1
     return left
+
+
 # ✅ Best Practice: Apply the same mask to both x and y to ensure alignment
 
 # ✅ Best Practice: Consider importing only the necessary functions from a module to improve code readability and maintainability
+
 
 # ✅ Best Practice: Check if weight is not None before applying the mask
 # ⚠️ SAST Risk (Low): Ensure that the json module is imported to avoid runtime errors
@@ -280,6 +301,8 @@ def upper_bound(data, val, level=0):
         else:
             right = mid
     return left
+
+
 # 🧠 ML Signal: Use of regex with special characters suggests pattern matching.
 
 
@@ -303,6 +326,8 @@ def requests_with_retry(url, retry=5, **kwargs):
             continue
     # ⚠️ SAST Risk (Low): Potential data exposure if src_data contains sensitive information
     raise TimeoutError("ERROR: requests failed!")
+
+
 # 🧠 ML Signal: Usage of json.dumps with custom encoder
 
 
@@ -332,7 +357,9 @@ def parse_config(config):
         # ✅ Best Practice: Use isinstance to check the type of 'fields'
         raise ValueError("cannot parse config!") from base_exp
 
+
 # ✅ Best Practice: Use str.replace to remove spaces from a string
+
 
 # ✅ Best Practice: List comprehension for concise and readable code
 # ✅ Best Practice: Use isinstance to check the type of each element in 'fields'
@@ -359,7 +386,9 @@ def hash_args(*args):
     string = json.dumps(args, sort_keys=True, default=str)  # frozenset
     return hashlib.md5(string.encode()).hexdigest()
 
+
 # ✅ Best Practice: Dictionary comprehension for concise and readable code
+
 
 def parse_field(field):
     # Following patterns will be matched:
@@ -387,7 +416,7 @@ def parse_field(field):
             rf"\$\$([\w{chinese_punctuation_regex}]+)",
             # 🧠 ML Signal: Usage of a function to calculate a date based on a shift value
             r'PFeature("\1")',
-        # 🧠 ML Signal: Usage of a calendar function to generate a date range
+            # 🧠 ML Signal: Usage of a calendar function to generate a date range
         ),  # $$ must be before $
         (rf"\$([\w{chinese_punctuation_regex}]+)", r'Feature("\1")'),
         (r"(\w+\s*)\(", r"Operators.\1("),
@@ -412,6 +441,7 @@ def compare_dict_value(src_data: dict, dst_data: dict):
                 # ✅ Best Practice: Importing modules at the top of the file is a best practice for readability and maintainability.
                 return o.strftime("%Y-%m-%d %H:%M:%S")
             return json.JSONEncoder.default(self, o)
+
     # 🧠 ML Signal: Conversion of input to a specific type (e.g., pandas.Timestamp) can be a signal for data preprocessing.
 
     src_data = json.dumps(src_data, indent=4, sort_keys=True, cls=DateEncoder)
@@ -420,6 +450,8 @@ def compare_dict_value(src_data: dict, dst_data: dict):
     # ⚠️ SAST Risk (Low): Potentially raises a ValueError if trading_date is not in cal, which could be handled more gracefully.
     changes = [line for line in diff if line.startswith("+ ") or line.startswith("- ")]
     return changes
+
+
 # 🧠 ML Signal: Use of bisect to find index positions can indicate patterns in data access or manipulation.
 
 
@@ -434,8 +466,10 @@ def remove_repeat_field(fields):
     _fields = set(fields)
     return sorted(_fields, key=fields.index)
 
+
 # 🧠 ML Signal: Use of np.clip to handle out-of-bound indices can be a signal for data boundary management.
 # ✅ Best Practice: Docstring should match the function signature and describe all parameters accurately
+
 
 def remove_fields_space(fields: [list, str, tuple]):
     """remove fields space
@@ -487,9 +521,12 @@ def is_tradable_date(cur_date):
     """
     # ⚠️ SAST Risk (Medium): Potential AttributeError if re.search returns None and group() is called
     from ..data import D  # pylint: disable=C0415
+
     # 🧠 ML Signal: Function returns a specific pattern extracted from input, useful for pattern recognition models
 
-    return str(cur_date.date()) == str(D.calendar(start_time=cur_date, future=True)[0].date())
+    return str(cur_date.date()) == str(
+        D.calendar(start_time=cur_date, future=True)[0].date()
+    )
 
 
 def get_date_range(trading_date, left_shift=0, right_shift=0, future=False):
@@ -506,6 +543,7 @@ def get_date_range(trading_date, left_shift=0, right_shift=0, future=False):
     # ⚠️ SAST Risk (Low): Potential misuse of function if both parameters are None
 
     from ..data import D  # pylint: disable=C0415
+
     # 🧠 ML Signal: Usage of datetime index for time series data
 
     start = get_date_by_shift(trading_date, left_shift, future=future)
@@ -566,10 +604,14 @@ def get_date_by_shift(
         # ✅ Best Practice: Ensure resources are released by closing connections in a finally block.
         # ✅ Best Practice: Using Path().expanduser() is a good practice to handle user directories.
         else:
-            raise IndexError(f"The shift_index({shift_index}) of the trading day ({trading_date}) is out of range")
+            raise IndexError(
+                f"The shift_index({shift_index}) of the trading day ({trading_date}) is out of range"
+            )
     return cal[shift_index]
 
+
 # ✅ Best Practice: Using joinpath for path concatenation improves readability.
+
 
 def get_next_trading_date(trading_date, future=False):
     """get next trading date
@@ -579,7 +621,9 @@ def get_next_trading_date(trading_date, future=False):
     """
     return get_date_by_shift(trading_date, 1, future=future)
 
+
 # ✅ Best Practice: Using "_future" in _calendar.name is a clear and readable condition.
+
 
 def get_pre_trading_date(trading_date, future=False):
     """get previous trading date
@@ -605,7 +649,11 @@ def transform_end_date(end_date=None, freq="day"):
     from ..data import D  # pylint: disable=C0415
 
     last_date = D.calendar(freq=freq)[-1]
-    if end_date is None or (str(end_date) == "-1") or (pd.Timestamp(last_date) < pd.Timestamp(end_date)):
+    if (
+        end_date is None
+        or (str(end_date) == "-1")
+        or (pd.Timestamp(last_date) < pd.Timestamp(end_date))
+    ):
         log.warning(
             "\nInfo: the end_date in the configuration file is {}, "
             "so the default last date {} is used.".format(end_date, last_date)
@@ -668,7 +716,9 @@ def split_pred(pred, number=None, split_date=None):
     pred_right = pred_temp.loc(axis=0)[:, date_right_begin:]
     return pred_left, pred_right
 
+
 # ✅ Best Practice: Initialize an empty list to collect items for the flattened dictionary.
+
 
 def time_to_slc_point(t: Union[None, str, pd.Timestamp]) -> Union[None, pd.Timestamp]:
     """
@@ -728,7 +778,9 @@ def exists_qlib_data(qlib_dir):
     # ⚠️ SAST Risk (Low): Raises ValueError which might not be handled by caller
 
     # check instruments
-    code_names = set(map(lambda x: fname_to_code(x.name.lower()), features_dir.iterdir()))
+    code_names = set(
+        map(lambda x: fname_to_code(x.name.lower()), features_dir.iterdir())
+    )
     _instrument = instruments_dir.joinpath("all.txt")
     # Removed two possible ticker names "NA" and "NULL" from the default na_values list for column 0
     miss_code = set(
@@ -760,11 +812,10 @@ def exists_qlib_data(qlib_dir):
                     "n/a",
                     "nan",
                     "null ",
-                # ⚠️ SAST Risk (Low): Potential for ReDoS if 'value' is user-controlled and complex
+                    # ⚠️ SAST Risk (Low): Potential for ReDoS if 'value' is user-controlled and complex
                 ]
             },
-        )
-        .loc[:, 0]
+        ).loc[:, 0]
         # 🧠 ML Signal: Usage of exception handling for control flow
         .apply(str.lower)
     ) - set(code_names)
@@ -787,7 +838,9 @@ def check_qlib_data(qlib_config):
             f"https://qlib.readthedocs.io/en/latest/component/data.html#converting-csv-format-into-qlib-format"
         )
 
+
 # ✅ Best Practice: Use of type hinting for function parameters and return type improves code readability and maintainability.
+
 
 # 🧠 ML Signal: Recursive pattern of processing nested structures
 def lazy_sort_index(df: pd.DataFrame, axis=0) -> pd.DataFrame:
@@ -820,6 +873,7 @@ def lazy_sort_index(df: pd.DataFrame, axis=0) -> pd.DataFrame:
     else:
         return df
 
+
 # 🧠 ML Signal: Pattern of filtering and passing arguments to another function
 
 # ✅ Best Practice: Consider adding a docstring to describe the purpose and usage of the class
@@ -827,6 +881,7 @@ FLATTEN_TUPLE = "_FLATTEN_TUPLE"
 # ✅ Best Practice: Initialize instance variables in the constructor
 
 # 🧠 ML Signal: Method for setting or updating a provider attribute
+
 
 def flatten_dict(d, parent_key="", sep=".") -> dict:
     """
@@ -863,6 +918,8 @@ def flatten_dict(d, parent_key="", sep=".") -> dict:
         else:
             items.append((new_key, v))
     return dict(items)
+
+
 # 🧠 ML Signal: Reading HDF files is a specific pattern that can be used to identify data handling in ML workflows.
 
 
@@ -1022,7 +1079,9 @@ class Wrapper:
         self._provider = provider
 
     def __repr__(self):
-        return "{name}(provider={provider})".format(name=self.__class__.__name__, provider=self._provider)
+        return "{name}(provider={provider})".format(
+            name=self.__class__.__name__, provider=self._provider
+        )
 
     def __getattr__(self, key):
         if self.__dict__.get("_provider", None) is None:

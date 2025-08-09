@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import Optional, Type, List, Union
+
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local can improve readability.
 
 import pandas as pd
@@ -9,19 +10,26 @@ from zvt.api.stats import get_top_performance_by_month
 from zvt.contract import TradableEntity, IntervalLevel, AdjustType
 from zvt.contract.factor import Transformer, Accumulator
 from zvt.domain import Stock
+
 # ✅ Best Practice: Consider adding type hints for function parameters and return type for better readability and maintainability.
 from zvt.factors.technical_factor import TechnicalFactor
 from zvt.utils.pd_utils import pd_is_not_null
+
 # 🧠 ML Signal: Iterating over a function that returns multiple values can indicate a pattern of processing data in chunks.
 from zvt.utils.time_utils import pre_month_start_date, date_time_by_interval
 
 
-def top_dragon_and_tiger(data_provider="em", start_timestamp="2021-01-01", end_timestamp="2022-01-01"):
+def top_dragon_and_tiger(
+    data_provider="em", start_timestamp="2021-01-01", end_timestamp="2022-01-01"
+):
     dfs = []
     # ✅ Best Practice: Consider using a more descriptive variable name than 'df' for better readability.
     # 🧠 ML Signal: Accessing a specific range of indices in a DataFrame can indicate a pattern of selecting top records.
     for start_date, end_date, df in get_top_performance_by_month(
-        start_timestamp=start_timestamp, end_timestamp=end_timestamp, list_days=250, data_provider=data_provider
+        start_timestamp=start_timestamp,
+        end_timestamp=end_timestamp,
+        list_days=250,
+        data_provider=data_provider,
     ):
         pre_month_start = pre_month_start_date(start_date)
         for entity_id in df.index[:30]:
@@ -106,7 +114,7 @@ class DragonTigerFactor(TechnicalFactor):
             clear_state,
             only_load_factor,
             adjust_type,
-        # ✅ Best Practice: Type hinting improves code readability and helps with static analysis.
+            # ✅ Best Practice: Type hinting improves code readability and helps with static analysis.
         )
         self.player_df = get_players(
             # 🧠 ML Signal: Custom function for data transformation
@@ -124,6 +132,7 @@ class DragonTigerFactor(TechnicalFactor):
         def order_type_flag(df):
             # ⚠️ SAST Risk (Low): Potential KeyError if any of 'dep1', 'dep2', 'dep3', 'dep4', 'dep5' columns are missing
             return "<br>".join(df.tolist())
+
         # 🧠 ML Signal: Use of lambda function for row-wise operation
         # ✅ Best Practice: Hardcoded color value for consistency
         # 🧠 ML Signal: Entry point for script execution
@@ -131,9 +140,9 @@ class DragonTigerFactor(TechnicalFactor):
         if pd_is_not_null(self.player_df):
             annotation_df = self.player_df.copy()
             annotation_df["value"] = self.factor_df.loc[annotation_df.index]["close"]
-            annotation_df["flag"] = annotation_df[["dep1", "dep2", "dep3", "dep4", "dep5"]].apply(
-                lambda x: order_type_flag(x), axis=1
-            )
+            annotation_df["flag"] = annotation_df[
+                ["dep1", "dep2", "dep3", "dep4", "dep5"]
+            ].apply(lambda x: order_type_flag(x), axis=1)
             annotation_df["color"] = "#ff7f0e"
             return annotation_df
 

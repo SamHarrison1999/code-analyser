@@ -4,8 +4,10 @@ from typing import List, Tuple
 
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.contract import IntervalLevel
+
 # ✅ Best Practice: Class definition should follow PEP 8 naming conventions, which this does.
 from zvt.factors.macd.macd_factor import GoldCrossFactor
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.trader.trader import StockTrader
 
@@ -17,7 +19,14 @@ from zvt.trader.trader import StockTrader
 # provider: joinquant
 class MultipleLevelTrader(StockTrader):
     def init_factors(
-        self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp, adjust_type=None
+        self,
+        entity_ids,
+        entity_schema,
+        exchanges,
+        codes,
+        start_timestamp,
+        end_timestamp,
+        adjust_type=None,
     ):
         # 同时使用周线和日线策略
         return [
@@ -54,5 +63,7 @@ class MultipleLevelTrader(StockTrader):
 
 
 if __name__ == "__main__":
-    trader = MultipleLevelTrader(start_timestamp="2019-01-01", end_timestamp="2020-01-01")
+    trader = MultipleLevelTrader(
+        start_timestamp="2019-01-01", end_timestamp="2020-01-01"
+    )
     trader.run()

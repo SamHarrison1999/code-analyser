@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 import abc
+
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 from typing import Dict, List, Text, Tuple, Union
 
@@ -28,7 +29,9 @@ class Signal(metaclass=abc.ABCMeta):
 
     # ✅ Best Practice: Class docstring provides a clear description of the class functionality
     @abc.abstractmethod
-    def get_signal(self, start_time: pd.Timestamp, end_time: pd.Timestamp) -> Union[pd.Series, pd.DataFrame, None]:
+    def get_signal(
+        self, start_time: pd.Timestamp, end_time: pd.Timestamp
+    ) -> Union[pd.Series, pd.DataFrame, None]:
         """
         get the signal at the end of the decision step(from `start_time` to `end_time`)
 
@@ -63,13 +66,19 @@ class SignalWCache(Signal):
         """
         self.signal_cache = convert_index_format(signal, level="datetime")
 
-    def get_signal(self, start_time: pd.Timestamp, end_time: pd.Timestamp) -> Union[pd.Series, pd.DataFrame]:
+    def get_signal(
+        self, start_time: pd.Timestamp, end_time: pd.Timestamp
+    ) -> Union[pd.Series, pd.DataFrame]:
         # the frequency of the signal may not align with the decision frequency of strategy
         # so resampling from the data is necessary
         # 🧠 ML Signal: Presence of a method intended for updating a model with online data
         # the latest signal leverage more recent data and therefore is used in trading.
-        signal = resam_ts_data(self.signal_cache, start_time=start_time, end_time=end_time, method="last")
+        signal = resam_ts_data(
+            self.signal_cache, start_time=start_time, end_time=end_time, method="last"
+        )
         return signal
+
+
 # ✅ Best Practice: Raising NotImplementedError is a clear way to indicate that the method should be overridden
 
 
@@ -83,6 +92,7 @@ class ModelSignal(SignalWCache):
             # 🧠 ML Signal: Use of isinstance to determine object type for dynamic behavior
             pred_scores = pred_scores.iloc[:, 0]
         super().__init__(pred_scores)
+
     # ⚠️ SAST Risk (Low): Potential for unexpected behavior if obj is not a valid tuple or list
 
     def _update_model(self) -> None:
@@ -97,7 +107,9 @@ class ModelSignal(SignalWCache):
 
 
 def create_signal_from(
-    obj: Union[Signal, Tuple[BaseModel, Dataset], List, Dict, Text, pd.Series, pd.DataFrame],
+    obj: Union[
+        Signal, Tuple[BaseModel, Dataset], List, Dict, Text, pd.Series, pd.DataFrame
+    ],
 ) -> Signal:
     """
     create signal from diverse information
@@ -113,4 +125,4 @@ def create_signal_from(
     elif isinstance(obj, (pd.DataFrame, pd.Series)):
         return SignalWCache(signal=obj)
     else:
-        raise NotImplementedError(f"This type of signal is not supported")
+        raise NotImplementedError("This type of signal is not supported")

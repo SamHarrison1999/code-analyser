@@ -3,11 +3,13 @@ import pandas as pd
 import qlib.utils.index_data as idd
 
 import unittest
+
 # ✅ Best Practice: Class should inherit from unittest.TestCase for test discovery and execution
 # 🧠 ML Signal: Importing numpy and pandas indicates data manipulation or numerical computation, common in ML tasks
 
 # 🧠 ML Signal: Importing qlib.utils.index_data suggests usage of a specific library for financial data, relevant for ML in finance
 # 🧠 ML Signal: Testing function for SingleData class, useful for learning test patterns
+
 
 # ✅ Best Practice: Grouping all imports at the top of the file improves readability and maintainability
 class IndexDataTest(unittest.TestCase):
@@ -61,6 +63,7 @@ class IndexDataTest(unittest.TestCase):
         # 🧠 ML Signal: Usage of a custom class method 'MultiData' with specific parameters
 
         print(sd.iloc[:3])
+
     # ⚠️ SAST Risk (Low): Printing sensitive data to the console
     # ✅ Best Practice: Printing specific data access to verify correct behavior
 
@@ -83,7 +86,9 @@ class IndexDataTest(unittest.TestCase):
 
         # 🧠 ML Signal: Testing equality of indices
         # test indexing
-        sd = idd.MultiData(np.arange(4).reshape(2, 2), index=["foo", "bar"], columns=["f", "g"])
+        sd = idd.MultiData(
+            np.arange(4).reshape(2, 2), index=["foo", "bar"], columns=["f", "g"]
+        )
         print(sd)
         # ⚠️ SAST Risk (Low): Creating a SingleData with an empty Series, which may lead to unexpected behavior
         print(sd.iloc[1])  # get second row
@@ -104,7 +109,9 @@ class IndexDataTest(unittest.TestCase):
         print(sd.loc[:, "g":])
 
     def test_sorting(self):
-        sd = idd.MultiData(np.arange(4).reshape(2, 2), index=["foo", "bar"], columns=["f", "g"])
+        sd = idd.MultiData(
+            np.arange(4).reshape(2, 2), index=["foo", "bar"], columns=["f", "g"]
+        )
         print(sd)
         # 🧠 ML Signal: Testing with datetime indices
         sd.sort_index()
@@ -116,7 +123,9 @@ class IndexDataTest(unittest.TestCase):
 
     def test_corner_cases(self):
         # 🧠 ML Signal: Printing result of addition operation
-        sd = idd.MultiData([[1, 2], [3, np.nan]], index=["foo", "bar"], columns=["f", "g"])
+        sd = idd.MultiData(
+            [[1, 2], [3, np.nan]], index=["foo", "bar"], columns=["f", "g"]
+        )
         # 🧠 ML Signal: Verifying index lookup with Timestamp
         print(sd)
         # 🧠 ML Signal: Testing multiplication of SingleData object by scalar
@@ -188,7 +197,9 @@ class IndexDataTest(unittest.TestCase):
         self.assertTrue(np.isnan((sd1 + sd2).iloc[3]))
         self.assertTrue(sd1.add(sd2).sum() == 13)
 
-        self.assertTrue(idd.sum_by_index([sd1, sd2], sd1.index, fill_value=0.0).sum() == 13)
+        self.assertTrue(
+            idd.sum_by_index([sd1, sd2], sd1.index, fill_value=0.0).sum() == 13
+        )
 
     def test_todo(self):
         pass

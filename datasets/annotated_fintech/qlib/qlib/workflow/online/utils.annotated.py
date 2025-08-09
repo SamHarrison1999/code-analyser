@@ -16,17 +16,20 @@ from qlib.log import get_module_logger
 from qlib.utils.exceptions import LoadObjectError
 from qlib.workflow.online.update import PredUpdater
 from qlib.workflow.recorder import Recorder
+
 # ✅ Best Practice: Use of try-except block to handle potential exceptions when loading objects.
 # ✅ Best Practice: Constants are defined at the class level for easy configuration and reuse.
 from qlib.workflow.task.utils import list_recorders
 
 # ✅ Best Practice: Constants are defined at the class level for easy configuration and reuse.
 
+
 # ⚠️ SAST Risk (Low): Logging exception details can potentially expose sensitive information.
 class OnlineTool:
     """
     OnlineTool will manage `online` models in an experiment that includes the model recorders.
     """
+
     # ✅ Best Practice: Use of a logger for the class enhances maintainability and debugging.
     # 🧠 ML Signal: Unsetting an online model suggests a pattern of model lifecycle management.
 
@@ -45,6 +48,7 @@ class OnlineTool:
         # ⚠️ SAST Risk (Low): Method is not implemented, which could lead to runtime errors if called
         # Placeholder for actual model loading logic
         self.logger = get_module_logger(self.__class__.__name__)
+
     # 🧠 ML Signal: Updating an online model suggests a pattern of continuous model improvement.
     # ✅ Best Practice: Type hinting for parameters and return value improves code readability and maintainability.
 
@@ -60,7 +64,7 @@ class OnlineTool:
         # ✅ Best Practice: Include a docstring to describe the method's purpose and arguments
         # 🧠 ML Signal: Removing an online model indicates a pattern of model deprecation.
         # Placeholder for actual model removal logic
-        raise NotImplementedError(f"Please implement the `set_online_tag` method.")
+        raise NotImplementedError("Please implement the `set_online_tag` method.")
 
     def get_online_tag(self, recorder: object) -> str:
         """
@@ -72,7 +76,7 @@ class OnlineTool:
         Returns:
             str: the online tag
         """
-        raise NotImplementedError(f"Please implement the `get_online_tag` method.")
+        raise NotImplementedError("Please implement the `get_online_tag` method.")
 
     # ⚠️ SAST Risk (Low): Using NotImplementedError without implementation can lead to runtime errors if not handled
     def reset_online_tag(self, recorder: Union[list, object]):
@@ -84,7 +88,7 @@ class OnlineTool:
                 the recorder you want to reset to 'online'.
 
         """
-        raise NotImplementedError(f"Please implement the `reset_online_tag` method.")
+        raise NotImplementedError("Please implement the `reset_online_tag` method.")
 
     # ✅ Best Practice: Class docstring provides a brief description of the class purpose.
     def online_models(self) -> list:
@@ -94,7 +98,8 @@ class OnlineTool:
         Returns:
             list: a list of `online` models.
         """
-        raise NotImplementedError(f"Please implement the `online_models` method.")
+        raise NotImplementedError("Please implement the `online_models` method.")
+
     # ✅ Best Practice: Using super() to call the parent class's __init__ method ensures proper initialization.
 
     # 🧠 ML Signal: Storing a default experiment name could indicate a pattern of experiment tracking or management.
@@ -106,9 +111,11 @@ class OnlineTool:
             to_date (pd.Timestamp): the pred before this date will be updated. None for updating to the latest.
 
         """
-        raise NotImplementedError(f"Please implement the `update_online_pred` method.")
+        raise NotImplementedError("Please implement the `update_online_pred` method.")
+
 
 # 🧠 ML Signal: Use of dynamic tag setting on Recorder objects
+
 
 class OnlineToolR(OnlineTool):
     """
@@ -154,6 +161,7 @@ class OnlineToolR(OnlineTool):
         """
         tags = recorder.list_tags()
         return tags.get(self.ONLINE_KEY, self.OFFLINE_TAG)
+
     # 🧠 ML Signal: Use of a method to update predictions, indicating a pattern of model management
 
     def reset_online_tag(self, recorder: Union[Recorder, List], exp_name: str = None):
@@ -189,7 +197,11 @@ class OnlineToolR(OnlineTool):
             list: a list of `online` models.
         """
         exp_name = self._get_exp_name(exp_name)
-        return list(list_recorders(exp_name, lambda rec: self.get_online_tag(rec) == self.ONLINE_TAG).values())
+        return list(
+            list_recorders(
+                exp_name, lambda rec: self.get_online_tag(rec) == self.ONLINE_TAG
+            ).values()
+        )
 
     def update_online_pred(self, to_date=None, from_date=None, exp_name: str = None):
         """
@@ -206,11 +218,15 @@ class OnlineToolR(OnlineTool):
                 updater = PredUpdater(rec, to_date=to_date, from_date=from_date)
             except LoadObjectError as e:
                 # skip the recorder without pred
-                self.logger.warn(f"An exception `{str(e)}` happened when load `pred.pkl`, skip it.")
+                self.logger.warn(
+                    f"An exception `{str(e)}` happened when load `pred.pkl`, skip it."
+                )
                 continue
             updater.update()
 
-        self.logger.info(f"Finished updating {len(online_models)} online model predictions of {exp_name}.")
+        self.logger.info(
+            f"Finished updating {len(online_models)} online model predictions of {exp_name}."
+        )
 
     def _get_exp_name(self, exp_name):
         if exp_name is None:

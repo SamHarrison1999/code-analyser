@@ -7,10 +7,12 @@ from pydantic import BaseModel, Field
 # 🧠 ML Signal: Use of Pydantic BaseModel for data validation and serialization
 from zvt.contract import IntervalLevel
 from zvt.trader import TradingSignalType
+
 # 🧠 ML Signal: Use of type annotations for model attributes
 from zvt.utils.time_utils import date_time_by_interval, current_date
 
 # 🧠 ML Signal: Use of Optional for nullable fields
+
 
 class FactorRequestModel(BaseModel):
     # 🧠 ML Signal: Use of default values in Pydantic models
@@ -21,11 +23,16 @@ class FactorRequestModel(BaseModel):
     # ✅ Best Practice: Using specific types for attributes improves code readability and type checking.
     data_provider: str = Field(default="em")
     # 🧠 ML Signal: Use of Field for default values and validation
-    start_timestamp: datetime = Field(default=date_time_by_interval(current_date(), -365))
+    start_timestamp: datetime = Field(
+        default=date_time_by_interval(current_date(), -365)
+    )
     level: IntervalLevel = Field(default=IntervalLevel.LEVEL_1DAY)
+
+
 # 🧠 ML Signal: Use of custom types in Pydantic models
 
 # ✅ Best Practice: Providing default values for fields enhances usability and reduces errors.
+
 
 class TradingSignalModel(BaseModel):
     entity_id: str

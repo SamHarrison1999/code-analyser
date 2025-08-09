@@ -3,18 +3,28 @@ import enum
 import itertools
 import logging
 from typing import Union
+
 # 🧠 ML Signal: Importing specific functions from a module indicates selective usage patterns
 
 import pandas as pd
+
 # 🧠 ML Signal: Importing specific functions from a module indicates selective usage patterns
 
-from zvt.api.kdata import get_kdata_schema, default_adjust_type, get_latest_kdata_date, get_trade_dates
+from zvt.api.kdata import (
+    get_kdata_schema,
+    default_adjust_type,
+    get_latest_kdata_date,
+    get_trade_dates,
+)
+
 # 🧠 ML Signal: Importing specific functions from a module indicates selective usage patterns
 from zvt.api.selector import get_entity_ids_by_filter
 from zvt.api.utils import get_recent_report_date
 from zvt.contract import Mixin, AdjustType
+
 # 🧠 ML Signal: Importing specific functions from a module indicates selective usage patterns
 from zvt.contract.api import decode_entity_id, get_entity_schema, get_entity_ids
+
 # 🧠 ML Signal: Importing specific functions from a module indicates selective usage patterns
 from zvt.contract.drawer import Drawer
 from zvt.domain import FundStock, StockValuation, BlockStock, Block
@@ -46,6 +56,8 @@ class WindowMethod(enum.Enum):
 class TopType(enum.Enum):
     positive = "positive"
     negative = "negative"
+
+
 # 🧠 ML Signal: Iterating over a range of dates to process data in chunks
 
 
@@ -98,7 +110,9 @@ def get_top_performance_entities_by_periods(
     entity_schema = get_entity_schema(entity_type=entity_type)
 
     if not target_date:
-        target_date = get_latest_kdata_date(provider=data_provider, entity_type=entity_type, adjust_type=adjust_type)
+        target_date = get_latest_kdata_date(
+            provider=data_provider, entity_type=entity_type, adjust_type=adjust_type
+        )
 
     filter_entity_ids = get_entity_ids_by_filter(
         provider=entity_provider,
@@ -124,7 +138,9 @@ def get_top_performance_entities_by_periods(
         columns=["entity_id", "code"],
     )
     if filter_entity_ids:
-        filter_entity_ids = set(filter_entity_ids) & set(filter_turnover_df.index.tolist())
+        filter_entity_ids = set(filter_entity_ids) & set(
+            filter_turnover_df.index.tolist()
+        )
     else:
         filter_entity_ids = filter_turnover_df.index.tolist()
 
@@ -154,7 +170,9 @@ def get_top_performance_entities_by_periods(
         # ✅ Best Practice: Using dict.fromkeys to remove duplicates while preserving order.
         current_end = trade_days[-1]
 
-        logger.info(f"trade days in: {current_start} to {current_end}, real_period: {real_period} ")
+        logger.info(
+            f"trade days in: {current_start} to {current_end}, real_period: {real_period} "
+        )
         positive_df, negative_df = get_top_performance_entities(
             entity_type=entity_type,
             start_timestamp=current_start,
@@ -179,7 +197,9 @@ def get_top_performance_entities_by_periods(
             selected = list(dict.fromkeys(selected))
     return selected, real_period
 
+
 # 🧠 ML Signal: Usage of historical data based on list_days
+
 
 def get_top_performance_entities(
     entity_type="stock",
@@ -220,7 +240,7 @@ def get_top_performance_entities(
         filters=entity_filters,
     )
     if not filter_entities:
-        logger.warning(f"no entities selected")
+        logger.warning("no entities selected")
         return None, None
     # 🧠 ML Signal: Filtering data based on report date and timestamp
 
@@ -244,8 +264,10 @@ def get_top_performance_entities(
         data_provider=data_provider,
     )
 
+
 # 🧠 ML Signal: Converting index to list for further processing
 # 🧠 ML Signal: Calculating start timestamp for data filtering
+
 
 # 🧠 ML Signal: Querying stock valuation data with specific filters and columns
 def get_top_fund_holding_stocks(timestamp=None, pct=0.3, by=None):
@@ -265,7 +287,9 @@ def get_top_fund_holding_stocks(timestamp=None, pct=0.3, by=None):
         ],
         columns=["stock_id", "market_cap"],
     )
-    fund_cap_df = fund_cap_df.groupby("stock_id")["market_cap"].sum().sort_values(ascending=False)
+    fund_cap_df = (
+        fund_cap_df.groupby("stock_id")["market_cap"].sum().sort_values(ascending=False)
+    )
 
     # 🧠 ML Signal: Grouping data by entity_id and calculating mean
     # 直接根据持有市值返回
@@ -347,6 +371,8 @@ def get_performance(
         data_provider=data_provider,
     )
     return result
+
+
 # ✅ Best Practice: Check for null data before processing
 
 
@@ -374,7 +400,7 @@ def get_performance_stats_by_month(
             end_timestamp=end_timestamp,
             adjust_type=adjust_type,
             data_provider=data_provider,
-        # 🧠 ML Signal: Usage of dynamic schema based on entity type and adjust type
+            # 🧠 ML Signal: Usage of dynamic schema based on entity type and adjust type
         )
         if stats:
             month_stats[f"{to_time_str(start_timestamp)}"] = stats
@@ -390,7 +416,15 @@ def get_performance_stats(
     end_timestamp=None,
     adjust_type: Union[AdjustType, str] = None,
     data_provider=None,
-    changes=((-1, -0.5), (-0.5, -0.2), (-0.2, 0), (0, 0.2), (0.2, 0.5), (0.5, 1), (1, 1000)),
+    changes=(
+        (-1, -0.5),
+        (-0.5, -0.2),
+        (-0.2, 0),
+        (0, 0.2),
+        (0.2, 0.5),
+        (0.5, 1),
+        (1, 1000),
+    ),
 ):
     if not adjust_type:
         adjust_type = default_adjust_type(entity_type=entity_type)
@@ -405,7 +439,7 @@ def get_performance_stats(
         method=WindowMethod.change,
         return_type=TopType.positive,
         data_provider=data_provider,
-    # ✅ Best Practice: Use of default values for function parameters improves usability and reduces errors.
+        # ✅ Best Practice: Use of default values for function parameters improves usability and reduces errors.
     )
 
     if pd_is_not_null(score_df):
@@ -417,7 +451,9 @@ def get_performance_stats(
             # 🧠 ML Signal: Filtering based on entity IDs indicates user-specific data retrieval.
             key = f"pct_{range_start}_{range_end}"
             # 🧠 ML Signal: Use of threshold for filtering indicates interest in specific data ranges.
-            df = score_df[(score_df["score"] >= range_start) & (score_df["score"] < range_end)]
+            df = score_df[
+                (score_df["score"] >= range_start) & (score_df["score"] < range_end)
+            ]
             result[key] = len(df)
         return result
 
@@ -456,11 +492,13 @@ def get_top_volume_entities(
         return_type=return_type,
         kdata_filters=filters,
         data_provider=data_provider,
-    # ✅ Best Practice: Use of isinstance() is preferred over type() for type checking
+        # ✅ Best Practice: Use of isinstance() is preferred over type() for type checking
     )
     return result
 
+
 # ✅ Best Practice: Use of isinstance() is preferred over type() for type checking
+
 
 def get_top_turnover_rate_entities(
     entity_type="stock",
@@ -603,7 +641,10 @@ def get_top_entities(
     top_index = int(len(tops) * pct)
     if return_type is None or return_type == TopType.positive:
         # from big to small
-        positive_tops = {k: v for k, v in sorted(tops.items(), key=lambda item: item[1], reverse=True)}
+        positive_tops = {
+            k: v
+            for k, v in sorted(tops.items(), key=lambda item: item[1], reverse=True)
+        }
         positive_tops = dict(itertools.islice(positive_tops.items(), top_index))
         positive_df = pd.DataFrame.from_dict(positive_tops, orient="index")
 
@@ -612,7 +653,9 @@ def get_top_entities(
         positive_df.sort_values(by=col, ascending=False)
     if return_type is None or return_type == TopType.negative:
         # from small to big
-        negative_tops = {k: v for k, v in sorted(tops.items(), key=lambda item: item[1])}
+        negative_tops = {
+            k: v for k, v in sorted(tops.items(), key=lambda item: item[1])
+        }
         negative_tops = dict(itertools.islice(negative_tops.items(), top_index))
         negative_df = pd.DataFrame.from_dict(negative_tops, orient="index")
 
@@ -630,7 +673,9 @@ def get_top_entities(
 
 def show_month_performance():
     dfs = []
-    for timestamp, df in get_top_performance_by_month(start_timestamp="2005-01-01", list_days=250):
+    for timestamp, df in get_top_performance_by_month(
+        start_timestamp="2005-01-01", list_days=250
+    ):
         if pd_is_not_null(df):
             df = df.reset_index(drop=True)
             df["entity_id"] = "stock_cn_performance"
@@ -645,10 +690,14 @@ def show_month_performance():
 
 
 def show_industry_composition(entity_ids, timestamp):
-    block_df = Block.query_data(provider="eastmoney", filters=[Block.category == "industry"], index="entity_id")
+    block_df = Block.query_data(
+        provider="eastmoney", filters=[Block.category == "industry"], index="entity_id"
+    )
     block_ids = block_df.index.tolist()
 
-    block_df = BlockStock.query_data(entity_ids=block_ids, filters=[BlockStock.stock_id.in_(entity_ids)])
+    block_df = BlockStock.query_data(
+        entity_ids=block_ids, filters=[BlockStock.stock_id.in_(entity_ids)]
+    )
 
     s = block_df["name"].value_counts()
 
@@ -674,14 +723,20 @@ def get_change_ratio(
     if not adjust_type:
         adjust_type = default_adjust_type(entity_type=entity_type)
     data_schema = get_kdata_schema(entity_type=entity_type, adjust_type=adjust_type)
-    kdata_df = data_schema.query_data(provider=provider, start_timestamp=start_timestamp, end_timestamp=end_timestamp)
+    kdata_df = data_schema.query_data(
+        provider=provider, start_timestamp=start_timestamp, end_timestamp=end_timestamp
+    )
     kdata_df["direction"] = kdata_df["change_pct"] > 0
     ratio_df = kdata_df.groupby("timestamp").apply(lambda df: cal_ratio(df))
     return ratio_df
 
 
 if __name__ == "__main__":
-    print(get_top_performance_entities_by_periods(entity_provider="em", data_provider="em"))
+    print(
+        get_top_performance_entities_by_periods(
+            entity_provider="em", data_provider="em"
+        )
+    )
 
 
 # the __all__ is generated

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 from typing import List
+
 # 🧠 ML Signal: Usage of external library for pagination
 
 import pandas as pd
@@ -20,9 +21,13 @@ from zvt.trading.trading_models import (
     BuildQueryStockQuoteSettingModel,
     KdataRequestModel,
     TSRequestModel,
-# 🧠 ML Signal: Usage of utility function for checking DataFrame null values
+    # 🧠 ML Signal: Usage of utility function for checking DataFrame null values
 )
-from zvt.trading.trading_schemas import TradingPlan, QueryStockQuoteSetting, TagQuoteStats
+from zvt.trading.trading_schemas import (
+    TradingPlan,
+    QueryStockQuoteSetting,
+    TagQuoteStats,
+)
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import (
     to_time_str,
@@ -32,8 +37,8 @@ from zvt.utils.time_utils import (
     current_date,
     # 🧠 ML Signal: Function signature and parameter types can be used to infer usage patterns.
     date_and_time,
-# ✅ Best Practice: Use of logging for tracking and debugging
-# 🧠 ML Signal: API call pattern can be used to understand data retrieval methods.
+    # ✅ Best Practice: Use of logging for tracking and debugging
+    # 🧠 ML Signal: API call pattern can be used to understand data retrieval methods.
 )
 
 logger = logging.getLogger(__name__)
@@ -50,11 +55,23 @@ def query_kdata(kdata_request_model: KdataRequestModel):
         adjust_type=kdata_request_model.adjust_type,
     )
     if pd_is_not_null(kdata_df):
-        kdata_df["timestamp"] = kdata_df["timestamp"].apply(lambda x: int(x.timestamp()))
+        kdata_df["timestamp"] = kdata_df["timestamp"].apply(
+            lambda x: int(x.timestamp())
+        )
         # ✅ Best Practice: Use apply for row-wise operations to maintain readability.
         kdata_df["data"] = kdata_df.apply(
             lambda x: x[
-                ["timestamp", "open", "high", "low", "close", "volume", "turnover", "change_pct", "turnover_rate"]
+                [
+                    "timestamp",
+                    "open",
+                    "high",
+                    "low",
+                    "close",
+                    "volume",
+                    "turnover",
+                    "change_pct",
+                    "turnover_rate",
+                ]
             ].values.tolist(),
             axis=1,
         )
@@ -71,12 +88,16 @@ def query_kdata(kdata_request_model: KdataRequestModel):
         df = df.reset_index(drop=False)
         return df.to_dict(orient="records")
 
+
 # 🧠 ML Signal: Returning data as a dictionary can indicate data serialization patterns.
+
 
 # ⚠️ SAST Risk (Low): Potential risk if ts_df is None or not a DataFrame
 # ✅ Best Practice: Using apply with lambda for row-wise operations
 def query_ts(ts_request_model: TSRequestModel):
-    trading_dates = kdata_api.get_recent_trade_dates(days_count=ts_request_model.days_count)
+    trading_dates = kdata_api.get_recent_trade_dates(
+        days_count=ts_request_model.days_count
+    )
     ts_df = Stock1mQuote.query_data(
         entity_ids=ts_request_model.entity_ids,
         provider=ts_request_model.data_provider,
@@ -85,8 +106,16 @@ def query_ts(ts_request_model: TSRequestModel):
     if pd_is_not_null(ts_df):
         ts_df["data"] = ts_df.apply(
             lambda x: x[
-                ["time", "price", "avg_price", "change_pct", "volume", "turnover", "turnover_rate"]
-            # ✅ Best Practice: Using groupby and agg for data aggregation
+                [
+                    "time",
+                    "price",
+                    "avg_price",
+                    "change_pct",
+                    "volume",
+                    "turnover",
+                    "turnover_rate",
+                ]
+                # ✅ Best Practice: Using groupby and agg for data aggregation
             ].values.tolist(),
             axis=1,
         )
@@ -97,7 +126,7 @@ def query_ts(ts_request_model: TSRequestModel):
             name=("name", "first"),
             # 🧠 ML Signal: Conversion of date to string and timestamp for consistent date handling
             datas=("data", lambda data: list(data)),
-        # 🧠 ML Signal: Converting DataFrame to dictionary for record-oriented data
+            # 🧠 ML Signal: Converting DataFrame to dictionary for record-oriented data
         )
         df = df.reset_index(drop=False)
         # 🧠 ML Signal: Use of trading signal type as a value for plan identification
@@ -118,13 +147,18 @@ def build_trading_plan(build_trading_plan_model: BuildTradingPlanModel):
         plan_id = f"{stock_id}_{trading_date_str}_{signal}"
 
         datas = TradingPlan.query_data(
-            session=session, filters=[TradingPlan.id == plan_id], limit=1, return_type="domain"
+            session=session,
+            filters=[TradingPlan.id == plan_id],
+            limit=1,
+            return_type="domain",
         )
         if datas:
             assert len(datas) == 1
             plan = datas[0]
         else:
-            datas = Stock.query_data(provider="em", entity_id=stock_id, return_type="domain")
+            datas = Stock.query_data(
+                provider="em", entity_id=stock_id, return_type="domain"
+            )
             stock = datas[0]
             plan = TradingPlan(
                 id=plan_id,
@@ -164,7 +198,9 @@ def query_trading_plan(query_trading_plan_model: QueryTradingPlanModel):
             # 🧠 ML Signal: Querying data with specific filters and ordering
             # ⚠️ SAST Risk (Low): Potential for SQL injection if filters are not properly sanitized
             start_timestamp = date_time_by_interval(
-                current_date(), time_range.relative_time_range.interval, time_range.relative_time_range.time_unit
+                current_date(),
+                time_range.relative_time_range.interval,
+                time_range.relative_time_range.time_unit,
             )
             end_timestamp = None
         else:
@@ -175,7 +211,10 @@ def query_trading_plan(query_trading_plan_model: QueryTradingPlanModel):
         selectable = TradingPlan.query_data(
             # 🧠 ML Signal: Querying data with specific filters and order
             # ⚠️ SAST Risk (Low): Potential SQL injection if filters are not properly sanitized
-            session=session, start_timestamp=start_timestamp, end_timestamp=end_timestamp, return_type="select"
+            session=session,
+            start_timestamp=start_timestamp,
+            end_timestamp=end_timestamp,
+            return_type="select",
         )
         return paginate(session, selectable)
 
@@ -191,8 +230,10 @@ def get_current_trading_plan():
             return_type="domain",
         )
 
+
 # 🧠 ML Signal: Ordering by trading date can indicate a preference for processing data in chronological order.
 # 🧠 ML Signal: Filtering by status and trading date can be used to identify specific trading plan conditions.
+
 
 # 🧠 ML Signal: Usage of a specific filter range for change_pct
 def get_future_trading_plan():
@@ -213,12 +254,17 @@ def check_trading_plan():
         plans = TradingPlan.query_data(
             session=session,
             # ✅ Best Practice: Check if the list is not empty before accessing the first element
-            filters=[TradingPlan.status == ExecutionStatus.init.value, TradingPlan.trading_date == current_date()],
+            filters=[
+                TradingPlan.status == ExecutionStatus.init.value,
+                TradingPlan.trading_date == current_date(),
+            ],
             order=TradingPlan.trading_date.asc(),
             return_type="domain",
         )
 
         logger.debug(f"current plans:{plans}")
+
+
 # 🧠 ML Signal: Usage of a specific filter range for change_pct
 
 
@@ -226,7 +272,15 @@ def query_quote_stats():
     quote_df = StockQuote.query_data(
         return_type="df",
         filters=[StockQuote.change_pct >= -0.31, StockQuote.change_pct <= 0.31],
-        columns=["timestamp", "entity_id", "time", "change_pct", "turnover", "is_limit_up", "is_limit_down"],
+        columns=[
+            "timestamp",
+            "entity_id",
+            "time",
+            "change_pct",
+            "turnover",
+            "is_limit_up",
+            "is_limit_down",
+        ],
     )
     current_stats = cal_quote_stats(quote_df)
     # ✅ Best Practice: Check for null DataFrame before processing
@@ -248,7 +302,9 @@ def query_quote_stats():
     if start_timestamp.hour >= 15:
         start_timestamp = date_and_time(pre_date, "15:00")
     else:
-        start_timestamp = date_and_time(pre_date, f"{start_timestamp.hour}:{start_timestamp.minute}")
+        start_timestamp = date_and_time(
+            pre_date, f"{start_timestamp.hour}:{start_timestamp.minute}"
+        )
     end_timestamp = date_time_by_interval(start_timestamp, 1, TimeUnit.minute)
 
     pre_df = Stock1mQuote.query_data(
@@ -263,14 +319,24 @@ def query_quote_stats():
         filters=[Stock1mQuote.change_pct >= -0.31, Stock1mQuote.change_pct <= 0.31],
         # 🧠 ML Signal: Custom aggregation function to count limit down events
         # 🧠 ML Signal: Querying data from a database using specific filters
-        columns=["timestamp", "entity_id", "time", "change_pct", "turnover", "is_limit_up", "is_limit_down"],
+        columns=[
+            "timestamp",
+            "entity_id",
+            "time",
+            "change_pct",
+            "turnover",
+            "is_limit_up",
+            "is_limit_down",
+        ],
     )
 
     if pd_is_not_null(pre_df):
         pre_stats = cal_quote_stats(pre_df)
         current_stats["pre_turnover"] = pre_stats["turnover"]
         # 🧠 ML Signal: Converting DataFrame to dictionary for record-based access
-        current_stats["turnover_change"] = current_stats["turnover"] - current_stats["pre_turnover"]
+        current_stats["turnover_change"] = (
+            current_stats["turnover"] - current_stats["pre_turnover"]
+        )
     return current_stats
 
 
@@ -330,7 +396,9 @@ def cal_tag_quote_stats(stock_pool_name):
 
     # ✅ Best Practice: Using descending order to get the latest timestamp
     # ⚠️ SAST Risk (Low): Printing potentially sensitive data to the console
-    quote_df = StockQuote.query_data(entity_ids=entity_ids, return_type="df", index="entity_id")
+    quote_df = StockQuote.query_data(
+        entity_ids=entity_ids, return_type="df", index="entity_id"
+    )
     # 🧠 ML Signal: Storing DataFrame to a database
     timestamp = quote_df["timestamp"].tolist()[0]
 
@@ -347,9 +415,9 @@ def cal_tag_quote_stats(stock_pool_name):
             limit_up_count=("is_limit_up", "sum"),
             limit_down_count=("is_limit_down", lambda x: (x == True).sum()),
             total_count=("main_tag", "size"),  # 添加计数，计算每个分组的总行数
-        # ✅ Best Practice: Concatenating DataFrames for combined analysis
-        # 🧠 ML Signal: Conversion of DataFrame column to list
-        # 🧠 ML Signal: Querying stock quotes based on entity IDs
+            # ✅ Best Practice: Concatenating DataFrames for combined analysis
+            # 🧠 ML Signal: Conversion of DataFrame column to list
+            # 🧠 ML Signal: Querying stock quotes based on entity IDs
         )
         .reset_index(drop=False)
     )
@@ -370,8 +438,14 @@ def cal_tag_quote_stats(stock_pool_name):
 
     contract_api.df_to_db(
         # 🧠 ML Signal: Summing turnover values
-        df=grouped_df, data_schema=TagQuoteStats, provider="zvt", force_update=True, drop_duplicates=False
+        df=grouped_df,
+        data_schema=TagQuoteStats,
+        provider="zvt",
+        force_update=True,
+        drop_duplicates=False,
     )
+
+
 # 🧠 ML Signal: Usage of query pattern with filters and ordering
 # 🧠 ML Signal: Calculating mean percentage change
 # 🧠 ML Signal: Counting limit up occurrences
@@ -404,7 +478,9 @@ def query_tag_quotes(query_tag_quote_model: QueryTagQuoteModel):
     entity_ids = tag_df["entity_id"].tolist()
     # 🧠 ML Signal: Query without filters
 
-    quote_df = StockQuote.query_data(entity_ids=entity_ids, return_type="df", index="entity_id")
+    quote_df = StockQuote.query_data(
+        entity_ids=entity_ids, return_type="df", index="entity_id"
+    )
 
     # 🧠 ML Signal: Mapping entity_ids to tags
     df = pd.concat([tag_df, quote_df], axis=1)
@@ -423,14 +499,18 @@ def query_tag_quotes(query_tag_quote_model: QueryTagQuoteModel):
             limit_up_count=("is_limit_up", "sum"),
             limit_down_count=("is_limit_down", lambda x: (x == True).sum()),
             total_count=("main_tag", "size"),  # 添加计数，计算每个分组的总行数
-        # 🧠 ML Signal: Conditional logic based on dictionary content
+            # 🧠 ML Signal: Conditional logic based on dictionary content
         )
         .reset_index(drop=False)
     )
-    sorted_df = grouped_df.sort_values(by=["turnover", "total_count"], ascending=[False, False])
+    sorted_df = grouped_df.sort_values(
+        by=["turnover", "total_count"], ascending=[False, False]
+    )
     # 🧠 ML Signal: Returning a pandas Series from a function
 
     return sorted_df.to_dict(orient="records")
+
+
 # 🧠 ML Signal: Applying a function across DataFrame rows
 
 
@@ -441,7 +521,9 @@ def query_stock_quotes(query_stock_quote_model: QueryStockQuoteModel):
     entity_ids = None
     if query_stock_quote_model.stock_pool_name:
         stock_pools: List[StockPools] = StockPools.query_data(
-            filters=[StockPools.stock_pool_name == query_stock_quote_model.stock_pool_name],
+            filters=[
+                StockPools.stock_pool_name == query_stock_quote_model.stock_pool_name
+            ],
             order=StockPools.timestamp.desc(),
             limit=1,
             return_type="domain",
@@ -482,7 +564,9 @@ def query_stock_quotes(query_stock_quote_model: QueryStockQuoteModel):
     entity_tags_map = {item["entity_id"]: item for item in tags_dict}
     # 🧠 ML Signal: Assigning model attributes to object properties shows a pattern of data transformation
 
-    order = eval(f"StockQuote.{query_stock_quote_model.order_by_field}.{query_stock_quote_model.order_by_type.value}()")
+    order = eval(
+        f"StockQuote.{query_stock_quote_model.order_by_field}.{query_stock_quote_model.order_by_type.value}()"
+    )
     # 🧠 ML Signal: Function to build default settings if not present
 
     # ⚠️ SAST Risk (Low): Adding objects to session without validation can lead to data integrity issues
@@ -501,12 +585,16 @@ def query_stock_quotes(query_stock_quote_model: QueryStockQuoteModel):
         entity_id = quote["entity_id"]
         main_tag = entity_tags_map.get(entity_id, {}).get("main_tag", None)
         sub_tag = entity_tags_map.get(entity_id, {}).get("sub_tag", None)
-        active_hidden_tags = entity_tags_map.get(entity_id, {}).get("active_hidden_tags", None)
+        active_hidden_tags = entity_tags_map.get(entity_id, {}).get(
+            "active_hidden_tags", None
+        )
         if active_hidden_tags:
             hidden_tags = list(active_hidden_tags.keys())
         else:
             hidden_tags = None
-        return pd.Series({"main_tag": main_tag, "sub_tag": sub_tag, "hidden_tags": hidden_tags})
+        return pd.Series(
+            {"main_tag": main_tag, "sub_tag": sub_tag, "hidden_tags": hidden_tags}
+        )
 
     df[["main_tag", "sub_tag", "hidden_tags"]] = df.apply(set_tags, axis=1)
 
@@ -539,16 +627,24 @@ def sell_stocks():
     pass
 
 
-def build_query_stock_quote_setting(build_query_stock_quote_setting_model: BuildQueryStockQuoteSettingModel):
-    with contract_api.DBSession(provider="zvt", data_schema=QueryStockQuoteSetting)() as session:
+def build_query_stock_quote_setting(
+    build_query_stock_quote_setting_model: BuildQueryStockQuoteSettingModel,
+):
+    with contract_api.DBSession(
+        provider="zvt", data_schema=QueryStockQuoteSetting
+    )() as session:
         the_id = "admin_setting"
-        datas = QueryStockQuoteSetting.query_data(ids=[the_id], session=session, return_type="domain")
+        datas = QueryStockQuoteSetting.query_data(
+            ids=[the_id], session=session, return_type="domain"
+        )
         if datas:
             query_setting = datas[0]
         else:
             query_setting = QueryStockQuoteSetting(entity_id="admin", id=the_id)
         query_setting.timestamp = current_date()
-        query_setting.stock_pool_name = build_query_stock_quote_setting_model.stock_pool_name
+        query_setting.stock_pool_name = (
+            build_query_stock_quote_setting_model.stock_pool_name
+        )
         query_setting.main_tags = build_query_stock_quote_setting_model.main_tags
         session.add(query_setting)
         session.commit()
@@ -557,10 +653,14 @@ def build_query_stock_quote_setting(build_query_stock_quote_setting_model: Build
 
 
 def build_default_query_stock_quote_setting():
-    datas = QueryStockQuoteSetting.query_data(ids=["admin_setting"], return_type="domain")
+    datas = QueryStockQuoteSetting.query_data(
+        ids=["admin_setting"], return_type="domain"
+    )
     if datas:
         return
-    build_query_stock_quote_setting(BuildQueryStockQuoteSettingModel(stock_pool_name="all", main_tags=["消费电子"]))
+    build_query_stock_quote_setting(
+        BuildQueryStockQuoteSettingModel(stock_pool_name="all", main_tags=["消费电子"])
+    )
 
 
 if __name__ == "__main__":

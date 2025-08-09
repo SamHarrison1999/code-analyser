@@ -7,8 +7,10 @@
 import pathlib
 import pandas as pd
 import shutil
+
 # 🧠 ML Signal: Importing multiple modules from different packages indicates a complex system integration.
 from ruamel.yaml import YAML
+
 # ✅ Best Practice: Docstring provides a clear explanation of the class and its parameters
 # ✅ Best Practice: Group standard library imports, third-party imports, and local imports separately for better readability.
 from ...backtest.account import Account
@@ -49,6 +51,7 @@ class UserManager:
         self.users = {}
         # 🧠 ML Signal: Iterating over user records to load user data
         self.user_record = None
+
     # 🧠 ML Signal: Loading individual user data by user_id
 
     def load_users(self):
@@ -155,8 +158,12 @@ class UserManager:
         # 🧠 ML Signal: Usage of pandas for data manipulation
         # save user
         user_path.mkdir()
-        save_instance(model, self.data_path / user_id / "model_{}.pickle".format(user_id))
-        save_instance(strategy, self.data_path / user_id / "strategy_{}.pickle".format(user_id))
+        save_instance(
+            model, self.data_path / user_id / "model_{}.pickle".format(user_id)
+        )
+        save_instance(
+            strategy, self.data_path / user_id / "strategy_{}.pickle".format(user_id)
+        )
         trade_account.save_account(self.data_path / user_id)
         user_record = pd.read_csv(self.users_file, index_col=0)
         user_record.loc[user_id] = [add_date]

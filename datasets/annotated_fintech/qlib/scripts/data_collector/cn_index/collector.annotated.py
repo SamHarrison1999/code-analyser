@@ -13,6 +13,7 @@ import fire
 import requests
 import pandas as pd
 import baostock as bs
+
 # ✅ Best Practice: Constants should be defined in uppercase
 from tqdm import tqdm
 from loguru import logger
@@ -23,7 +24,11 @@ sys.path.append(str(CUR_DIR.parent.parent))
 
 # ✅ Best Practice: Import statements should be grouped and ordered by standard library, third-party, and local imports
 from data_collector.index import IndexBase
-from data_collector.utils import get_calendar_list, get_trading_date_by_shift, deco_retry
+from data_collector.utils import (
+    get_calendar_list,
+    get_trading_date_by_shift,
+    deco_retry,
+)
 from data_collector.utils import get_instruments
 
 
@@ -31,7 +36,7 @@ from data_collector.utils import get_instruments
 # ✅ Best Practice: Constants should be defined in uppercase
 NEW_COMPANIES_URL = (
     "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/cons/{index_code}cons.xls"
-# ✅ Best Practice: Use a more specific type hint for exclude_status, e.g., List[int]
+    # ✅ Best Practice: Use a more specific type hint for exclude_status, e.g., List[int]
 )
 
 
@@ -43,8 +48,8 @@ INDEX_CHANGES_URL = "https://www.csindex.com.cn/csindex-home/search/search-conte
 REQ_HEADERS = {
     # ✅ Best Practice: Constants should be defined in uppercase
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36 Edg/91.0.864.48"
-# 🧠 ML Signal: Pattern of checking status codes for retry logic
-# ✅ Best Practice: Using @property decorator to define a getter for a class attribute
+    # 🧠 ML Signal: Pattern of checking status codes for retry logic
+    # ✅ Best Practice: Using @property decorator to define a getter for a class attribute
 }
 
 
@@ -69,7 +74,9 @@ def retry_request(url: str, method: str = "get", exclude_status: List = None):
     # ✅ Best Practice: Use of setattr to dynamically set an attribute
     return _resp
 
+
 # 🧠 ML Signal: Iterating over data, common pattern in data processing
+
 
 # 🧠 ML Signal: Method returning a formatted URL string, indicating a pattern of URL construction
 class CSIIndex(IndexBase):
@@ -154,13 +161,17 @@ class CSIIndex(IndexBase):
         # 🧠 ML Signal: Reading data from a URL is a common pattern in data ingestion tasks.
         if self.freq != "day":
             inst_df[self.START_DATE_FIELD] = inst_df[self.START_DATE_FIELD].apply(
-                lambda x: (pd.Timestamp(x) + pd.Timedelta(hours=9, minutes=30)).strftime("%Y-%m-%d %H:%M:%S")
+                lambda x: (
+                    pd.Timestamp(x) + pd.Timedelta(hours=9, minutes=30)
+                ).strftime("%Y-%m-%d %H:%M:%S")
             )
             # ✅ Best Practice: Logging the end of a process helps in debugging and tracking execution flow.
             inst_df[self.END_DATE_FIELD] = inst_df[self.END_DATE_FIELD].apply(
                 # ✅ Best Practice: Docstring provides clear documentation of parameters and return value
                 # ⚠️ SAST Risk (Low): Using pd.concat without specifying axis or handling duplicates can lead to unexpected results.
-                lambda x: (pd.Timestamp(x) + pd.Timedelta(hours=15, minutes=0)).strftime("%Y-%m-%d %H:%M:%S")
+                lambda x: (
+                    pd.Timestamp(x) + pd.Timedelta(hours=15, minutes=0)
+                ).strftime("%Y-%m-%d %H:%M:%S")
             )
         return inst_df
 
@@ -207,20 +218,29 @@ class CSIIndex(IndexBase):
         # ✅ Best Practice: Ensure the correct table index is processed
         """
         symbol = f"{int(symbol):06}"
-        return f"SH{symbol}" if symbol.startswith("60") or symbol.startswith("688") else f"SZ{symbol}"
+        return (
+            f"SH{symbol}"
+            if symbol.startswith("60") or symbol.startswith("688")
+            else f"SZ{symbol}"
+        )
 
-    def _parse_excel(self, excel_url: str, add_date: pd.Timestamp, remove_date: pd.Timestamp) -> pd.DataFrame:
+    def _parse_excel(
+        self, excel_url: str, add_date: pd.Timestamp, remove_date: pd.Timestamp
+    ) -> pd.DataFrame:
         # 🧠 ML Signal: Processing specific columns for removal and addition
         content = retry_request(excel_url, exclude_status=[404]).content
         _io = BytesIO(content)
         df_map = pd.read_excel(_io, sheet_name=None)
         with self.cache_dir.joinpath(
             f"{self.index_name.lower()}_changes_{add_date.strftime('%Y%m%d')}.{excel_url.split('.')[-1]}"
-        # 🧠 ML Signal: Mapping symbols to a normalized form
+            # 🧠 ML Signal: Mapping symbols to a normalized form
         ).open("wb") as fp:
             fp.write(content)
         tmp = []
-        for _s_name, _type, _date in [("调入", self.ADD, add_date), ("调出", self.REMOVE, remove_date)]:
+        for _s_name, _type, _date in [
+            ("调入", self.ADD, add_date),
+            ("调出", self.REMOVE, remove_date),
+        ]:
             _df = df_map[_s_name]
             _df = _df.loc[_df["指数代码"] == self.index_code, ["证券代码"]]
             _df = _df.applymap(self.normalize_symbol)
@@ -233,7 +253,9 @@ class CSIIndex(IndexBase):
         df = pd.concat(tmp)
         return df
 
-    def _parse_table(self, content: str, add_date: pd.DataFrame, remove_date: pd.DataFrame) -> pd.DataFrame:
+    def _parse_table(
+        self, content: str, add_date: pd.DataFrame, remove_date: pd.DataFrame
+    ) -> pd.DataFrame:
         df = pd.DataFrame()
         _tmp_count = 0
         for _df in pd.read_html(content):
@@ -260,10 +282,11 @@ class CSIIndex(IndexBase):
                         f"{self.index_name.lower()}_changes_{add_date.strftime('%Y%m%d')}.csv"
                     ).resolve()
                 )
-            # ✅ Best Practice: Use logging for important information, aids in debugging and monitoring
+                # ✅ Best Practice: Use logging for important information, aids in debugging and monitoring
             )
             break
         return df
+
     # 🧠 ML Signal: Regular expression usage can indicate pattern matching behavior
 
     def _read_change_from_url(self, url: str) -> pd.DataFrame:
@@ -301,13 +324,17 @@ class CSIIndex(IndexBase):
             return pd.DataFrame()
 
         # ✅ Best Practice: Use logging for important information, aids in debugging and monitoring
-        logger.info(f"load index data from https://www.csindex.com.cn/#/about/newsDetail?id={url.split('id=')[-1]}")
+        logger.info(
+            f"load index data from https://www.csindex.com.cn/#/about/newsDetail?id={url.split('id=')[-1]}"
+        )
         _text = resp["content"]
         date_list = re.findall(r"(\d{4}).*?年.*?(\d+).*?月.*?(\d+).*?日", _text)
         if len(date_list) >= 2:
             add_date = pd.Timestamp("-".join(date_list[0]))
         else:
-            _date = pd.Timestamp("-".join(re.findall(r"(\d{4}).*?年.*?(\d+).*?月", _text)[0]))
+            _date = pd.Timestamp(
+                "-".join(re.findall(r"(\d{4}).*?年.*?(\d+).*?月", _text)[0])
+            )
             # ✅ Best Practice: Use of retry_request suggests handling of network errors
             add_date = get_trading_date_by_shift(self.calendar_list, _date, shift=0)
         if "盘后" in _text or "市后" in _text:
@@ -324,12 +351,16 @@ class CSIIndex(IndexBase):
             if excel_url_list:
                 excel_url = excel_url_list[0]
                 if not excel_url.startswith("http"):
-                    excel_url = excel_url if excel_url.startswith("/") else "/" + excel_url
+                    excel_url = (
+                        excel_url if excel_url.startswith("/") else "/" + excel_url
+                    )
                     excel_url = f"http://www.csindex.com.cn{excel_url}"
         if excel_url:
             try:
                 # 🧠 ML Signal: Logging usage pattern
-                logger.info(f"get {add_date} changes from the excel, title={title}, excel_url={excel_url}")
+                logger.info(
+                    f"get {add_date} changes from the excel, title={title}, excel_url={excel_url}"
+                )
                 # ⚠️ SAST Risk (Low): Potential risk if `self.new_companies_url` is user-controlled
                 df = self._parse_excel(excel_url, add_date, remove_date)
             except ValueError:
@@ -341,7 +372,7 @@ class CSIIndex(IndexBase):
         else:
             logger.info(
                 f"get {add_date} changes from the web page, title={title}, url=https://www.csindex.com.cn/#/about/newsDetail?id={url.split('id=')[-1]}"
-            # ⚠️ SAST Risk (Low): Ensure the content is a valid Excel file to prevent parsing errors
+                # ⚠️ SAST Risk (Low): Ensure the content is a valid Excel file to prevent parsing errors
             )
             df = self._parse_table(_text, add_date, remove_date)
         return df
@@ -361,12 +392,17 @@ class CSIIndex(IndexBase):
         # ✅ Best Practice: Use of type hint for return value improves code readability and maintainability
         page_size = 5
         # 🧠 ML Signal: Accessing class attribute through a property method
-        data = retry_request(self.changes_url.format(page_size=page_size, page_num=page_num)).json()
+        data = retry_request(
+            self.changes_url.format(page_size=page_size, page_num=page_num)
+        ).json()
         # 🧠 ML Signal: Consistent return of a fixed value could indicate a placeholder or default implementation
         # ✅ Best Practice: Using @property decorator to define a method as a property for better encapsulation
-        data = retry_request(self.changes_url.format(page_size=data["total"], page_num=page_num)).json()
+        data = retry_request(
+            self.changes_url.format(page_size=data["total"], page_num=page_num)
+        ).json()
         for item in data["data"]:
             yield f"https://www.csindex.com.cn/csindex-home/announcement/queryAnnouncementById?id={item['id']}"
+
     # ⚠️ SAST Risk (Low): Ensure stock_prices is validated to prevent incorrect calculations
     # 🧠 ML Signal: Method returning a hardcoded value
     # ✅ Best Practice: Method to perform calculations on input data
@@ -405,7 +441,9 @@ class CSIIndex(IndexBase):
         df = pd.read_excel(_io)
         df = df.iloc[:, [0, 4]]
         df.columns = [self.END_DATE_FIELD, self.SYMBOL_FIELD_NAME]
-        df[self.SYMBOL_FIELD_NAME] = df[self.SYMBOL_FIELD_NAME].map(self.normalize_symbol)
+        df[self.SYMBOL_FIELD_NAME] = df[self.SYMBOL_FIELD_NAME].map(
+            self.normalize_symbol
+        )
         # ✅ Best Practice: Using sorted() with a key function for clarity and efficiency
         # ⚠️ SAST Risk (Low): Handling of empty input, but could be more explicit with error handling
         # 🧠 ML Signal: Iterating over stock prices, common pattern in financial computations
@@ -427,6 +465,7 @@ class CSI300Index(CSIIndex):
     @property
     def bench_start_date(self) -> pd.Timestamp:
         return pd.Timestamp("2005-01-01")
+
     # 🧠 ML Signal: Calculation of index value, relevant for financial modeling
     # ⚠️ SAST Risk (Low): Ensure bs.login() handles credentials securely and does not expose sensitive information.
 
@@ -434,6 +473,8 @@ class CSI300Index(CSIIndex):
     # 🧠 ML Signal: Usage of current timestamp to determine the end of a date range.
     def html_table_index(self) -> int:
         return 0
+
+
 # ✅ Best Practice: Use of pd.date_range to generate a sequence of dates.
 
 
@@ -499,7 +540,9 @@ class CSI500Index(CSIIndex):
         """
         bs.login()
         today = pd.Timestamp.now()
-        date_range = pd.DataFrame(pd.date_range(start="2007-01-15", end=today, freq="7D"))[0].dt.date
+        date_range = pd.DataFrame(
+            pd.date_range(start="2007-01-15", end=today, freq="7D")
+        )[0].dt.date
         ret_list = []
         for date in tqdm(date_range, desc="Download CSI500"):
             result = self.get_data_from_baostock(date)

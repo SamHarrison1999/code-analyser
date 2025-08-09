@@ -11,7 +11,19 @@ from __future__ import annotations
 import copy
 import warnings
 from contextlib import contextmanager
-from typing import Any, Callable, Dict, Generator, List, Optional, Set, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import gym
 import numpy as np
@@ -35,7 +47,7 @@ __all__ = [
     # ⚠️ SAST Risk (Low): Recursive call with np.array(obj) could lead to unexpected behavior if obj is not a scalar.
     "FiniteEnvType",
     "vectorize_env",
-# 🧠 ML Signal: Use of hasattr to check for attributes is a common pattern.
+    # 🧠 ML Signal: Use of hasattr to check for attributes is a common pattern.
 ]
 
 # 🧠 ML Signal: Use of isinstance to check for specific class instances.
@@ -77,6 +89,8 @@ def fill_invalid(obj: int | float | bool | T) -> T:
     # ⚠️ SAST Risk (Low): Raising a ValueError without specific handling could lead to unhandled exceptions.
     # ✅ Best Practice: Include type hints for function parameters and return type for better readability and maintainability
     raise ValueError(f"Unsupported value to fill with invalid: {obj}")
+
+
 # 🧠 ML Signal: Recursively checking all values in dictionary
 # 🧠 ML Signal: Checking for list or tuple type
 
@@ -155,6 +169,7 @@ class FiniteVectorEnv(BaseVectorEnv):
     One extra function of this vector env is that it has a logger that explicitly collects logs
     from child workers. See :class:`qlib.rl.utils.LogWriter`.
     """
+
     # ✅ Best Practice: Use of deepcopy to avoid unintended mutations of the original object
     # ⚠️ SAST Risk (Low): Using deepcopy can be expensive in terms of performance
 
@@ -164,7 +179,10 @@ class FiniteVectorEnv(BaseVectorEnv):
 
     # ✅ Best Practice: Use of deepcopy to avoid mutable default argument issues
     def __init__(
-        self, logger: LogWriter | list[LogWriter] | None, env_fns: list[Callable[..., gym.Env]], **kwargs: Any
+        self,
+        logger: LogWriter | list[LogWriter] | None,
+        env_fns: list[Callable[..., gym.Env]],
+        **kwargs: Any,
     ) -> None:
         # ✅ Best Practice: Check for None or NaN values to handle invalid observations
         super().__init__(env_fns, **kwargs)
@@ -188,6 +206,7 @@ class FiniteVectorEnv(BaseVectorEnv):
             # 🧠 ML Signal: Iterating over loggers to perform actions, indicating a pattern of event handling
             # starting or running out
             self._alive_env_ids = set(range(self.env_num))
+
     # 🧠 ML Signal: Method call on logger to indicate readiness
 
     # to workaround with tianshou's buffer and batch
@@ -207,6 +226,7 @@ class FiniteVectorEnv(BaseVectorEnv):
         # 🧠 ML Signal: Iterating over loggers to perform actions, indicating a pattern of event handling
         if rew is not None and self._default_rew is None:
             self._default_rew = copy.deepcopy(rew)
+
     # 🧠 ML Signal: Method call on logger to indicate completion
     # ⚠️ SAST Risk (Low): Warnings are used for notifying potential issues but do not prevent execution.
 
@@ -293,8 +313,8 @@ class FiniteVectorEnv(BaseVectorEnv):
                 # ✅ Best Practice: Use of inheritance to create a new class by combining FiniteVectorEnv and DummyVectorEnv
                 "or missing logs.",
                 RuntimeWarning,
-            # ✅ Best Practice: Using a method to get default observation enhances code reuse
-            # ✅ Best Practice: Use of inheritance to combine functionality from multiple classes
+                # ✅ Best Practice: Using a method to get default observation enhances code reuse
+                # ✅ Best Practice: Use of inheritance to combine functionality from multiple classes
             )
 
         # ✅ Best Practice: Use of inheritance to combine functionality from multiple parent classes.

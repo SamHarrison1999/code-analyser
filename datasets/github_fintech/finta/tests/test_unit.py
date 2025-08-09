@@ -244,6 +244,7 @@ def test_roc():
     assert isinstance(roc, series.Series)
     assert roc.values[-1] == -16.0491877
 
+
 def test_vbm():
     """test TA.VBM"""
 
@@ -251,6 +252,7 @@ def test_vbm():
 
     assert isinstance(vbm, series.Series)
     assert vbm.values[-1] == -27.57038694
+
 
 def test_rsi():
     """test TA.RSI"""
@@ -328,9 +330,10 @@ def test_bbands():
     assert bb["BB_MIDDLE"].values[-1] == 7110.55082354
     assert bb["BB_LOWER"].values[-1] == 6008.30372428
 
+
 def test_mobo():
     """test TA.mobo"""
-    
+
     mbb = TA.MOBO(ohlc).round(decimals=8)
 
     assert isinstance(mbb["BB_UPPER"], series.Series)
@@ -626,7 +629,8 @@ def test_emv():
 
     assert isinstance(emv, series.Series)
     assert emv.values[-1] == -26103140.8
-                             
+
+
 def test_cci():
     """test TA.CCI"""
 
@@ -727,9 +731,9 @@ def test_ichimoku():
     assert isinstance(ichi["SENKOU"], series.Series)
     assert isinstance(ichi["CHIKOU"], series.Series)
 
-    assert ichi["TENKAN"].values[-1] == 6911.5 
+    assert ichi["TENKAN"].values[-1] == 6911.5
     assert ichi["KIJUN"].values[-1] == 6946.5
-    assert ichi["SENKOU"].values[-1] == 8243.0 
+    assert ichi["SENKOU"].values[-1] == 8243.0
     assert ichi["CHIKOU"].values[-27] == 6420.45318629
 
 
@@ -879,6 +883,7 @@ def test_vc():
     assert isinstance(vc["Value Chart Open"], series.Series)
     assert vc.values[-1][0] == 0.50469864
     assert vc.values[-1][-1] == -0.87573258
+
 
 def test_sma():
     """test TA.WAVEPM"""

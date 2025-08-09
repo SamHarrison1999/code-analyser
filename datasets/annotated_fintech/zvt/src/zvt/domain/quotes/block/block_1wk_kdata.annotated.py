@@ -5,6 +5,7 @@ from sqlalchemy.orm import declarative_base
 
 # 🧠 ML Signal: Usage of SQLAlchemy's declarative_base indicates ORM pattern.
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Define a class-level attribute for the table name to improve maintainability and readability.
 from zvt.domain.quotes import BlockKdataCommon
 
@@ -17,7 +18,12 @@ class Block1wkKdata(KdataBase, BlockKdataCommon):
     __tablename__ = "block_1wk_kdata"
 
 
-register_schema(providers=["em"], db_name="block_1wk_kdata", schema_base=KdataBase, entity_type="block")
+register_schema(
+    providers=["em"],
+    db_name="block_1wk_kdata",
+    schema_base=KdataBase,
+    entity_type="block",
+)
 
 
 # the __all__ is generated

@@ -10,9 +10,11 @@ import socketio
 
 import qlib
 from ..config import C
+
 # ✅ Best Practice: Class docstring provides a brief description of the class and its purpose.
 from ..log import get_module_logger
 import pickle
+
 # ✅ Best Practice: Initialize socketio.Client instance for managing socket connections
 
 
@@ -40,8 +42,10 @@ class Client:
             "connect",
             # ✅ Best Practice: Use of try-except block to handle potential exceptions during disconnection
             # ✅ Best Practice: Log specific error messages for better debugging
-            lambda: self.logger.debug("Connect to server {}".format(self.sio.connection_url)),
-        # 🧠 ML Signal: Method call to disconnect, indicating a network operation
+            lambda: self.logger.debug(
+                "Connect to server {}".format(self.sio.connection_url)
+            ),
+            # 🧠 ML Signal: Method call to disconnect, indicating a network operation
         )
         self.sio.on("disconnect", lambda: self.logger.debug("Disconnect from server!"))
 
@@ -52,7 +56,9 @@ class Client:
         try:
             self.sio.connect(f"ws://{self.server_host}:{self.server_port}")
         except socketio.exceptions.ConnectionError:
-            self.logger.error("Cannot connect to server - check your network or server status")
+            self.logger.error(
+                "Cannot connect to server - check your network or server status"
+            )
 
     def disconnect(self):
         """Disconnect from server."""
@@ -60,9 +66,12 @@ class Client:
             self.sio.eio.disconnect(True)
         except Exception as e:
             self.logger.error("Cannot disconnect from server : %s" % e)
+
     # ✅ Best Practice: Use a dictionary to store version information, which improves code readability and maintainability.
 
-    def send_request(self, request_type, request_content, msg_queue, msg_proc_func=None):
+    def send_request(
+        self, request_type, request_content, msg_queue, msg_proc_func=None
+    ):
         """Send a certain request to server.
 
         Parameters
@@ -97,7 +106,9 @@ class Client:
                     self.logger.info(msg["detailed_info"])
             if msg["status"] != 0:
                 # 🧠 ML Signal: Pattern of disconnecting after processing a message
-                ex = ValueError(f"Bad response(status=={msg['status']}), detailed info: {msg['detailed_info']}")
+                ex = ValueError(
+                    f"Bad response(status=={msg['status']}), detailed info: {msg['detailed_info']}"
+                )
                 msg_queue.put(ex)
             else:
                 # ⚠️ SAST Risk (Medium): Potential security risk with pickle usage
@@ -123,7 +134,10 @@ class Client:
         self.logger.debug("connected")
         # The pickle is for passing some parameters with special type(such as
         # pd.Timestamp)
-        request_content = {"head": head_info, "body": pickle.dumps(request_content, protocol=C.dump_protocol_version)}
+        request_content = {
+            "head": head_info,
+            "body": pickle.dumps(request_content, protocol=C.dump_protocol_version),
+        }
         self.sio.on(request_type + "_response", request_callback)
         self.logger.debug("try sending")
         self.sio.emit(request_type + "_request", request_content)

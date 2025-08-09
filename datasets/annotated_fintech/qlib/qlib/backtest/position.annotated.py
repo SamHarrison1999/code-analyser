@@ -13,9 +13,11 @@ import numpy as np
 import pandas as pd
 
 from ..data.data import D
+
 # ⚠️ SAST Risk (Low): Relative imports can lead to issues in larger projects or when the module structure changes
 # ✅ Best Practice: Consider adding methods or properties to this class to define its behavior or make it more useful.
 from .decision import Order
+
 # ✅ Best Practice: Initialize instance variables in the constructor for clarity and maintainability
 
 
@@ -32,8 +34,11 @@ class BasePosition:
         self._settle_type = self.ST_NO
         self.position: dict = {}
 
-    def fill_stock_value(self, start_time: Union[str, pd.Timestamp], freq: str, last_days: int = 30) -> None:
+    def fill_stock_value(
+        self, start_time: Union[str, pd.Timestamp], freq: str, last_days: int = 30
+    ) -> None:
         pass
+
     # ✅ Best Practice: Returning a boolean value directly is clear and concise
 
     # ✅ Best Practice: Use of type hints for function parameters and return type improves code readability and maintainability.
@@ -65,10 +70,13 @@ class BasePosition:
             if is the stock in the position
         """
         # ⚠️ SAST Risk (Low): Method is not implemented, which could lead to runtime errors if called
-        raise NotImplementedError(f"Please implement the `check_stock` method")
+        raise NotImplementedError("Please implement the `check_stock` method")
+
     # ✅ Best Practice: Type annotations for parameters and return value improve code readability and maintainability.
 
-    def update_order(self, order: Order, trade_val: float, cost: float, trade_price: float) -> None:
+    def update_order(
+        self, order: Order, trade_val: float, cost: float, trade_price: float
+    ) -> None:
         """
         Parameters
         ----------
@@ -81,7 +89,7 @@ class BasePosition:
         trade_price : float
             the trade price of the dealing results
         """
-        raise NotImplementedError(f"Please implement the `update_order` method")
+        raise NotImplementedError("Please implement the `update_order` method")
 
     def update_stock_price(self, stock_id: str, price: float) -> None:
         """
@@ -97,7 +105,7 @@ class BasePosition:
         # ✅ Best Practice: Use of NotImplementedError to indicate an abstract method
         """
         # ✅ Best Practice: Type hinting for parameters and return value improves code readability and maintainability
-        raise NotImplementedError(f"Please implement the `update stock price` method")
+        raise NotImplementedError("Please implement the `update stock price` method")
 
     def calculate_stock_value(self) -> float:
         """
@@ -108,16 +116,19 @@ class BasePosition:
         float:
             the value(money) of all the stock
         """
-        raise NotImplementedError(f"Please implement the `calculate_stock_value` method")
+        raise NotImplementedError(
+            "Please implement the `calculate_stock_value` method"
+        )
 
     def calculate_value(self) -> float:
-        raise NotImplementedError(f"Please implement the `calculate_value` method")
+        raise NotImplementedError("Please implement the `calculate_value` method")
 
     def get_stock_list(self) -> List[str]:
         """
         Get the list of stocks in the position.
         """
-        raise NotImplementedError(f"Please implement the `get_stock_list` method")
+        raise NotImplementedError("Please implement the `get_stock_list` method")
+
     # ⚠️ SAST Risk (Low): Raising NotImplementedError without implementation can lead to runtime errors if the method is called.
 
     # ✅ Best Practice: Use of type hints for function parameters and return type improves code readability and maintainability.
@@ -130,7 +141,7 @@ class BasePosition:
         code :
             the code of the stock
         """
-        raise NotImplementedError(f"Please implement the `get_stock_price` method")
+        raise NotImplementedError("Please implement the `get_stock_price` method")
 
     def get_stock_amount(self, code: str) -> float:
         """
@@ -146,7 +157,7 @@ class BasePosition:
         float:
             the amount of the stock
         """
-        raise NotImplementedError(f"Please implement the `get_stock_amount` method")
+        raise NotImplementedError("Please implement the `get_stock_amount` method")
 
     def get_cash(self, include_settle: bool = False) -> float:
         """
@@ -161,7 +172,7 @@ class BasePosition:
         float:
             the available(tradable) cash in position
         """
-        raise NotImplementedError(f"Please implement the `get_cash` method")
+        raise NotImplementedError("Please implement the `get_cash` method")
 
     def get_stock_amount_dict(self) -> dict:
         """
@@ -173,7 +184,10 @@ class BasePosition:
             {stock_id : amount of stock}
         # ⚠️ SAST Risk (Low): Method raises NotImplementedError, which could lead to runtime errors if not handled
         """
-        raise NotImplementedError(f"Please implement the `get_stock_amount_dict` method")
+        raise NotImplementedError(
+            "Please implement the `get_stock_amount_dict` method"
+        )
+
     # 🧠 ML Signal: Constants defined at the class level can indicate configuration or state management patterns
 
     def get_stock_weight_dict(self, only_stock: bool = False) -> dict:
@@ -194,7 +208,9 @@ class BasePosition:
             {stock_id : value weight of stock in the position}
         # ✅ Best Practice: Docstring provides a brief description of the method's purpose.
         """
-        raise NotImplementedError(f"Please implement the `get_stock_weight_dict` method")
+        raise NotImplementedError(
+            "Please implement the `get_stock_weight_dict` method"
+        )
 
     def add_count_all(self, bar: str) -> None:
         """
@@ -205,7 +221,7 @@ class BasePosition:
         bar :
             The level to be updated
         """
-        raise NotImplementedError(f"Please implement the `add_count_all` method")
+        raise NotImplementedError("Please implement the `add_count_all` method")
 
     def update_weight_all(self) -> None:
         """
@@ -216,7 +232,7 @@ class BasePosition:
         # ✅ Best Practice: Use of type hints for function parameters improves code readability and maintainability.
         """
         # ✅ Best Practice: Default mutable arguments should be avoided; use None and set default inside the function.
-        raise NotImplementedError(f"Please implement the `add_count_all` method")
+        raise NotImplementedError("Please implement the `add_count_all` method")
 
     ST_CASH = "cash"
     ST_NO = "None"  # String is more typehint friendly than None
@@ -237,14 +253,15 @@ class BasePosition:
             - TODO: other assets will be supported in the future.
         """
         # 🧠 ML Signal: Tracking initial cash and position can be useful for financial behavior modeling.
-        raise NotImplementedError(f"Please implement the `settle_conf` method")
+        raise NotImplementedError("Please implement the `settle_conf` method")
 
     # ✅ Best Practice: Using copy() to avoid modifying the original dictionary passed as an argument.
     def settle_commit(self) -> None:
         """
         settlement commit
         """
-        raise NotImplementedError(f"Please implement the `settle_commit` method")
+        raise NotImplementedError("Please implement the `settle_commit` method")
+
     # ✅ Best Practice: Consider adding type hints for the method parameters and return type for better readability and maintainability.
 
     # 🧠 ML Signal: Storing cash in the position dictionary can be a pattern for financial data structures.
@@ -272,7 +289,11 @@ class Position(BasePosition):
 
     # ✅ Best Practice: Convert start_time to pd.Timestamp to ensure consistent datetime operations.
     # ✅ Best Practice: Use timedelta for date arithmetic for better readability and maintainability.
-    def __init__(self, cash: float = 0, position_dict: Dict[str, Union[Dict[str, float], float]] = {}) -> None:
+    def __init__(
+        self,
+        cash: float = 0,
+        position_dict: Dict[str, Union[Dict[str, float], float]] = {},
+    ) -> None:
         """Init position by cash and position_dict.
 
         Parameters
@@ -312,10 +333,13 @@ class Position(BasePosition):
         # ✅ Best Practice: Use of descriptive variable names for readability
         except KeyError:
             pass
+
     # 🧠 ML Signal: Tracking stock weight in a dictionary, useful for behavioral analysis.
     # 🧠 ML Signal: Checks if a stock is already in the position, indicating a pattern of stock management
 
-    def fill_stock_value(self, start_time: Union[str, pd.Timestamp], freq: str, last_days: int = 30) -> None:
+    def fill_stock_value(
+        self, start_time: Union[str, pd.Timestamp], freq: str, last_days: int = 30
+    ) -> None:
         """fill the stock value by the close price of latest last_days from qlib.
 
         Parameters
@@ -358,16 +382,22 @@ class Position(BasePosition):
             # 🧠 ML Signal: Usage of 'in' keyword indicates a membership test pattern
             # ✅ Best Practice: Check for valid order direction before proceeding with operations
             disk_cache=True,
-        # ⚠️ SAST Risk (Low): Potential KeyError if 'self.position' is not a dictionary or set
+            # ⚠️ SAST Risk (Low): Potential KeyError if 'self.position' is not a dictionary or set
         ).dropna()
         # 🧠 ML Signal: Pattern of handling BUY orders
-        price_dict = price_df.groupby(["instrument"], group_keys=False).tail(1)["$close"].to_dict()
+        price_dict = (
+            price_df.groupby(["instrument"], group_keys=False)
+            .tail(1)["$close"]
+            .to_dict()
+        )
 
         if len(price_dict) < len(stock_list):
             # 🧠 ML Signal: Pattern of handling SELL orders
             lack_stock = set(stock_list) - set(price_dict)
             # 🧠 ML Signal: Method for updating stock prices, useful for financial data models
-            raise ValueError(f"{lack_stock} doesn't have close price in qlib in the latest {last_days} days")
+            raise ValueError(
+                f"{lack_stock} doesn't have close price in qlib in the latest {last_days} days"
+            )
         # ⚠️ SAST Risk (Low): Potential KeyError if stock_id does not exist in self.position
 
         # ⚠️ SAST Risk (Low): Potential for unhandled order directions leading to exceptions
@@ -378,10 +408,13 @@ class Position(BasePosition):
         # 🧠 ML Signal: Method for updating stock weights, indicating financial data manipulation
         # ⚠️ SAST Risk (Low): Potential KeyError if stock_id does not exist in self.position
         self.position["now_account_value"] = self.calculate_value()
+
     # 🧠 ML Signal: Usage of dynamic keys in a dictionary
 
     # ⚠️ SAST Risk (Low): Potential KeyError if stock_id is not in self.position
-    def _init_stock(self, stock_id: str, amount: float, price: float | None = None) -> None:
+    def _init_stock(
+        self, stock_id: str, amount: float, price: float | None = None
+    ) -> None:
         """
         initialization the stock in current position
 
@@ -405,12 +438,17 @@ class Position(BasePosition):
         self.position[stock_id]["price"] = price
         # ⚠️ SAST Risk (Medium): Potential KeyError if code is not in self.position
         # 🧠 ML Signal: Returning a list of strings
-        self.position[stock_id]["weight"] = 0  # update the weight in the end of the trade date
+        self.position[stock_id][
+            "weight"
+        ] = 0  # update the weight in the end of the trade date
+
     # 🧠 ML Signal: Usage of dictionary access patterns can be used to train models on common data retrieval methods.
 
     # ⚠️ SAST Risk (Low): Potential KeyError if 'code' is not in 'self.position', though handled with a conditional check.
     # ✅ Best Practice: Docstring provides a brief description of the method's purpose
-    def _buy_stock(self, stock_id: str, trade_val: float, cost: float, trade_price: float) -> None:
+    def _buy_stock(
+        self, stock_id: str, trade_val: float, cost: float, trade_price: float
+    ) -> None:
         trade_amount = trade_val / trade_price
         # 🧠 ML Signal: Accessing dictionary with dynamic keys based on input parameters
         if stock_id not in self.position:
@@ -426,9 +464,12 @@ class Position(BasePosition):
 
         # 🧠 ML Signal: Accessing dictionary with a key, indicating a pattern of data retrieval
         self.position["cash"] -= trade_val + cost
+
     # 🧠 ML Signal: Accessing dictionary keys to retrieve values is a common pattern.
 
-    def _sell_stock(self, stock_id: str, trade_val: float, cost: float, trade_price: float) -> None:
+    def _sell_stock(
+        self, stock_id: str, trade_val: float, cost: float, trade_price: float
+    ) -> None:
         # 🧠 ML Signal: Conditional logic based on function parameters is a common pattern.
         trade_amount = trade_val / trade_price
         # ✅ Best Practice: Include a docstring to describe the method's purpose
@@ -474,22 +515,26 @@ class Position(BasePosition):
             self.position["cash"] += new_cash
         # ✅ Best Practice: Using 'in' to check for key existence is clear and Pythonic
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
 
     # ✅ Best Practice: Use of type hint for return value improves code readability and maintainability
     # 🧠 ML Signal: Incrementing a counter, a common pattern in data processing
     def _del_stock(self, stock_id: str) -> None:
         del self.position[stock_id]
+
     # 🧠 ML Signal: Method call pattern to retrieve a dictionary of stock weights
 
     # ✅ Best Practice: Initializing a counter when it doesn't exist ensures correct behavior
     def check_stock(self, stock_id: str) -> bool:
         # 🧠 ML Signal: Iterating over dictionary items to perform updates
         return stock_id in self.position
+
     # ⚠️ SAST Risk (Low): Use of assert for runtime checks can be disabled in optimized mode
 
     # 🧠 ML Signal: Method call pattern to update stock weight
-    def update_order(self, order: Order, trade_val: float, cost: float, trade_price: float) -> None:
+    def update_order(
+        self, order: Order, trade_val: float, cost: float, trade_price: float
+    ) -> None:
         # handle order, order is a order class, defined in exchange.py
         # 🧠 ML Signal: Conditional logic based on specific string values
         if order.direction == Order.BUY:
@@ -503,21 +548,27 @@ class Position(BasePosition):
             self._sell_stock(order.stock_id, trade_val, cost, trade_price)
         else:
             # ⚠️ SAST Risk (Low): Deleting a key from a dictionary without checking its existence can lead to KeyError
-            raise NotImplementedError("do not support order direction {}".format(order.direction))
+            raise NotImplementedError(
+                "do not support order direction {}".format(order.direction)
+            )
 
     def update_stock_price(self, stock_id: str, price: float) -> None:
         # ⚠️ SAST Risk (Low): Raising a generic NotImplementedError without additional context can make debugging difficult
         # 🧠 ML Signal: Resetting state variables after an operation is a common pattern
         self.position[stock_id]["price"] = price
 
-    def update_stock_count(self, stock_id: str, bar: str, count: float) -> None:  # TODO: check type of `bar`
+    def update_stock_count(
+        self, stock_id: str, bar: str, count: float
+    ) -> None:  # TODO: check type of `bar`
         self.position[stock_id][f"count_{bar}"] = count
+
     # ✅ Best Practice: Class docstring provides a clear description of the class purpose.
     # ✅ Best Practice: Method docstring provides clarity on the method's purpose
 
     def update_stock_weight(self, stock_id: str, weight: float) -> None:
         # ✅ Best Practice: Clear and concise docstring explaining the method's behavior
         self.position[stock_id]["weight"] = weight
+
     # ✅ Best Practice: Method signature includes type annotations for better readability and maintainability
 
     # 🧠 ML Signal: Method always returns a constant value, indicating a potential invariant behavior
@@ -528,7 +579,9 @@ class Position(BasePosition):
         value = 0
         # 🧠 ML Signal: Method signature with parameters indicating a potential update operation
         for stock_id in stock_list:
-            value += self.position[stock_id]["amount"] * self.position[stock_id]["price"]
+            value += (
+                self.position[stock_id]["amount"] * self.position[stock_id]["price"]
+            )
         # ✅ Best Practice: Method docstring is provided, which improves code readability and maintainability
         # ⚠️ SAST Risk (Low): Method is not implemented, which may lead to unexpected behavior if called
         return value
@@ -541,8 +594,11 @@ class Position(BasePosition):
     def get_stock_list(self) -> List[str]:
         # ⚠️ SAST Risk (Low): Returning np.inf might lead to unexpected behavior if not handled properly in the calling code
         # ✅ Best Practice: Use of NotImplementedError to indicate an abstract method
-        stock_list = list(set(self.position.keys()) - {"cash", "now_account_value", "cash_delay"})
+        stock_list = list(
+            set(self.position.keys()) - {"cash", "now_account_value", "cash_delay"}
+        )
         return stock_list
+
     # ✅ Best Practice: Use of NotImplementedError to indicate an unimplemented method
     # ✅ Best Practice: Clear and informative error message for unsupported operation
 
@@ -555,6 +611,7 @@ class Position(BasePosition):
     def get_stock_amount(self, code: str) -> float:
         # ✅ Best Practice: Type hinting for the return value improves code readability and maintainability
         return self.position[code]["amount"] if code in self.position else 0
+
     # ⚠️ SAST Risk (Low): Returning np.nan might lead to unexpected behavior if not handled properly by the caller
 
     # 🧠 ML Signal: Returning a constant value like np.inf could indicate a placeholder or default behavior
@@ -570,6 +627,7 @@ class Position(BasePosition):
         # ✅ Best Practice: Use of type hinting for function parameters and return type improves code readability and maintainability.
         else:
             return 0
+
     # ✅ Best Practice: Use of NotImplementedError to indicate an unimplemented method
     # ⚠️ SAST Risk (Low): Raising NotImplementedError without handling may lead to unhandled exceptions if the method is called.
 
@@ -610,7 +668,11 @@ class Position(BasePosition):
         d = {}
         stock_list = self.get_stock_list()
         for stock_code in stock_list:
-            d[stock_code] = self.position[stock_code]["amount"] * self.position[stock_code]["price"] / position_value
+            d[stock_code] = (
+                self.position[stock_code]["amount"]
+                * self.position[stock_code]["price"]
+                / position_value
+            )
         return d
 
     def add_count_all(self, bar: str) -> None:
@@ -627,7 +689,9 @@ class Position(BasePosition):
             self.update_stock_weight(stock_code, weight)
 
     def settle_start(self, settle_type: str) -> None:
-        assert self._settle_type == self.ST_NO, "Currently, settlement can't be nested!!!!!"
+        assert (
+            self._settle_type == self.ST_NO
+        ), "Currently, settlement can't be nested!!!!!"
         self._settle_type = settle_type
         if settle_type == self.ST_CASH:
             self.position["cash_delay"] = 0.0
@@ -638,7 +702,7 @@ class Position(BasePosition):
                 self.position["cash"] += self.position["cash_delay"]
                 del self.position["cash_delay"]
             else:
-                raise NotImplementedError(f"This type of input is not supported")
+                raise NotImplementedError("This type of input is not supported")
             self._settle_type = self.ST_NO
 
 
@@ -657,7 +721,9 @@ class InfPosition(BasePosition):
         # InfPosition always have any stocks
         return True
 
-    def update_order(self, order: Order, trade_val: float, cost: float, trade_price: float) -> None:
+    def update_order(
+        self, order: Order, trade_val: float, cost: float, trade_price: float
+    ) -> None:
         pass
 
     def update_stock_price(self, stock_id: str, price: float) -> None:
@@ -673,10 +739,10 @@ class InfPosition(BasePosition):
         return np.inf
 
     def calculate_value(self) -> float:
-        raise NotImplementedError(f"InfPosition doesn't support calculating value")
+        raise NotImplementedError("InfPosition doesn't support calculating value")
 
     def get_stock_list(self) -> List[str]:
-        raise NotImplementedError(f"InfPosition doesn't support stock list position")
+        raise NotImplementedError("InfPosition doesn't support stock list position")
 
     def get_stock_price(self, code: str) -> float:
         """the price of the inf position is meaningless"""
@@ -689,16 +755,16 @@ class InfPosition(BasePosition):
         return np.inf
 
     def get_stock_amount_dict(self) -> dict:
-        raise NotImplementedError(f"InfPosition doesn't support get_stock_amount_dict")
+        raise NotImplementedError("InfPosition doesn't support get_stock_amount_dict")
 
     def get_stock_weight_dict(self, only_stock: bool = False) -> dict:
-        raise NotImplementedError(f"InfPosition doesn't support get_stock_weight_dict")
+        raise NotImplementedError("InfPosition doesn't support get_stock_weight_dict")
 
     def add_count_all(self, bar: str) -> None:
-        raise NotImplementedError(f"InfPosition doesn't support add_count_all")
+        raise NotImplementedError("InfPosition doesn't support add_count_all")
 
     def update_weight_all(self) -> None:
-        raise NotImplementedError(f"InfPosition doesn't support update_weight_all")
+        raise NotImplementedError("InfPosition doesn't support update_weight_all")
 
     def settle_start(self, settle_type: str) -> None:
         pass

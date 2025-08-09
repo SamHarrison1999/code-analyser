@@ -3,14 +3,17 @@
 # Licensed under the MIT License.
 
 from __future__ import annotations
+
 # ✅ Best Practice: Explicit imports improve code readability and maintainability
 
 from typing import List, Tuple, cast
 
 import torch
+
 # ✅ Best Practice: Grouping imports from the same library together improves readability
 # ✅ Best Practice: Include a docstring to describe the purpose and functionality of the class
 import torch.nn as nn
+
 # ✅ Best Practice: Importing specific classes or functions helps avoid namespace pollution
 from tianshou.data import Batch
 
@@ -44,7 +47,7 @@ class Recurrent(nn.Module):
         # 🧠 ML Signal: Use of RNN, LSTM, or GRU indicates sequence modeling.
         rnn_type: Literal["rnn", "lstm", "gru"] = "gru",
         rnn_num_layers: int = 1,
-    # 🧠 ML Signal: Use of RNN, LSTM, or GRU indicates sequence modeling.
+        # 🧠 ML Signal: Use of RNN, LSTM, or GRU indicates sequence modeling.
     ) -> None:
         super().__init__()
         # 🧠 ML Signal: Use of nn.Sequential indicates a feedforward neural network structure.
@@ -63,17 +66,30 @@ class Recurrent(nn.Module):
         self.rnn_layers = rnn_num_layers
         # 🧠 ML Signal: Use of tensor operations and device management for model input preparation
 
-        self.raw_rnn = self.rnn_class(hidden_dim, hidden_dim, batch_first=True, num_layers=self.rnn_layers)
+        self.raw_rnn = self.rnn_class(
+            hidden_dim, hidden_dim, batch_first=True, num_layers=self.rnn_layers
+        )
         # ✅ Best Practice: Use of torch.cat for efficient tensor concatenation
-        self.prev_rnn = self.rnn_class(hidden_dim, hidden_dim, batch_first=True, num_layers=self.rnn_layers)
-        self.pri_rnn = self.rnn_class(hidden_dim, hidden_dim, batch_first=True, num_layers=self.rnn_layers)
+        self.prev_rnn = self.rnn_class(
+            hidden_dim, hidden_dim, batch_first=True, num_layers=self.rnn_layers
+        )
+        self.pri_rnn = self.rnn_class(
+            hidden_dim, hidden_dim, batch_first=True, num_layers=self.rnn_layers
+        )
         # 🧠 ML Signal: Conversion of observation steps to long tensor for indexing
 
-        self.raw_fc = nn.Sequential(nn.Linear(obs_space["data_processed"].shape[-1], hidden_dim), nn.ReLU())
+        self.raw_fc = nn.Sequential(
+            nn.Linear(obs_space["data_processed"].shape[-1], hidden_dim), nn.ReLU()
+        )
         # ✅ Best Practice: Use of torch.arange for creating index tensors
         # 🧠 ML Signal: Conversion of observation ticks to long tensor for indexing
         self.pri_fc = nn.Sequential(nn.Linear(2, hidden_dim), nn.ReLU())
-        self.dire_fc = nn.Sequential(nn.Linear(2, hidden_dim), nn.ReLU(), nn.Linear(hidden_dim, hidden_dim), nn.ReLU())
+        self.dire_fc = nn.Sequential(
+            nn.Linear(2, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+        )
 
         self._init_extra_branches()
         # ⚠️ SAST Risk (Low): Potential division by zero if obs["target"] contains zeros
@@ -85,6 +101,7 @@ class Recurrent(nn.Module):
             nn.Linear(hidden_dim, output_dim),
             nn.ReLU(),
         )
+
     # ✅ Best Practice: Use of torch.stack for combining tensors along a new dimension
 
     def _init_extra_branches(self) -> None:
@@ -92,23 +109,32 @@ class Recurrent(nn.Module):
         pass
 
     # 🧠 ML Signal: Use of RNN for sequential data processing
-    def _source_features(self, obs: FullHistoryObs, device: torch.device) -> Tuple[List[torch.Tensor], torch.Tensor]:
+    def _source_features(
+        self, obs: FullHistoryObs, device: torch.device
+    ) -> Tuple[List[torch.Tensor], torch.Tensor]:
         # 🧠 ML Signal: Use of fully connected layer for feature transformation
         # 🧠 ML Signal: Use of RNN for sequential data processing
         # 🧠 ML Signal: Slicing tensor output based on current tick
         bs, _, data_dim = obs["data_processed"].size()
-        data = torch.cat((torch.zeros(bs, 1, data_dim, device=device), obs["data_processed"]), 1)
+        data = torch.cat(
+            (torch.zeros(bs, 1, data_dim, device=device), obs["data_processed"]), 1
+        )
         cur_step = obs["cur_step"].long()
         cur_tick = obs["cur_tick"].long()
         bs_indices = torch.arange(bs, device=device)
 
-        position = obs["position_history"] / obs["target"].unsqueeze(-1)  # [bs, num_step]
+        position = obs["position_history"] / obs["target"].unsqueeze(
+            -1
+        )  # [bs, num_step]
         steps = (
-            torch.arange(position.size(-1), device=device).unsqueeze(0).repeat(bs, 1).float()
+            torch.arange(position.size(-1), device=device)
+            .unsqueeze(0)
+            .repeat(bs, 1)
+            .float()
             / obs["num_step"].unsqueeze(-1).float()
-        # 🧠 ML Signal: Slicing tensor output based on current step
-        # ✅ Best Practice: Use of list to collect multiple tensor sources
-        # ✅ Best Practice: Use of type casting to ensure the input batch is of the expected type
+            # 🧠 ML Signal: Slicing tensor output based on current step
+            # ✅ Best Practice: Use of list to collect multiple tensor sources
+            # ✅ Best Practice: Use of type casting to ensure the input batch is of the expected type
         )  # [bs, num_step]
         # 🧠 ML Signal: Use of fully connected layer for directional feature transformation
         priv = torch.stack((position.float(), steps), -1)
@@ -137,7 +163,9 @@ class Recurrent(nn.Module):
         # 🧠 ML Signal: Use of neural network layers (q_net, k_net, v_net) for processing input tensors
 
         # 🧠 ML Signal: Usage of nn.Linear indicates a neural network layer, common in ML models
-        dir_out = self.dire_fc(torch.stack((obs["acquiring"], 1 - obs["acquiring"]), -1).float())
+        dir_out = self.dire_fc(
+            torch.stack((obs["acquiring"], 1 - obs["acquiring"]), -1).float()
+        )
         # 🧠 ML Signal: Use of neural network layers (q_net, k_net, v_net) for processing input tensors
         sources.append(dir_out)
 

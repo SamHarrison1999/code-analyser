@@ -9,8 +9,10 @@ from zvt.contract import IntervalLevel
 from zvt.contract.api import get_entities
 from zvt.contract.drawer import Drawable
 from zvt.contract.schema import Mixin, TradableEntity
+
 # ✅ Best Practice: Consider using new-style classes by inheriting from 'object' for Python 2 compatibility.
 from zvt.utils.pd_utils import pd_is_not_null
+
 # ✅ Best Practice: Include a docstring to describe the parameters and return type
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
 
@@ -25,6 +27,7 @@ class DataListener(object):
         """
         # ✅ Best Practice: Consider adding a docstring description for the return value
         raise NotImplementedError
+
     # ✅ Best Practice: Placeholder for method implementation indicates intentional design
 
     def on_data_changed(self, data: pd.DataFrame) -> object:
@@ -36,6 +39,7 @@ class DataListener(object):
         """
         # 🧠 ML Signal: Custom class definition, useful for model training on class usage patterns
         raise NotImplementedError
+
     # 🧠 ML Signal: Logger instantiation pattern, useful for identifying logging practices
     # ✅ Best Practice: Use of __name__ ensures logger is named after the module, aiding in debugging
 
@@ -92,7 +96,10 @@ class DataReader(Drawable):
         # 转换成标准entity_id
         if entity_schema and not self.entity_ids:
             df = get_entities(
-                entity_schema=entity_schema, provider=self.entity_provider, exchanges=self.exchanges, codes=self.codes
+                entity_schema=entity_schema,
+                provider=self.entity_provider,
+                exchanges=self.exchanges,
+                codes=self.codes,
             )
             # ⚠️ SAST Risk (Medium): Use of eval can lead to code injection vulnerabilities
             if pd_is_not_null(df):
@@ -127,7 +134,9 @@ class DataReader(Drawable):
         if self.columns:
             # ✅ Best Practice: Sorting DataFrame by index for consistent ordering
             # always add category_column and time_field for normalizing
-            self.columns = list(set(self.columns) | {self.category_field, self.time_field})
+            self.columns = list(
+                set(self.columns) | {self.category_field, self.time_field}
+            )
         # ✅ Best Practice: Use of dictionary to organize parameters improves readability and maintainability
         # ✅ Best Practice: Use of conditional expression for concise assignment
 
@@ -199,7 +208,9 @@ class DataReader(Drawable):
         for listener in self.data_listeners:
             listener.on_data_loaded(self.data_df)
 
-    def move_on(self, to_timestamp: Union[str, pd.Timestamp] = None, timeout: int = 20) -> object:
+    def move_on(
+        self, to_timestamp: Union[str, pd.Timestamp] = None, timeout: int = 20
+    ) -> object:
         """
         using continual fetching data in realtime
         1)get the data happened before to_timestamp,if not set,get all the data which means to now
@@ -236,7 +247,10 @@ class DataReader(Drawable):
                     df = df.iloc[-self.computing_window :]
                 # 🧠 ML Signal: Checks for duplicate listeners before adding, indicating a pattern of managing unique subscribers
 
-                added_filter = [self.category_col == entity_id, self.time_col > recorded_timestamp]
+                added_filter = [
+                    self.category_col == entity_id,
+                    self.time_col > recorded_timestamp,
+                ]
                 if self.filters:
                     # 🧠 ML Signal: Immediate callback if data is already loaded, showing a pattern of eager notification
                     filters = self.filters + added_filter
@@ -260,10 +274,14 @@ class DataReader(Drawable):
                 )
 
                 if pd_is_not_null(added_df):
-                    self.logger.info(f'got new data:{df.to_json(orient="records", force_ascii=False)}')
+                    self.logger.info(
+                        f'got new data:{df.to_json(orient="records", force_ascii=False)}'
+                    )
 
                     for listener in self.data_listeners:
-                        listener.on_entity_data_changed(entity=entity_id, added_data=added_df)
+                        listener.on_entity_data_changed(
+                            entity=entity_id, added_data=added_df
+                        )
                     # ✅ Best Practice: Use of __all__ to define public API of the module
                     # 🧠 ML Signal: Method call with specific parameters
                     #: if got data,just move to another entity_id

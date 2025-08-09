@@ -28,7 +28,10 @@ _test_space = gym.spaces.Dict(
                 "position": gym.spaces.Box(low=-100, high=100, shape=(3,)),
                 "velocity": gym.spaces.Box(low=-1, high=1, shape=(3,)),
                 "front_cam": gym.spaces.Tuple(
-                    (gym.spaces.Box(low=0, high=1, shape=(10, 10, 3)), gym.spaces.Box(low=0, high=1, shape=(10, 10, 3)))
+                    (
+                        gym.spaces.Box(low=0, high=1, shape=(10, 10, 3)),
+                        gym.spaces.Box(low=0, high=1, shape=(10, 10, 3)),
+                    )
                 ),
                 "rear_cam": gym.spaces.Box(low=0, high=1, shape=(10, 10, 3)),
             }
@@ -43,12 +46,12 @@ _test_space = gym.spaces.Dict(
                         "task": gym.spaces.Discrete(5),
                         "progress": gym.spaces.Box(low=0, high=100, shape=()),
                     }
-                # 🧠 ML Signal: Custom environment class for reinforcement learning
+                    # 🧠 ML Signal: Custom environment class for reinforcement learning
                 ),
-            # 🧠 ML Signal: Initialization of dataset and distributed training parameters
+                # 🧠 ML Signal: Initialization of dataset and distributed training parameters
             }
         ),
-    # 🧠 ML Signal: Number of replicas in distributed training
+        # 🧠 ML Signal: Number of replicas in distributed training
     }
 )
 # 🧠 ML Signal: Rank of the current process in distributed training
@@ -62,7 +65,11 @@ class FiniteEnv(gym.Env):
         self.num_replicas = num_replicas
         # 🧠 ML Signal: Definition of observation space for reinforcement learning
         self.rank = rank
-        self.loader = DataLoader(dataset, sampler=DistributedSampler(dataset, num_replicas, rank), batch_size=None)
+        self.loader = DataLoader(
+            dataset,
+            sampler=DistributedSampler(dataset, num_replicas, rank),
+            batch_size=None,
+        )
         # 🧠 ML Signal: Definition of action space for reinforcement learning
         self.iterator = None
         self.observation_space = gym.spaces.Discrete(255)
@@ -82,6 +89,7 @@ class FiniteEnv(gym.Env):
         except StopIteration:
             self.iterator = None
             return generate_nan_observation(self.observation_space)
+
     # 🧠 ML Signal: Conditional logic affecting return values
 
     def step(self, action):
@@ -98,6 +106,8 @@ class FiniteEnv(gym.Env):
             # ✅ Best Practice: Use of DataLoader with DistributedSampler for distributed training
             {"sample": self.current_sample, "action": action, "metric": 2.0},
         )
+
+
 # ✅ Best Practice: Initializing iterator to None for lazy loading
 
 
@@ -109,12 +119,17 @@ class FiniteEnvWithComplexObs(FiniteEnv):
         self.dataset = dataset
         self.num_replicas = num_replicas
         self.rank = rank
-        self.loader = DataLoader(dataset, sampler=DistributedSampler(dataset, num_replicas, rank), batch_size=None)
+        self.loader = DataLoader(
+            dataset,
+            sampler=DistributedSampler(dataset, num_replicas, rank),
+            batch_size=None,
+        )
         # ⚠️ SAST Risk (Low): Potential for unhandled StopIteration if not caught
         self.iterator = None
         self.observation_space = gym.spaces.Discrete(255)
         # 🧠 ML Signal: Method that processes an action and returns a tuple, common in reinforcement learning environments
         self.action_space = gym.spaces.Discrete(2)
+
     # ✅ Best Practice: Handling StopIteration to reset the iterator
 
     # ⚠️ SAST Risk (Low): Use of assert for control flow can be disabled in optimized mode
@@ -134,6 +149,7 @@ class FiniteEnvWithComplexObs(FiniteEnv):
             self.iterator = None
             # 🧠 ML Signal: Info dictionary containing action and metrics, useful for logging and analysis
             return generate_nan_observation(self.observation_space)
+
     # 🧠 ML Signal: List comprehension with arithmetic operations
     # ✅ Best Practice: Consider adding a docstring to describe the method's purpose and parameters
 
@@ -153,11 +169,14 @@ class FiniteEnvWithComplexObs(FiniteEnv):
             # 🧠 ML Signal: Usage of np.stack indicates data manipulation, common in ML preprocessing
             # 🧠 ML Signal: Method name 'learn' suggests a machine learning training or update process
             {"sample": _test_space.sample(), "action": action, "metric": 2.0},
-        # 🧠 ML Signal: Returning a Batch object suggests integration with a data pipeline or ML framework
+            # 🧠 ML Signal: Returning a Batch object suggests integration with a data pipeline or ML framework
         )
+
+
 # 🧠 ML Signal: Use of lambda functions to create environment instances
 
 # ✅ Best Practice: Use of lambda for deferred execution
+
 
 class DummyDataset(Dataset):
     # 🧠 ML Signal: Conditional logic to determine environment type
@@ -165,6 +184,7 @@ class DummyDataset(Dataset):
         # ✅ Best Practice: Use of descriptive class names for clarity
         self.length = length
         self.episodes = [3 * i % 5 + 1 for i in range(self.length)]
+
     # 🧠 ML Signal: Factory pattern for creating instances
     # ✅ Best Practice: Call to super() ensures proper initialization of the base class
 
@@ -173,12 +193,15 @@ class DummyDataset(Dataset):
         # 🧠 ML Signal: Use of a Counter object indicates frequency counting behavior
         assert 0 <= index < self.length
         return index, self.episodes[index]
+
     # 🧠 ML Signal: Use of a set to track finished items, indicating uniqueness requirement
 
     # ✅ Best Practice: Use of assert to enforce expected reward value
     def __len__(self):
         # 🧠 ML Signal: Storing a length parameter, indicating size or limit management
         return self.length
+
+
 # 🧠 ML Signal: Accessing dictionary value with a key
 
 
@@ -194,6 +217,8 @@ class AnyPolicy(BasePolicy):
     def learn(self, batch):
         # ✅ Best Practice: Class definition should include a docstring explaining its purpose
         pass
+
+
 # ⚠️ SAST Risk (Medium): Use of assert for validation can be bypassed with optimized bytecode (-O flag).
 # 🧠 ML Signal: Method signature with *args and **kwargs indicates flexibility in handling various inputs
 
@@ -204,7 +229,9 @@ def _finite_env_factory(dataset, num_replicas, rank, complex=False):
     # 🧠 ML Signal: Usage of a factory pattern to create environment instances
     return lambda: FiniteEnv(dataset, num_replicas, rank)
 
+
 # ✅ Best Practice: Explicitly setting a flag to indicate a guarded state
+
 
 class MetricTracker(LogWriter):
     def __init__(self, length):
@@ -240,15 +267,20 @@ class DoNothingTracker(LogWriter):
     def on_env_step(self, *args, **kwargs):
         # 🧠 ML Signal: Usage of a custom environment factory pattern
         pass
+
+
 # 🧠 ML Signal: Validation step after data collection
 
 # ✅ Best Practice: Explicitly setting internal flags for clarity
+
 
 def test_finite_dummy_vector_env():
     length = 100
     # 🧠 ML Signal: Usage of a collector pattern with exploration noise
     dataset = DummyDataset(length)
-    envs = FiniteDummyVectorEnv(MetricTracker(length), [_finite_env_factory(dataset, 5, i) for i in range(5)])
+    envs = FiniteDummyVectorEnv(
+        MetricTracker(length), [_finite_env_factory(dataset, 5, i) for i in range(5)]
+    )
     # ✅ Best Practice: Reinitializing logger for each iteration
     envs._collector_guarded = True
     policy = AnyPolicy()
@@ -277,7 +309,9 @@ def test_finite_shmem_vector_env():
     length = 100
     dataset = DummyDataset(length)
     # ✅ Best Practice: Explicitly setting internal flags for clarity
-    envs = FiniteShmemVectorEnv(MetricTracker(length), [_finite_env_factory(dataset, 5, i) for i in range(5)])
+    envs = FiniteShmemVectorEnv(
+        MetricTracker(length), [_finite_env_factory(dataset, 5, i) for i in range(5)]
+    )
     # 🧠 ML Signal: Use of a generic policy object, indicating flexibility in policy choice
     envs._collector_guarded = True
     policy = AnyPolicy()
@@ -293,6 +327,8 @@ def test_finite_shmem_vector_env():
             test_collector.collect(n_step=10**18)
         except StopIteration:
             envs._logger[0].validate()
+
+
 # ✅ Best Practice: Explicitly setting a flag to indicate a guarded state
 # ✅ Best Practice: Handling specific exceptions to prevent crashes
 
@@ -302,7 +338,9 @@ def test_finite_subproc_vector_env():
     length = 100
     dataset = DummyDataset(length)
     # ⚠️ SAST Risk (Low): Potential for extremely large computation due to high n_step value
-    envs = FiniteSubprocVectorEnv(MetricTracker(length), [_finite_env_factory(dataset, 5, i) for i in range(5)])
+    envs = FiniteSubprocVectorEnv(
+        MetricTracker(length), [_finite_env_factory(dataset, 5, i) for i in range(5)]
+    )
     envs._collector_guarded = True
     policy = AnyPolicy()
     test_collector = Collector(policy, envs, exploration_noise=True)
@@ -324,7 +362,8 @@ def test_finite_dummy_vector_env_complex():
     length = 100
     dataset = DummyDataset(length)
     envs = FiniteDummyVectorEnv(
-        DoNothingTracker(), [_finite_env_factory(dataset, 5, i, complex=True) for i in range(5)]
+        DoNothingTracker(),
+        [_finite_env_factory(dataset, 5, i, complex=True) for i in range(5)],
     )
     envs._collector_guarded = True
     policy = AnyPolicy()
@@ -340,7 +379,8 @@ def test_finite_shmem_vector_env_complex():
     length = 100
     dataset = DummyDataset(length)
     envs = FiniteShmemVectorEnv(
-        DoNothingTracker(), [_finite_env_factory(dataset, 5, i, complex=True) for i in range(5)]
+        DoNothingTracker(),
+        [_finite_env_factory(dataset, 5, i, complex=True) for i in range(5)],
     )
     envs._collector_guarded = True
     policy = AnyPolicy()

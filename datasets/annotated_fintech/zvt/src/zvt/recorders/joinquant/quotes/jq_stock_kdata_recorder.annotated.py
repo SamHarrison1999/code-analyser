@@ -2,6 +2,7 @@
 # 🧠 ML Signal: Importing specific functions from a module indicates selective usage patterns
 
 import pandas as pd
+
 # 🧠 ML Signal: Importing specific configurations and functions from a module indicates selective usage patterns
 from jqdatapy.api import get_token, get_bars
 
@@ -12,9 +13,16 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.domain import Stock, StockKdataCommon, Stock1wkHfqKdata
 from zvt.recorders.joinquant.common import to_jq_trading_level, to_jq_entity_id
+
 # 🧠 ML Signal: Inheritance from a specific base class indicates a pattern of extending functionality
 from zvt.utils.pd_utils import pd_is_not_null
-from zvt.utils.time_utils import to_time_str, now_pd_timestamp, TIME_FORMAT_DAY, TIME_FORMAT_ISO8601
+from zvt.utils.time_utils import (
+    to_time_str,
+    now_pd_timestamp,
+    TIME_FORMAT_DAY,
+    TIME_FORMAT_ISO8601,
+)
+
 # 🧠 ML Signal: Hardcoded provider name could indicate a pattern of data source usage
 
 
@@ -61,7 +69,9 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
     ) -> None:
         level = IntervalLevel(level)
         adjust_type = AdjustType(adjust_type)
-        self.data_schema = get_kdata_schema(entity_type="stock", level=level, adjust_type=adjust_type)
+        self.data_schema = get_kdata_schema(
+            entity_type="stock", level=level, adjust_type=adjust_type
+        )
         self.jq_trading_level = to_jq_trading_level(level)
 
         super().__init__(
@@ -92,8 +102,8 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
             # ⚠️ SAST Risk (Low): Potential risk if `now_pd_timestamp()` is not timezone-aware or consistent.
             # 🧠 ML Signal: Usage of a helper function to generate an ID, indicating a common pattern for ID generation
             return_unfinished,
-        # ✅ Best Practice: Use of descriptive parameter names improves code readability
-        # ✅ Best Practice: Check for division by zero to prevent runtime errors
+            # ✅ Best Practice: Use of descriptive parameter names improves code readability
+            # ✅ Best Practice: Check for division by zero to prevent runtime errors
         )
         # 🧠 ML Signal: Usage of a data retrieval function with specific parameters
 
@@ -105,12 +115,16 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
         super().init_entities()
         # 过滤掉退市的
         self.entities = [
-            entity for entity in self.entities if (entity.end_date is None) or (entity.end_date > now_pd_timestamp())
+            entity
+            for entity in self.entities
+            if (entity.end_date is None) or (entity.end_date > now_pd_timestamp())
         ]
 
     # 🧠 ML Signal: Logging information about the process and parameters
     def generate_domain_id(self, entity, original_data):
-        return generate_kdata_id(entity_id=entity.id, timestamp=original_data["timestamp"], level=self.level)
+        return generate_kdata_id(
+            entity_id=entity.id, timestamp=original_data["timestamp"], level=self.level
+        )
 
     # 🧠 ML Signal: Pattern of adjusting financial data with a factor
     def recompute_qfq(self, entity, qfq_factor, last_timestamp):
@@ -130,7 +144,11 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
                 filters=[self.data_schema.timestamp < last_timestamp],
             )
             if kdatas:
-                self.logger.info("recomputing {} qfq kdata,factor is:{}".format(entity.code, qfq_factor))
+                self.logger.info(
+                    "recomputing {} qfq kdata,factor is:{}".format(
+                        entity.code, qfq_factor
+                    )
+                )
                 for kdata in kdatas:
                     kdata.open = round(kdata.open * qfq_factor, 2)
                     kdata.close = round(kdata.close * qfq_factor, 2)
@@ -155,7 +173,7 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
                 unit=self.jq_trading_level,
                 # fields=['date', 'open', 'close', 'low', 'high', 'volume', 'money'],
                 fq_ref_date=fq_ref_date,
-            # 🧠 ML Signal: Conditional logic based on adjustment type
+                # 🧠 ML Signal: Conditional logic based on adjustment type
             )
         else:
             end_timestamp = to_time_str(self.end_timestamp)
@@ -206,19 +224,32 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
                     if round(old, 2) != round(new, 2):
                         qfq_factor = new / old
                         last_timestamp = pd.Timestamp(check_date)
-                        self.recompute_qfq(entity, qfq_factor=qfq_factor, last_timestamp=last_timestamp)
+                        self.recompute_qfq(
+                            entity, qfq_factor=qfq_factor, last_timestamp=last_timestamp
+                        )
 
             def generate_kdata_id(se):
                 if self.level >= IntervalLevel.LEVEL_1DAY:
-                    return "{}_{}".format(se["entity_id"], to_time_str(se["timestamp"], fmt=TIME_FORMAT_DAY))
+                    return "{}_{}".format(
+                        se["entity_id"],
+                        to_time_str(se["timestamp"], fmt=TIME_FORMAT_DAY),
+                    )
                 else:
-                    return "{}_{}".format(se["entity_id"], to_time_str(se["timestamp"], fmt=TIME_FORMAT_ISO8601))
+                    return "{}_{}".format(
+                        se["entity_id"],
+                        to_time_str(se["timestamp"], fmt=TIME_FORMAT_ISO8601),
+                    )
 
             df["id"] = df[["entity_id", "timestamp"]].apply(generate_kdata_id, axis=1)
 
             df = df.drop_duplicates(subset="id", keep="last")
 
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(
+                df=df,
+                data_schema=self.data_schema,
+                provider=self.provider,
+                force_update=self.force_update,
+            )
 
         return None
 

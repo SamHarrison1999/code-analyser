@@ -9,23 +9,28 @@ TODO:
 import shutil
 import struct
 from pathlib import Path
+
 # ✅ Best Practice: Use of fire library for creating CLIs easily
 from typing import Iterable
 from functools import partial
+
 # ✅ Best Practice: Use of pandas for data manipulation
 from concurrent.futures import ProcessPoolExecutor
 
 # ✅ Best Practice: Use of tqdm for progress bar in loops
 import fire
 import pandas as pd
+
 # ✅ Best Practice: Use of loguru for logging
 # 🧠 ML Signal: Class definition for data handling, indicating a pattern for data processing
 from tqdm import tqdm
 from loguru import logger
+
 # 🧠 ML Signal: Importing specific functions from a module
 # 🧠 ML Signal: Constants for directory and file naming conventions
 from qlib.utils import fname_to_code, get_period_offset
 from qlib.config import C
+
 # 🧠 ML Signal: Importing specific configuration from a module
 # 🧠 ML Signal: Constants for CSV file handling
 
@@ -51,9 +56,9 @@ class DumpPitData:
             C.pit_record_type["period"],
             C.pit_record_type["value"],
             C.pit_record_type["index"],
-        # 🧠 ML Signal: Handling of missing data with a specific constant
-        # 🧠 ML Signal: Calculation of data type sizes for structured data
-        # 🧠 ML Signal: Constants for operational modes
+            # 🧠 ML Signal: Handling of missing data with a specific constant
+            # 🧠 ML Signal: Calculation of data type sizes for structured data
+            # 🧠 ML Signal: Constants for operational modes
         ]
     )
 
@@ -115,12 +120,18 @@ class DumpPitData:
         if isinstance(include_fields, str):
             include_fields = include_fields.split(",")
         # ✅ Best Practice: Use Path.expanduser for consistent path handling
-        self._exclude_fields = tuple(filter(lambda x: len(x) > 0, map(str.strip, exclude_fields)))
-        self._include_fields = tuple(filter(lambda x: len(x) > 0, map(str.strip, include_fields)))
+        self._exclude_fields = tuple(
+            filter(lambda x: len(x) > 0, map(str.strip, exclude_fields))
+        )
+        self._include_fields = tuple(
+            filter(lambda x: len(x) > 0, map(str.strip, include_fields))
+        )
         # ✅ Best Practice: Check if backup_dir is not None before calling backup method
         self.file_suffix = file_suffix
         # ⚠️ SAST Risk (Medium): Using shutil.copytree without exception handling can lead to unhandled exceptions if the source or target directories are invalid or inaccessible.
-        self.csv_files = sorted(csv_path.glob(f"*{self.file_suffix}") if csv_path.is_dir() else [csv_path])
+        self.csv_files = sorted(
+            csv_path.glob(f"*{self.file_suffix}") if csv_path.is_dir() else [csv_path]
+        )
         # ✅ Best Practice: Consider adding exception handling to manage potential errors during the copy process.
         if limit_nums is not None:
             # ✅ Best Practice: Type hinting for the return type improves code readability and maintainability
@@ -128,7 +139,9 @@ class DumpPitData:
         # 🧠 ML Signal: Usage of shutil.copytree indicates a pattern of directory duplication, which can be a feature for ML models to learn about file operations.
         self.qlib_dir = Path(qlib_dir).expanduser()
         # 🧠 ML Signal: Usage of pandas to read CSV files is a common pattern in data processing tasks
-        self.backup_dir = backup_dir if backup_dir is None else Path(backup_dir).expanduser()
+        self.backup_dir = (
+            backup_dir if backup_dir is None else Path(backup_dir).expanduser()
+        )
         # ⚠️ SAST Risk (Low): Potential for large memory usage if the CSV file is very large
         if backup_dir is not None:
             self._backup_qlib_dir(Path(backup_dir).expanduser())
@@ -160,7 +173,9 @@ class DumpPitData:
         df[self.value_column_name] = df[self.value_column_name].astype("float32")
         # ✅ Best Practice: Using pathlib for path operations improves code readability and maintainability.
         # ⚠️ SAST Risk (Low): Directory creation with user-controlled input could lead to directory traversal if not properly validated.
-        df[self.date_column_name] = df[self.date_column_name].str.replace("-", "").astype("int32")
+        df[self.date_column_name] = (
+            df[self.date_column_name].str.replace("-", "").astype("int32")
+        )
         # df.drop_duplicates([self.date_field_name], inplace=True)
         return df
 
@@ -193,7 +208,7 @@ class DumpPitData:
         file_path: str,
         interval: str = "quarterly",
         overwrite: bool = False,
-    # ✅ Best Practice: Use of descriptive variable names improves code readability.
+        # ✅ Best Practice: Use of descriptive variable names improves code readability.
     ):
         """
         dump data as the following format:
@@ -227,7 +242,9 @@ class DumpPitData:
             # ✅ Best Practice: Use of descriptive variable names improves code readability.
             return
         for field in self.get_dump_fields(df):
-            df_sub = df.query(f'{self.field_column_name}=="{field}"').sort_values(self.date_column_name)
+            df_sub = df.query(f'{self.field_column_name}=="{field}"').sort_values(
+                self.date_column_name
+            )
             if df_sub.empty:
                 logger.warning(f"field {field} of {symbol} is empty")
                 continue
@@ -244,7 +261,9 @@ class DumpPitData:
             # adjust `first_year` if existing data found
             if not overwrite and index_file.exists():
                 with open(index_file, "rb") as fi:
-                    (first_year,) = struct.unpack(self.PERIOD_DTYPE, fi.read(self.PERIOD_DTYPE_SIZE))
+                    (first_year,) = struct.unpack(
+                        self.PERIOD_DTYPE, fi.read(self.PERIOD_DTYPE_SIZE)
+                    )
                     n_years = len(fi.read()) // self.INDEX_DTYPE_SIZE
                     if interval == self.INTERVAL_quarterly:
                         n_years //= 4
@@ -258,7 +277,9 @@ class DumpPitData:
             # if data already exists, continue to the next field
             if start_year > end_year:
                 # ✅ Best Practice: Use of descriptive variable names improves code readability.
-                logger.warning(f"{symbol}-{field} data already exists, continue to the next field")
+                logger.warning(
+                    f"{symbol}-{field} data already exists, continue to the next field"
+                )
                 continue
 
             # ✅ Best Practice: Use of descriptive variable names improves code readability.
@@ -268,7 +289,9 @@ class DumpPitData:
                 for year in range(start_year, end_year + 1):
                     # ✅ Best Practice: Logging the start of a process helps in debugging and tracking execution flow.
                     if interval == self.INTERVAL_quarterly:
-                        fi.write(struct.pack(self.INDEX_DTYPE * 4, *[self.NA_INDEX] * 4))
+                        fi.write(
+                            struct.pack(self.INDEX_DTYPE * 4, *[self.NA_INDEX] * 4)
+                        )
                     # 🧠 ML Signal: Use of partial functions indicates a pattern of function customization.
                     else:
                         # ✅ Best Practice: Use of descriptive variable names improves code readability.
@@ -301,10 +324,14 @@ class DumpPitData:
                 # update index if needed
                 for i, row in df_sub.iterrows():
                     # get index
-                    offset = get_period_offset(first_year, row.period, interval == self.INTERVAL_quarterly)
+                    offset = get_period_offset(
+                        first_year, row.period, interval == self.INTERVAL_quarterly
+                    )
 
                     fi.seek(self.PERIOD_DTYPE_SIZE + self.INDEX_DTYPE_SIZE * offset)
-                    (cur_index,) = struct.unpack(self.INDEX_DTYPE, fi.read(self.INDEX_DTYPE_SIZE))
+                    (cur_index,) = struct.unpack(
+                        self.INDEX_DTYPE, fi.read(self.INDEX_DTYPE_SIZE)
+                    )
 
                     # Case I: new data => update `_next` with current index
                     if cur_index == self.NA_INDEX:
@@ -314,16 +341,34 @@ class DumpPitData:
                     else:
                         _cur_fd = fd.tell()
                         prev_index = self.NA_INDEX
-                        while cur_index != self.NA_INDEX:  # NOTE: first iter always != NA_INDEX
-                            fd.seek(cur_index + self.DATA_DTYPE_SIZE - self.INDEX_DTYPE_SIZE)
+                        while (
+                            cur_index != self.NA_INDEX
+                        ):  # NOTE: first iter always != NA_INDEX
+                            fd.seek(
+                                cur_index + self.DATA_DTYPE_SIZE - self.INDEX_DTYPE_SIZE
+                            )
                             prev_index = cur_index
-                            (cur_index,) = struct.unpack(self.INDEX_DTYPE, fd.read(self.INDEX_DTYPE_SIZE))
-                        fd.seek(prev_index + self.DATA_DTYPE_SIZE - self.INDEX_DTYPE_SIZE)
-                        fd.write(struct.pack(self.INDEX_DTYPE, _cur_fd))  # NOTE: add _next pointer
+                            (cur_index,) = struct.unpack(
+                                self.INDEX_DTYPE, fd.read(self.INDEX_DTYPE_SIZE)
+                            )
+                        fd.seek(
+                            prev_index + self.DATA_DTYPE_SIZE - self.INDEX_DTYPE_SIZE
+                        )
+                        fd.write(
+                            struct.pack(self.INDEX_DTYPE, _cur_fd)
+                        )  # NOTE: add _next pointer
                         fd.seek(_cur_fd)
 
                     # dump data
-                    fd.write(struct.pack(self.DATA_DTYPE, row.date, row.period, row.value, self.NA_INDEX))
+                    fd.write(
+                        struct.pack(
+                            self.DATA_DTYPE,
+                            row.date,
+                            row.period,
+                            row.value,
+                            self.NA_INDEX,
+                        )
+                    )
 
     def dump(self, interval="quarterly", overwrite=False):
         logger.info("start dump pit data......")

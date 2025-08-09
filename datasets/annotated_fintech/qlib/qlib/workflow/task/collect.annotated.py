@@ -11,12 +11,15 @@ from qlib.log import TimeInspector
 from typing import Callable, Dict, Iterable, List
 from qlib.log import get_module_logger
 from qlib.utils.serial import Serializable
+
 # ✅ Best Practice: Class docstring provides a brief description of the class purpose
 from qlib.utils.exceptions import LoadObjectError
 from qlib.workflow import R
+
 # ✅ Best Practice: Class attribute with a default value for serialization backend
 from qlib.workflow.exp import Experiment
 from qlib.workflow.recorder import Recorder
+
 # ⚠️ SAST Risk (Low): Using a mutable default argument can lead to unexpected behavior if modified.
 
 
@@ -53,7 +56,8 @@ class Collector(Serializable):
 
             ...
         """
-        raise NotImplementedError(f"Please implement the `collect` method.")
+        raise NotImplementedError("Please implement the `collect` method.")
+
     # ✅ Best Practice: Ensures process_list is always a list, improving consistency.
 
     @staticmethod
@@ -81,10 +85,13 @@ class Collector(Serializable):
             value = collected_dict[artifact]
             for process in process_list:
                 if not callable(process):
-                    raise NotImplementedError(f"{type(process)} is not supported in `process_collect`.")
+                    raise NotImplementedError(
+                        f"{type(process)} is not supported in `process_collect`."
+                    )
                 value = process(value, *args, **kwargs)
             result[artifact] = value
         return result
+
     # ✅ Best Practice: Use of type hints for function parameters improves code readability and maintainability.
     # ⚠️ SAST Risk (Low): Using a mutable default argument (process_list) can lead to unexpected behavior if modified.
 
@@ -98,7 +105,9 @@ class Collector(Serializable):
         collected = self.collect()
         return self.process_collect(collected, self.process_list, *args, **kwargs)
 
+
 # ✅ Best Practice: Explicitly calling the superclass initializer ensures proper initialization of inherited attributes.
+
 
 # 🧠 ML Signal: Storing a dictionary of collectors could indicate a pattern of managing multiple data sources or handlers.
 class MergeCollector(Collector):
@@ -117,7 +126,12 @@ class MergeCollector(Collector):
     """
 
     # ✅ Best Practice: Class should have a docstring explaining its purpose and usage
-    def __init__(self, collector_dict: Dict[str, Collector], process_list: List[Callable] = [], merge_func=None):
+    def __init__(
+        self,
+        collector_dict: Dict[str, Collector],
+        process_list: List[Callable] = [],
+        merge_func=None,
+    ):
         """
         Init MergeCollector.
 
@@ -130,6 +144,7 @@ class MergeCollector(Collector):
         super().__init__(process_list=process_list)
         self.collector_dict = collector_dict
         self.merge_func = merge_func
+
     # ✅ Best Practice: Provide a docstring to describe the purpose and usage of the class constructor.
 
     def collect(self) -> dict:
@@ -149,6 +164,8 @@ class MergeCollector(Collector):
                     # ✅ Best Practice: Call the superclass's __init__ method to ensure proper initialization.
                     collect_dict[(collector_key, key)] = value
         return collect_dict
+
+
 # ⚠️ SAST Risk (Low): Using isinstance with a string type check can lead to unexpected behavior if experiment is not a string.
 
 
@@ -210,7 +227,9 @@ class RecorderCollector(Collector):
         self.list_kwargs = list_kwargs
         self.status = status
 
-    def collect(self, artifacts_key=None, rec_filter_func=None, only_exist=True) -> dict:
+    def collect(
+        self, artifacts_key=None, rec_filter_func=None, only_exist=True
+    ) -> dict:
         """
         Collect different artifacts based on recorder after filtering.
 
@@ -245,7 +264,8 @@ class RecorderCollector(Collector):
             rec
             for rec in recs
             if (
-                (self.status is None or rec.status in self.status) and (rec_filter_func is None or rec_filter_func(rec))
+                (self.status is None or rec.status in self.status)
+                and (rec_filter_func is None or rec_filter_func(rec))
             )
         ]
 
@@ -265,7 +285,9 @@ class RecorderCollector(Collector):
                     except LoadObjectError as e:
                         if only_exist:
                             # only collect existing artifact
-                            logger.warning(f"Fail to load {self.artifacts_path[key]} and it is ignored.")
+                            logger.warning(
+                                f"Fail to load {self.artifacts_path[key]} and it is ignored."
+                            )
                             continue
                         raise e
                 # give user some warning if the values are overridden

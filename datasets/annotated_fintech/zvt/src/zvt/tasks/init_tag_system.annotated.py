@@ -8,6 +8,7 @@ from zvt.tag.tag_utils import (
     build_initial_industry_info,
 )
 from zvt.trading.trading_service import build_default_query_stock_quote_setting
+
 # 🧠 ML Signal: Function call sequence indicating initialization of industry information
 
 if __name__ == "__main__":

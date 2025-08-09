@@ -76,13 +76,16 @@ def parse_position(position: dict = None) -> pd.DataFrame:
         # 🧠 ML Signal: Further filtering based on time, reinforcing temporal data handling.
         if not result_df.empty:
             _trading_day_sell_df = result_df.loc[
-                (result_df["date"] == previous_data["date"]) & (result_df.index.isin(_cur_day_sell))
+                (result_df["date"] == previous_data["date"])
+                & (result_df.index.isin(_cur_day_sell))
             ].copy()
             if not _trading_day_sell_df.empty:
                 _trading_day_sell_df["status"] = -1
                 # ✅ Best Practice: Resetting index with a specific level improves code clarity and ensures the correct index is used.
                 _trading_day_sell_df["date"] = _trading_date
-                _trading_day_df = pd.concat([_trading_day_df, _trading_day_sell_df], sort=False)
+                _trading_day_df = pd.concat(
+                    [_trading_day_df, _trading_day_sell_df], sort=False
+                )
         # ⚠️ SAST Risk (Low): Potential for index misalignment if 'bench' does not match the expected index structure.
 
         result_df = pd.concat([result_df, _trading_day_df], sort=True)
@@ -91,17 +94,21 @@ def parse_position(position: dict = None) -> pd.DataFrame:
         previous_data = dict(
             date=_trading_date,
             code_list=_trading_day_df[_trading_day_df["status"] != -1].index,
-        # ✅ Best Practice: Use of a constant or variable for the label name improves maintainability
+            # ✅ Best Practice: Use of a constant or variable for the label name improves maintainability
         )
 
     result_df.reset_index(inplace=True)
     # ✅ Best Practice: Using copy to avoid modifying the original DataFrame
     result_df.rename(columns={"date": "datetime", "index": "instrument"}, inplace=True)
     return result_df.set_index(["instrument", "datetime"])
+
+
 # 🧠 ML Signal: Ranking and normalizing data, common in feature engineering
 
 
-def _add_label_to_position(position_df: pd.DataFrame, label_data: pd.DataFrame) -> pd.DataFrame:
+def _add_label_to_position(
+    position_df: pd.DataFrame, label_data: pd.DataFrame
+) -> pd.DataFrame:
     """Concat position with custom label
 
     :param position_df: position DataFrame
@@ -112,12 +119,16 @@ def _add_label_to_position(position_df: pd.DataFrame, label_data: pd.DataFrame) 
     _start_time = position_df.index.get_level_values(level="datetime").min()
     _end_time = position_df.index.get_level_values(level="datetime").max()
     label_data = label_data.loc(axis=0)[:, pd.to_datetime(_start_time) :]
-    _result_df = pd.concat([position_df, label_data], axis=1, sort=True).reindex(label_data.index)
+    _result_df = pd.concat([position_df, label_data], axis=1, sort=True).reindex(
+        label_data.index
+    )
     _result_df = _result_df.loc[_result_df.index.get_level_values(1) <= _end_time]
     return _result_df
 
 
-def _add_bench_to_position(position_df: pd.DataFrame = None, bench: pd.Series = None) -> pd.DataFrame:
+def _add_bench_to_position(
+    position_df: pd.DataFrame = None, bench: pd.Series = None
+) -> pd.DataFrame:
     """Concat position with bench
 
     :param position_df: position DataFrame
@@ -131,6 +142,8 @@ def _add_bench_to_position(position_df: pd.DataFrame = None, bench: pd.Series = 
     _temp_df["bench"] = bench.shift(-1)
     res_df = _temp_df.set_index(["instrument", _temp_df.index])
     return res_df
+
+
 # 🧠 ML Signal: Conditional data transformation based on a flag
 
 
@@ -148,7 +161,9 @@ def _calculate_label_rank(df: pd.DataFrame) -> pd.DataFrame:
 
         # Sell: -1, Hold: 0, Buy: 1
         for i in [-1, 0, 1]:
-            g_df.loc[g_df["status"] == i, "rank_label_mean"] = g_df[g_df["status"] == i]["rank_ratio"].mean()
+            g_df.loc[g_df["status"] == i, "rank_label_mean"] = g_df[
+                g_df["status"] == i
+            ]["rank_ratio"].mean()
 
         g_df["excess_return"] = g_df[_label_name] - g_df[_label_name].mean()
         return g_df
@@ -192,5 +207,7 @@ def get_position_data(
     _date_list = _position_df.index.get_level_values(level="datetime")
     start_date = _date_list.min() if start_date is None else start_date
     end_date = _date_list.max() if end_date is None else end_date
-    _position_df = _position_df.loc[(start_date <= _date_list) & (_date_list <= end_date)]
+    _position_df = _position_df.loc[
+        (start_date <= _date_list) & (_date_list <= end_date)
+    ]
     return _position_df

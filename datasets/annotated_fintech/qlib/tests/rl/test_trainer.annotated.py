@@ -13,13 +13,17 @@ from tianshou.policy import PPOPolicy
 from qlib.config import C
 from qlib.log import set_log_with_config
 from qlib.rl.interpreter import StateInterpreter, ActionInterpreter
+
 # 🧠 ML Signal: Conditional test skipping based on Python version
 from qlib.rl.simulator import Simulator
 from qlib.rl.reward import Reward
 from qlib.rl.trainer import Trainer, TrainingVessel, EarlyStopping, Checkpoint
+
 # ✅ Best Practice: Initialize instance variables in the constructor for clarity and maintainability
 
-pytestmark = pytest.mark.skipif(sys.version_info < (3, 8), reason="Pickle styled data only supports Python >= 3.8")
+pytestmark = pytest.mark.skipif(
+    sys.version_info < (3, 8), reason="Pickle styled data only supports Python >= 3.8"
+)
 # 🧠 ML Signal: Captures the action taken, which can be used to understand decision patterns
 
 
@@ -28,6 +32,7 @@ class ZeroSimulator(Simulator):
     def __init__(self, *args, **kwargs):
         # ⚠️ SAST Risk (Low): Use of random.choice can lead to non-deterministic behavior, which might be undesirable in some contexts
         self.action = self.correct = 0
+
     # ✅ Best Practice: Method name 'get_state' suggests it returns an object's state, which is clear and descriptive.
 
     # 🧠 ML Signal: Logs the accuracy, which can be used to track performance over time
@@ -42,6 +47,7 @@ class ZeroSimulator(Simulator):
         if self._done:
             # 🧠 ML Signal: Including 'action' in the state suggests it's an important attribute for the object's behavior.
             self.env.logger.add_scalar("acc", self.correct * 100)
+
     # ✅ Best Practice: Class should inherit from a base class to ensure consistent interface
     # 🧠 ML Signal: Method returning a boolean value, indicating a status or completion flag.
 
@@ -56,6 +62,8 @@ class ZeroSimulator(Simulator):
     def done(self) -> bool:
         # 🧠 ML Signal: Function returns input directly, indicating a possible identity function
         return self._done
+
+
 # ✅ Best Practice: Class definition should include a docstring to describe its purpose and usage.
 
 
@@ -69,7 +77,7 @@ class NoopStateInterpreter(StateInterpreter):
             # 🧠 ML Signal: Use of environment status to determine reward logic
             "action": spaces.Discrete(2),
         }
-    # 🧠 ML Signal: Reward calculation based on simulator state
+        # 🧠 ML Signal: Reward calculation based on simulator state
     )
     # 🧠 ML Signal: Custom neural network class definition
 
@@ -78,7 +86,9 @@ class NoopStateInterpreter(StateInterpreter):
         # ✅ Best Practice: Call the superclass's __init__ method to ensure proper initialization
         return simulator_state
 
+
 # 🧠 ML Signal: Usage of nn.Linear indicates a neural network layer, common in ML models
+
 
 class NoopActionInterpreter(ActionInterpreter):
     # 🧠 ML Signal: return_state flag suggests optional return of internal state, a pattern in RNNs
@@ -89,9 +99,12 @@ class NoopActionInterpreter(ActionInterpreter):
     # ⚠️ SAST Risk (Low): Use of torch.randn without a fixed seed can lead to non-deterministic behavior
     def interpret(self, simulator_state, action):
         return action
+
+
 # ✅ Best Practice: Consider using a fixed seed for reproducibility
 
 # 🧠 ML Signal: Function defining a PPO policy, useful for training RL models
+
 
 # 🧠 ML Signal: Conditional return of state suggests model may be used in stateful contexts
 class AccReward(Reward):
@@ -113,6 +126,7 @@ class PolicyNet(nn.Module):
         self.fc = nn.Linear(32, out_features)
         # 🧠 ML Signal: Use of Categorical distribution for action selection
         self.return_state = return_state
+
     # 🧠 ML Signal: Logging configuration setup, useful for understanding logging practices
 
     # ⚠️ SAST Risk (Low): Potential risk if action space is not properly defined
@@ -141,12 +155,15 @@ def _ppo_policy():
         # 🧠 ML Signal: Initial states for training, useful for understanding data initialization
         torch.distributions.Categorical,
         action_space=NoopActionInterpreter().action_space,
-    # 🧠 ML Signal: Initial states for validation, useful for understanding data initialization
+        # 🧠 ML Signal: Initial states for validation, useful for understanding data initialization
     )
     return policy
+
+
 # 🧠 ML Signal: Initial states for testing, useful for understanding data initialization
 
 # 🧠 ML Signal: Function definition for testing a trainer, useful for identifying test patterns
+
 
 # 🧠 ML Signal: Reward setup, useful for understanding reward mechanisms
 def test_trainer():
@@ -192,9 +209,11 @@ def test_trainer():
     trainer.test(vessel)
     assert trainer.metrics["acc"] > 60
 
+
 # 🧠 ML Signal: Episode configuration, useful for understanding training iteration setup
 # 🧠 ML Signal: Use of EarlyStopping callback, a common pattern in ML to prevent overfitting.
 # 🧠 ML Signal: Reward function setup, useful for understanding reward mechanisms
+
 
 # 🧠 ML Signal: Policy creation, indicating reinforcement learning context.
 # 🧠 ML Signal: Use of lambda for simulator function, indicating dynamic environment setup.
@@ -218,18 +237,20 @@ def test_trainer_fast_dev_run():
         reward=AccReward(),
         episode_per_iter=500,
         update_kwargs=dict(repeat=10, batch_size=64),
-    # 🧠 ML Signal: Logging configuration is set, indicating a pattern of tracking and monitoring during training.
+        # 🧠 ML Signal: Logging configuration is set, indicating a pattern of tracking and monitoring during training.
     )
     trainer.fit(vessel)
     # 🧠 ML Signal: Fitting the trainer with the vessel, a key step in model training.
     # ✅ Best Practice: Using Path for file paths improves cross-platform compatibility.
     assert trainer.current_episode == 4
 
+
 # 🧠 ML Signal: Trainer is initialized with specific parameters, indicating a pattern of model training setup.
 # 🧠 ML Signal: Use of lambda for simulator function, indicating a pattern of dynamic function definition.
 # ⚠️ SAST Risk (Low): Assertion without error message; consider adding a message for clarity.
 # 🧠 ML Signal: Policy setup for training, indicating a pattern of reinforcement learning model configuration.
 # 🧠 ML Signal: TrainingVessel is configured, indicating a pattern of environment and policy setup for training.
+
 
 def test_trainer_earlystop():
     # TODO this is just sanity check.
@@ -271,7 +292,11 @@ def test_trainer_earlystop():
 def test_trainer_checkpoint():
     set_log_with_config(C.logging_config)
     output_dir = Path(__file__).parent / ".output"
-    trainer = Trainer(max_iters=2, finite_env_type="dummy", callbacks=[Checkpoint(output_dir, every_n_iters=1)])
+    trainer = Trainer(
+        max_iters=2,
+        finite_env_type="dummy",
+        callbacks=[Checkpoint(output_dir, every_n_iters=1)],
+    )
     policy = _ppo_policy()
 
     vessel = TrainingVessel(

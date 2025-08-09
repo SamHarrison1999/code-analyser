@@ -13,6 +13,7 @@ from zvt.informer.inform_utils import add_to_eastmoney
 from zvt.recorders.em.em_api import record_hot_topic
 from zvt.tag.common import InsertMode
 from zvt.tag.tag_schemas import StockPools
+
 # ✅ Best Practice: Using a background scheduler is a good practice for running periodic tasks without blocking the main thread.
 from zvt.tag.tag_stats import build_stock_pool_and_tag_stats
 from zvt.utils.time_utils import now_pd_timestamp, current_date
@@ -40,7 +41,7 @@ def calculate_top(clear_em=True):
             break
 
         if Stock.in_trading_time() and not Stock.in_real_trading_time():
-            logger.info(f"Sleeping time......")
+            logger.info("Sleeping time......")
             time.sleep(60 * 1)
             continue
 
@@ -74,7 +75,9 @@ def calculate_top(clear_em=True):
                             to_added = get_top_vol(entity_ids=to_added, limit=500)
 
                 add_to_eastmoney(
-                    codes=[entity_id.split("_")[2] for entity_id in to_added], group="今日强势", over_write=False
+                    codes=[entity_id.split("_")[2] for entity_id in to_added],
+                    group="今日强势",
+                    over_write=False,
                 )
                 add_all_to_em = False
             except Exception as e:
@@ -101,6 +104,8 @@ def calculate_top(clear_em=True):
 if __name__ == "__main__":
     init_log("today_top_runner.log")
     calculate_top(clear_em=False)
-    sched.add_job(func=calculate_top, trigger="cron", hour=9, minute=26, day_of_week="mon-fri")
+    sched.add_job(
+        func=calculate_top, trigger="cron", hour=9, minute=26, day_of_week="mon-fri"
+    )
     sched.start()
     sched._thread.join()

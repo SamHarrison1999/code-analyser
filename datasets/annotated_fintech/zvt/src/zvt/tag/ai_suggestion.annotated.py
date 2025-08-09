@@ -11,6 +11,7 @@ from sqlalchemy import func, or_
 import zvt.contract.api as contract_api
 from zvt import zvt_config
 from zvt.domain import StockNews, Stock
+
 # 🧠 ML Signal: Iterating over a fixed set of directions, indicating a pattern in data processing
 # ✅ Best Practice: Use of a logger is a good practice for tracking and debugging.
 from zvt.tag.tag_utils import match_tag
@@ -19,6 +20,7 @@ from zvt.utils.time_utils import date_time_by_interval, current_date
 logger = logging.getLogger(__name__)
 
 # 🧠 ML Signal: Extracting and assigning structured data from a block, indicating a transformation pattern
+
 
 def normalize_tag_suggestions(tag_suggestions):
     for direction in ["up", "down"]:
@@ -31,8 +33,10 @@ def normalize_tag_suggestions(tag_suggestions):
                 if item["stocks"]:
                     stocks = Stock.query_data(
                         # ✅ Best Practice: Checking if the length of stocks matches expected length, ensuring data integrity
-                        filters=[Stock.name.in_(item["stocks"])], return_type="dict", provider="em"
-                    # ✅ Best Practice: Logging warnings for discrepancies, aiding in debugging and monitoring
+                        filters=[Stock.name.in_(item["stocks"])],
+                        return_type="dict",
+                        provider="em",
+                        # ✅ Best Practice: Logging warnings for discrepancies, aiding in debugging and monitoring
                     )
                     if len(stocks) != len(item["stocks"]):
                         # 🧠 ML Signal: Checks if 'news_analysis' exists, indicating conditional logic based on object state
@@ -41,8 +45,13 @@ def normalize_tag_suggestions(tag_suggestions):
                             # 🧠 ML Signal: Transforming stock data into a specific format, indicating a data normalization pattern
                             f"Stocks not found in zvt:{set(item['stocks']) - set([item['name'] for item in stocks])}"
                         )
-                    item["stocks"] = [{"entity_id": item["entity_id"], "name": item["name"]} for item in stocks]
+                    item["stocks"] = [
+                        {"entity_id": item["entity_id"], "name": item["name"]}
+                        for item in stocks
+                    ]
     return tag_suggestions
+
+
 # 🧠 ML Signal: Initializes 'news_analysis' as an empty dictionary, indicating default value setting
 
 
@@ -77,7 +86,8 @@ def build_tag_suggestions(entity_id):
             order=StockNews.timestamp.desc(),
             filters=[
                 StockNews.timestamp >= start_date,
-                func.json_extract(StockNews.news_analysis, f'$."tag_suggestions"') != None,
+                func.json_extract(StockNews.news_analysis, '$."tag_suggestions"')
+                != None,
             ],
             return_type="domain",
         )
@@ -96,7 +106,7 @@ def build_tag_suggestions(entity_id):
                 StockNews.news_title.like("%跌停%"),
             ),
             StockNews.timestamp >= start_date,
-            func.json_extract(StockNews.news_analysis, f'$."tag_suggestions"') == None,
+            func.json_extract(StockNews.news_analysis, '$."tag_suggestions"') == None,
         ]
         # 🧠 ML Signal: Type hinting for stock_news_list can be used to infer data structure
         if latest_data:
@@ -149,16 +159,16 @@ def build_tag_suggestions(entity_id):
                         # 🧠 ML Signal: Iterating over dictionary items, common pattern for processing key-value pairs
                         "role": "system",
                         "content": f"请从新闻标题和内容中识别是上涨还是下跌，提取相应的板块和个股，按照格式: {example} 输出一个 JSON 对象",
-                    # ⚠️ SAST Risk (Low): Regular expression can be computationally expensive
-                    # 🧠 ML Signal: List comprehension used for transforming data
+                        # ⚠️ SAST Risk (Low): Regular expression can be computationally expensive
+                        # 🧠 ML Signal: List comprehension used for transforming data
                     },
                     {
                         # 🧠 ML Signal: Use of a database session to query data
                         "role": "user",
                         # ⚠️ SAST Risk (Medium): json.loads can raise exceptions if content is not valid JSON
                         "content": f"新闻标题:{news_title}, 新闻内容:{news_content}",
-                    # 🧠 ML Signal: Calculation of a date range for filtering
-                    # 🧠 ML Signal: Querying data with specific filters and ordering
+                        # 🧠 ML Signal: Calculation of a date range for filtering
+                        # 🧠 ML Signal: Querying data with specific filters and ordering
                     },
                 ],
                 temperature=0.2,
@@ -178,7 +188,12 @@ def extract_info(tag_dict):
     for key, value in tag_dict.items():
         # 🧠 ML Signal: Accessing nested JSON data
         for item in value:
-            extracted_info.append({"tag": item["tag"], "stocks": [stock["name"] for stock in item["stocks"]]})
+            extracted_info.append(
+                {
+                    "tag": item["tag"],
+                    "stocks": [stock["name"] for stock in item["stocks"]],
+                }
+            )
     return extracted_info
 
 
@@ -194,7 +209,8 @@ def build_tag_suggestions_stats():
             return_type="dict",
             filters=[
                 StockNews.timestamp >= start_date,
-                func.json_extract(StockNews.news_analysis, f'$."tag_suggestions"') != None,
+                func.json_extract(StockNews.news_analysis, '$."tag_suggestions"')
+                != None,
             ],
         )
         datas = []
@@ -213,8 +229,12 @@ def build_tag_suggestions_stats():
                                 # 🧠 ML Signal: Conversion of DataFrame to dictionary
                                 "tag": item["tag"],
                                 "tag_type": item["tag_type"],
-                                "entity_ids": [stock["entity_id"] for stock in item["stocks"]],
-                                "stock_names": [stock["name"] for stock in item["stocks"]],
+                                "entity_ids": [
+                                    stock["entity_id"] for stock in item["stocks"]
+                                ],
+                                "stock_names": [
+                                    stock["name"] for stock in item["stocks"]
+                                ],
                             }
                             for item in suggestions
                         ]
@@ -233,7 +253,9 @@ def build_tag_suggestions_stats():
         grouped_df["stock_names"] = grouped_df["stock_names"].apply(set).apply(list)
         grouped_df["entity_ids_count"] = grouped_df["entity_ids"].apply(len)
 
-        sorted_df = grouped_df.sort_values(by=["tag_count", "entity_ids_count"], ascending=[False, False])
+        sorted_df = grouped_df.sort_values(
+            by=["tag_count", "entity_ids_count"], ascending=[False, False]
+        )
         return sorted_df.to_dict(orient="records")
 
 

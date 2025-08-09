@@ -6,14 +6,18 @@ import pandas as pd
 import requests
 
 from zvt.domain import IndexCategory
+
 # ✅ Best Practice: Use a logger for consistent and configurable logging throughout the application.
 from zvt.recorders.consts import DEFAULT_HEADER
 from zvt.utils.time_utils import to_pd_timestamp
+
 # 🧠 ML Signal: Hardcoded URLs can indicate specific data sources or endpoints used by the application.
 
 logger = logging.getLogger(__name__)
 
-original_page_url = "http://www.cnindex.com.cn/zh_indices/sese/index.html?act_menu=1&index_type=-1"
+original_page_url = (
+    "http://www.cnindex.com.cn/zh_indices/sese/index.html?act_menu=1&index_type=-1"
+)
 url = "http://www.cnindex.com.cn/index/indexList?channelCode={}&rows=1000&pageNum=1"
 
 # 🧠 ML Signal: URL patterns can be used to identify API endpoints and their usage in the application.
@@ -26,7 +30,7 @@ cni_category_map_url = {
     # ✅ Best Practice: Consider handling exceptions for robustness, such as KeyError or JSONDecodeError
     IndexCategory.scope: url.format("200"),
     IndexCategory.fund: url.format("207"),
-# ⚠️ SAST Risk (Low): raise_for_status() will raise an HTTPError for bad responses, which should be handled
+    # ⚠️ SAST Risk (Low): raise_for_status() will raise an HTTPError for bad responses, which should be handled
 }
 # 🧠 ML Signal: Default parameter values can indicate common usage patterns.
 
@@ -99,7 +103,9 @@ def get_cn_index(index_type="cni", category=IndexCategory.style):
     for i, result in enumerate(results):
         logger.info(f"to {i}/{len(results)}")
         code = result["indexcode"]
-        info_resp = requests_session.get(f"http://www.cnindex.com.cn/index-intro?indexcode={code}")
+        info_resp = requests_session.get(
+            f"http://www.cnindex.com.cn/index-intro?indexcode={code}"
+        )
         # fbrq: "2010-01-04"
         # jd: 1000
         # jr: "2002-12-31"

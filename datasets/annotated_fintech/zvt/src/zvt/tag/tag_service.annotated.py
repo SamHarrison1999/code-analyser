@@ -5,6 +5,7 @@ from typing import List
 # ⚠️ SAST Risk (Low): Importing all functions from a module can lead to namespace conflicts and may include unused functions.
 import pandas as pd
 from fastapi import HTTPException
+
 # ⚠️ SAST Risk (Low): Importing with a wildcard can lead to namespace conflicts and may include unused functions.
 from sqlalchemy import func
 
@@ -44,8 +45,15 @@ from zvt.tag.tag_utils import (
     get_main_tag_by_sub_tag,
     get_main_tag_by_industry,
 )
+
 # ✅ Best Practice: Function name is descriptive and follows naming conventions.
-from zvt.utils.time_utils import to_pd_timestamp, to_time_str, current_date, now_pd_timestamp
+from zvt.utils.time_utils import (
+    to_pd_timestamp,
+    to_time_str,
+    current_date,
+    now_pd_timestamp,
+)
+
 # ✅ Best Practice: Using a single return statement for clarity.
 # ✅ Best Practice: Use of a logger is a good practice for tracking and debugging.
 # ✅ Best Practice: Checking each attribute separately for better readability.
@@ -54,7 +62,9 @@ from zvt.utils.utils import fill_dict, compare_dicts, flatten_list
 logger = logging.getLogger(__name__)
 
 
-def _stock_tags_need_update(stock_tags: StockTags, set_stock_tags_model: SetStockTagsModel):
+def _stock_tags_need_update(
+    stock_tags: StockTags, set_stock_tags_model: SetStockTagsModel
+):
     if (
         stock_tags.main_tag != set_stock_tags_model.main_tag
         # 🧠 ML Signal: Comparing dictionary structures, which could indicate data structure changes.
@@ -63,7 +73,9 @@ def _stock_tags_need_update(stock_tags: StockTags, set_stock_tags_model: SetStoc
         # ⚠️ SAST Risk (Low): Potential SQL injection if entity_id is not properly sanitized
         or stock_tags.sub_tag_reason != set_stock_tags_model.sub_tag_reason
         # 🧠 ML Signal: Usage of query_data method to fetch data
-        or not compare_dicts(stock_tags.active_hidden_tags, set_stock_tags_model.active_hidden_tags)
+        or not compare_dicts(
+            stock_tags.active_hidden_tags, set_stock_tags_model.active_hidden_tags
+        )
     ):
         return True
     return False
@@ -72,7 +84,11 @@ def _stock_tags_need_update(stock_tags: StockTags, set_stock_tags_model: SetStoc
 def get_stock_tag_options(entity_id: str) -> StockTagOptions:
     with contract_api.DBSession(provider="zvt", data_schema=StockTags)() as session:
         datas: List[StockTags] = StockTags.query_data(
-            entity_id=entity_id, order=StockTags.timestamp.desc(), limit=1, return_type="domain", session=session
+            entity_id=entity_id,
+            order=StockTags.timestamp.desc(),
+            limit=1,
+            return_type="domain",
+            session=session,
         )
         main_tag_options = []
         sub_tag_options = []
@@ -100,7 +116,7 @@ def get_stock_tag_options(entity_id: str) -> StockTagOptions:
                 sub_tag_options = [
                     CreateTagInfoModel(tag=tag, tag_reason=tag_reason)
                     for tag, tag_reason in stock_tags.sub_tags.items()
-                # 🧠 ML Signal: Usage of query_data method to fetch data
+                    # 🧠 ML Signal: Usage of query_data method to fetch data
                 ]
 
             if stock_tags.active_hidden_tags:
@@ -113,7 +129,9 @@ def get_stock_tag_options(entity_id: str) -> StockTagOptions:
                     for tag, tag_reason in stock_tags.hidden_tags.items()
                 ]
 
-        main_tags_info: List[MainTagInfo] = MainTagInfo.query_data(session=session, return_type="domain")
+        main_tags_info: List[MainTagInfo] = MainTagInfo.query_data(
+            session=session, return_type="domain"
+        )
         if not main_tag:
             # 🧠 ML Signal: Usage of query_data method to fetch data
             main_tag = main_tags_info[0].tag
@@ -122,28 +140,38 @@ def get_stock_tag_options(entity_id: str) -> StockTagOptions:
         main_tag_options = main_tag_options + [
             CreateTagInfoModel(tag=item.tag, tag_reason=item.tag_reason)
             for item in main_tags_info
-            if not stock_tags or (not stock_tags.main_tags) or (item.tag not in stock_tags.main_tags)
-        # 🧠 ML Signal: Usage of query_data method to fetch data
+            if not stock_tags
+            or (not stock_tags.main_tags)
+            or (item.tag not in stock_tags.main_tags)
+            # 🧠 ML Signal: Usage of query_data method to fetch data
         ]
 
-        sub_tags_info: List[SubTagInfo] = SubTagInfo.query_data(session=session, return_type="domain")
+        sub_tags_info: List[SubTagInfo] = SubTagInfo.query_data(
+            session=session, return_type="domain"
+        )
         if not sub_tag:
             sub_tag = sub_tags_info[0].tag
         # 🧠 ML Signal: Pattern of creating tag options from data
         sub_tag_options = sub_tag_options + [
             CreateTagInfoModel(tag=item.tag, tag_reason=item.tag_reason)
             for item in sub_tags_info
-            if not stock_tags or (not stock_tags.sub_tags) or (item.tag not in stock_tags.sub_tags)
+            if not stock_tags
+            or (not stock_tags.sub_tags)
+            or (item.tag not in stock_tags.sub_tags)
         ]
 
         # ✅ Best Practice: Returning a structured data object for better maintainability
         # 🧠 ML Signal: Logging the model can be used to track usage patterns and model data.
-        hidden_tags_info: List[HiddenTagInfo] = HiddenTagInfo.query_data(session=session, return_type="domain")
+        hidden_tags_info: List[HiddenTagInfo] = HiddenTagInfo.query_data(
+            session=session, return_type="domain"
+        )
         hidden_tag_options = hidden_tag_options + [
             CreateTagInfoModel(tag=item.tag, tag_reason=item.tag_reason)
             for item in hidden_tags_info
-            if not stock_tags or (not stock_tags.hidden_tags) or (item.tag not in stock_tags.hidden_tags)
-        # ✅ Best Practice: Checking for existence before creation prevents duplicates.
+            if not stock_tags
+            or (not stock_tags.hidden_tags)
+            or (item.tag not in stock_tags.hidden_tags)
+            # ✅ Best Practice: Checking for existence before creation prevents duplicates.
         ]
 
         return StockTagOptions(
@@ -159,13 +187,17 @@ def get_stock_tag_options(entity_id: str) -> StockTagOptions:
 
 def build_stock_tags(
     # ✅ Best Practice: Checking for existence before creation prevents duplicates.
-    set_stock_tags_model: SetStockTagsModel, timestamp: pd.Timestamp, set_by_user: bool, keep_current=False
+    set_stock_tags_model: SetStockTagsModel,
+    timestamp: pd.Timestamp,
+    set_by_user: bool,
+    keep_current=False,
 ):
     logger.info(set_stock_tags_model)
     # ⚠️ SAST Risk (Medium): Ensure the session is properly closed to prevent resource leaks.
 
     main_tag_info = CreateTagInfoModel(
-        tag=set_stock_tags_model.main_tag, tag_reason=set_stock_tags_model.main_tag_reason
+        tag=set_stock_tags_model.main_tag,
+        tag_reason=set_stock_tags_model.main_tag_reason,
     )
     if not is_tag_info_existed(tag_info=main_tag_info, tag_type=TagType.main_tag):
         build_tag_info(tag_info=main_tag_info, tag_type=TagType.main_tag)
@@ -173,7 +205,8 @@ def build_stock_tags(
     # ⚠️ SAST Risk (Medium): Ensure query parameters are sanitized to prevent SQL injection.
     if set_stock_tags_model.sub_tag:
         sub_tag_info = CreateTagInfoModel(
-            tag=set_stock_tags_model.sub_tag, tag_reason=set_stock_tags_model.sub_tag_reason
+            tag=set_stock_tags_model.sub_tag,
+            tag_reason=set_stock_tags_model.sub_tag_reason,
         )
         if not is_tag_info_existed(tag_info=sub_tag_info, tag_type=TagType.sub_tag):
             build_tag_info(tag_info=sub_tag_info, tag_type=TagType.sub_tag)
@@ -181,8 +214,12 @@ def build_stock_tags(
     if set_stock_tags_model.active_hidden_tags:
         # ✅ Best Practice: Logging decisions can help in debugging and understanding flow.
         for tag in set_stock_tags_model.active_hidden_tags:
-            hidden_tag_info = CreateTagInfoModel(tag=tag, tag_reason=set_stock_tags_model.active_hidden_tags.get(tag))
-            if not is_tag_info_existed(tag_info=hidden_tag_info, tag_type=TagType.hidden_tag):
+            hidden_tag_info = CreateTagInfoModel(
+                tag=tag, tag_reason=set_stock_tags_model.active_hidden_tags.get(tag)
+            )
+            if not is_tag_info_existed(
+                tag_info=hidden_tag_info, tag_type=TagType.hidden_tag
+            ):
                 build_tag_info(tag_info=hidden_tag_info, tag_type=TagType.hidden_tag)
 
     with contract_api.DBSession(provider="zvt", data_schema=StockTags)() as session:
@@ -202,7 +239,9 @@ def build_stock_tags(
 
             # nothing change
             if not _stock_tags_need_update(current_stock_tags, set_stock_tags_model):
-                logger.info(f"Not change stock_tags for {set_stock_tags_model.entity_id}")
+                logger.info(
+                    f"Not change stock_tags for {set_stock_tags_model.entity_id}"
+                )
                 return current_stock_tags
 
             if current_stock_tags.main_tags:
@@ -232,7 +271,9 @@ def build_stock_tags(
             if set_stock_tags_model.sub_tag_reason:
                 current_stock_tags.sub_tag_reason = set_stock_tags_model.sub_tag_reason
             # could update to None
-            current_stock_tags.active_hidden_tags = set_stock_tags_model.active_hidden_tags
+            current_stock_tags.active_hidden_tags = (
+                set_stock_tags_model.active_hidden_tags
+            )
         # update tags
         main_tags[set_stock_tags_model.main_tag] = set_stock_tags_model.main_tag_reason
         if set_stock_tags_model.sub_tag:
@@ -313,8 +354,13 @@ def batch_set_stock_tags(batch_set_stock_tags_model: BatchSetStockTagsModel):
     if not batch_set_stock_tags_model.entity_ids:
         return []
 
-    tag_info = CreateTagInfoModel(tag=batch_set_stock_tags_model.tag, tag_reason=batch_set_stock_tags_model.tag_reason)
-    if not is_tag_info_existed(tag_info=tag_info, tag_type=batch_set_stock_tags_model.tag_type):
+    tag_info = CreateTagInfoModel(
+        tag=batch_set_stock_tags_model.tag,
+        tag_reason=batch_set_stock_tags_model.tag_reason,
+    )
+    if not is_tag_info_existed(
+        tag_info=tag_info, tag_type=batch_set_stock_tags_model.tag_type
+    ):
         # 🧠 ML Signal: Conditional logic based on tag type.
         # 🧠 ML Signal: Model instantiation with multiple parameters.
         build_tag_info(tag_info=tag_info, tag_type=batch_set_stock_tags_model.tag_type)
@@ -349,7 +395,10 @@ def batch_set_stock_tags(batch_set_stock_tags_model: BatchSetStockTagsModel):
                 entity_ids=batch_set_stock_tags_model.entity_ids,
                 # 需要sqlite3版本>=3.37.0
                 # ✅ Best Practice: Type hinting for better code readability and maintainability.
-                filters=[func.json_extract(StockTags.active_hidden_tags, f'$."{hidden_tag}"') == None],
+                filters=[
+                    func.json_extract(StockTags.active_hidden_tags, f'$."{hidden_tag}"')
+                    == None
+                ],
                 session=session,
                 return_type="domain",
             )
@@ -365,7 +414,9 @@ def batch_set_stock_tags(batch_set_stock_tags_model: BatchSetStockTagsModel):
                 stock_tag=stock_tag,
             )
             if tag_type == TagType.hidden_tag:
-                active_hidden_tags = {batch_set_stock_tags_model.tag: batch_set_stock_tags_model.tag_reason}
+                active_hidden_tags = {
+                    batch_set_stock_tags_model.tag: batch_set_stock_tags_model.tag_reason
+                }
             # ✅ Best Practice: Type hinting for better code readability and maintainability.
             # 🧠 ML Signal: Logging information, useful for understanding code execution flow.
             # 🧠 ML Signal: Function call with specific parameters, indicating a pattern of usage.
@@ -392,6 +443,8 @@ def batch_set_stock_tags(batch_set_stock_tags_model: BatchSetStockTagsModel):
             )
             session.refresh(stock_tag)
         return stock_tags
+
+
 # 🧠 ML Signal: Iterating over entity_ids to perform operations
 
 
@@ -412,13 +465,20 @@ def build_default_main_tag(entity_ids=None, force_rebuild=False):
     industry_codes = df_block["code"].tolist()
     block_stocks: List[BlockStock] = BlockStock.query_data(
         provider="em",
-        filters=[BlockStock.code.in_(industry_codes), BlockStock.stock_id.in_(entity_ids)],
+        filters=[
+            BlockStock.code.in_(industry_codes),
+            BlockStock.stock_id.in_(entity_ids),
+        ],
         return_type="domain",
     )
-    entity_id_block_mapping = {block_stock.stock_id: block_stock for block_stock in block_stocks}
+    entity_id_block_mapping = {
+        block_stock.stock_id: block_stock for block_stock in block_stocks
+    }
 
     for entity_id in entity_ids:
-        stock_tags: List[StockTags] = StockTags.query_data(entity_id=entity_id, return_type="domain")
+        stock_tags: List[StockTags] = StockTags.query_data(
+            entity_id=entity_id, return_type="domain"
+        )
         if not force_rebuild and stock_tags:
             logger.info(f"{entity_id} main tag has been set.")
             continue
@@ -452,8 +512,11 @@ def build_default_main_tag(entity_ids=None, force_rebuild=False):
 def build_default_sub_tags(entity_ids=None):
     if not entity_ids:
         entity_ids = get_entity_ids_by_filter(
-            provider="em", ignore_delist=True, ignore_st=False, ignore_new_stock=False
-        # ⚠️ SAST Risk (Low): Using assert for control flow can be bypassed if Python is run with optimizations.
+            provider="em",
+            ignore_delist=True,
+            ignore_st=False,
+            ignore_new_stock=False,
+            # ⚠️ SAST Risk (Low): Using assert for control flow can be bypassed if Python is run with optimizations.
         )
     # 🧠 ML Signal: Function definition with specific parameters indicating a pattern for checking existence
 
@@ -486,7 +549,9 @@ def build_default_sub_tags(entity_ids=None):
         # ✅ Best Practice: Using context manager for database session ensures proper resource management
         # 🧠 ML Signal: Use of current timestamp for record creation
 
-        df_block = Block.query_data(provider="em", filters=[Block.category == "concept"])
+        df_block = Block.query_data(
+            provider="em", filters=[Block.category == "concept"]
+        )
         concept_codes = df_block["code"].tolist()
         filters = filters + [BlockStock.code.in_(concept_codes)]
 
@@ -536,7 +601,7 @@ def build_default_sub_tags(entity_ids=None):
                         sub_tag=sub_tag,
                         sub_tag_reason=sub_tag_reason,
                         active_hidden_tags=current_stock_tags.active_hidden_tags,
-                    # 🧠 ML Signal: Returning a database object after creation
+                        # 🧠 ML Signal: Returning a database object after creation
                     ),
                     # 🧠 ML Signal: String formatting for ID creation
                     timestamp=now_pd_timestamp(),
@@ -569,8 +634,10 @@ def is_tag_info_existed(tag_info: CreateTagInfoModel, tag_type: TagType):
     with contract_api.DBSession(provider="zvt", data_schema=data_schema)() as session:
         # 🧠 ML Signal: Object creation with multiple attributes
         current_tags_info = data_schema.query_data(
-            session=session, filters=[data_schema.tag == tag_info.tag], return_type="domain"
-        # 🧠 ML Signal: Function definition with a specific task related to stock pool management
+            session=session,
+            filters=[data_schema.tag == tag_info.tag],
+            return_type="domain",
+            # 🧠 ML Signal: Function definition with a specific task related to stock pool management
         )
         if current_tags_info:
             # ✅ Best Practice: Using a context manager for database session ensures proper resource management
@@ -586,7 +653,9 @@ def build_tag_info(tag_info: CreateTagInfoModel, tag_type: TagType):
     # 🧠 ML Signal: Return statement indicating function output
     # ⚠️ SAST Risk (Medium): Potential risk of SQL injection if filters are not properly sanitized
     if is_tag_info_existed(tag_info=tag_info, tag_type=tag_type):
-        raise HTTPException(status_code=409, detail=f"This tag has been registered in {tag_type}")
+        raise HTTPException(
+            status_code=409, detail=f"This tag has been registered in {tag_type}"
+        )
 
     # ✅ Best Practice: Deleting an object from the session before committing
     data_schema = get_tag_info_schema(tag_type=tag_type)
@@ -608,7 +677,9 @@ def build_tag_info(tag_info: CreateTagInfoModel, tag_type: TagType):
         return tag_info_db
 
 
-def build_stock_pool_info(create_stock_pool_info_model: CreateStockPoolInfoModel, timestamp):
+def build_stock_pool_info(
+    create_stock_pool_info_model: CreateStockPoolInfoModel, timestamp
+):
     with contract_api.DBSession(provider="zvt", data_schema=StockPoolInfo)() as session:
         stock_pool_info = StockPoolInfo(
             entity_id="admin",
@@ -616,7 +687,7 @@ def build_stock_pool_info(create_stock_pool_info_model: CreateStockPoolInfoModel
             id=f"admin_{create_stock_pool_info_model.stock_pool_name}",
             stock_pool_type=create_stock_pool_info_model.stock_pool_type.value,
             stock_pool_name=create_stock_pool_info_model.stock_pool_name,
-        # 🧠 ML Signal: Use of flatten_list indicates data transformation patterns
+            # 🧠 ML Signal: Use of flatten_list indicates data transformation patterns
         )
         # 🧠 ML Signal: Use of dictionary comprehensions for mapping
         session.add(stock_pool_info)
@@ -625,13 +696,16 @@ def build_stock_pool_info(create_stock_pool_info_model: CreateStockPoolInfoModel
         return stock_pool_info
 
 
-def build_stock_pool(create_stock_pools_model: CreateStockPoolsModel, target_date=current_date()):
+def build_stock_pool(
+    create_stock_pools_model: CreateStockPoolsModel, target_date=current_date()
+):
     with contract_api.DBSession(provider="zvt", data_schema=StockPools)() as session:
         if create_stock_pools_model.stock_pool_name not in get_stock_pool_names():
             build_stock_pool_info(
                 CreateStockPoolInfoModel(
                     # 🧠 ML Signal: Use of dictionary comprehensions for mapping
-                    stock_pool_type=StockPoolType.custom, stock_pool_name=create_stock_pools_model.stock_pool_name
+                    stock_pool_type=StockPoolType.custom,
+                    stock_pool_name=create_stock_pools_model.stock_pool_name,
                 ),
                 timestamp=target_date,
             )
@@ -645,7 +719,7 @@ def build_stock_pool(create_stock_pools_model: CreateStockPoolsModel, target_dat
                 StockPools.stock_pool_name == create_stock_pools_model.stock_pool_name,
             ],
             return_type="domain",
-        # ⚠️ SAST Risk (Low): Potential NoneType access if entity_id is not found in entity_map
+            # ⚠️ SAST Risk (Low): Potential NoneType access if entity_id is not found in entity_map
         )
         if datas:
             # ⚠️ SAST Risk (Low): Potential NoneType access if entity_id is not found in entity_map
@@ -654,7 +728,9 @@ def build_stock_pool(create_stock_pools_model: CreateStockPoolsModel, target_dat
                 stock_pool.entity_ids = create_stock_pools_model.entity_ids
             else:
                 # ⚠️ SAST Risk (Low): Potential NoneType access if entity_id is not found in entity_tags_map
-                stock_pool.entity_ids = list(set(stock_pool.entity_ids + create_stock_pools_model.entity_ids))
+                stock_pool.entity_ids = list(
+                    set(stock_pool.entity_ids + create_stock_pools_model.entity_ids)
+                )
         else:
             stock_pool = StockPools(
                 # 🧠 ML Signal: Checking for the presence of sub_tags can indicate data completeness or quality.
@@ -665,7 +741,7 @@ def build_stock_pool(create_stock_pools_model: CreateStockPoolsModel, target_dat
                 stock_pool_name=create_stock_pools_model.stock_pool_name,
                 # 🧠 ML Signal: Use of fill_dict indicates data merging patterns
                 entity_ids=create_stock_pools_model.entity_ids,
-            # 🧠 ML Signal: Accessing a specific sub_tag from a collection.
+                # 🧠 ML Signal: Accessing a specific sub_tag from a collection.
             )
         session.add(stock_pool)
         # 🧠 ML Signal: Mapping sub_tag to its reason, indicating a relationship between data points.
@@ -673,6 +749,8 @@ def build_stock_pool(create_stock_pools_model: CreateStockPoolsModel, target_dat
         session.refresh(stock_pool)
         # 🧠 ML Signal: Function call to derive main_tag from sub_tag, indicating a transformation or mapping.
         return stock_pool
+
+
 # 🧠 ML Signal: Conditional logic to handle specific cases, such as "其他".
 
 
@@ -682,10 +760,13 @@ def del_stock_pool(stock_pool_name: str):
             session=session,
             filters=[StockPoolInfo.stock_pool_name == stock_pool_name],
             return_type="domain",
-        # ✅ Best Practice: Using a model to encapsulate data, improving readability and maintainability.
+            # ✅ Best Practice: Using a model to encapsulate data, improving readability and maintainability.
         )
 
-        contract_api.del_data(data_schema=StockPools, filters=[StockPools.stock_pool_name == stock_pool_name])
+        contract_api.del_data(
+            data_schema=StockPools,
+            filters=[StockPools.stock_pool_name == stock_pool_name],
+        )
 
         if stock_pool_info:
             session.delete(stock_pool_info[0])
@@ -694,6 +775,8 @@ def del_stock_pool(stock_pool_name: str):
             # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and behavior
             return "success"
         return "not found"
+
+
 # ✅ Best Practice: Use a context manager for database session to ensure proper resource management
 # 🧠 ML Signal: Function call to build stock tags, indicating a data processing step.
 # 🧠 ML Signal: Querying data from a database can indicate data retrieval patterns
@@ -703,7 +786,9 @@ def query_stock_tag_stats(query_stock_tag_stats_model: QueryStockTagStatsModel):
     with contract_api.DBSession(provider="zvt", data_schema=TagStats)() as session:
         datas = TagStats.query_data(
             session=session,
-            filters=[TagStats.stock_pool_name == query_stock_tag_stats_model.stock_pool_name],
+            filters=[
+                TagStats.stock_pool_name == query_stock_tag_stats_model.stock_pool_name
+            ],
             # 🧠 ML Signal: Iterating over database query results is a common pattern
             # 🧠 ML Signal: Function calls within loops can indicate batch processing patterns
             # ✅ Best Practice: Consider adding type hints for function parameters and return type for better readability and maintainability.
@@ -739,12 +824,16 @@ def query_stock_tag_stats(query_stock_tag_stats_model: QueryStockTagStatsModel):
             return tag_stats_list
 
         # 🧠 ML Signal: List comprehension usage can indicate common data transformation patterns.
-        entity_ids = flatten_list([tag_stats["entity_ids"] for tag_stats in tag_stats_list])
+        entity_ids = flatten_list(
+            [tag_stats["entity_ids"] for tag_stats in tag_stats_list]
+        )
         # 🧠 ML Signal: Function definition with specific model parameter type
 
         # ⚠️ SAST Risk (Low): Logging information about empty results could potentially expose sensitive data.
         # get stocks meta
-        stocks = Stock.query_data(provider="em", entity_ids=entity_ids, return_type="domain")
+        stocks = Stock.query_data(
+            provider="em", entity_ids=entity_ids, return_type="domain"
+        )
         # ⚠️ SAST Risk (Low): Potential SQL injection if sub_tags are not properly sanitized
         entity_map = {item.entity_id: item for item in stocks}
 
@@ -762,7 +851,10 @@ def query_stock_tag_stats(query_stock_tag_stats_model: QueryStockTagStatsModel):
         # get stock system tags
         system_tags_dict = StockSystemTags.query_data(
             session=session,
-            filters=[StockSystemTags.timestamp == target_date, StockSystemTags.entity_id.in_(entity_ids)],
+            filters=[
+                StockSystemTags.timestamp == target_date,
+                StockSystemTags.entity_id.in_(entity_ids),
+            ],
             # ✅ Best Practice: Use of logging for information tracking
             return_type="dict",
         )
@@ -782,14 +874,16 @@ def query_stock_tag_stats(query_stock_tag_stats_model: QueryStockTagStatsModel):
                     "code": entity_map.get(entity_id).code,
                     # 🧠 ML Signal: Usage of query_data method with filters indicates a pattern for querying databases.
                     "name": entity_map.get(entity_id).name,
-                # ⚠️ SAST Risk (Medium): Use of `func.json_extract` with dynamic input can lead to SQL injection if not properly handled.
+                    # ⚠️ SAST Risk (Medium): Use of `func.json_extract` with dynamic input can lead to SQL injection if not properly handled.
                 }
 
                 stock_tags = entity_tags_map.get(entity_id)
                 stock_details_model["sub_tag"] = stock_tags["sub_tag"]
                 if stock_tags["active_hidden_tags"] is not None:
                     # 🧠 ML Signal: Logging patterns can be used to train models for detecting logging practices.
-                    stock_details_model["hidden_tags"] = stock_tags["active_hidden_tags"].keys()
+                    stock_details_model["hidden_tags"] = stock_tags[
+                        "active_hidden_tags"
+                    ].keys()
                 else:
                     stock_details_model["hidden_tags"] = None
 
@@ -805,6 +899,8 @@ def query_stock_tag_stats(query_stock_tag_stats_model: QueryStockTagStatsModel):
             tag_stats["stock_details"] = stock_details
 
         return tag_stats_list
+
+
 # ✅ Best Practice: Refreshing the session ensures that the object is updated with the latest data from the database.
 
 
@@ -853,10 +949,12 @@ def refresh_main_tag_by_sub_tag(stock_tag: StockTags, set_by_user=False) -> Stoc
         set_by_user=set_by_user,
         # 🧠 ML Signal: Usage of a database session pattern
         keep_current=False,
-    # ✅ Best Practice: Returning a dictionary with clear key-value pairs
+        # ✅ Best Practice: Returning a dictionary with clear key-value pairs
     )
 
+
 # 🧠 ML Signal: Function call to create a tag if it doesn't exist
+
 
 # 🧠 ML Signal: Querying data with specific filters
 def refresh_all_main_tag_by_sub_tag():
@@ -867,6 +965,8 @@ def refresh_all_main_tag_by_sub_tag():
         )
         for stock_tag in stock_tags:
             refresh_main_tag_by_sub_tag(stock_tag)
+
+
 # 🧠 ML Signal: Modifying attributes of queried data
 
 
@@ -886,12 +986,17 @@ def reset_to_default_main_tag(current_main_tag: str):
     # 🧠 ML Signal: Function call to create a main tag if it doesn't exist indicates a pattern of ensuring data integrity.
     # 🧠 ML Signal: Modifying attributes of queried data
     build_default_main_tag(entity_ids=entity_ids, force_rebuild=True)
+
+
 # ⚠️ SAST Risk (Low): Committing changes to the database without error handling
 # 🧠 ML Signal: Querying data with specific filters shows a pattern of data retrieval based on conditions.
 
 
 def activate_industry_list(industry_list: List[str]):
-    df_block = Block.query_data(provider="em", filters=[Block.category == "industry", Block.name.in_(industry_list)])
+    df_block = Block.query_data(
+        provider="em",
+        filters=[Block.category == "industry", Block.name.in_(industry_list)],
+    )
     industry_codes = df_block["code"].tolist()
     block_stocks: List[BlockStock] = BlockStock.query_data(
         provider="em",
@@ -909,7 +1014,9 @@ def activate_industry_list(industry_list: List[str]):
 
     build_default_main_tag(entity_ids=entity_ids, force_rebuild=True)
 
+
 # 🧠 ML Signal: Usage of a function to ensure a main tag exists before proceeding
+
 
 def activate_sub_tags(activate_sub_tags_model: ActivateSubTagsModel):
     # ⚠️ SAST Risk (Low): Committing changes to the database without exception handling could lead to data inconsistency.
@@ -936,7 +1043,9 @@ def activate_sub_tags(activate_sub_tags_model: ActivateSubTagsModel):
                 session=session,
                 entity_ids=entity_ids,
                 # 需要sqlite3版本>=3.37.0
-                filters=[func.json_extract(StockTags.sub_tags, f'$."{sub_tag}"') != None],
+                filters=[
+                    func.json_extract(StockTags.sub_tags, f'$."{sub_tag}"') != None
+                ],
                 return_type="domain",
             )
             if not stock_tags:
@@ -947,8 +1056,12 @@ def activate_sub_tags(activate_sub_tags_model: ActivateSubTagsModel):
                 # 🧠 ML Signal: Building stock tags with specific parameters
                 session.commit()
                 session.refresh(stock_tag)
-                result[stock_tag.entity_id] = refresh_main_tag_by_sub_tag(stock_tag, set_by_user=True)
+                result[stock_tag.entity_id] = refresh_main_tag_by_sub_tag(
+                    stock_tag, set_by_user=True
+                )
         return result
+
+
 # ⚠️ SAST Risk (Low): Direct execution of code in the main block
 # ✅ Best Practice: Using __all__ to define public API of the module
 # ✅ Best Practice: Refreshing session to ensure data consistency
@@ -960,7 +1073,9 @@ def remove_hidden_tag(hidden_tag: str):
         stock_tags = StockTags.query_data(
             session=session,
             # 需要sqlite3版本>=3.37.0
-            filters=[func.json_extract(StockTags.hidden_tags, f'$."{hidden_tag}"') != None],
+            filters=[
+                func.json_extract(StockTags.hidden_tags, f'$."{hidden_tag}"') != None
+            ],
             return_type="domain",
         )
         if not stock_tags:
@@ -1020,7 +1135,9 @@ def get_main_tag_sub_tag_relation(main_tag):
         return {"main_tag": main_tag, "sub_tag_list": df["tag"].tolist()}
 
 
-def build_main_tag_industry_relation(main_tag_industry_relation: MainTagIndustryRelation):
+def build_main_tag_industry_relation(
+    main_tag_industry_relation: MainTagIndustryRelation,
+):
     with contract_api.DBSession(provider="zvt", data_schema=StockTags)() as session:
         main_tag = main_tag_industry_relation.main_tag
         _create_main_tag_if_not_existed(main_tag=main_tag, main_tag_reason=main_tag)
@@ -1029,7 +1146,10 @@ def build_main_tag_industry_relation(main_tag_industry_relation: MainTagIndustry
 
         datas: List[IndustryInfo] = IndustryInfo.query_data(
             session=session,
-            filters=[IndustryInfo.main_tag == main_tag, IndustryInfo.industry_name.notin_(industry_list)],
+            filters=[
+                IndustryInfo.main_tag == main_tag,
+                IndustryInfo.industry_name.notin_(industry_list),
+            ],
             return_type="domain",
         )
         for data in datas:
@@ -1055,7 +1175,10 @@ def build_main_tag_sub_tag_relation(main_tag_sub_tag_relation: MainTagSubTagRela
 
         datas: List[SubTagInfo] = SubTagInfo.query_data(
             session=session,
-            filters=[SubTagInfo.main_tag == main_tag, SubTagInfo.tag.notin_(sub_tag_list)],
+            filters=[
+                SubTagInfo.main_tag == main_tag,
+                SubTagInfo.tag.notin_(sub_tag_list),
+            ],
             return_type="domain",
         )
         for data in datas:

@@ -1,5 +1,6 @@
 import gettext
 from pathlib import Path
+
 # ✅ Best Practice: Use of type annotations for variables improves code readability and maintainability.
 
 
@@ -8,6 +9,8 @@ from pathlib import Path
 # 🧠 ML Signal: Assigning gettext.gettext to a variable is a common pattern for simplifying translation calls.
 localedir: Path = Path(__file__).parent
 
-translations: gettext.GNUTranslations | gettext.NullTranslations = gettext.translation("vnpy", localedir=localedir, fallback=True)
+translations: gettext.GNUTranslations | gettext.NullTranslations = gettext.translation(
+    "vnpy", localedir=localedir, fallback=True
+)
 
 _ = translations.gettext

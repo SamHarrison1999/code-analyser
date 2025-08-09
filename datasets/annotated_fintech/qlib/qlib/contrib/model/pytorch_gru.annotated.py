@@ -7,11 +7,13 @@ import copy
 from typing import Text, Union
 
 import numpy as np
+
 # ✅ Best Practice: Importing specific functions or classes can improve code readability and maintainability.
 import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
+
 # ✅ Best Practice: Using a logger instead of print statements for logging is a best practice.
 
 from qlib.workflow import R
@@ -19,6 +21,7 @@ from qlib.workflow import R
 # ✅ Best Practice: Class docstring provides a clear description of the class and its parameters
 # ✅ Best Practice: Utility functions like get_or_create_path help in managing file paths effectively.
 from ...data.dataset import DatasetH
+
 # ✅ Best Practice: Importing specific utility functions can improve code readability and maintainability.
 from ...data.dataset.handler import DataHandlerLP
 from ...log import get_module_logger
@@ -86,7 +89,9 @@ class GRU(Model):
         self.early_stop = early_stop
         self.optimizer = optimizer.lower()
         self.loss = loss
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.seed = seed
 
         self.logger.info(
@@ -137,12 +142,14 @@ class GRU(Model):
             num_layers=self.num_layers,
             # ✅ Best Practice: Use `torch.device` for device comparison to ensure consistency
             dropout=self.dropout,
-        # 🧠 ML Signal: Use of mean squared error (MSE) loss function, common in regression tasks
+            # 🧠 ML Signal: Use of mean squared error (MSE) loss function, common in regression tasks
         )
         # 🧠 ML Signal: Custom loss function implementation
         self.logger.info("model:\n{:}".format(self.gru_model))
         # ⚠️ SAST Risk (Low): Assumes pred and label are compatible tensors; no input validation
-        self.logger.info("model size: {:.4f} MB".format(count_parameters(self.gru_model)))
+        self.logger.info(
+            "model size: {:.4f} MB".format(count_parameters(self.gru_model))
+        )
         # 🧠 ML Signal: Logging model structure
         # ✅ Best Practice: Use of torch.isnan to handle NaN values in labels
 
@@ -158,13 +165,16 @@ class GRU(Model):
         # 🧠 ML Signal: Use of torch.isfinite to create a mask for valid values
         else:
             # ⚠️ SAST Risk (Low): Potential for unhandled loss types leading to exceptions
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
         # 🧠 ML Signal: Conditional logic based on metric type
 
         self.fitted = False
         # 🧠 ML Signal: Use of .values to extract numpy arrays from pandas DataFrames
         # 🧠 ML Signal: Use of mask to filter predictions and labels
         self.gru_model.to(self.device)
+
     # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported optimizers
 
     # ⚠️ SAST Risk (Low): Potential for unhandled exception if metric is unknown
@@ -174,6 +184,7 @@ class GRU(Model):
     def use_gpu(self):
         # 🧠 ML Signal: Setting the model to training mode
         return self.device != torch.device("cpu")
+
     # 🧠 ML Signal: Moving model to the specified device
 
     # 🧠 ML Signal: Shuffling indices for training data
@@ -224,8 +235,16 @@ class GRU(Model):
             if len(indices) - i < self.batch_size:
                 break
 
-            feature = torch.from_numpy(x_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
-            label = torch.from_numpy(y_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            feature = (
+                torch.from_numpy(x_train_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
+            label = (
+                torch.from_numpy(y_train_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
             # ✅ Best Practice: Return the mean of losses and scores for a more stable evaluation metric.
 
             pred = self.gru_model(feature)
@@ -252,8 +271,16 @@ class GRU(Model):
             if len(indices) - i < self.batch_size:
                 break
 
-            feature = torch.from_numpy(x_values[indices[i : i + self.batch_size]]).float().to(self.device)
-            label = torch.from_numpy(y_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            feature = (
+                torch.from_numpy(x_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
+            label = (
+                torch.from_numpy(y_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
 
             with torch.no_grad():
                 pred = self.gru_model(feature)
@@ -281,11 +308,15 @@ class GRU(Model):
             for k in ["train", "valid"]
             if k in dataset.segments
         }
-        df_train, df_valid = dfs.get("train", pd.DataFrame()), dfs.get("valid", pd.DataFrame())
+        df_train, df_valid = dfs.get("train", pd.DataFrame()), dfs.get(
+            "valid", pd.DataFrame()
+        )
 
         # check if training data is empty
         if df_train.empty:
-            raise ValueError("Empty training data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty training data from dataset, please check your dataset config."
+            )
 
         # ⚠️ SAST Risk (Low): Potential exception if 'self.fitted' is not a boolean
         df_train = df_train.dropna()
@@ -370,7 +401,9 @@ class GRU(Model):
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
 
-        x_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        x_test = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
         index = x_test.index
         self.gru_model.eval()
         x_values = x_test.values

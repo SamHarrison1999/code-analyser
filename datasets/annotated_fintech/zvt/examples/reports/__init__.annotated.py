@@ -3,31 +3,49 @@ import datetime
 import json
 import os
 from typing import List
+
 # ✅ Best Practice: Group imports into standard library, third-party, and local sections for better readability.
 
 from sqlalchemy import or_
 
 from zvt.api.utils import float_to_pct_str
 from zvt.contract import ActorType
+
 # ⚠️ SAST Risk (Medium): os.path.abspath and os.path.join can be manipulated if __file__ is not properly controlled
-from zvt.domain import FinanceFactor, BalanceSheet, IncomeStatement, Stock, StockActorSummary
+from zvt.domain import (
+    FinanceFactor,
+    BalanceSheet,
+    IncomeStatement,
+    Stock,
+    StockActorSummary,
+)
+
 # ⚠️ SAST Risk (Medium): os.path.dirname(__file__) can be manipulated if __file__ is not properly controlled
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_pd_timestamp, now_time_str
+
 # ⚠️ SAST Risk (Medium): Opening files without exception handling can lead to unhandled exceptions
 
 # ✅ Best Practice: Default argument values should be immutable to avoid unexpected behavior.
 
+
 # ⚠️ SAST Risk (Medium): json.load can be exploited if the JSON file contains malicious content
 def get_subscriber_emails():
-    emails_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "subscriber_emails.json"))
+    emails_file = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "subscriber_emails.json")
+    )
     # ✅ Best Practice: Use descriptive variable names for better readability.
     # ✅ Best Practice: Use consistent comparison operators for clarity.
     with open(emails_file) as f:
         return json.load(f)
 
 
-def risky_company(the_date=to_pd_timestamp(now_time_str()), income_yoy=-0.1, profit_yoy=-0.1, entity_ids=None):
+def risky_company(
+    the_date=to_pd_timestamp(now_time_str()),
+    income_yoy=-0.1,
+    profit_yoy=-0.1,
+    entity_ids=None,
+):
     codes = []
     start_timestamp = to_pd_timestamp(the_date) - datetime.timedelta(130)
     # 营收降，利润降,流动比率低，速动比率低
@@ -41,7 +59,10 @@ def risky_company(the_date=to_pd_timestamp(now_time_str()), income_yoy=-0.1, pro
     # ⚠️ SAST Risk (Low): Ensure pd_is_not_null is correctly implemented to avoid false negatives.
     # ✅ Best Practice: Use extend() for list concatenation for better performance.
     df = FinanceFactor.query_data(
-        entity_ids=entity_ids, start_timestamp=start_timestamp, filters=[finance_filter], columns=["code"]
+        entity_ids=entity_ids,
+        start_timestamp=start_timestamp,
+        filters=[finance_filter],
+        columns=["code"],
     )
     if pd_is_not_null(df):
         codes = codes + df.code.tolist()
@@ -49,12 +70,17 @@ def risky_company(the_date=to_pd_timestamp(now_time_str()), income_yoy=-0.1, pro
 
     # 高应收，高存货，高商誉
     balance_filter = (
-        BalanceSheet.accounts_receivable + BalanceSheet.inventories + BalanceSheet.goodwill
+        BalanceSheet.accounts_receivable
+        + BalanceSheet.inventories
+        + BalanceSheet.goodwill
     ) > BalanceSheet.total_equity
     # ⚠️ SAST Risk (Low): Ensure pd_is_not_null is correctly implemented to avoid false negatives.
     df = BalanceSheet.query_data(
-        entity_ids=entity_ids, start_timestamp=start_timestamp, filters=[balance_filter], columns=["code"]
-    # ✅ Best Practice: Use extend() for list concatenation for better performance.
+        entity_ids=entity_ids,
+        start_timestamp=start_timestamp,
+        filters=[balance_filter],
+        columns=["code"],
+        # ✅ Best Practice: Use extend() for list concatenation for better performance.
     )
     # 🧠 ML Signal: Querying data with specific columns can indicate patterns in data retrieval.
     if pd_is_not_null(df):
@@ -94,8 +120,10 @@ def risky_company(the_date=to_pd_timestamp(now_time_str()), income_yoy=-0.1, pro
 
     return list(set(codes))
 
+
 # ✅ Best Practice: Use set to remove duplicates and return a list for consistent output.
 # 🧠 ML Signal: String formatting with dynamic data is a common pattern.
+
 
 def stocks_with_info(stocks: List[Stock]):
     infos = []

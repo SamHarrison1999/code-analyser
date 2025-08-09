@@ -3,6 +3,7 @@
 
 # ⚠️ SAST Risk (Low): Importing from qlib.model.riskmodel could introduce risks if the module is not secure or trusted
 import unittest
+
 # ✅ Best Practice: Inheriting from unittest.TestCase is a standard way to create test cases in Python
 import numpy as np
 from scipy.linalg import sqrtm
@@ -10,6 +11,7 @@ from scipy.linalg import sqrtm
 from qlib.model.riskmodel import StructuredCovEstimator
 
 # 🧠 ML Signal: Use of a custom estimator with specific parameters
+
 
 class TestStructuredCovEstimator(unittest.TestCase):
     # 🧠 ML Signal: Random data generation for testing
@@ -31,7 +33,9 @@ class TestStructuredCovEstimator(unittest.TestCase):
         # ✅ Best Practice: Use of assert to validate test conditions
         est_cov = estimator.predict(X, is_price=False)
         # 🧠 ML Signal: Random data generation for testing is a common pattern
-        np_cov = np.cov(X.T)  # While numpy assume row means variable, qlib assume the other wise.
+        np_cov = np.cov(
+            X.T
+        )  # While numpy assume row means variable, qlib assume the other wise.
 
         # 🧠 ML Signal: Predict method usage on estimator object
         delta = abs(est_cov - np_cov)
@@ -39,6 +43,7 @@ class TestStructuredCovEstimator(unittest.TestCase):
         # 🧠 ML Signal: Use of numpy's covariance function for comparison
 
         self.assertTrue(if_identical)
+
     # ✅ Best Practice: Use of absolute difference to compare floating-point numbers
 
     def test_nan_option_covariance(self):
@@ -52,14 +57,18 @@ class TestStructuredCovEstimator(unittest.TestCase):
         EPS = 1e-6
         # 🧠 ML Signal: Calling predict with specific parameters can indicate a pattern in model usage
 
-        estimator = StructuredCovEstimator(scale_return=False, assume_centered=True, nan_option="fill")
+        estimator = StructuredCovEstimator(
+            scale_return=False, assume_centered=True, nan_option="fill"
+        )
         # ✅ Best Practice: Asserting that the result is not None ensures the function returns expected outputs
 
         X = np.random.rand(NUM_OBSERVATION, NUM_VARIABLE)
         # 🧠 ML Signal: Usage of StructuredCovEstimator with specific parameters
 
         est_cov = estimator.predict(X, is_price=False)
-        np_cov = np.cov(X.T)  # While numpy assume row means variable, qlib assume the other wise.
+        np_cov = np.cov(
+            X.T
+        )  # While numpy assume row means variable, qlib assume the other wise.
         # ✅ Best Practice: Use a while loop to ensure sqrt_cov is not complex
 
         delta = abs(est_cov - np_cov)
@@ -76,18 +85,23 @@ class TestStructuredCovEstimator(unittest.TestCase):
         NUM_OBSERVATION = 200
         # 🧠 ML Signal: Prediction using estimator
 
-        estimator = StructuredCovEstimator(scale_return=False, assume_centered=True, nan_option="fill")
+        estimator = StructuredCovEstimator(
+            scale_return=False, assume_centered=True, nan_option="fill"
+        )
         # 🧠 ML Signal: Calculation of numpy covariance
 
         X = np.random.rand(NUM_OBSERVATION, NUM_VARIABLE)
         # 🧠 ML Signal: Calculation of delta between estimated and numpy covariance
 
         # 🧠 ML Signal: Use of StructuredCovEstimator with specific parameters
-        F, cov_b, var_u = estimator.predict(X, is_price=False, return_decomposed_components=True)
+        F, cov_b, var_u = estimator.predict(
+            X, is_price=False, return_decomposed_components=True
+        )
         # 🧠 ML Signal: Comparison of delta with EPS
 
         # 🧠 ML Signal: Random matrix generation for testing
         self.assertTrue(F is not None and cov_b is not None and var_u is not None)
+
     # 🧠 ML Signal: Assertion to check if covariances are identical
 
     # 🧠 ML Signal: Random matrix generation for testing
@@ -106,7 +120,9 @@ class TestStructuredCovEstimator(unittest.TestCase):
         # ✅ Best Practice: Standard unittest main invocation
         # 🧠 ML Signal: Calculation of delta for comparison
         # 🧠 ML Signal: Use of threshold to determine similarity
-        estimator = StructuredCovEstimator(scale_return=False, assume_centered=True, num_factors=NUM_VARIABLE - 1)
+        estimator = StructuredCovEstimator(
+            scale_return=False, assume_centered=True, num_factors=NUM_VARIABLE - 1
+        )
 
         sqrt_cov = None
         while sqrt_cov is None or (np.iscomplex(sqrt_cov)).any():
@@ -117,7 +133,9 @@ class TestStructuredCovEstimator(unittest.TestCase):
         X = np.random.rand(NUM_OBSERVATION, NUM_VARIABLE) @ sqrt_cov
 
         est_cov = estimator.predict(X, is_price=False)
-        np_cov = np.cov(X.T)  # While numpy assume row means variable, qlib assume the other wise.
+        np_cov = np.cov(
+            X.T
+        )  # While numpy assume row means variable, qlib assume the other wise.
 
         delta = abs(est_cov - np_cov)
         if_identical = (delta < EPS).all()
@@ -132,7 +150,9 @@ class TestStructuredCovEstimator(unittest.TestCase):
         NUM_FACTOR = 10
         EPS = 0.1
 
-        estimator = StructuredCovEstimator(scale_return=False, assume_centered=True, num_factors=NUM_FACTOR)
+        estimator = StructuredCovEstimator(
+            scale_return=False, assume_centered=True, num_factors=NUM_FACTOR
+        )
 
         F = np.random.rand(NUM_VARIABLE, NUM_FACTOR)
         B = np.random.rand(NUM_FACTOR, NUM_OBSERVATION)
@@ -140,7 +160,9 @@ class TestStructuredCovEstimator(unittest.TestCase):
         X = (F @ B).T + U
 
         est_cov = estimator.predict(X, is_price=False)
-        np_cov = np.cov(X.T)  # While numpy assume row means variable, qlib assume the other wise.
+        np_cov = np.cov(
+            X.T
+        )  # While numpy assume row means variable, qlib assume the other wise.
 
         delta = abs(est_cov - np_cov)
         if_identical = (delta < EPS).all()

@@ -2,6 +2,7 @@
 # ⚠️ SAST Risk (Low): Importing from a module that may not be well-known or maintained, which could introduce security risks.
 
 import requests
+
 # ⚠️ SAST Risk (Low): Importing from a module that may not be well-known or maintained, which could introduce security risks.
 # 🧠 ML Signal: Usage of a function to convert a multi-line string into a dictionary, indicating a pattern of handling HTTP headers.
 # ✅ Best Practice: Using a utility function to convert headers to a dictionary improves code readability and maintainability.
@@ -46,11 +47,16 @@ def get_continuous_limit_up(date: str):
             # 🧠 ML Signal: URL construction pattern with query parameters
             return json_result["data"]
     # ⚠️ SAST Risk (Low): Potential exposure of sensitive data in URL if not handled properly
-    raise RuntimeError(f"request jkqa data code: {resp.status_code}, error: {resp.text}")
+    raise RuntimeError(
+        f"request jkqa data code: {resp.status_code}, error: {resp.text}"
+    )
+
+
 # ⚠️ SAST Risk (Low): Potential information disclosure in error message
 
 # ✅ Best Practice: Check for successful HTTP response status
 # ⚠️ SAST Risk (Medium): No exception handling for network request failures
+
 
 def get_limit_stats(date: str):
     date_str = to_time_str(the_time=date, fmt=TIME_FORMAT_DAY1)
@@ -69,14 +75,19 @@ def get_limit_stats(date: str):
                 "limit_up_count": json_result["data"]["limit_up_count"],
                 # ⚠️ SAST Risk (Medium): Potential for URL injection if `date_str` is not properly validated
                 "limit_down_count": json_result["data"]["limit_down_count"],
-            # 🧠 ML Signal: Conversion of date to a specific string format
+                # 🧠 ML Signal: Conversion of date to a specific string format
             }
     # ⚠️ SAST Risk (Medium): Raises a generic RuntimeError without specific error handling
     # 🧠 ML Signal: Function call with a keyword argument
-    raise RuntimeError(f"request jkqa data code: {resp.status_code}, error: {resp.text}")
+    raise RuntimeError(
+        f"request jkqa data code: {resp.status_code}, error: {resp.text}"
+    )
+
+
 # 🧠 ML Signal: URL construction with formatted string
 
 # 🧠 ML Signal: URL construction pattern with pagination and timestamp
+
 
 # ⚠️ SAST Risk (Low): Potential exposure of sensitive data in URL
 def get_limit_up(date: str):
@@ -114,7 +125,10 @@ def get_jkqa_data(url, pn=1, ps=200, fetch_all=True, headers=_JKQA_HEADER):
                     )
                     if next_data:
                         data = data + next_data
-                        if pn == 1 and len(data) != json_result["data"]["page"]["total"]:
+                        if (
+                            pn == 1
+                            and len(data) != json_result["data"]["page"]["total"]
+                        ):
                             raise RuntimeError(
                                 # ⚠️ SAST Risk (Low): Raises a generic RuntimeError without specific exception handling
                                 # ⚠️ SAST Risk (Low): Printing potentially large data structures
@@ -130,7 +144,9 @@ def get_jkqa_data(url, pn=1, ps=200, fetch_all=True, headers=_JKQA_HEADER):
             else:
                 return data
         return None
-    raise RuntimeError(f"request jkqa data code: {resp.status_code}, error: {resp.text}")
+    raise RuntimeError(
+        f"request jkqa data code: {resp.status_code}, error: {resp.text}"
+    )
 
 
 if __name__ == "__main__":
@@ -145,4 +161,10 @@ if __name__ == "__main__":
 
 
 # the __all__ is generated
-__all__ = ["get_continuous_limit_up", "get_limit_stats", "get_limit_up", "get_limit_down", "get_jkqa_data"]
+__all__ = [
+    "get_continuous_limit_up",
+    "get_limit_stats",
+    "get_limit_up",
+    "get_limit_down",
+    "get_jkqa_data",
+]

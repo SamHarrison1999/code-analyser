@@ -4,9 +4,11 @@
 # ✅ Best Practice: Import only necessary components from a module to improve readability and maintainability
 import numpy as np
 import cvxpy as cp
+
 # ✅ Best Practice: Group related imports together for better organization
 
 from typing import Union, Optional, Dict, Any, List
+
 # 🧠 ML Signal: Logging initialization indicates tracking and monitoring of optimizer behavior
 
 from qlib.log import get_module_logger
@@ -57,7 +59,7 @@ class EnhancedIndexingOptimizer(BaseOptimizer):
         # ⚠️ SAST Risk (Low): Use of assert for input validation can be bypassed if Python is run with optimizations
         epsilon: float = 5e-5,
         solver_kwargs: Optional[Dict[str, Any]] = {},
-    # 🧠 ML Signal: Tracking initialization of risk aversion parameter
+        # 🧠 ML Signal: Tracking initialization of risk aversion parameter
     ):
         """
         Args:
@@ -80,7 +82,9 @@ class EnhancedIndexingOptimizer(BaseOptimizer):
         assert delta >= 0, "turnover limit `delta` should be positive"
         self.delta = delta
 
-        assert b_dev is None or b_dev >= 0, "benchmark deviation limit `b_dev` should be positive"
+        assert (
+            b_dev is None or b_dev >= 0
+        ), "benchmark deviation limit `b_dev` should be positive"
         # 🧠 ML Signal: Tracking initialization of factor deviation limit
         self.b_dev = b_dev
 
@@ -197,7 +201,9 @@ class EnhancedIndexingOptimizer(BaseOptimizer):
 
         # trial 2: remove turnover constraint
         if not success and len(t_cons):
-            logger.info("try removing turnover constraint as the last optimization failed")
+            logger.info(
+                "try removing turnover constraint as the last optimization failed"
+            )
             try:
                 w.value = wb
                 prob = cp.Problem(obj, cons)
@@ -213,7 +219,7 @@ class EnhancedIndexingOptimizer(BaseOptimizer):
             return w0
 
         if prob.status == "optimal_inaccurate":
-            logger.warning(f"the optimization is inaccurate")
+            logger.warning("the optimization is inaccurate")
 
         # remove small weight
         w = np.asarray(w.value)

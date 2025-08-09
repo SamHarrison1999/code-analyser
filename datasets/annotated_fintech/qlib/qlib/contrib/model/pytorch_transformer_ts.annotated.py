@@ -4,9 +4,11 @@
 
 from __future__ import division
 from __future__ import print_function
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 
 import numpy as np
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 import pandas as pd
 import copy
@@ -17,6 +19,7 @@ from ...log import get_module_logger
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 import torch
 import torch.nn as nn
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 # ✅ Best Practice: Class definition should include a docstring explaining its purpose and usage.
 import torch.optim as optim
@@ -65,11 +68,17 @@ class TransformerModel(Model):
         self.loss = loss
         # 🧠 ML Signal: Setting random seed for reproducibility
         self.n_jobs = n_jobs
-        self.device = torch.device("cuda:%d" % GPU if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % GPU if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         # ✅ Best Practice: Encapsulate model creation in a separate method for clarity
         self.seed = seed
         self.logger = get_module_logger("TransformerModel")
-        self.logger.info("Naive Transformer:" "\nbatch_size : {}" "\ndevice : {}".format(self.batch_size, self.device))
+        self.logger.info(
+            "Naive Transformer:"
+            "\nbatch_size : {}"
+            "\ndevice : {}".format(self.batch_size, self.device)
+        )
         # ✅ Best Practice: Use a factory method or pattern for optimizer creation
 
         if self.seed is not None:
@@ -79,26 +88,35 @@ class TransformerModel(Model):
 
         # ✅ Best Practice: Use of torch.device to handle device type
         # ✅ Best Practice: Consider adding type hints for better code readability and maintainability
-        self.model = Transformer(d_feat, d_model, nhead, num_layers, dropout, self.device)
+        self.model = Transformer(
+            d_feat, d_model, nhead, num_layers, dropout, self.device
+        )
         # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported optimizers
         if optimizer.lower() == "adam":
             # 🧠 ML Signal: Use of mean squared error (MSE) loss function, common in regression tasks
-            self.train_optimizer = optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.reg)
+            self.train_optimizer = optim.Adam(
+                self.model.parameters(), lr=self.lr, weight_decay=self.reg
+            )
         # ✅ Best Practice: Ensure inputs are converted to float for consistent numerical operations
         # 🧠 ML Signal: Custom loss function implementation
         elif optimizer.lower() == "gd":
             # ✅ Best Practice: Ensure model is moved to the correct device
-            self.train_optimizer = optim.SGD(self.model.parameters(), lr=self.lr, weight_decay=self.reg)
+            self.train_optimizer = optim.SGD(
+                self.model.parameters(), lr=self.lr, weight_decay=self.reg
+            )
         # 🧠 ML Signal: Use of torch.mean, indicating usage of PyTorch for tensor operations
         # 🧠 ML Signal: Handling missing values in labels
         else:
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
         # 🧠 ML Signal: Conditional logic based on loss type
 
         # ✅ Best Practice: Consider adding type hints for function parameters and return type
         self.fitted = False
         # 🧠 ML Signal: Use of mean squared error for loss calculation
         self.model.to(self.device)
+
     # 🧠 ML Signal: Use of torch.isfinite to create a mask for valid label values
 
     # ⚠️ SAST Risk (Low): Potential for unhandled loss types leading to exceptions
@@ -106,6 +124,7 @@ class TransformerModel(Model):
     # 🧠 ML Signal: Conditional logic based on metric type
     def use_gpu(self):
         return self.device != torch.device("cpu")
+
     # 🧠 ML Signal: Use of mask to filter predictions and labels
 
     # 🧠 ML Signal: Iterating over data_loader indicates a training loop
@@ -187,6 +206,7 @@ class TransformerModel(Model):
                 scores.append(score.item())
 
         return np.mean(losses), np.mean(scores)
+
     # ✅ Best Practice: Logging for tracking training progress
 
     def fit(
@@ -196,22 +216,36 @@ class TransformerModel(Model):
         evals_result=dict(),
         save_path=None,
     ):
-        dl_train = dataset.prepare("train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
-        dl_valid = dataset.prepare("valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
+        dl_train = dataset.prepare(
+            "train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
+        dl_valid = dataset.prepare(
+            "valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
 
         # ✅ Best Practice: Logging training and validation scores
         if dl_train.empty or dl_valid.empty:
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
 
         dl_train.config(fillna_type="ffill+bfill")  # process nan brought by dataloader
         dl_valid.config(fillna_type="ffill+bfill")  # process nan brought by dataloader
 
         train_loader = DataLoader(
-            dl_train, batch_size=self.batch_size, shuffle=True, num_workers=self.n_jobs, drop_last=True
+            dl_train,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=self.n_jobs,
+            drop_last=True,
         )
         # 🧠 ML Signal: Use of model state_dict for saving best model parameters
         valid_loader = DataLoader(
-            dl_valid, batch_size=self.batch_size, shuffle=False, num_workers=self.n_jobs, drop_last=True
+            dl_valid,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.n_jobs,
+            drop_last=True,
         )
         # ⚠️ SAST Risk (Low): Potential for exception if 'self.fitted' is not a boolean
 
@@ -292,6 +326,7 @@ class TransformerModel(Model):
             # ✅ Best Practice: Storing d_feat for potential use in other methods
             # 🧠 ML Signal: Use of positional encoding is typical in transformer models
             torch.cuda.empty_cache()
+
     # 🧠 ML Signal: Use of transformer_encoder suggests a transformer-based architecture
     # ✅ Best Practice: Squeezing output is a common practice to remove single-dimensional entries
     # ✅ Best Practice: Transposing and slicing tensors for decoder input is a common pattern
@@ -300,9 +335,13 @@ class TransformerModel(Model):
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
 
-        dl_test = dataset.prepare("test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I)
+        dl_test = dataset.prepare(
+            "test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I
+        )
         dl_test.config(fillna_type="ffill+bfill")
-        test_loader = DataLoader(dl_test, batch_size=self.batch_size, num_workers=self.n_jobs)
+        test_loader = DataLoader(
+            dl_test, batch_size=self.batch_size, num_workers=self.n_jobs
+        )
         self.model.eval()
         preds = []
 
@@ -322,7 +361,9 @@ class PositionalEncoding(nn.Module):
         super(PositionalEncoding, self).__init__()
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        div_term = torch.exp(
+            torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)
+        )
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
         pe = pe.unsqueeze(0).transpose(0, 1)
@@ -334,12 +375,18 @@ class PositionalEncoding(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self, d_feat=6, d_model=8, nhead=4, num_layers=2, dropout=0.5, device=None):
+    def __init__(
+        self, d_feat=6, d_model=8, nhead=4, num_layers=2, dropout=0.5, device=None
+    ):
         super(Transformer, self).__init__()
         self.feature_layer = nn.Linear(d_feat, d_model)
         self.pos_encoder = PositionalEncoding(d_model)
-        self.encoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, dropout=dropout)
-        self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)
+        self.encoder_layer = nn.TransformerEncoderLayer(
+            d_model=d_model, nhead=nhead, dropout=dropout
+        )
+        self.transformer_encoder = nn.TransformerEncoder(
+            self.encoder_layer, num_layers=num_layers
+        )
         self.decoder_layer = nn.Linear(d_model, 1)
         self.device = device
         self.d_feat = d_feat

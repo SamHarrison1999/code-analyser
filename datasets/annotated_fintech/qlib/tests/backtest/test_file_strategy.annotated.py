@@ -5,11 +5,14 @@ import unittest
 from qlib.backtest import backtest
 from qlib.tests import TestAutoData
 import pandas as pd
+
 # ✅ Best Practice: Use of Path from pathlib for file path operations is recommended for cross-platform compatibility.
 from pathlib import Path
+
 # 🧠 ML Signal: Class definition with inheritance, useful for understanding class hierarchies
 from qlib.data import D
 import numpy as np
+
 # 🧠 ML Signal: Constant string assignment, useful for pattern recognition in test instances
 
 DIRNAME = Path(__file__).absolute().resolve().parent
@@ -52,7 +55,10 @@ class FileStrTest(TestAutoData):
             # test selling all stocks
             ["20200110", self.TEST_INST, str(dealt_num_for_1000), "sell"],
         ]
-        return pd.DataFrame(orders, columns=headers).set_index(["datetime", "instrument"])
+        return pd.DataFrame(orders, columns=headers).set_index(
+            ["datetime", "instrument"]
+        )
+
     # ⚠️ SAST Risk (Low): Writing to a file without exception handling
     # 🧠 ML Signal: Printing orders for debugging or logging
 
@@ -63,7 +69,12 @@ class FileStrTest(TestAutoData):
         # 🧠 ML Signal: Configuration of a backtest using a dictionary
 
         # 1) get information
-        df = D.features([self.TEST_INST], ["$close", "$factor"], start_time="20200103", end_time="20200103")
+        df = D.features(
+            [self.TEST_INST],
+            ["$close", "$factor"],
+            start_time="20200103",
+            end_time="20200103",
+        )
         price = df["$close"].item()
         factor = df["$factor"].item()
         price_unit = price / factor * 100

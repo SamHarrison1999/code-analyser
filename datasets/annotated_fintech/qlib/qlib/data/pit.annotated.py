@@ -16,17 +16,21 @@ Qlib will use the operator `P` to perform the collapse.
 # 🧠 ML Signal: Function that calculates features based on time, indicating a time-series analysis pattern
 # ✅ Best Practice: Class should have a docstring explaining its purpose and usage
 import numpy as np
+
 # ⚠️ SAST Risk (Low): Potential risk if observe_time and period_time are not validated
 import pandas as pd
+
 # ✅ Best Practice: Clear function naming indicating its purpose
 # ✅ Best Practice: Consider renaming `_calendar` to `calendar` as it is not a private variable.
 from qlib.data.ops import ElemOperator
 from qlib.log import get_module_logger
+
 # ✅ Best Practice: Use of boolean indexing for filtering data
 # ✅ Best Practice: Use `np.full` instead of `np.empty` to initialize with a default value like `np.nan`.
 from .data import Cal
 
 # 🧠 ML Signal: Use of mean function, common in statistical analysis
+
 
 class P(ElemOperator):
     # ⚠️ SAST Risk (Medium): Raising a generic `ValueError` without specific handling might lead to unhandled exceptions.
@@ -58,11 +62,15 @@ class P(ElemOperator):
                 # ✅ Best Practice: Consider using `pd.Index` instead of `pd.RangeIndex` for more flexibility.
                 # 🧠 ML Signal: Usage of a feature loading method, common in data processing pipelines
                 s = self._load_feature(instrument, -start_ws, 0, cur_time)
-                resample_data[cur_index - start_index] = s.iloc[-1] if len(s) > 0 else np.nan
+                resample_data[cur_index - start_index] = (
+                    s.iloc[-1] if len(s) > 0 else np.nan
+                )
             # ✅ Best Practice: Consider implementing the method or raising NotImplementedError if it's a placeholder
             # ✅ Best Practice: Consider adding a docstring to explain the purpose of the function
             except FileNotFoundError:
-                get_module_logger("base").warning(f"WARN: period data not found for {str(self)}")
+                get_module_logger("base").warning(
+                    f"WARN: period data not found for {str(self)}"
+                )
                 # ✅ Best Practice: Class should have a docstring explaining its purpose and usage
                 # ✅ Best Practice: Consider returning named tuples or a dictionary for better readability
                 return pd.Series(dtype="float32", name=str(self))
@@ -70,11 +78,15 @@ class P(ElemOperator):
 
         resample_series = pd.Series(
             # ✅ Best Practice: Explicitly calling the superclass constructor
-            resample_data, index=pd.RangeIndex(start_index, end_index + 1), dtype="float32", name=str(self)
-        # ✅ Best Practice: Use of f-string for string formatting improves readability and performance.
+            resample_data,
+            index=pd.RangeIndex(start_index, end_index + 1),
+            dtype="float32",
+            name=str(self),
+            # ✅ Best Practice: Use of f-string for string formatting improves readability and performance.
         )
         # 🧠 ML Signal: Usage of instance variables for storing state
         return resample_series
+
     # 🧠 ML Signal: Overriding __str__ method indicates customization of object string representation.
     # 🧠 ML Signal: Method name suggests loading features, which is common in ML data preprocessing
 
@@ -101,4 +113,6 @@ class PRef(P):
         return f"{super().__str__()}[{self.period}]"
 
     def _load_feature(self, instrument, start_index, end_index, cur_time):
-        return self.feature.load(instrument, start_index, end_index, cur_time, self.period)
+        return self.feature.load(
+            instrument, start_index, end_index, cur_time, self.period
+        )

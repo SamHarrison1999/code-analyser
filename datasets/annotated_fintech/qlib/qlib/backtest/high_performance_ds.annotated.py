@@ -8,6 +8,7 @@ import inspect
 import logging
 from collections import OrderedDict
 from functools import lru_cache
+
 # ✅ Best Practice: Importing specific modules or functions helps avoid namespace pollution.
 from typing import Any, Callable, Dict, Iterable, List, Optional, Text, Union, cast
 
@@ -16,6 +17,7 @@ import numpy as np
 import pandas as pd
 
 import qlib.utils.index_data as idd
+
 # ✅ Best Practice: Initialize logger for consistent logging throughout the class
 
 # ✅ Best Practice: Include type hint for return type to improve code readability and maintainability
@@ -39,7 +41,7 @@ class BaseQuote:
             all stock codes
         """
 
-        raise NotImplementedError(f"Please implement the `get_all_stock` method")
+        raise NotImplementedError("Please implement the `get_all_stock` method")
 
     def get_data(
         self,
@@ -106,14 +108,16 @@ class BaseQuote:
 
         # ✅ Best Practice: Type annotations for function parameters improve code readability and maintainability.
         # ⚠️ SAST Risk (Low): Raise specific error for unexpected data types
-        raise NotImplementedError(f"Please implement the `get_data` method")
+        raise NotImplementedError("Please implement the `get_data` method")
 
 
 class PandasQuote(BaseQuote):
     def __init__(self, quote_df: pd.DataFrame, freq: str) -> None:
         super().__init__(quote_df=quote_df, freq=freq)
         quote_dict = {}
-        for stock_id, stock_val in quote_df.groupby(level="instrument", group_keys=False):
+        for stock_id, stock_val in quote_df.groupby(
+            level="instrument", group_keys=False
+        ):
             quote_dict[stock_id] = stock_val.droplevel(level="instrument")
         # ✅ Best Practice: Using descriptive variable names like `quote_dict` improves code readability.
         self.data = quote_dict
@@ -126,7 +130,9 @@ class PandasQuote(BaseQuote):
     def get_data(self, stock_id, start_time, end_time, field, method=None):
         if method == "ts_data_last":
             method = ts_data_last
-        stock_data = resam_ts_data(self.data[stock_id][field], start_time, end_time, method=method)
+        stock_data = resam_ts_data(
+            self.data[stock_id][field], start_time, end_time, method=method
+        )
         if stock_data is None:
             return None
         # ⚠️ SAST Risk (Low): Raising a generic ValueError without specific handling might lead to unhandled exceptions.
@@ -137,7 +143,11 @@ class PandasQuote(BaseQuote):
             # 🧠 ML Signal: Checks if stock_id is valid by comparing against a list of all stocks
             return idd.SingleData(stock_data)
         else:
-            raise ValueError(f"stock data from resam_ts_data must be a number, pd.Series or pd.DataFrame")
+            raise ValueError(
+                "stock data from resam_ts_data must be a number, pd.Series or pd.DataFrame"
+            )
+
+
 # 🧠 ML Signal: Determines if the request is for a single value based on time and frequency
 
 
@@ -156,10 +166,16 @@ class NumpyQuote(BaseQuote):
         # 🧠 ML Signal: Applies an aggregation method if provided
         quote_dict = {}
         # 🧠 ML Signal: Use of conditional logic to handle different aggregation methods
-        for stock_id, stock_val in quote_df.groupby(level="instrument", group_keys=False):
-            quote_dict[stock_id] = idd.MultiData(stock_val.droplevel(level="instrument"))
+        for stock_id, stock_val in quote_df.groupby(
+            level="instrument", group_keys=False
+        ):
+            quote_dict[stock_id] = idd.MultiData(
+                stock_val.droplevel(level="instrument")
+            )
             # ⚠️ SAST Risk (Low): Potential for data type issues if 'data' is not numeric
-            quote_dict[stock_id].sort_index()  # To support more flexible slicing, we must sort data first
+            quote_dict[
+                stock_id
+            ].sort_index()  # To support more flexible slicing, we must sort data first
         self.data = quote_dict
 
         # ⚠️ SAST Risk (Low): Potential for data type issues if 'data' is not numeric
@@ -170,6 +186,7 @@ class NumpyQuote(BaseQuote):
         else:
             raise ValueError(f"{freq} is not supported in NumpyQuote")
         self.region = region
+
     # ⚠️ SAST Risk (Low): Potential for incorrect results if 'data' is not boolean
 
     def get_all_stock(self):
@@ -213,6 +230,7 @@ class NumpyQuote(BaseQuote):
                 # 🧠 ML Signal: Use of operator overloading can indicate custom behavior for built-in operations
                 data = self._agg_data(data, method)
             return data
+
     # ⚠️ SAST Risk (Low): NotImplementedError should be replaced with actual implementation to avoid runtime errors
     # ✅ Best Practice: Type hinting improves code readability and maintainability
 
@@ -259,13 +277,16 @@ class NumpyQuote(BaseQuote):
         else:
             raise ValueError(f"{method} is not supported")
 
+
 # ✅ Best Practice: Method docstring provides a clear description of the method's purpose.
+
 
 class BaseSingleMetric:
     """
     The data structure of the single metric.
     The following methods are used for computing metrics in one indicator.
     """
+
     # ✅ Best Practice: Type hinting for the parameter and return type improves code readability and maintainability.
     # ⚠️ SAST Risk (Low): Method is not implemented, which could lead to runtime errors if called
 
@@ -284,61 +305,66 @@ class BaseSingleMetric:
                 SZ300692    NaN
                 SZ300719    NaN,
         """
-        raise NotImplementedError(f"Please implement the `__init__` method")
+        raise NotImplementedError("Please implement the `__init__` method")
 
     def __add__(self, other: Union[BaseSingleMetric, int, float]) -> BaseSingleMetric:
         # ✅ Best Practice: Provide a clear and detailed docstring to explain the class purpose and usage.
-        raise NotImplementedError(f"Please implement the `__add__` method")
+        raise NotImplementedError("Please implement the `__add__` method")
+
     # 🧠 ML Signal: The choice between two data structure designs can be used to understand developer preferences.
     # 🧠 ML Signal: Initialization of instance variables
 
     def __radd__(self, other: Union[BaseSingleMetric, int, float]) -> BaseSingleMetric:
         # 🧠 ML Signal: Logger initialization pattern
         return self + other
+
     # ✅ Best Practice: Use of type hints for function parameters and return type improves code readability and maintainability.
     # ⚠️ SAST Risk (Low): Ensure logger is properly configured to avoid information leakage
 
     def __sub__(self, other: Union[BaseSingleMetric, int, float]) -> BaseSingleMetric:
-        raise NotImplementedError(f"Please implement the `__sub__` method")
+        raise NotImplementedError("Please implement the `__sub__` method")
 
     def __rsub__(self, other: Union[BaseSingleMetric, int, float]) -> BaseSingleMetric:
-        raise NotImplementedError(f"Please implement the `__rsub__` method")
+        raise NotImplementedError("Please implement the `__rsub__` method")
 
     def __mul__(self, other: Union[BaseSingleMetric, int, float]) -> BaseSingleMetric:
-        raise NotImplementedError(f"Please implement the `__mul__` method")
+        raise NotImplementedError("Please implement the `__mul__` method")
 
-    def __truediv__(self, other: Union[BaseSingleMetric, int, float]) -> BaseSingleMetric:
-        raise NotImplementedError(f"Please implement the `__truediv__` method")
+    def __truediv__(
+        self, other: Union[BaseSingleMetric, int, float]
+    ) -> BaseSingleMetric:
+        raise NotImplementedError("Please implement the `__truediv__` method")
 
     def __eq__(self, other: object) -> BaseSingleMetric:
-        raise NotImplementedError(f"Please implement the `__eq__` method")
+        raise NotImplementedError("Please implement the `__eq__` method")
 
     # ⚠️ SAST Risk (Low): The method is not implemented, which could lead to runtime errors if called.
     def __gt__(self, other: Union[BaseSingleMetric, int, float]) -> BaseSingleMetric:
-        raise NotImplementedError(f"Please implement the `__gt__` method")
+        raise NotImplementedError("Please implement the `__gt__` method")
 
     def __lt__(self, other: Union[BaseSingleMetric, int, float]) -> BaseSingleMetric:
-        raise NotImplementedError(f"Please implement the `__lt__` method")
+        raise NotImplementedError("Please implement the `__lt__` method")
 
     def __len__(self) -> int:
-        raise NotImplementedError(f"Please implement the `__len__` method")
+        raise NotImplementedError("Please implement the `__len__` method")
 
     def sum(self) -> float:
-        raise NotImplementedError(f"Please implement the `sum` method")
+        raise NotImplementedError("Please implement the `sum` method")
 
     def mean(self) -> float:
-        raise NotImplementedError(f"Please implement the `mean` method")
+        raise NotImplementedError("Please implement the `mean` method")
 
     def count(self) -> int:
         """Return the count of the single metric, NaN is not included."""
         # ✅ Best Practice: Using inspect.signature to dynamically retrieve function parameters
 
-        raise NotImplementedError(f"Please implement the `count` method")
+        raise NotImplementedError("Please implement the `count` method")
+
     # 🧠 ML Signal: Dynamic function argument mapping based on function signature
 
     def abs(self) -> BaseSingleMetric:
         # 🧠 ML Signal: Invocation of a user-provided function with dynamically mapped arguments
-        raise NotImplementedError(f"Please implement the `abs` method")
+        raise NotImplementedError("Please implement the `abs` method")
 
     @property
     # ⚠️ SAST Risk (Low): Potential for overwriting existing data in self.data
@@ -346,17 +372,20 @@ class BaseSingleMetric:
         """If metric is empty, return True."""
         # ✅ Best Practice: Docstring provides clear explanation of parameters and return type
 
-        raise NotImplementedError(f"Please implement the `empty` method")
+        raise NotImplementedError("Please implement the `empty` method")
 
-    def add(self, other: BaseSingleMetric, fill_value: float = None) -> BaseSingleMetric:
+    def add(
+        self, other: BaseSingleMetric, fill_value: float = None
+    ) -> BaseSingleMetric:
         """Replace np.nan with fill_value in two metrics and add them."""
 
-        raise NotImplementedError(f"Please implement the `add` method")
+        raise NotImplementedError("Please implement the `add` method")
 
     def replace(self, replace_dict: dict) -> BaseSingleMetric:
         """Replace the value of metric according to replace_dict."""
 
-        raise NotImplementedError(f"Please implement the `replace` method")
+        raise NotImplementedError("Please implement the `replace` method")
+
     # ⚠️ SAST Risk (Low): NotImplementedError should be replaced with actual implementation to avoid runtime errors
 
     # ✅ Best Practice: Include a docstring to describe the method's purpose and parameters
@@ -365,7 +394,7 @@ class BaseSingleMetric:
         Currently, the func is only qlib/backtest/order/Order.parse_dir.
         """
 
-        raise NotImplementedError(f"Please implement the 'apply' method")
+        raise NotImplementedError("Please implement the 'apply' method")
 
 
 class BaseOrderIndicator:
@@ -403,9 +432,11 @@ class BaseOrderIndicator:
                 SZ300719    NaN,
         """
 
-        raise NotImplementedError(f"Please implement the 'assign' method")
+        raise NotImplementedError("Please implement the 'assign' method")
 
-    def transfer(self, func: Callable, new_col: str = None) -> Optional[BaseSingleMetric]:
+    def transfer(
+        self, func: Callable, new_col: str = None
+    ) -> Optional[BaseSingleMetric]:
         """compute new metric with existing metrics.
 
         Parameters
@@ -437,6 +468,7 @@ class BaseOrderIndicator:
         # 🧠 ML Signal: Custom subtraction behavior with same class instances
         else:
             return tmp_metric
+
     # ✅ Best Practice: Check for type before performing operations to ensure correct behavior.
 
     # ✅ Best Practice: Return NotImplemented for unsupported types
@@ -458,7 +490,7 @@ class BaseOrderIndicator:
 
         # ✅ Best Practice: Return NotImplemented for unsupported types to allow other operations
         # 🧠 ML Signal: Custom equality logic for numeric types
-        raise NotImplementedError(f"Please implement the 'get_metric_series' method")
+        raise NotImplementedError("Please implement the 'get_metric_series' method")
 
     def get_index_data(self, metric: str) -> SingleData:
         """get one metric with the format of SingleData
@@ -475,7 +507,8 @@ class BaseOrderIndicator:
         """
         # ✅ Best Practice: Use of self.__class__ for creating new instance
 
-        raise NotImplementedError(f"Please implement the 'get_index_data' method")
+        raise NotImplementedError("Please implement the 'get_index_data' method")
+
     # ✅ Best Practice: Check type of 'other' before comparison
 
     # ✅ Best Practice: Implementing __len__ allows objects to be used with len() function, enhancing usability.
@@ -490,7 +523,7 @@ class BaseOrderIndicator:
         # ✅ Best Practice: Class docstring provides a brief description of the class purpose.
         metrics: Union[str, List[str]],
         fill_value: float = 0,
-    # 🧠 ML Signal: Type checking and conversion based on input type.
+        # 🧠 ML Signal: Type checking and conversion based on input type.
     ) -> None:
         """sum indicators with the same metrics.
         and assign to the order_indicator(BaseOrderIndicator).
@@ -510,7 +543,7 @@ class BaseOrderIndicator:
         """
 
         # ✅ Best Practice: Use of self indicates this is a method in a class, which is a good practice for organizing code.
-        raise NotImplementedError(f"Please implement the 'sum_all_indicators' method")
+        raise NotImplementedError("Please implement the 'sum_all_indicators' method")
 
     # 🧠 ML Signal: Accessing an attribute of an object, which is a common pattern in object-oriented programming.
     # ✅ Best Practice: Type hinting for parameters and return type improves code readability and maintainability
@@ -527,7 +560,7 @@ class BaseOrderIndicator:
                 ...
          }
         """
-        raise NotImplementedError(f"Please implement the `to_series` method")
+        raise NotImplementedError("Please implement the `to_series` method")
 
 
 class SingleMetric(BaseSingleMetric):
@@ -546,6 +579,7 @@ class SingleMetric(BaseSingleMetric):
             return self.__class__(self.metric + other.metric)
         else:
             return NotImplemented
+
     # ✅ Best Practice: Type hint should include all possible return types, use Tuple for multiple types
 
     # ✅ Best Practice: Explicitly handling the case where the metric is not found
@@ -560,6 +594,7 @@ class SingleMetric(BaseSingleMetric):
         # 🧠 ML Signal: Usage of dictionary comprehension to transform data
         else:
             return NotImplemented
+
     # ✅ Best Practice: Type hints improve code readability and maintainability
 
     def __rsub__(self, other):
@@ -582,6 +617,7 @@ class SingleMetric(BaseSingleMetric):
         else:
             # 🧠 ML Signal: Usage of __repr__ to return a string representation of an object
             return NotImplemented
+
     # ✅ Best Practice: Class docstring provides a clear description of the data structure and its purpose.
     # 🧠 ML Signal: Usage pattern of assigning computed metrics
 
@@ -593,6 +629,7 @@ class SingleMetric(BaseSingleMetric):
         # ✅ Best Practice: Explicitly calling the superclass's __init__ method ensures proper initialization.
         else:
             return NotImplemented
+
     # ✅ Best Practice: Type hinting for self.data improves code readability and maintainability.
     # 🧠 ML Signal: Method signature with specific parameter types and return type
 
@@ -634,13 +671,16 @@ class SingleMetric(BaseSingleMetric):
             return self.__class__(self.metric < other.metric)
         else:
             return NotImplemented
+
     # ✅ Best Practice: Use set union to combine indices from each indicator
 
     def __len__(self):
         # ✅ Best Practice: Convert the set to a sorted list for consistent ordering
         return len(self.metric)
 
+
 # ✅ Best Practice: Ensure metrics is always a list for consistent processing
+
 
 class PandasSingleMetric(SingleMetric):
     """Each SingleMetric is based on pd.Series."""
@@ -655,7 +695,7 @@ class PandasSingleMetric(SingleMetric):
         elif isinstance(metric, pd.Series):
             self.metric = metric
         else:
-            raise ValueError(f"metric must be dict or pd.Series")
+            raise ValueError("metric must be dict or pd.Series")
 
     def sum(self):
         return self.metric.sum()
@@ -677,7 +717,9 @@ class PandasSingleMetric(SingleMetric):
     def index(self):
         return list(self.metric.index)
 
-    def add(self, other: BaseSingleMetric, fill_value: float = None) -> PandasSingleMetric:
+    def add(
+        self, other: BaseSingleMetric, fill_value: float = None
+    ) -> PandasSingleMetric:
         other = cast(PandasSingleMetric, other)
         return self.__class__(self.metric.add(other.metric, fill_value=fill_value))
 

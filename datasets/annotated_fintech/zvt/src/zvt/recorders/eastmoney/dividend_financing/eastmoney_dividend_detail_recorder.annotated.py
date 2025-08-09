@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from zvt.domain import DividendDetail
+
 # ⚠️ SAST Risk (Low): Importing modules without validation can lead to dependency confusion if the module names are not unique or are typo-squatted.
 from zvt.recorders.eastmoney.common import EastmoneyPageabeDataRecorder
 from zvt.utils.time_utils import to_pd_timestamp
+
 # 🧠 ML Signal: Inheritance from a specific base class indicates a pattern of extending functionality
 
 

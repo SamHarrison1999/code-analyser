@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, JSON, Boolean, DateTime, Integer
+
 # ✅ Best Practice: Grouping related imports together improves readability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Mixin
+
 # ✅ Best Practice: Naming convention for base classes is clear and descriptive.
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Use of class-level variable for table name improves maintainability and readability.
 
 NewsBase = declarative_base()
@@ -63,7 +66,9 @@ class StockHotTopic(NewsBase, Mixin):
     news_analysis = Column(JSON)
 
 
-register_schema(providers=["em"], db_name="stock_news", schema_base=NewsBase, entity_type="stock")
+register_schema(
+    providers=["em"], db_name="stock_news", schema_base=NewsBase, entity_type="stock"
+)
 
 
 # the __all__ is generated

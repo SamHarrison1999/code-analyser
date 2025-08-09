@@ -14,6 +14,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+
 # ✅ Best Practice: Handle ImportError to ensure the program can run even if tensorboard is not installed.
 
 try:
@@ -96,11 +97,18 @@ class TRAModel(Model):
 
         assert memory_mode in ["sample", "daily"], "invalid memory mode"
         # ✅ Best Practice: Seed initialization for reproducibility
-        assert transport_method in ["none", "router", "oracle"], f"invalid transport method {transport_method}"
-        assert transport_method == "none" or tra_config["num_states"] > 1, "optimal transport requires `num_states` > 1"
+        assert transport_method in [
+            "none",
+            "router",
+            "oracle",
+        ], f"invalid transport method {transport_method}"
         assert (
-            memory_mode != "daily" or tra_config["src_info"] == "TPE"
-        # 🧠 ML Signal: Model configuration parameters are stored, indicating model setup
+            transport_method == "none" or tra_config["num_states"] > 1
+        ), "optimal transport requires `num_states` > 1"
+        assert (
+            memory_mode != "daily"
+            or tra_config["src_info"] == "TPE"
+            # 🧠 ML Signal: Model configuration parameters are stored, indicating model setup
         ), "daily transport can only support TPE as `src_info`"
 
         # 🧠 ML Signal: Training configuration parameters are stored, indicating training setup
@@ -150,7 +158,9 @@ class TRAModel(Model):
         self.transport_method = transport_method
         # 🧠 ML Signal: Pretraining flag is stored, indicating training strategy
         self.use_daily_transport = memory_mode == "daily"
-        self.transport_fn = transport_daily if self.use_daily_transport else transport_sample
+        self.transport_fn = (
+            transport_daily if self.use_daily_transport else transport_sample
+        )
         # 🧠 ML Signal: Initial state is stored, indicating model initialization
         # ✅ Best Practice: Consider using logging instead of print for consistency and better control over output.
 
@@ -170,6 +180,7 @@ class TRAModel(Model):
         # ⚠️ SAST Risk (Medium): Function name suggests potential unsafe operation; ensure it is safe.
 
         self._init_model()
+
     # 🧠 ML Signal: Memory mode is stored, indicating model configuration
     # 🧠 ML Signal: Logging results of state loading can be used to track model state changes.
 
@@ -189,7 +200,7 @@ class TRAModel(Model):
         # ✅ Best Practice: Warn users about existing log directory to avoid data loss
 
         if self.init_state:
-            self.logger.warning(f"load state dict from `init_state`")
+            self.logger.warning("load state dict from `init_state`")
             # ✅ Best Practice: Conditional initialization of optional components
             state_dict = torch.load(self.init_state, map_location="cpu")
             # 🧠 ML Signal: Logging parameter freezing can be used to track model training state changes.
@@ -200,7 +211,7 @@ class TRAModel(Model):
 
         # 🧠 ML Signal: Logging model parameters can be used to track model size and complexity.
         if self.reset_router:
-            self.logger.warning(f"reset TRA.router parameters")
+            self.logger.warning("reset TRA.router parameters")
             # 🧠 ML Signal: Logging model parameters can be used to track model size and complexity.
             self.tra.fc.reset_parameters()
             self.tra.router.reset_parameters()
@@ -208,20 +219,28 @@ class TRAModel(Model):
 
         if self.freeze_model:
             # 🧠 ML Signal: Tracking the fitted state of the model can be used to monitor training progress.
-            self.logger.warning(f"freeze model parameters")
+            self.logger.warning("freeze model parameters")
             for param in self.model.parameters():
                 # 🧠 ML Signal: Tracking the global step can be used to monitor training progress.
                 param.requires_grad_(False)
 
         if self.freeze_predictors:
-            self.logger.warning(f"freeze TRA.predictors parameters")
+            self.logger.warning("freeze TRA.predictors parameters")
             for param in self.tra.predictors.parameters():
                 param.requires_grad_(False)
 
-        self.logger.info("# model params: %d" % sum(p.numel() for p in self.model.parameters() if p.requires_grad))
-        self.logger.info("# tra params: %d" % sum(p.numel() for p in self.tra.parameters() if p.requires_grad))
+        self.logger.info(
+            "# model params: %d"
+            % sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+        )
+        self.logger.info(
+            "# tra params: %d"
+            % sum(p.numel() for p in self.tra.parameters() if p.requires_grad)
+        )
 
-        self.optimizer = optim.Adam(list(self.model.parameters()) + list(self.tra.parameters()), lr=self.lr)
+        self.optimizer = optim.Adam(
+            list(self.model.parameters()) + list(self.tra.parameters()), lr=self.lr
+        )
 
         self.fitted = False
         self.global_step = -1
@@ -238,7 +257,9 @@ class TRAModel(Model):
         max_steps = len(data_set)
         if self.max_steps_per_epoch is not None:
             if epoch == 0 and self.max_steps_per_epoch < max_steps:
-                self.logger.info(f"max steps updated from {max_steps} to {self.max_steps_per_epoch}")
+                self.logger.info(
+                    f"max steps updated from {max_steps} to {self.max_steps_per_epoch}"
+                )
             max_steps = min(self.max_steps_per_epoch, max_steps)
 
         cur_step = 0
@@ -252,7 +273,12 @@ class TRAModel(Model):
             if not is_pretrain:
                 self.global_step += 1
 
-            data, state, label, count = batch["data"], batch["state"], batch["label"], batch["daily_count"]
+            data, state, label, count = (
+                batch["data"],
+                batch["state"],
+                batch["label"],
+                batch["daily_count"],
+            )
             index = batch["daily_index"] if self.use_daily_transport else batch["index"]
 
             with torch.set_grad_enabled(not self.freeze_model):
@@ -276,21 +302,33 @@ class TRAModel(Model):
                 data_set.assign_data(index, L)  # save loss to memory
                 if self.use_daily_transport:  # only save for daily transport
                     P_all.append(pd.DataFrame(P.detach().cpu().numpy(), index=index))
-                    prob_all.append(pd.DataFrame(prob.detach().cpu().numpy(), index=index))
-                    choice_all.append(pd.DataFrame(choice.detach().cpu().numpy(), index=index))
+                    prob_all.append(
+                        pd.DataFrame(prob.detach().cpu().numpy(), index=index)
+                    )
+                    choice_all.append(
+                        pd.DataFrame(choice.detach().cpu().numpy(), index=index)
+                    )
                 decay = self.rho ** (self.global_step // 100)  # decay every 100 steps
                 # 🧠 ML Signal: Model evaluation mode is set, indicating a testing phase
                 lamb = 0 if is_pretrain else self.lamb * decay
-                reg = prob.log().mul(P).sum(dim=1).mean()  # train router to predict TO assignment
+                reg = (
+                    prob.log().mul(P).sum(dim=1).mean()
+                )  # train router to predict TO assignment
                 # 🧠 ML Signal: Evaluation mode for another model or component
                 if self._writer is not None and not is_pretrain:
-                    self._writer.add_scalar("training/router_loss", -reg.item(), self.global_step)
+                    self._writer.add_scalar(
+                        "training/router_loss", -reg.item(), self.global_step
+                    )
                     # 🧠 ML Signal: Dataset is set to evaluation mode
-                    self._writer.add_scalar("training/reg_loss", loss.item(), self.global_step)
+                    self._writer.add_scalar(
+                        "training/reg_loss", loss.item(), self.global_step
+                    )
                     self._writer.add_scalar("training/lamb", lamb, self.global_step)
                     if not self.use_daily_transport:
                         P_mean = P.mean(axis=0).detach()
-                        self._writer.add_scalar("training/P", P_mean.max() / P_mean.min(), self.global_step)
+                        self._writer.add_scalar(
+                            "training/P", P_mean.max() / P_mean.min(), self.global_step
+                        )
                 loss = loss - lamb * reg
             # 🧠 ML Signal: Iterating over batches in the dataset
             else:
@@ -307,7 +345,9 @@ class TRAModel(Model):
                 self.optimizer.zero_grad()
 
             if self._writer is not None and not is_pretrain:
-                self._writer.add_scalar("training/total_loss", loss.item(), self.global_step)
+                self._writer.add_scalar(
+                    "training/total_loss", loss.item(), self.global_step
+                )
 
             total_loss += loss.item()
             total_count += 1
@@ -324,7 +364,9 @@ class TRAModel(Model):
                 self._writer.add_image("P", plot(P_all), epoch, dataformats="HWC")
                 # 🧠 ML Signal: Assigning data back to the dataset
                 self._writer.add_image("prob", plot(prob_all), epoch, dataformats="HWC")
-                self._writer.add_image("choice", plot(choice_all), epoch, dataformats="HWC")
+                self._writer.add_image(
+                    "choice", plot(choice_all), epoch, dataformats="HWC"
+                )
 
         # ⚠️ SAST Risk (Low): Potentially large DataFrame creation
         total_loss /= total_count
@@ -336,7 +378,9 @@ class TRAModel(Model):
 
         return total_loss
 
-    def test_epoch(self, epoch, data_set, return_pred=False, prefix="test", is_pretrain=False):
+    def test_epoch(
+        self, epoch, data_set, return_pred=False, prefix="test", is_pretrain=False
+    ):
         self.model.eval()
         # ⚠️ SAST Risk (Low): Potentially large DataFrame creation
         self.tra.eval()
@@ -349,7 +393,12 @@ class TRAModel(Model):
         metrics = []
         # ⚠️ SAST Risk (Low): Potentially large DataFrame creation
         for batch in tqdm(data_set):
-            data, state, label, count = batch["data"], batch["state"], batch["label"], batch["daily_count"]
+            data, state, label, count = (
+                batch["data"],
+                batch["state"],
+                batch["label"],
+                batch["daily_count"],
+            )
             # ⚠️ SAST Risk (Low): Potentially large DataFrame creation
             index = batch["daily_index"] if self.use_daily_transport else batch["index"]
 
@@ -370,7 +419,7 @@ class TRAModel(Model):
                     self.transport_method if not is_pretrain else "oracle",
                     self.alpha,
                     training=False,
-                # ✅ Best Practice: Sorting index for consistent ordering
+                    # ✅ Best Practice: Sorting index for consistent ordering
                 )
                 data_set.assign_data(index, L)  # save loss to memory
                 if P is not None and return_pred:
@@ -381,7 +430,9 @@ class TRAModel(Model):
 
             # ✅ Best Practice: Use of logging for tracking the flow and state of the application
             X = np.c_[pred.cpu().numpy(), label.cpu().numpy(), all_preds.cpu().numpy()]
-            columns = ["score", "label"] + ["score_%d" % d for d in range(all_preds.shape[1])]
+            columns = ["score", "label"] + [
+                "score_%d" % d for d in range(all_preds.shape[1])
+            ]
             pred = pd.DataFrame(X, index=batch["index"], columns=columns)
             # ✅ Best Practice: Sorting index for consistent ordering
 
@@ -395,7 +446,9 @@ class TRAModel(Model):
                 if prob is not None:
                     columns = ["prob_%d" % d for d in range(all_preds.shape[1])]
                     # ✅ Best Practice: Use of logging for tracking the flow and state of the application
-                    probs.append(pd.DataFrame(prob.cpu().numpy(), index=index, columns=columns))
+                    probs.append(
+                        pd.DataFrame(prob.cpu().numpy(), index=index, columns=columns)
+                    )
 
         metrics = pd.DataFrame(metrics)
         # ✅ Best Practice: Sorting index for consistent ordering
@@ -442,6 +495,7 @@ class TRAModel(Model):
                     P_all.sort_index(inplace=True)
 
         return metrics, preds, probs, P_all
+
     # 🧠 ML Signal: Use of Adam optimizer indicates a common pattern in training ML models.
 
     def _fit(self, train_set, valid_set, test_set, evals_result, is_pretrain=True):
@@ -467,23 +521,31 @@ class TRAModel(Model):
 
             self.logger.info("evaluating...")
             # NOTE: during evaluating, the whole memory will be refreshed
-            if not is_pretrain and (self.transport_method == "router" or self.eval_train):
+            if not is_pretrain and (
+                self.transport_method == "router" or self.eval_train
+            ):
                 # ⚠️ SAST Risk (Low): Potential path traversal if logdir is not properly sanitized.
                 train_set.clear_memory()  # NOTE: clear the shared memory
-                train_metrics = self.test_epoch(epoch, train_set, is_pretrain=is_pretrain, prefix="train")[0]
+                train_metrics = self.test_epoch(
+                    epoch, train_set, is_pretrain=is_pretrain, prefix="train"
+                )[0]
                 # ⚠️ SAST Risk (Low): Potential path traversal if logdir is not properly sanitized.
                 evals_result["train"].append(train_metrics)
                 self.logger.info("train metrics: %s" % train_metrics)
             # ⚠️ SAST Risk (Low): Potential path traversal if logdir is not properly sanitized.
 
-            valid_metrics = self.test_epoch(epoch, valid_set, is_pretrain=is_pretrain, prefix="valid")[0]
+            valid_metrics = self.test_epoch(
+                epoch, valid_set, is_pretrain=is_pretrain, prefix="valid"
+            )[0]
             # ⚠️ SAST Risk (Low): Potential path traversal if logdir is not properly sanitized.
             evals_result["valid"].append(valid_metrics)
             self.logger.info("valid metrics: %s" % valid_metrics)
             # ⚠️ SAST Risk (Low): Potential path traversal if logdir is not properly sanitized.
 
             if self.eval_test:
-                test_metrics = self.test_epoch(epoch, test_set, is_pretrain=is_pretrain, prefix="test")[0]
+                test_metrics = self.test_epoch(
+                    epoch, test_set, is_pretrain=is_pretrain, prefix="test"
+                )[0]
                 evals_result["test"].append(test_metrics)
                 self.logger.info("test metrics: %s" % test_metrics)
 
@@ -515,7 +577,9 @@ class TRAModel(Model):
     # ⚠️ SAST Risk (Low): Potential for assert statement to be disabled in optimized mode, leading to type issues.
     def fit(self, dataset, evals_result=dict()):
         # ⚠️ SAST Risk (Medium): Raises a ValueError if the model is not fitted, which could be a denial of service vector if not handled properly by the caller.
-        assert isinstance(dataset, MTSDatasetH), "TRAModel only supports `qlib.contrib.data.dataset.MTSDatasetH`"
+        assert isinstance(
+            dataset, MTSDatasetH
+        ), "TRAModel only supports `qlib.contrib.data.dataset.MTSDatasetH`"
 
         train_set, valid_set, test_set = dataset.prepare(["train", "valid", "test"])
         # ✅ Best Practice: Class docstring provides a clear description of the class and its parameters
@@ -535,25 +599,36 @@ class TRAModel(Model):
         if self.pretrain:
             self.logger.info("pretraining...")
             self.optimizer = optim.Adam(
-                list(self.model.parameters()) + list(self.tra.predictors.parameters()), lr=self.lr
+                list(self.model.parameters()) + list(self.tra.predictors.parameters()),
+                lr=self.lr,
             )
             self._fit(train_set, valid_set, test_set, evals_result, is_pretrain=True)
 
             # reset optimizer
-            self.optimizer = optim.Adam(list(self.model.parameters()) + list(self.tra.parameters()), lr=self.lr)
+            self.optimizer = optim.Adam(
+                list(self.model.parameters()) + list(self.tra.parameters()), lr=self.lr
+            )
 
         self.logger.info("training...")
-        best_score = self._fit(train_set, valid_set, test_set, evals_result, is_pretrain=False)
+        best_score = self._fit(
+            train_set, valid_set, test_set, evals_result, is_pretrain=False
+        )
 
         self.logger.info("inference")
-        train_metrics, train_preds, train_probs, train_P = self.test_epoch(-1, train_set, return_pred=True)
+        train_metrics, train_preds, train_probs, train_P = self.test_epoch(
+            -1, train_set, return_pred=True
+        )
         self.logger.info("train metrics: %s" % train_metrics)
 
-        valid_metrics, valid_preds, valid_probs, valid_P = self.test_epoch(-1, valid_set, return_pred=True)
+        valid_metrics, valid_preds, valid_probs, valid_P = self.test_epoch(
+            -1, valid_set, return_pred=True
+        )
         self.logger.info("valid metrics: %s" % valid_metrics)
         # ✅ Best Practice: Consider validating input parameters for expected types and ranges
 
-        test_metrics, test_preds, test_probs, test_P = self.test_epoch(-1, test_set, return_pred=True)
+        test_metrics, test_preds, test_probs, test_P = self.test_epoch(
+            -1, test_set, return_pred=True
+        )
         self.logger.info("test metrics: %s" % test_metrics)
 
         # 🧠 ML Signal: Dynamic RNN architecture selection based on parameter
@@ -561,11 +636,15 @@ class TRAModel(Model):
         if self.logdir:
             self.logger.info("save model & pred to local directory")
 
-            pd.concat({name: pd.DataFrame(evals_result[name]) for name in evals_result}, axis=1).to_csv(
-                self.logdir + "/logs.csv", index=False
-            )
+            pd.concat(
+                {name: pd.DataFrame(evals_result[name]) for name in evals_result},
+                axis=1,
+            ).to_csv(self.logdir + "/logs.csv", index=False)
 
-            torch.save({"model": self.model.state_dict(), "tra": self.tra.state_dict()}, self.logdir + "/model.bin")
+            torch.save(
+                {"model": self.model.state_dict(), "tra": self.tra.state_dict()},
+                self.logdir + "/model.bin",
+            )
 
             train_preds.to_pickle(self.logdir + "/train_pred.pkl")
             valid_preds.to_pickle(self.logdir + "/valid_pred.pkl")
@@ -618,17 +697,23 @@ class TRAModel(Model):
                     # 🧠 ML Signal: Use of dropout for regularization in neural networks
                     # 🧠 ML Signal: Definition of a Transformer model class, useful for identifying model architecture patterns
                     "use_daily_transport": self.use_daily_transport,
-                # ✅ Best Practice: Use of register_buffer to store tensors not considered model parameters
-                # 🧠 ML Signal: Reshaping positional encoding for model input
+                    # ✅ Best Practice: Use of register_buffer to store tensors not considered model parameters
+                    # 🧠 ML Signal: Reshaping positional encoding for model input
                 },
                 "best_eval_metric": -best_score,  # NOTE: -1 for minimize
-                "metrics": {"train": train_metrics, "valid": valid_metrics, "test": test_metrics},
+                "metrics": {
+                    "train": train_metrics,
+                    "valid": valid_metrics,
+                    "test": test_metrics,
+                },
             }
             with open(self.logdir + "/info.json", "w") as f:
                 json.dump(info, f)
 
     def predict(self, dataset, segment="test"):
-        assert isinstance(dataset, MTSDatasetH), "TRAModel only supports `qlib.contrib.data.dataset.MTSDatasetH`"
+        assert isinstance(
+            dataset, MTSDatasetH
+        ), "TRAModel only supports `qlib.contrib.data.dataset.MTSDatasetH`"
 
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
@@ -640,6 +725,8 @@ class TRAModel(Model):
         # ✅ Best Practice: Call to super() ensures proper initialization of the base class
 
         return preds
+
+
 # 🧠 ML Signal: Storing model hyperparameters as instance variables
 
 
@@ -747,7 +834,9 @@ class PositionalEncoding(nn.Module):
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
         # 🧠 ML Signal: Ranking predictions is a common preprocessing step in ML
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        div_term = torch.exp(
+            torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)
+        )
         pe[:, 0::2] = torch.sin(position * div_term)
         # ⚠️ SAST Risk (Low): Assumes 'pred' has 'score' and 'label' attributes
         pe[:, 1::2] = torch.cos(position * div_term)
@@ -762,8 +851,10 @@ class PositionalEncoding(nn.Module):
         # 🧠 ML Signal: Mean Squared Error is a common metric for regression tasks
         return self.dropout(x)
 
+
 # 🧠 ML Signal: Identifying infinite values in a tensor, common in data preprocessing
 # 🧠 ML Signal: Mean Absolute Error is a common metric for regression tasks
+
 
 class Transformer(nn.Module):
     """Transformer Model
@@ -788,7 +879,7 @@ class Transformer(nn.Module):
         # 🧠 ML Signal: Use of torch.exp suggests this function is part of a machine learning model
         dropout=0.0,
         **kwargs,
-    # ✅ Best Practice: Ensure shoot_infs is defined elsewhere in the codebase
+        # ✅ Best Practice: Ensure shoot_infs is defined elsewhere in the codebase
     ):
         super().__init__()
         # 🧠 ML Signal: Function for calculating loss, common in training ML models
@@ -809,8 +900,11 @@ class Transformer(nn.Module):
         self.pe = PositionalEncoding(input_size, dropout)
         # 🧠 ML Signal: Use of tensor operations, indicating potential use in ML frameworks like PyTorch
         layer = nn.TransformerEncoderLayer(
-            nhead=num_heads, dropout=dropout, d_model=hidden_size, dim_feedforward=hidden_size * 4
-        # 🧠 ML Signal: Handling edge cases where min equals max, common in data normalization
+            nhead=num_heads,
+            dropout=dropout,
+            d_model=hidden_size,
+            dim_feedforward=hidden_size * 4,
+            # 🧠 ML Signal: Handling edge cases where min equals max, common in data normalization
         )
         self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
         # ⚠️ SAST Risk (Low): Potential division by zero if EPS is not defined or too small
@@ -890,7 +984,10 @@ class TRA(nn.Module):
                     batch_first=True,
                     dropout=dropout,
                 )
-                self.fc = nn.Linear(hidden_size + input_size if "LR" in src_info else hidden_size, num_states)
+                self.fc = nn.Linear(
+                    hidden_size + input_size if "LR" in src_info else hidden_size,
+                    num_states,
+                )
             # ⚠️ SAST Risk (Low): Potential issue if loss_fn is not defined or behaves unexpectedly
             else:
                 self.fc = nn.Linear(input_size, num_states)
@@ -928,6 +1025,8 @@ class TRA(nn.Module):
         prob = torch.softmax(out / self.tau, dim=-1)
 
         return preds, choice, prob
+
+
 # ⚠️ SAST Risk (Low): Assumes pred is non-empty and contains valid tensors
 # ✅ Best Practice: Initialize lists to collect issues for better error handling and reporting
 
@@ -1011,7 +1110,17 @@ def minmax_norm(x):
     return x
 
 
-def transport_sample(all_preds, label, choice, prob, hist_loss, count, transport_method, alpha, training=False):
+def transport_sample(
+    all_preds,
+    label,
+    choice,
+    prob,
+    hist_loss,
+    count,
+    transport_method,
+    alpha,
+    training=False,
+):
     """
     sample-wise transport
 
@@ -1056,7 +1165,17 @@ def transport_sample(all_preds, label, choice, prob, hist_loss, count, transport
     return loss, pred, L, P
 
 
-def transport_daily(all_preds, label, choice, prob, hist_loss, count, transport_method, alpha, training=False):
+def transport_daily(
+    all_preds,
+    label,
+    choice,
+    prob,
+    hist_loss,
+    count,
+    transport_method,
+    alpha,
+    training=False,
+):
     """
     daily transport
 
@@ -1131,7 +1250,13 @@ def load_state_dict_unsafe(model, state_dict):
     def load(module, prefix=""):
         local_metadata = {} if metadata is None else metadata.get(prefix[:-1], {})
         module._load_from_state_dict(
-            state_dict, prefix, local_metadata, True, missing_keys, unexpected_keys, error_msgs
+            state_dict,
+            prefix,
+            local_metadata,
+            True,
+            missing_keys,
+            unexpected_keys,
+            error_msgs,
         )
         for name, child in module._modules.items():
             if child is not None:
@@ -1140,7 +1265,11 @@ def load_state_dict_unsafe(model, state_dict):
     load(model)
     load = None  # break load->load reference cycle
 
-    return {"unexpected_keys": unexpected_keys, "missing_keys": missing_keys, "error_msgs": error_msgs}
+    return {
+        "unexpected_keys": unexpected_keys,
+        "missing_keys": missing_keys,
+        "error_msgs": error_msgs,
+    }
 
 
 def plot(P):

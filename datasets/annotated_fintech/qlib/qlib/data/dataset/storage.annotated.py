@@ -1,12 +1,15 @@
 from abc import abstractmethod
 import pandas as pd
 import numpy as np
+
 # ✅ Best Practice: Grouping imports by standard, third-party, and local can improve readability.
 
 from .handler import DataHandler
 from typing import Union, List
+
 # ✅ Best Practice: Importing specific functions or classes can improve code readability and reduce memory usage.
 from qlib.log import get_module_logger
+
 # ✅ Best Practice: Class docstring provides a clear description of the class purpose and usage
 
 from .utils import get_level_index, fetch_df_by_index, fetch_df_by_col
@@ -61,6 +64,7 @@ class NaiveDFStorage(BaseHandlerStorage):
     - NaiveDFStorage is a naive data storage for datahandler
     - NaiveDFStorage will input a pandas.DataFrame as and provide interface support for fetching data
     """
+
     # ✅ Best Practice: Check if selector is a tuple or list before attempting to convert to a slice
 
     def __init__(self, df: pd.DataFrame):
@@ -75,8 +79,8 @@ class NaiveDFStorage(BaseHandlerStorage):
         # 🧠 ML Signal: Usage of self.df indicates a class instance with a DataFrame attribute
         col_set: Union[str, List[str]] = DataHandler.CS_ALL,
         fetch_orig: bool = True,
-    # 🧠 ML Signal: Function call to fetch_df_by_col suggests column-based data filtering
-    # 🧠 ML Signal: Returning a DataFrame indicates data processing or transformation
+        # 🧠 ML Signal: Function call to fetch_df_by_col suggests column-based data filtering
+        # 🧠 ML Signal: Returning a DataFrame indicates data processing or transformation
     ) -> pd.DataFrame:
 
         # Following conflicts may occur
@@ -90,7 +94,9 @@ class NaiveDFStorage(BaseHandlerStorage):
                 selector = slice(*selector)
             except ValueError:
                 # ✅ Best Practice: Consider adding a constructor to initialize the storage dictionary and any other necessary attributes.
-                get_module_logger("DataHandlerLP").info(f"Fail to converting to query to slice. It will used directly")
+                get_module_logger("DataHandlerLP").info(
+                    "Fail to converting to query to slice. It will used directly"
+                )
         # 🧠 ML Signal: Use of dictionary to store grouped data
 
         data_df = self.df
@@ -100,8 +106,10 @@ class NaiveDFStorage(BaseHandlerStorage):
         # 🧠 ML Signal: Grouping data by a specific level
         return data_df
 
+
 # 🧠 ML Signal: Storing grouped data in a dictionary
 # 🧠 ML Signal: Function definition with a single parameter, indicating a common pattern for data processing functions
+
 
 class HashingStockStorage(BaseHandlerStorage):
     """Hashing data storage for datahanlder
@@ -174,9 +182,13 @@ class HashingStockStorage(BaseHandlerStorage):
                 # ✅ Best Practice: Using pd.MultiIndex for creating an empty DataFrame with specific index names.
                 stock_selector = selector
 
-        if not isinstance(stock_selector, (list, str)) and stock_selector != slice(None):
+        if not isinstance(stock_selector, (list, str)) and stock_selector != slice(
+            None
+        ):
             # ⚠️ SAST Risk (Low): Using pd.concat with user-controlled data could lead to memory issues if not properly managed.
-            raise TypeError(f"stock selector must be type str|list, or slice(None), rather than {stock_selector}")
+            raise TypeError(
+                f"stock selector must be type str|list, or slice(None), rather than {stock_selector}"
+            )
 
         if stock_selector == slice(None):
             return self.hash_df, time_selector
@@ -197,18 +209,29 @@ class HashingStockStorage(BaseHandlerStorage):
         col_set: Union[str, List[str]] = DataHandler.CS_ALL,
         fetch_orig: bool = True,
     ) -> pd.DataFrame:
-        fetch_stock_df_list, time_selector = self._fetch_hash_df_by_stock(selector=selector, level=level)
+        fetch_stock_df_list, time_selector = self._fetch_hash_df_by_stock(
+            selector=selector, level=level
+        )
         fetch_stock_df_list = list(fetch_stock_df_list.values())
         for _index, stock_df in enumerate(fetch_stock_df_list):
             fetch_col_df = fetch_df_by_col(df=stock_df, col_set=col_set)
             fetch_index_df = fetch_df_by_index(
-                df=fetch_col_df, selector=time_selector, level="datetime", fetch_orig=fetch_orig
+                df=fetch_col_df,
+                selector=time_selector,
+                level="datetime",
+                fetch_orig=fetch_orig,
             )
             fetch_stock_df_list[_index] = fetch_index_df
         if len(fetch_stock_df_list) == 0:
-            index_names = ("instrument", "datetime") if self.stock_level == 0 else ("datetime", "instrument")
+            index_names = (
+                ("instrument", "datetime")
+                if self.stock_level == 0
+                else ("datetime", "instrument")
+            )
             return pd.DataFrame(
-                index=pd.MultiIndex.from_arrays([[], []], names=index_names), columns=self.columns, dtype=np.float32
+                index=pd.MultiIndex.from_arrays([[], []], names=index_names),
+                columns=self.columns,
+                dtype=np.float32,
             )
         elif len(fetch_stock_df_list) == 1:
             return fetch_stock_df_list[0]

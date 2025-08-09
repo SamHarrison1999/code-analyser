@@ -4,9 +4,11 @@
 
 from __future__ import division
 from __future__ import print_function
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 
 import numpy as np
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import pandas as pd
 from typing import Text, Union
@@ -17,9 +19,11 @@ from ...log import get_module_logger
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import torch
 import torch.nn as nn
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import torch.optim as optim
 from torch.utils.data import DataLoader
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
@@ -84,7 +88,9 @@ class ALSTM(Model):
         self.early_stop = early_stop
         self.optimizer = optimizer.lower()
         self.loss = loss
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.n_jobs = n_jobs
         self.seed = seed
 
@@ -142,14 +148,16 @@ class ALSTM(Model):
             num_layers=self.num_layers,
             # 🧠 ML Signal: Use of mean squared error (MSE) loss function
             dropout=self.dropout,
-        # ⚠️ SAST Risk (Low): Ensure 'weight' is validated to prevent unexpected behavior
-        # 🧠 ML Signal: Custom loss function implementation
+            # ⚠️ SAST Risk (Low): Ensure 'weight' is validated to prevent unexpected behavior
+            # 🧠 ML Signal: Custom loss function implementation
         )
         # ⚠️ SAST Risk (Low): Raises an exception for unsupported optimizers.
         self.logger.info("model:\n{:}".format(self.ALSTM_model))
         # 🧠 ML Signal: Use of torch.mean for reducing tensor dimensions
         # 🧠 ML Signal: Handling missing values in labels
-        self.logger.info("model size: {:.4f} MB".format(count_parameters(self.ALSTM_model)))
+        self.logger.info(
+            "model size: {:.4f} MB".format(count_parameters(self.ALSTM_model))
+        )
         # 🧠 ML Signal: Tracking whether the model has been fitted.
 
         # 🧠 ML Signal: Default weight handling
@@ -162,7 +170,9 @@ class ALSTM(Model):
         # ✅ Best Practice: Check for finite values in label to avoid computation errors
         else:
             # 🧠 ML Signal: Use of mask for valid data points
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
 
         # ⚠️ SAST Risk (Low): Potential information disclosure through error message
         # ✅ Best Practice: Use mask to filter out non-finite values before loss computation
@@ -267,11 +277,17 @@ class ALSTM(Model):
         save_path=None,
         reweighter=None,
     ):
-        dl_train = dataset.prepare("train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
-        dl_valid = dataset.prepare("valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
+        dl_train = dataset.prepare(
+            "train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
+        dl_valid = dataset.prepare(
+            "valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
         # 🧠 ML Signal: Tracking evaluation results
         if dl_train.empty or dl_valid.empty:
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
 
         dl_train.config(fillna_type="ffill+bfill")  # process nan brought by dataloader
         dl_valid.config(fillna_type="ffill+bfill")  # process nan brought by dataloader
@@ -293,8 +309,8 @@ class ALSTM(Model):
             shuffle=True,
             num_workers=self.n_jobs,
             drop_last=True,
-        # ⚠️ SAST Risk (Low): No check for dataset being None or invalid type
-        # 🧠 ML Signal: Storing best model parameters
+            # ⚠️ SAST Risk (Low): No check for dataset being None or invalid type
+            # 🧠 ML Signal: Storing best model parameters
         )
         valid_loader = DataLoader(
             ConcatDataset(dl_valid, wl_valid),
@@ -304,7 +320,7 @@ class ALSTM(Model):
             # ✅ Best Practice: Configuring data handling with fillna_type for consistency
             num_workers=self.n_jobs,
             drop_last=True,
-        # 🧠 ML Signal: Usage of DataLoader with specific batch size and number of workers
+            # 🧠 ML Signal: Usage of DataLoader with specific batch size and number of workers
         )
         # 🧠 ML Signal: Loading best model parameters
 
@@ -373,9 +389,13 @@ class ALSTM(Model):
 
         # 🧠 ML Signal: Element-wise multiplication for attention application
         # 🧠 ML Signal: Use of Softmax layer indicates classification or attention mechanism
-        dl_test = dataset.prepare(segment, col_set=["feature", "label"], data_key=DataHandlerLP.DK_I)
+        dl_test = dataset.prepare(
+            segment, col_set=["feature", "label"], data_key=DataHandlerLP.DK_I
+        )
         dl_test.config(fillna_type="ffill+bfill")
-        test_loader = DataLoader(dl_test, batch_size=self.batch_size, num_workers=self.n_jobs)
+        test_loader = DataLoader(
+            dl_test, batch_size=self.batch_size, num_workers=self.n_jobs
+        )
         # 🧠 ML Signal: Summing over a dimension, typical in reducing sequence data
         # 🧠 ML Signal: Concatenation of features, a common pattern in deep learning
         # ✅ Best Practice: Explicitly returning a specific slice of the output
@@ -394,7 +414,9 @@ class ALSTM(Model):
 
 
 class ALSTMModel(nn.Module):
-    def __init__(self, d_feat=6, hidden_size=64, num_layers=2, dropout=0.0, rnn_type="GRU"):
+    def __init__(
+        self, d_feat=6, hidden_size=64, num_layers=2, dropout=0.0, rnn_type="GRU"
+    ):
         super().__init__()
         self.hid_size = hidden_size
         self.input_size = d_feat
@@ -409,7 +431,9 @@ class ALSTMModel(nn.Module):
         except Exception as e:
             raise ValueError("unknown rnn_type `%s`" % self.rnn_type) from e
         self.net = nn.Sequential()
-        self.net.add_module("fc_in", nn.Linear(in_features=self.input_size, out_features=self.hid_size))
+        self.net.add_module(
+            "fc_in", nn.Linear(in_features=self.input_size, out_features=self.hid_size)
+        )
         self.net.add_module("act", nn.Tanh())
         self.rnn = klass(
             input_size=self.hid_size,
@@ -433,7 +457,9 @@ class ALSTMModel(nn.Module):
         self.att_net.add_module("att_softmax", nn.Softmax(dim=1))
 
     def forward(self, inputs):
-        rnn_out, _ = self.rnn(self.net(inputs))  # [batch, seq_len, num_directions * hidden_size]
+        rnn_out, _ = self.rnn(
+            self.net(inputs)
+        )  # [batch, seq_len, num_directions * hidden_size]
         attention_score = self.att_net(rnn_out)  # [batch, seq_len, 1]
         out_att = torch.mul(rnn_out, attention_score)
         out_att = torch.sum(out_att, dim=1)

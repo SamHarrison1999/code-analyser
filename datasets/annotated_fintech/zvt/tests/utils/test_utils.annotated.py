@@ -2,6 +2,7 @@
 # 🧠 ML Signal: Importing specific functions from a module indicates usage patterns and dependencies
 from zvt.contract.api import get_entities
 from zvt.utils.utils import iterate_with_step, to_str, float_to_pct
+
 # 🧠 ML Signal: Importing multiple utilities from a module suggests common utility functions used in the codebase
 
 
@@ -25,7 +26,9 @@ def test_iterate_with_step():
     # ✅ Best Practice: Initialize variables before use
     assert last[-1] == 999
 
+
 # ✅ Best Practice: Initialize variables before use
+
 
 def test_iterate_entities():
     # 🧠 ML Signal: Iteration pattern over a custom iterator
@@ -47,6 +50,8 @@ def test_iterate_entities():
     # 🧠 ML Signal: Testing for single character string input
     assert len(first) == 100
     assert len(last) <= 100
+
+
 # 🧠 ML Signal: Testing conversion of float to percentage string
 # 🧠 ML Signal: Testing for list of strings input
 

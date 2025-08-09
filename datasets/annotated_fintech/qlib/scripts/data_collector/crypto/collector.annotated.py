@@ -8,6 +8,7 @@ import fire
 import pandas as pd
 from loguru import logger
 from dateutil.tz import tzlocal
+
 # ⚠️ SAST Risk (Low): Modifying sys.path can lead to import conflicts or security issues if not handled carefully.
 
 CUR_DIR = Path(__file__).resolve().parent
@@ -17,8 +18,10 @@ from data_collector.utils import deco_retry
 
 from pycoingecko import CoinGeckoAPI
 from time import mktime
+
 # 🧠 ML Signal: Global variables like _CG_CRYPTO_SYMBOLS can indicate shared state or configuration.
 from datetime import datetime as dt
+
 # ✅ Best Practice: Provide a clear and concise docstring for the function.
 import time
 
@@ -26,6 +29,7 @@ import time
 _CG_CRYPTO_SYMBOLS = None
 
 # 🧠 ML Signal: Use of global variables can indicate shared state or configuration patterns.
+
 
 def get_cg_crypto_symbols(qlib_data_path: [str, Path] = None) -> list:
     """get crypto symbols in coingecko
@@ -63,7 +67,9 @@ def get_cg_crypto_symbols(qlib_data_path: [str, Path] = None) -> list:
 
     return _CG_CRYPTO_SYMBOLS
 
+
 # ✅ Best Practice: Use of docstring to describe parameters and their default values
+
 
 class CryptoCollector(BaseCollector):
     def __init__(
@@ -116,8 +122,8 @@ class CryptoCollector(BaseCollector):
             # ✅ Best Practice: Use a more specific exception handling instead of a broad exception clause
             check_data_length=check_data_length,
             limit_nums=limit_nums,
-        # 🧠 ML Signal: Conversion of datetime to a specific timezone
-        # ⚠️ SAST Risk (Medium): Potential timezone-related issues if timezone is not validated
+            # 🧠 ML Signal: Conversion of datetime to a specific timezone
+            # ⚠️ SAST Risk (Medium): Potential timezone-related issues if timezone is not validated
         )
 
         # ⚠️ SAST Risk (Medium): Potential timezone-related issues if tzlocal() is not validated
@@ -126,7 +132,9 @@ class CryptoCollector(BaseCollector):
     def init_datetime(self):
         if self.interval == self.INTERVAL_1min:
             # ✅ Best Practice: Consider logging the exception for better debugging
-            self.start_datetime = max(self.start_datetime, self.DEFAULT_START_DATETIME_1MIN)
+            self.start_datetime = max(
+                self.start_datetime, self.DEFAULT_START_DATETIME_1MIN
+            )
         # ✅ Best Practice: Use of @property decorator for defining a read-only property
         # ⚠️ SAST Risk (Low): Raising NotImplementedError without handling can lead to unhandled exceptions.
         elif self.interval == self.INTERVAL_1d:
@@ -170,14 +178,22 @@ class CryptoCollector(BaseCollector):
             # ⚠️ SAST Risk (Low): Generic exception handling may hide specific errors
             # ⚠️ SAST Risk (Low): Use of potentially undefined variable 'interval' if not set elsewhere in the class
             cg = CoinGeckoAPI()
-            data = cg.get_coin_market_chart_by_id(id=symbol, vs_currency="usd", days="max")
+            data = cg.get_coin_market_chart_by_id(
+                id=symbol, vs_currency="usd", days="max"
+            )
             _resp = pd.DataFrame(columns=["date"] + list(data.keys()))
-            _resp["date"] = [dt.fromtimestamp(mktime(time.localtime(x[0] / 1000))) for x in data["prices"]]
+            _resp["date"] = [
+                dt.fromtimestamp(mktime(time.localtime(x[0] / 1000)))
+                for x in data["prices"]
+            ]
             for key in data.keys():
                 _resp[key] = [x[1] for x in data[key]]
             _resp["date"] = pd.to_datetime(_resp["date"])
             _resp["date"] = [x.date() for x in _resp["date"]]
-            _resp = _resp[(_resp["date"] < pd.to_datetime(end).date()) & (_resp["date"] > pd.to_datetime(start).date())]
+            _resp = _resp[
+                (_resp["date"] < pd.to_datetime(end).date())
+                & (_resp["date"] > pd.to_datetime(start).date())
+            ]
             # 🧠 ML Signal: Conditional logic based on specific values of 'interval'
             if _resp.shape[0] != 0:
                 _resp = _resp.reset_index()
@@ -192,9 +208,13 @@ class CryptoCollector(BaseCollector):
 
     # 🧠 ML Signal: Function call pattern to external API or service
     def get_data(
-        self, symbol: str, interval: str, start_datetime: pd.Timestamp, end_datetime: pd.Timestamp
-    # 🧠 ML Signal: Logging usage pattern for monitoring and debugging
-    # 🧠 ML Signal: Simple function returning input, could indicate a placeholder or stub
+        self,
+        symbol: str,
+        interval: str,
+        start_datetime: pd.Timestamp,
+        end_datetime: pd.Timestamp,
+        # 🧠 ML Signal: Logging usage pattern for monitoring and debugging
+        # 🧠 ML Signal: Simple function returning input, could indicate a placeholder or stub
     ) -> [pd.DataFrame]:
         def _get_simple(start_, end_):
             # ✅ Best Practice: Explicitly returning the result of a function
@@ -217,6 +237,8 @@ class CryptoCollector(BaseCollector):
         else:
             raise ValueError(f"cannot support {interval}")
         return _result
+
+
 # ✅ Best Practice: Use copy to avoid modifying the original DataFrame
 
 
@@ -238,6 +260,8 @@ class CryptoCollector1d(CryptoCollector, ABC):
     # ✅ Best Practice: Use pd.Timestamp for consistent datetime operations
     def _timezone(self):
         return "Asia/Shanghai"
+
+
 # ✅ Best Practice: Include type hints for method parameters and return type for better readability and maintainability
 
 
@@ -273,13 +297,15 @@ class CryptoNormalize(BaseNormalize):
                 pd.DataFrame(index=calendar_list)
                 .loc[
                     # ✅ Best Practice: Method name should be descriptive of its purpose
-                    pd.Timestamp(df.index.min()).date() : pd.Timestamp(df.index.max()).date()
+                    pd.Timestamp(df.index.min())
+                    .date() : pd.Timestamp(df.index.max())
+                    .date()
                     # 🧠 ML Signal: Usage of f-string for string formatting
                     # ✅ Best Practice: Use of @property decorator for creating read-only attributes
                     + pd.Timedelta(hours=23, minutes=59)
                 ]
                 .index
-            # 🧠 ML Signal: Method returns a formatted string based on an instance attribute
+                # 🧠 ML Signal: Method returns a formatted string based on an instance attribute
             )
         df.sort_index(inplace=True)
         # ⚠️ SAST Risk (Low): The function returns a variable CUR_DIR which is not defined within the function, leading to potential misuse if CUR_DIR is not properly defined elsewhere.
@@ -290,7 +316,9 @@ class CryptoNormalize(BaseNormalize):
         return df.reset_index()
 
     def normalize(self, df: pd.DataFrame) -> pd.DataFrame:
-        df = self.normalize_crypto(df, self._calendar_list, self._date_field_name, self._symbol_field_name)
+        df = self.normalize_crypto(
+            df, self._calendar_list, self._date_field_name, self._symbol_field_name
+        )
         return df
 
 
@@ -300,7 +328,9 @@ class CryptoNormalize1d(CryptoNormalize):
 
 
 class Run(BaseRun):
-    def __init__(self, source_dir=None, normalize_dir=None, max_workers=1, interval="1d"):
+    def __init__(
+        self, source_dir=None, normalize_dir=None, max_workers=1, interval="1d"
+    ):
         """
 
         Parameters
@@ -320,6 +350,7 @@ class Run(BaseRun):
     # ✅ Best Practice: Use of super() to call a method from the parent class ensures proper inheritance and method resolution.
     def collector_class_name(self):
         return f"CryptoCollector{self.interval}"
+
     # ✅ Best Practice: Use of default parameter values for flexibility and ease of use
 
     @property
@@ -367,9 +398,13 @@ class Run(BaseRun):
             $ python collector.py download_data --source_dir ~/.qlib/crypto_data/source/1d --start 2015-01-01 --end 2021-11-30 --delay 1 --interval 1d
         """
 
-        super(Run, self).download_data(max_collector_count, delay, start, end, check_data_length, limit_nums)
+        super(Run, self).download_data(
+            max_collector_count, delay, start, end, check_data_length, limit_nums
+        )
 
-    def normalize_data(self, date_field_name: str = "date", symbol_field_name: str = "symbol"):
+    def normalize_data(
+        self, date_field_name: str = "date", symbol_field_name: str = "symbol"
+    ):
         """normalize data
 
         Parameters

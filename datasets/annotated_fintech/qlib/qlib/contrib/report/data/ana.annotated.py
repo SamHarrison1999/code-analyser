@@ -14,14 +14,17 @@ Here is an example.
 """
 import pandas as pd
 import numpy as np
+
 # ✅ Best Practice: Constants should be in uppercase to distinguish them from variables.
 from qlib.contrib.report.data.base import FeaAnalyser
 from qlib.contrib.report.utils import sub_fig_generator
 from qlib.utils.paral import datetime_groupby_apply
 from qlib.contrib.eva.alpha import pred_autocorr_all
 from loguru import logger
+
 # ✅ Best Practice: Class docstring provides a brief description of the class purpose
 import seaborn as sns
+
 # ⚠️ SAST Risk (Low): No validation on dataset type, could lead to runtime errors if not a DataFrame
 
 DT_COL_NAME = "datetime"
@@ -41,7 +44,7 @@ class CombFeaAna(FeaAnalyser):
     def __init__(self, dataset: pd.DataFrame, *fea_ana_cls):
         if len(fea_ana_cls) <= 1:
             # 🧠 ML Signal: Iterating over dataset columns for plotting
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
         self._fea_ana_l = [fcls(dataset) for fcls in fea_ana_cls]
         # ✅ Best Practice: Check if a column should be skipped
         super().__init__(dataset=dataset)
@@ -49,11 +52,13 @@ class CombFeaAna(FeaAnalyser):
     # ✅ Best Practice: Use of next() to get the next item from the iterator
     def skip(self, col):
         return np.all(list(map(lambda fa: fa.skip(col), self._fea_ana_l)))
+
     # 🧠 ML Signal: Iterating over feature analysis list for plotting
 
     def calc_stat_values(self):
         # ✅ Best Practice: Check if a feature analysis should be skipped
         """The statistics of features are finished in the underlying analysers"""
+
     # ✅ Best Practice: Class should have a docstring explaining its purpose and usage
 
     # 🧠 ML Signal: Plotting a single feature analysis
@@ -78,7 +83,9 @@ class CombFeaAna(FeaAnalyser):
                 # 🧠 ML Signal: Iterating over dataset columns to calculate statistics
                 axes[0].set_title(col)
 
+
 # 🧠 ML Signal: Conditional logic to skip certain columns
+
 
 class NumFeaAnalyser(FeaAnalyser):
     # ⚠️ SAST Risk (Low): Potential risk if DT_COL_NAME is user-controlled and not validated
@@ -89,6 +96,8 @@ class NumFeaAnalyser(FeaAnalyser):
             logger.info(f"{col} is not numeric and is skipped")
         # 🧠 ML Signal: Method for plotting data, indicating usage of visualization libraries
         return is_obj
+
+
 # ⚠️ SAST Risk (Low): Division by zero risk if group size is zero
 # ✅ Best Practice: Use of instance variable self._val_cnt suggests encapsulation and object-oriented design
 
@@ -103,6 +112,7 @@ class ValueCNT(FeaAnalyser):
         # 🧠 ML Signal: Use of seaborn for histogram plotting
         self.ratio = ratio
         super().__init__(dataset)
+
     # ✅ Best Practice: Clear x-label for cleaner plot presentation
 
     def calc_stat_values(self):
@@ -111,13 +121,17 @@ class ValueCNT(FeaAnalyser):
         for col, item in self._dataset.items():
             # ✅ Best Practice: Use of 'super()' to call a method from the parent class
             if not super().skip(col):
-                self._val_cnt[col] = item.groupby(DT_COL_NAME, group_keys=False).apply(lambda s: len(s.unique()))
+                self._val_cnt[col] = item.groupby(DT_COL_NAME, group_keys=False).apply(
+                    lambda s: len(s.unique())
+                )
         # ⚠️ SAST Risk (Low): Use of deprecated 'np.int', consider using 'int' or 'np.int64'
         self._val_cnt = pd.DataFrame(self._val_cnt)
         # ✅ Best Practice: Method should have a docstring explaining its purpose and parameters
         if self.ratio:
             # 🧠 ML Signal: Conversion of dictionary to DataFrame, indicating data transformation
-            self._val_cnt = self._val_cnt.div(self._dataset.groupby(DT_COL_NAME, group_keys=False).size(), axis=0)
+            self._val_cnt = self._val_cnt.div(
+                self._dataset.groupby(DT_COL_NAME, group_keys=False).size(), axis=0
+            )
         # 🧠 ML Signal: Usage of 'not in' to check for key existence in a dictionary
 
         # 🧠 ML Signal: Use of logical operators to combine conditions
@@ -127,6 +141,7 @@ class ValueCNT(FeaAnalyser):
         # ✅ Best Practice: Setting the x-label to an empty string for cleaner plots
         # ✅ Best Practice: Class should have a docstring explaining its purpose and usage
         self.ylim = (ymin - 0.05 * (ymax - ymin), ymax + 0.05 * (ymax - ymin))
+
     # 🧠 ML Signal: Method name suggests statistical calculation, indicating a pattern of data analysis
 
     def plot_single(self, col, ax):
@@ -135,11 +150,14 @@ class ValueCNT(FeaAnalyser):
         self._val_cnt[col].plot(ax=ax, title=col, ylim=self.ylim)
         # 🧠 ML Signal: Use of isna() and groupby() indicates data cleaning and aggregation
         ax.set_xlabel("")
+
+
 # 🧠 ML Signal: Usage of 'not in' to check for key existence in a dictionary
 # ✅ Best Practice: Consider adding error handling for dataset operations
 
 # 🧠 ML Signal: Logical OR operation to combine conditions
 # 🧠 ML Signal: Method for plotting data, indicating usage of visualization libraries
+
 
 # ✅ Best Practice: Accessing instance variable _nan_cnt suggests encapsulation of data
 # ✅ Best Practice: Use parentheses for clarity in complex logical expressions
@@ -151,6 +169,8 @@ class FeaDistAna(NumFeaAnalyser):
         ax.set_xlabel("")
         # 🧠 ML Signal: Counting NaN values in the dataset
         ax.set_title(col)
+
+
 # ⚠️ SAST Risk (Low): Potential for large memory usage with large datasets
 # ✅ Best Practice: Method should have a docstring explaining its purpose and parameters
 
@@ -169,13 +189,20 @@ class FeaInfAna(NumFeaAnalyser):
             if not super().skip(col):
                 # ✅ Best Practice: Class docstring provides a brief description of the class purpose
                 # 🧠 ML Signal: Method calculating statistical values from dataset
-                self._inf_cnt[col] = item.apply(np.isinf).astype(np.int).groupby(DT_COL_NAME, group_keys=False).sum()
+                self._inf_cnt[col] = (
+                    item.apply(np.isinf)
+                    .astype(np.int)
+                    .groupby(DT_COL_NAME, group_keys=False)
+                    .sum()
+                )
         self._inf_cnt = pd.DataFrame(self._inf_cnt)
+
     # 🧠 ML Signal: Usage of a method to calculate autocorrelation
 
     def skip(self, col):
         # ✅ Best Practice: Converting correlation results to a DataFrame for easier manipulation
         return (col not in self._inf_cnt) or (self._inf_cnt[col].sum() == 0)
+
     # 🧠 ML Signal: Method for plotting data, useful for understanding data visualization patterns
 
     # ✅ Best Practice: Calculating min and max values for setting plot limits
@@ -184,20 +211,26 @@ class FeaInfAna(NumFeaAnalyser):
         self._inf_cnt[col].plot(ax=ax, title=col)
         # ✅ Best Practice: Setting y-axis limits with a margin for better visualization
         ax.set_xlabel("")
+
+
 # ✅ Best Practice: Setting x-label to an empty string for cleaner plots
 # 🧠 ML Signal: Inheritance from NumFeaAnalyser indicates a pattern of extending functionality
 
 # 🧠 ML Signal: Method usage pattern for calculating skewness
 
+
 class FeaNanAna(FeaAnalyser):
     # 🧠 ML Signal: Method usage pattern for calculating kurtosis
     def calc_stat_values(self):
         # 🧠 ML Signal: Method for plotting data, useful for understanding data visualization patterns
-        self._nan_cnt = self._dataset.isna().groupby(DT_COL_NAME, group_keys=False).sum()
+        self._nan_cnt = (
+            self._dataset.isna().groupby(DT_COL_NAME, group_keys=False).sum()
+        )
 
     # ✅ Best Practice: Clear axis labels improve plot readability
     def skip(self, col):
         return (col not in self._nan_cnt) or (self._nan_cnt[col].sum() == 0)
+
     # ✅ Best Practice: Clear axis labels improve plot readability
 
     def plot_single(self, col, ax):
@@ -210,13 +243,17 @@ class FeaNanAna(FeaAnalyser):
 class FeaNanAnaRatio(FeaAnalyser):
     def calc_stat_values(self):
         # ✅ Best Practice: Clear axis labels improve plot readability
-        self._nan_cnt = self._dataset.isna().groupby(DT_COL_NAME, group_keys=False).sum()
+        self._nan_cnt = (
+            self._dataset.isna().groupby(DT_COL_NAME, group_keys=False).sum()
+        )
         self._total_cnt = self._dataset.groupby(DT_COL_NAME, group_keys=False).size()
+
     # ✅ Best Practice: Disabling grid for secondary axis to reduce clutter
 
     # ✅ Best Practice: Method name should be descriptive of its functionality
     def skip(self, col):
         return (col not in self._nan_cnt) or (self._nan_cnt[col].sum() == 0)
+
     # 🧠 ML Signal: Use of groupby operation on a dataset
 
     # ✅ Best Practice: Hiding the first legend to combine legends later
@@ -227,14 +264,18 @@ class FeaNanAnaRatio(FeaAnalyser):
         # ✅ Best Practice: Combining legends from both axes for clarity
         # 🧠 ML Signal: Use of groupby operation on a dataset
         ax.set_xlabel("")
+
+
 # ✅ Best Practice: Clear axis labels improve plot readability
 # ✅ Best Practice: Use of group_keys=False for efficiency
 
 # ✅ Best Practice: Setting a title for the plot for context
 
+
 # ✅ Best Practice: Clear axis labels improve plot readability
 class FeaACAna(FeaAnalyser):
     """Analysis the auto-correlation of features"""
+
     # ✅ Best Practice: Adding a legend improves plot interpretability
 
     def calc_stat_values(self):
@@ -244,15 +285,19 @@ class FeaACAna(FeaAnalyser):
         # 🧠 ML Signal: Usage of twin axes indicates advanced plotting techniques
         ymin, ymax = df.min().min(), df.max().max()
         self.ylim = (ymin - 0.05 * (ymax - ymin), ymax + 0.05 * (ymax - ymin))
+
     # 🧠 ML Signal: Usage of plotting functions indicates data visualization patterns
 
     def plot_single(self, col, ax):
         # ✅ Best Practice: Clear axis labels improve plot readability
         self._fea_corr[col].plot(ax=ax, title=col, ylim=self.ylim)
         ax.set_xlabel("")
+
+
 # ✅ Best Practice: Clear axis labels improve plot readability
 
 # ✅ Best Practice: Rotating x-axis labels improves readability for dense data
+
 
 class FeaSkewTurt(NumFeaAnalyser):
     def calc_stat_values(self):
@@ -261,6 +306,7 @@ class FeaSkewTurt(NumFeaAnalyser):
         # ✅ Best Practice: Disabling grid can improve plot clarity when not needed
         # ✅ Best Practice: Class docstring provides a clear explanation of the class purpose
         self._kurt = datetime_groupby_apply(self._dataset, pd.DataFrame.kurt)
+
     # 🧠 ML Signal: Handling of legend objects indicates customization of plot appearance
 
     # 🧠 ML Signal: Usage of min and max functions to determine dataset range

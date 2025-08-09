@@ -16,7 +16,10 @@ __all__ = []
 # import all from submodule exchange_stock_summary_recorder
 # 🧠 ML Signal: Pattern of extending __all__ with imported module's __all__
 from .exchange_stock_summary_recorder import *
-from .exchange_stock_summary_recorder import __all__ as _exchange_stock_summary_recorder_all
+from .exchange_stock_summary_recorder import (
+    __all__ as _exchange_stock_summary_recorder_all,
+)
+
 # ✅ Best Practice: Importing specific components from a module to avoid namespace pollution
 
 __all__ += _exchange_stock_summary_recorder_all
@@ -25,6 +28,7 @@ __all__ += _exchange_stock_summary_recorder_all
 # import all from submodule api
 # 🧠 ML Signal: Pattern of extending __all__ with imported module's __all__
 from .api import *
+
 # ✅ Best Practice: Importing specific components from a module to avoid namespace pollution
 # 🧠 ML Signal: Pattern of importing and extending __all__ for module exports
 # 🧠 ML Signal: Pattern of extending __all__ with imported module's __all__

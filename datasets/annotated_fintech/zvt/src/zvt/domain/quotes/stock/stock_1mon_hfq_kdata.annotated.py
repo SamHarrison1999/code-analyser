@@ -4,9 +4,11 @@
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract.register import register_schema
+
 # 🧠 ML Signal: Inheritance from multiple classes indicates a pattern of code reuse and polymorphism.
 # ✅ Best Practice: Using a descriptive variable name for the base class improves code readability.
 from zvt.domain.quotes import StockKdataCommon
+
 # 🧠 ML Signal: Use of a class attribute to define a table name suggests a pattern for ORM usage.
 
 KdataBase = declarative_base()
@@ -15,12 +17,16 @@ KdataBase = declarative_base()
 # ✅ Best Practice: Use of keyword arguments improves code readability and maintainability.
 # ✅ Best Practice: Defining __all__ for module exports improves code clarity and controls namespace exposure.
 
+
 class Stock1monHfqKdata(KdataBase, StockKdataCommon):
     __tablename__ = "stock_1mon_hfq_kdata"
 
 
 register_schema(
-    providers=["em", "qmt", "joinquant"], db_name="stock_1mon_hfq_kdata", schema_base=KdataBase, entity_type="stock"
+    providers=["em", "qmt", "joinquant"],
+    db_name="stock_1mon_hfq_kdata",
+    schema_base=KdataBase,
+    entity_type="stock",
 )
 
 

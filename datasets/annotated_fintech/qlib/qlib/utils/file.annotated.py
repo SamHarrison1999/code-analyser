@@ -4,9 +4,11 @@
 import os
 import shutil
 import tempfile
+
 # 🧠 ML Signal: Custom logging setup can indicate specific logging practices
 import contextlib
 from typing import Optional, Text, IO, Union
+
 # 🧠 ML Signal: Custom logger usage can indicate specific logging practices
 from pathlib import Path
 
@@ -30,7 +32,9 @@ def get_or_create_path(path: Optional[Text] = None, return_dir: bool = False):
         # ✅ Best Practice: Check if directory needs to be created
         if return_dir and not os.path.exists(path):
             os.makedirs(path)
-        elif not return_dir:  # return a file, thus we need to create its parent directory
+        elif (
+            not return_dir
+        ):  # return a file, thus we need to create its parent directory
             xpath = os.path.abspath(os.path.join(path, ".."))
             # ✅ Best Practice: Use os.path.expanduser to handle user directories
             if not os.path.exists(xpath):
@@ -83,7 +87,9 @@ def save_multiple_parts_file(filename, format="gztar"):
 
     # Create model dir
     if os.path.exists(file_path):
-        raise FileExistsError("ERROR: file exists: {}, cannot be create the directory.".format(file_path))
+        raise FileExistsError(
+            "ERROR: file exists: {}, cannot be create the directory.".format(file_path)
+        )
 
     os.makedirs(file_path)
 
@@ -200,6 +206,8 @@ def get_io_object(file: Union[IO, str, Path], *args, **kwargs) -> IO:
         if isinstance(file, str):
             file = Path(file)
         if not isinstance(file, Path):
-            raise NotImplementedError(f"This type[{type(file)}] of input is not supported")
+            raise NotImplementedError(
+                f"This type[{type(file)}] of input is not supported"
+            )
         with file.open(*args, **kwargs) as f:
             yield f

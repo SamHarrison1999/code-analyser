@@ -3,9 +3,11 @@
 # 🧠 ML Signal: Usage of declarative_base from SQLAlchemy indicates ORM pattern
 from sqlalchemy import Column, String, Float
 from sqlalchemy.orm import declarative_base
+
 # 🧠 ML Signal: Importing custom modules indicates potential domain-specific logic
 
 from zvt.contract import Portfolio, PortfolioStockHistory
+
 # 🧠 ML Signal: Custom decorators suggest usage patterns for extending functionality
 # ✅ Best Practice: Class inherits from multiple base classes, ensure method resolution order is as intended
 from zvt.contract.register import register_schema, register_entity
@@ -16,6 +18,7 @@ IndexMetaBase = declarative_base()
 
 # 🧠 ML Signal: Decorator usage indicates a pattern for registering entities
 # 🧠 ML Signal: Use of Column with String type and length constraint
+
 
 #: 指数
 # 🧠 ML Signal: Use of Column with String type and length constraint
@@ -41,7 +44,9 @@ class IndexStock(IndexMetaBase, PortfolioStockHistory):
     __tablename__ = "index_stock"
 
 
-register_schema(providers=["em", "exchange"], db_name="index_meta", schema_base=IndexMetaBase)
+register_schema(
+    providers=["em", "exchange"], db_name="index_meta", schema_base=IndexMetaBase
+)
 
 
 # the __all__ is generated

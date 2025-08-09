@@ -3,12 +3,15 @@
 
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.domain import Index
+
 # 🧠 ML Signal: Inheritance from a base class, indicating a pattern of extending functionality
 from zvt.recorders.exchange.api import cn_index_api, cs_index_api
 
 # 🧠 ML Signal: Use of class attribute to define a constant value
+
 
 # 🧠 ML Signal: Method calls with string literals indicate specific actions or configurations
 class ExchangeIndexRecorder(Recorder):
@@ -41,8 +44,14 @@ class ExchangeIndexRecorder(Recorder):
     def record_cs_index(self, index_type):
         df = cs_index_api.get_cs_index(index_type=index_type)
         # 🧠 ML Signal: Iterating over items in a dictionary
-        df_to_db(data_schema=self.data_schema, df=df, provider=self.provider, force_update=True)
+        df_to_db(
+            data_schema=self.data_schema,
+            df=df,
+            provider=self.provider,
+            force_update=True,
+        )
         self.logger.info(f"finish record {index_type} index")
+
     # 🧠 ML Signal: API call with dynamic parameters
 
     # 国证，深圳
@@ -62,7 +71,12 @@ class ExchangeIndexRecorder(Recorder):
 
         for category, _ in category_map_url.items():
             df = cn_index_api.get_cn_index(index_type=index_type, category=category)
-            df_to_db(data_schema=self.data_schema, df=df, provider=self.provider, force_update=True)
+            df_to_db(
+                data_schema=self.data_schema,
+                df=df,
+                provider=self.provider,
+                force_update=True,
+            )
             self.logger.info(f"finish record {index_type} index:{category.value}")
 
 

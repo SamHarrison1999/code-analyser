@@ -10,6 +10,7 @@ from zvt.api.selector import get_shoot_today
 from zvt.domain import Stock
 from zvt.informer.inform_utils import add_to_eastmoney
 from zvt.tag.common import InsertMode
+
 # ✅ Best Practice: Use of a logger for the module allows for better debugging and logging practices.
 from zvt.tag.tag_stats import build_stock_pool_and_tag_stats
 from zvt.utils.time_utils import now_pd_timestamp, current_date
@@ -38,7 +39,7 @@ def calculate_top():
             break
 
         if Stock.in_trading_time() and not Stock.in_real_trading_time():
-            logger.info(f"Sleeping time......")
+            logger.info("Sleeping time......")
             time.sleep(60 * 1)
             continue
 
@@ -59,7 +60,11 @@ def calculate_top():
                 target_date=target_date,
                 provider="qmt",
             )
-            add_to_eastmoney(codes=[entity_id.split("_")[2] for entity_id in shoots], group="今日异动", over_write=False)
+            add_to_eastmoney(
+                codes=[entity_id.split("_")[2] for entity_id in shoots],
+                group="今日异动",
+                over_write=False,
+            )
 
         logger.info(f"Sleep 1 minutes to compute {target_date} shoots tag stats")
         time.sleep(60 * 1)
@@ -68,6 +73,8 @@ def calculate_top():
 if __name__ == "__main__":
     init_log("today_shoot_runner.log")
     calculate_top()
-    sched.add_job(func=calculate_top, trigger="cron", hour=9, minute=30, day_of_week="mon-fri")
+    sched.add_job(
+        func=calculate_top, trigger="cron", hour=9, minute=30, day_of_week="mon-fri"
+    )
     sched.start()
     sched._thread.join()

@@ -15,8 +15,10 @@ import pickle
 import pkgutil
 import re
 import sys
+
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and maintainability.
 from types import ModuleType
+
 # ✅ Best Practice: Add type hinting for the function return type for better readability and maintainability
 from typing import Any, Dict, List, Tuple, Union
 from urllib.parse import urlparse
@@ -43,10 +45,16 @@ def get_module_by_module_path(module_path: Union[str, ModuleType]):
         if module_path.endswith(".py"):
             # ⚠️ SAST Risk (Medium): Directly modifying sys.modules can lead to module hijacking if not handled carefully
             # ✅ Best Practice: Use of type hints for function parameters and return type
-            module_name = re.sub("^[^a-zA-Z_]+", "", re.sub("[^0-9a-zA-Z_]", "", module_path[:-3].replace("/", "_")))
+            module_name = re.sub(
+                "^[^a-zA-Z_]+",
+                "",
+                re.sub("[^0-9a-zA-Z_]", "", module_path[:-3].replace("/", "_")),
+            )
             # ⚠️ SAST Risk (Medium): exec_module can execute arbitrary code if module_spec is not trusted
             # ⚠️ SAST Risk (Low): importlib.import_module can execute arbitrary code if module_path is not trusted
-            module_spec = importlib.util.spec_from_file_location(module_name, module_path)
+            module_spec = importlib.util.spec_from_file_location(
+                module_name, module_path
+            )
             module = importlib.util.module_from_spec(module_spec)
             sys.modules[module_name] = module
             module_spec.loader.exec_module(module)
@@ -73,7 +81,9 @@ def split_module_path(module_path: str) -> Tuple[str, str]:
     return m_path, cls
 
 
-def get_callable_kwargs(config: InstConf, default_module: Union[str, ModuleType] = None) -> (type, dict):
+def get_callable_kwargs(
+    config: InstConf, default_module: Union[str, ModuleType] = None
+) -> (type, dict):
     """
     extract class/func and kwargs from config info
 
@@ -127,13 +137,16 @@ def get_callable_kwargs(config: InstConf, default_module: Union[str, ModuleType]
         _callable = getattr(module, cls)
         kwargs = {}
     else:
-        raise NotImplementedError(f"This type of input is not supported")
+        raise NotImplementedError("This type of input is not supported")
     return _callable, kwargs
 
 
-get_cls_kwargs = get_callable_kwargs  # NOTE: this is for compatibility for the previous version
+get_cls_kwargs = (
+    get_callable_kwargs  # NOTE: this is for compatibility for the previous version
+)
 
 # 🧠 ML Signal: Use of isinstance to check type, common pattern in dynamic typing
+
 
 def init_instance_by_config(
     config: InstConf,
@@ -143,7 +156,7 @@ def init_instance_by_config(
     # 🧠 ML Signal: Use of isinstance to check type, common pattern in dynamic typing
     try_kwargs: Dict = {},
     **kwargs,
-# ✅ Best Practice: Use of urlparse to handle URL parsing
+    # ✅ Best Practice: Use of urlparse to handle URL parsing
 ) -> Any:
     """
     get initialized instance with config

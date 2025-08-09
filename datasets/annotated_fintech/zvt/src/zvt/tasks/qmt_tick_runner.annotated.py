@@ -14,6 +14,8 @@ if __name__ == "__main__":
     # 🧠 ML Signal: Starting a scheduler, indicating a pattern of automated task management.
     # ⚠️ SAST Risk (Low): Accessing a protected member of an object (sched._thread) which may lead to unexpected behavior if the internal implementation changes.
     record_tick()
-    sched.add_job(func=record_tick, trigger="cron", hour=9, minute=18, day_of_week="mon-fri")
+    sched.add_job(
+        func=record_tick, trigger="cron", hour=9, minute=18, day_of_week="mon-fri"
+    )
     sched.start()
     sched._thread.join()

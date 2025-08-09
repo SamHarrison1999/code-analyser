@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 # 🧠 ML Signal: Use of abstract base class pattern, indicating a design choice for extensibility
 
 # 🧠 ML Signal: Importing specific classes from a module, indicating selective usage
@@ -12,7 +13,7 @@ from .event import (
     EVENT_CONTRACT,
     EVENT_LOG,
     EVENT_QUOTE,
-# 🧠 ML Signal: Importing constants, indicating event-driven architecture
+    # 🧠 ML Signal: Importing constants, indicating event-driven architecture
 )
 from .object import (
     TickData,
@@ -29,8 +30,9 @@ from .object import (
     HistoryRequest,
     QuoteRequest,
     Exchange,
-    BarData
+    BarData,
 )
+
 # 🧠 ML Signal: Importing multiple data structures and request types, indicating a complex system
 
 
@@ -137,6 +139,7 @@ class BaseGateway(ABC):
         self.on_event(EVENT_ORDER, order)
         # 🧠 ML Signal: Method for handling log events, useful for understanding event-driven patterns
         self.on_event(EVENT_ORDER + order.vt_orderid, order)
+
     # ✅ Best Practice: Use of type hinting for method parameters and return type
 
     def on_position(self, position: PositionData) -> None:
@@ -171,6 +174,7 @@ class BaseGateway(ABC):
         Log event push.
         """
         self.on_event(EVENT_LOG, log)
+
     # ✅ Best Practice: Use of @abstractmethod indicates this method should be overridden in subclasses.
 
     def on_contract(self, contract: ContractData) -> None:
@@ -187,6 +191,7 @@ class BaseGateway(ABC):
         """
         log: LogData = LogData(msg=msg, gateway_name=self.gateway_name)
         self.on_log(log)
+
     # ✅ Best Practice: Use @abstractmethod to enforce implementation of this method in subclasses.
 
     @abstractmethod
@@ -226,6 +231,7 @@ class BaseGateway(ABC):
         # ✅ Best Practice: Return a meaningful value or raise NotImplementedError if the method is not yet implemented
         """
         pass
+
     # ✅ Best Practice: Include a docstring to describe the method's purpose and behavior
 
     @abstractmethod
@@ -255,6 +261,7 @@ class BaseGateway(ABC):
         * send request to server
         """
         pass
+
     # 🧠 ML Signal: Accessing an instance attribute, indicating a pattern of object-oriented design
 
     def send_quote(self, req: QuoteRequest) -> str:

@@ -4,8 +4,10 @@
 
 import pickle
 import dill
+
 # ⚠️ SAST Risk (Low): Relative imports can lead to potential issues in module resolution.
 from pathlib import Path
+
 # ⚠️ SAST Risk (Medium): Deserializing data from untrusted sources can lead to arbitrary code execution.
 # ✅ Best Practice: Use 'Path' for file path operations for better cross-platform compatibility.
 # ✅ Best Practice: Check if the file exists before attempting to open it.
@@ -29,6 +31,7 @@ class Serializable:
     - For examples, a learnable Datahandler just wants to save the parameters without data when dumping to disk
     # ✅ Best Practice: Use of class variables for default settings and configurations
     """
+
     # ✅ Best Practice: Initialize instance variables in the constructor for clarity and maintainability.
     # 🧠 ML Signal: Function to load serialized objects, indicating usage patterns for data persistence.
 
@@ -51,7 +54,10 @@ class Serializable:
         # 🧠 ML Signal: Checks for exclusion in a list, indicating a blacklist pattern
         self._dump_all = self.default_dump_all
         # ✅ Best Practice: Use of dictionary comprehension for concise and readable code
-        self._exclude = None  # this attribute have higher priorities than `exclude_attr`
+        self._exclude = (
+            None  # this attribute have higher priorities than `exclude_attr`
+        )
+
     # 🧠 ML Signal: Choice of serialization library (pickle) for saving objects.
 
     # 🧠 ML Signal: Custom serialization logic for object state
@@ -68,6 +74,7 @@ class Serializable:
         if key in self._get_attr_list("exclude"):
             return False
         return self.dump_all or not key.startswith("_")
+
     # ✅ Best Practice: Consider renaming the method to better reflect its functionality
 
     # 🧠 ML Signal: Usage of getattr to access object attributes dynamically
@@ -194,7 +201,9 @@ class Serializable:
         # 🧠 ML Signal: Using a method specific to the object's class for serialization
         # ⚠️ SAST Risk (Medium): Opening files without exception handling can lead to unhandled exceptions
         else:
-            raise TypeError(f"The instance of {type(object)} is not a valid `{type(cls)}`!")
+            raise TypeError(
+                f"The instance of {type(object)} is not a valid `{type(cls)}`!"
+            )
 
     @classmethod
     def get_backend(cls):

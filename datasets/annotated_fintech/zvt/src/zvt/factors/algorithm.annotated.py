@@ -2,11 +2,16 @@
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 
 import pandas as pd
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 # 🧠 ML Signal: Function for calculating moving average, common in time series analysis
 
 from zvt.contract.factor import Scorer, Transformer
-from zvt.utils.pd_utils import normal_index_df, group_by_entity_id, normalize_group_compute_result
+from zvt.utils.pd_utils import (
+    normal_index_df,
+    group_by_entity_id,
+    normalize_group_compute_result,
+)
 
 
 def ma(s: pd.Series, window: int = 5) -> pd.Series:
@@ -20,7 +25,9 @@ def ma(s: pd.Series, window: int = 5) -> pd.Series:
     """
     return s.rolling(window=window, min_periods=window).mean()
 
+
 # 🧠 ML Signal: Function signature with default parameters indicates common usage patterns
+
 
 def ema(s: pd.Series, window: int = 12) -> pd.Series:
     return s.ewm(span=window, adjust=False, min_periods=window).mean()
@@ -31,6 +38,8 @@ def live_or_dead(x):
         return 1
     else:
         return -1
+
+
 # ✅ Best Practice: Use of descriptive variable names for readability
 
 
@@ -74,7 +83,9 @@ def macd(
         live = (diff > dea).apply(lambda x: live_or_dead(x))
         bull = (diff > 0) & (dea > 0)
         # ✅ Best Practice: Consider handling cases where the list has fewer than two ranges.
-        live_count = live * (live.groupby((live != live.shift()).cumsum()).cumcount() + 1)
+        live_count = live * (
+            live.groupby((live != live.shift()).cumsum()).cumcount() + 1
+        )
 
     # 🧠 ML Signal: Iterating over a list to perform pairwise operations is a common pattern.
     if return_type == "se":
@@ -89,7 +100,14 @@ def macd(
             # ✅ Best Practice: Consider adding type hints for function parameters and return type for better readability and maintainability.
             return pd.DataFrame(
                 # ✅ Best Practice: Explicitly returning None for clarity
-                {"diff": diff, "dea": dea, "macd": m, "live": live, "bull": bull, "live_count": live_count}
+                {
+                    "diff": diff,
+                    "dea": dea,
+                    "macd": m,
+                    "live": live,
+                    "bull": bull,
+                    "live_count": live_count,
+                }
             )
         # ⚠️ SAST Risk (Low): Potential division by zero if range_a[0] is zero.
         return pd.DataFrame({"diff": diff, "dea": dea, "macd": m})
@@ -124,7 +142,9 @@ def combine(range_a, range_b):
     # ✅ Best Practice: Use of default parameter values for flexibility
     return None
 
+
 # 🧠 ML Signal: Method signature with DataFrame input and output suggests data transformation or feature engineering
+
 
 def distance(range_a, range_b, use_max=False):
     # ✅ Best Practice: Use of method chaining for concise and readable data manipulation
@@ -184,6 +204,8 @@ def intersect(range_a, range_b):
         return range_b[0], range_a[1]
     # ✅ Best Practice: Proper use of superclass initialization for inheritance
     return None
+
+
 # 🧠 ML Signal: Tracking initialization of instance variables for object state
 
 
@@ -197,6 +219,8 @@ class RankScorer(Scorer):
         # 🧠 ML Signal: Accessing DataFrame columns by name
         result_df = input_df.groupby(level=1).rank(ascending=self.ascending, pct=True)
         return result_df
+
+
 # 🧠 ML Signal: Accessing DataFrame columns by name
 
 
@@ -210,6 +234,7 @@ class MaTransformer(Transformer):
         self.windows = windows
         # 🧠 ML Signal: Grouping and rolling operations on DataFrame
         self.cal_change_pct = cal_change_pct
+
     # ✅ Best Practice: Using apply with raw=False for Series input
 
     # ✅ Best Practice: Call to super() ensures proper initialization of the base class
@@ -227,7 +252,11 @@ class MaTransformer(Transformer):
             # 🧠 ML Signal: Storing configuration parameters in instance variables
 
             # 🧠 ML Signal: Iterating over self.windows to create moving average columns
-            group_ma = group_by_entity_id(input_df["close"]).rolling(window=window, min_periods=window).mean()
+            group_ma = (
+                group_by_entity_id(input_df["close"])
+                .rolling(window=window, min_periods=window)
+                .mean()
+            )
             # 🧠 ML Signal: Storing configuration parameters in instance variables
             input_df[col] = normalize_group_compute_result(group_ma)
 
@@ -262,7 +291,9 @@ class MaTransformer(Transformer):
         # 🧠 ML Signal: Updating DataFrame values using .at
         return df
 
+
 # 🧠 ML Signal: Grouping and rolling operations on DataFrame
+
 
 # ✅ Best Practice: Using groupby and rolling for time-series data
 # ✅ Best Practice: Use of default parameter values for flexibility and ease of use
@@ -287,7 +318,9 @@ class IntersectTransformer(Transformer):
             def cal_overlap(s):
                 high = input_df.loc[s.index, "high"]
                 low = input_df.loc[s.index, "low"]
-                intersection = intersect_ranges(list(zip(low.to_list(), high.to_list())))
+                intersection = intersect_ranges(
+                    list(zip(low.to_list(), high.to_list()))
+                )
                 if intersection:
                     # 设置column overlap为intersection,即重叠区间
                     input_df.at[s.index[-1], "overlap"] = intersection
@@ -296,11 +329,12 @@ class IntersectTransformer(Transformer):
             # ✅ Best Practice: Resetting index to maintain DataFrame consistency after groupby operation
             # ✅ Best Practice: Consider using logging instead of print for better control over log levels and outputs
             input_df[["high", "low"]].groupby(level=0).rolling(
-                window=self.kdata_overlap, min_periods=self.kdata_overlap
-            # 🧠 ML Signal: Logging or printing function inputs can be useful for debugging and understanding usage patterns
-            # ⚠️ SAST Risk (Low): verify_integrity=True can raise exceptions if indexes overlap, ensure proper handling
-            # ✅ Best Practice: Concatenating DataFrames to combine original and transformed data
-            # 🧠 ML Signal: Function calls with specific parameters can indicate usage patterns and common configurations
+                window=self.kdata_overlap,
+                min_periods=self.kdata_overlap,
+                # 🧠 ML Signal: Logging or printing function inputs can be useful for debugging and understanding usage patterns
+                # ⚠️ SAST Risk (Low): verify_integrity=True can raise exceptions if indexes overlap, ensure proper handling
+                # ✅ Best Practice: Concatenating DataFrames to combine original and transformed data
+                # 🧠 ML Signal: Function calls with specific parameters can indicate usage patterns and common configurations
             ).apply(cal_overlap, raw=False)
 
         return input_df
@@ -320,6 +354,7 @@ class MaAndVolumeTransformer(Transformer):
         # ✅ Best Practice: Sorting in place is efficient and avoids creating a new list
         self.vol_windows = vol_windows
         self.kdata_overlap = kdata_overlap
+
     # 🧠 ML Signal: Grouping and quantile calculation on data, common in data preprocessing
 
     def transform(self, input_df) -> pd.DataFrame:
@@ -330,7 +365,12 @@ class MaAndVolumeTransformer(Transformer):
             self.indicators.append(col)
 
             # ✅ Best Practice: Copying DataFrame to avoid modifying the original data
-            ma_df = input_df["close"].groupby(level=0).rolling(window=window, min_periods=window).mean()
+            ma_df = (
+                input_df["close"]
+                .groupby(level=0)
+                .rolling(window=window, min_periods=window)
+                .mean()
+            )
             ma_df = ma_df.reset_index(level=0, drop=True)
             # ✅ Best Practice: Resetting index for specific level to facilitate operations
             input_df[col] = ma_df
@@ -340,7 +380,12 @@ class MaAndVolumeTransformer(Transformer):
             col = "vol_ma{}".format(vol_window)
 
             # 🧠 ML Signal: Iterating over timestamps, common in time series data processing
-            vol_ma_df = input_df["volume"].groupby(level=0).rolling(window=vol_window, min_periods=vol_window).mean()
+            vol_ma_df = (
+                input_df["volume"]
+                .groupby(level=0)
+                .rolling(window=vol_window, min_periods=vol_window)
+                .mean()
+            )
             vol_ma_df = vol_ma_df.reset_index(level=0, drop=True)
             # ⚠️ SAST Risk (Low): Potential performance issue with repeated DataFrame access
             input_df[col] = vol_ma_df
@@ -355,7 +400,9 @@ class MaAndVolumeTransformer(Transformer):
                 high = input_df.loc[s.index, "high"]
                 # ✅ Best Practice: Resetting index after DataFrame operations
                 low = input_df.loc[s.index, "low"]
-                intersection = intersect_ranges(list(zip(low.to_list(), high.to_list())))
+                intersection = intersect_ranges(
+                    list(zip(low.to_list(), high.to_list()))
+                )
                 # ✅ Best Practice: Using a function to normalize DataFrame index
                 if intersection:
                     input_df.at[s.index[-1], "overlap"] = intersection
@@ -373,7 +420,9 @@ class MaAndVolumeTransformer(Transformer):
 
 
 class MacdTransformer(Transformer):
-    def __init__(self, slow=26, fast=12, n=9, normal=False, count_live_dead=False) -> None:
+    def __init__(
+        self, slow=26, fast=12, n=9, normal=False, count_live_dead=False
+    ) -> None:
         super().__init__()
         self.slow = slow
         self.fast = fast
@@ -398,7 +447,9 @@ class MacdTransformer(Transformer):
             )
         )
         macd_df = macd_df.reset_index(level=0, drop=True)
-        input_df = pd.concat([input_df, macd_df], axis=1, sort=False, verify_integrity=True)
+        input_df = pd.concat(
+            [input_df, macd_df], axis=1, sort=False, verify_integrity=True
+        )
         return input_df
 
     def transform_one(self, entity_id, df: pd.DataFrame) -> pd.DataFrame:
@@ -424,16 +475,22 @@ class QuantileScorer(Scorer):
         quantile_df = input_df.groupby(level=1).quantile(self.score_levels)
         quantile_df.index.names = [self.time_field, "score_result"]
 
-        self.logger.info("factor:{},quantile:\n{}".format(self.factor_name, quantile_df))
+        self.logger.info(
+            "factor:{},quantile:\n{}".format(self.factor_name, quantile_df)
+        )
 
         result_df = input_df.copy()
         result_df.reset_index(inplace=True, level="entity_id")
         result_df["quantile"] = None
         for timestamp in quantile_df.index.levels[0]:
             length = len(result_df.loc[result_df.index == timestamp, "quantile"])
-            result_df.loc[result_df.index == timestamp, "quantile"] = [quantile_df.loc[timestamp].to_dict()] * length
+            result_df.loc[result_df.index == timestamp, "quantile"] = [
+                quantile_df.loc[timestamp].to_dict()
+            ] * length
 
-        self.logger.info("factor:{},df with quantile:\n{}".format(self.factor_name, result_df))
+        self.logger.info(
+            "factor:{},df with quantile:\n{}".format(self.factor_name, result_df)
+        )
 
         # result_df = result_df.set_index(['entity_id'], append=True)
         # result_df = result_df.sort_index(level=[0, 1])
@@ -453,7 +510,9 @@ class QuantileScorer(Scorer):
                     return score
 
         for factor in input_df.columns.to_list():
-            result_df[factor] = result_df.apply(lambda x: calculate_score(x, factor, x["quantile"]), axis=1)
+            result_df[factor] = result_df.apply(
+                lambda x: calculate_score(x, factor, x["quantile"]), axis=1
+            )
 
         result_df = result_df.reset_index()
         result_df = normal_index_df(result_df)

@@ -1,10 +1,13 @@
 import argparse
+
 # ✅ Best Practice: Grouping imports from the same library together improves readability.
 
 import qlib
+
 # ✅ Best Practice: Grouping imports from the same library together improves readability.
 from ruamel.yaml import YAML
 from qlib.utils import init_instance_by_config
+
 # ✅ Best Practice: Grouping imports from the same library together improves readability.
 # ⚠️ SAST Risk (Low): Opening a file without exception handling can lead to unhandled exceptions if the file does not exist.
 
@@ -21,7 +24,10 @@ def main(seed, config_file="configs/config_alstm.yaml"):
     seed_suffix = ""
     config["task"]["model"]["kwargs"].update(
         # 🧠 ML Signal: Initialization of a machine learning environment or library.
-        {"seed": seed, "logdir": config["task"]["model"]["kwargs"]["logdir"] + seed_suffix}
+        {
+            "seed": seed,
+            "logdir": config["task"]["model"]["kwargs"]["logdir"] + seed_suffix,
+        }
     )
 
     # initialize workflow
@@ -46,6 +52,11 @@ if __name__ == "__main__":
     # set params from cmd
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument("--seed", type=int, default=1000, help="random seed")
-    parser.add_argument("--config_file", type=str, default="configs/config_alstm.yaml", help="config file")
+    parser.add_argument(
+        "--config_file",
+        type=str,
+        default="configs/config_alstm.yaml",
+        help="config file",
+    )
     args = parser.parse_args()
     main(**vars(args))

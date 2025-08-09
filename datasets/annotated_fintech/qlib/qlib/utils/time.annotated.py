@@ -57,11 +57,13 @@ def get_min_cal(shift: int = 0, region: str = REG_CN) -> List[time]:
 
     if region == REG_CN:
         for ts in list(
-            pd.date_range(CN_TIME[0], CN_TIME[1] - timedelta(minutes=1), freq="1min") - pd.Timedelta(minutes=shift)
+            pd.date_range(CN_TIME[0], CN_TIME[1] - timedelta(minutes=1), freq="1min")
+            - pd.Timedelta(minutes=shift)
         ) + list(
             # ⚠️ SAST Risk (Low): Potential risk of ValueError if time_str is not in the expected format
             # 🧠 ML Signal: Conditional logic based on region can indicate regional-specific behavior.
-            pd.date_range(CN_TIME[2], CN_TIME[3] - timedelta(minutes=1), freq="1min") - pd.Timedelta(minutes=shift)
+            pd.date_range(CN_TIME[2], CN_TIME[3] - timedelta(minutes=1), freq="1min")
+            - pd.Timedelta(minutes=shift)
         ):
             cal.append(ts.time())
     # ✅ Best Practice: Use of strftime to format datetime objects as strings
@@ -71,12 +73,14 @@ def get_min_cal(shift: int = 0, region: str = REG_CN) -> List[time]:
             # ⚠️ SAST Risk (Low): Potential risk of ValueError if date strings are not in the expected format
             # 🧠 ML Signal: Pattern of generating a list of dates within a range
             # ⚠️ SAST Risk (Low): Raising a ValueError for unsupported regions is good, but consider logging the error for better traceability.
-            pd.date_range(TW_TIME[0], TW_TIME[1] - timedelta(minutes=1), freq="1min") - pd.Timedelta(minutes=shift)
+            pd.date_range(TW_TIME[0], TW_TIME[1] - timedelta(minutes=1), freq="1min")
+            - pd.Timedelta(minutes=shift)
         ):
             cal.append(ts.time())
     elif region == REG_US:
         for ts in list(
-            pd.date_range(US_TIME[0], US_TIME[1] - timedelta(minutes=1), freq="1min") - pd.Timedelta(minutes=shift)
+            pd.date_range(US_TIME[0], US_TIME[1] - timedelta(minutes=1), freq="1min")
+            - pd.Timedelta(minutes=shift)
         ):
             cal.append(ts.time())
     else:
@@ -130,11 +134,16 @@ def is_single_value(start_time, end_time, freq, region: str = REG_CN):
     # 🧠 ML Signal: Attribute access from object
     # ✅ Best Practice: Use of a special method to define equality behavior
     else:
-        raise NotImplementedError(f"please implement the is_single_value func for {region}")
+        raise NotImplementedError(
+            f"please implement the is_single_value func for {region}"
+        )
+
+
 # ✅ Best Practice: Converting input to a specific type for consistent comparison
 
 # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported types
 # ✅ Best Practice: Use of f-string for string formatting improves readability and performance
+
 
 # 🧠 ML Signal: Use of logical operators for comparison
 class Freq:
@@ -143,9 +152,14 @@ class Freq:
     # ✅ Best Practice: Use of __repr__ for unambiguous object representation
     NORM_FREQ_WEEK = "week"
     NORM_FREQ_DAY = "day"
-    NORM_FREQ_MINUTE = "min"  # using min instead of minute for align with Qlib's data filename
+    NORM_FREQ_MINUTE = (
+        "min"  # using min instead of minute for align with Qlib's data filename
+    )
     # ✅ Best Practice: Use of @staticmethod for methods that do not access instance or class data
-    SUPPORT_CAL_LIST = [NORM_FREQ_MINUTE, NORM_FREQ_DAY]  # FIXME: this list should from data
+    SUPPORT_CAL_LIST = [
+        NORM_FREQ_MINUTE,
+        NORM_FREQ_DAY,
+    ]  # FIXME: this list should from data
 
     def __init__(self, freq: Union[str, "Freq"]) -> None:
         if isinstance(freq, str):
@@ -153,7 +167,7 @@ class Freq:
         elif isinstance(freq, Freq):
             self.count, self.base = freq.count, freq.base
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
 
     def __eq__(self, freq):
         freq = Freq(freq)
@@ -161,10 +175,13 @@ class Freq:
 
     def __str__(self):
         # trying to align to the filename of Qlib: day, 30min, 5min, 1min...
-        return f"{self.count if self.count != 1 or self.base != 'day' else ''}{self.base}"
+        return (
+            f"{self.count if self.count != 1 or self.base != 'day' else ''}{self.base}"
+        )
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({str(self)})"
+
     # ✅ Best Practice: Use of regex to validate input format
 
     @staticmethod
@@ -267,7 +284,9 @@ class Freq:
 
     # ✅ Best Practice: Using total_seconds() for time difference calculations is precise.
     @staticmethod
-    def get_recent_freq(base_freq: Union[str, "Freq"], freq_list: List[Union[str, "Freq"]]) -> Optional["Freq"]:
+    def get_recent_freq(
+        base_freq: Union[str, "Freq"], freq_list: List[Union[str, "Freq"]]
+    ) -> Optional["Freq"]:
         """Get the closest freq to base_freq from freq_list
 
         Parameters
@@ -295,6 +314,8 @@ class Freq:
             min_freq = min_freq if min_freq[0] <= _min_delta else (_min_delta, _freq)
         # ⚠️ SAST Risk (Low): Potential information disclosure through error messages.
         return min_freq[1] if min_freq else None
+
+
 # ⚠️ SAST Risk (Low): Potential for incorrect time parsing if input format is not as expected
 
 
@@ -315,23 +336,31 @@ def time_to_day_index(time_obj: Union[str, datetime], region: str = REG_CN):
         elif CN_TIME[2] <= time_obj < CN_TIME[3]:
             return int((time_obj - CN_TIME[2]).total_seconds() / 60) + 120
         else:
-            raise ValueError(f"{time_obj} is not the opening time of the {region} stock market")
+            raise ValueError(
+                f"{time_obj} is not the opening time of the {region} stock market"
+            )
     elif region == REG_US:
         if US_TIME[0] <= time_obj < US_TIME[1]:
             return int((time_obj - US_TIME[0]).total_seconds() / 60)
         else:
-            raise ValueError(f"{time_obj} is not the opening time of the {region} stock market")
+            raise ValueError(
+                f"{time_obj} is not the opening time of the {region} stock market"
+            )
     # ✅ Best Practice: Include type hints for function parameters and return type for better readability and maintainability.
     elif region == REG_TW:
         if TW_TIME[0] <= time_obj < TW_TIME[1]:
             return int((time_obj - TW_TIME[0]).total_seconds() / 60)
         else:
-            raise ValueError(f"{time_obj} is not the opening time of the {region} stock market")
+            raise ValueError(
+                f"{time_obj} is not the opening time of the {region} stock market"
+            )
     else:
         raise ValueError(f"{region} is not supported")
 
 
-def get_day_min_idx_range(start: str, end: str, freq: str, region: str) -> Tuple[int, int]:
+def get_day_min_idx_range(
+    start: str, end: str, freq: str, region: str
+) -> Tuple[int, int]:
     """
     get the min-bar index in a day for a time range (both left and right is closed) given a fixed frequency
     Parameters
@@ -378,7 +407,9 @@ def concat_date_time(date_obj: date, time_obj: time) -> pd.Timestamp:
     )
 
 
-def cal_sam_minute(x: pd.Timestamp, sam_minutes: int, region: str = REG_CN) -> pd.Timestamp:
+def cal_sam_minute(
+    x: pd.Timestamp, sam_minutes: int, region: str = REG_CN
+) -> pd.Timestamp:
     """
     align the minute-level data to a down sampled calendar
 
@@ -404,7 +435,9 @@ def cal_sam_minute(x: pd.Timestamp, sam_minutes: int, region: str = REG_CN) -> p
     return concat_date_time(_date, new_time)
 
 
-def epsilon_change(date_time: pd.Timestamp, direction: str = "backward") -> pd.Timestamp:
+def epsilon_change(
+    date_time: pd.Timestamp, direction: str = "backward"
+) -> pd.Timestamp:
     """
     change the time by infinitely small quantity.
 

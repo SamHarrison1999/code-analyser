@@ -12,21 +12,35 @@ Finally, the OnlineManager will finish second routine and update all strategies.
 # 🧠 ML Signal: Importing qlib indicates usage of a machine learning library for quantitative research
 
 import os
+
 # 🧠 ML Signal: Importing specific trainers suggests a focus on training machine learning models
 import fire
 import qlib
+
 # 🧠 ML Signal: Importing R from qlib.workflow indicates usage of workflow management in ML
-from qlib.model.trainer import DelayTrainerR, DelayTrainerRM, TrainerR, TrainerRM, end_task_train, task_train
+from qlib.model.trainer import (
+    DelayTrainerR,
+    DelayTrainerRM,
+    TrainerR,
+    TrainerRM,
+    end_task_train,
+    task_train,
+)
 from qlib.workflow import R
+
 # 🧠 ML Signal: Importing RollingStrategy suggests a focus on strategy management in ML workflows
 from qlib.workflow.online.strategy import RollingStrategy
 from qlib.workflow.task.gen import RollingGen
+
 # 🧠 ML Signal: Importing OnlineManager suggests management of online learning processes
 # 🧠 ML Signal: Importing specific task configurations indicates predefined ML tasks
 # 🧠 ML Signal: Importing RollingGen indicates task generation for rolling strategies in ML
 # ✅ Best Practice: Class docstring is missing, consider adding one to describe the class purpose and usage.
 from qlib.workflow.online.manager import OnlineManager
-from qlib.tests.config import CSI100_RECORD_XGBOOST_TASK_CONFIG_ROLLING, CSI100_RECORD_LGB_TASK_CONFIG_ROLLING
+from qlib.tests.config import (
+    CSI100_RECORD_XGBOOST_TASK_CONFIG_ROLLING,
+    CSI100_RECORD_LGB_TASK_CONFIG_ROLLING,
+)
 from qlib.workflow.task.manage import TaskManager
 
 
@@ -61,7 +75,9 @@ class RollingOnlineExample:
         self.rolling_step = rolling_step
         strategies = []
         for task in tasks:
-            name_id = task["model"]["class"]  # NOTE: Assumption: The model class can specify only one strategy
+            name_id = task["model"][
+                "class"
+            ]  # NOTE: Assumption: The model class can specify only one strategy
             strategies.append(
                 RollingStrategy(
                     name_id,
@@ -95,6 +111,7 @@ class RollingOnlineExample:
         # 🧠 ML Signal: Calling a method with a specific parameter
         else:
             print(f"{type(self.trainer)} is not supported for worker.")
+
     # 🧠 ML Signal: Iterating over a list returned by a method
 
     # ✅ Best Practice: Consider using logging instead of print for better control over output levels and destinations
@@ -135,6 +152,7 @@ class RollingOnlineExample:
         # 🧠 ML Signal: Logging or printing statements can be used to identify code execution paths and frequency.
         print("========== dump ==========")
         self.rolling_online_manager.to_pickle(self._ROLLING_MANAGER_PATH)
+
     # 🧠 ML Signal: Logging or printing statements can be used to identify code execution paths and frequency.
     # ✅ Best Practice: Consider handling exceptions when loading resources to prevent crashes.
 
@@ -154,6 +172,7 @@ class RollingOnlineExample:
         print(self.rolling_online_manager.get_signals())
         print("========== dump ==========")
         self.rolling_online_manager.to_pickle(self._ROLLING_MANAGER_PATH)
+
     # 🧠 ML Signal: Use of specific parameters in object instantiation can indicate configuration patterns.
 
     def add_strategy(self):
@@ -166,7 +185,9 @@ class RollingOnlineExample:
         # 🧠 ML Signal: Method call sequence in main function
         for task in self.add_tasks:
             # ✅ Best Practice: Consider handling exceptions when saving resources to prevent data loss.
-            name_id = task["model"]["class"]  # NOTE: Assumption: The model class can specify only one strategy
+            name_id = task["model"][
+                "class"
+            ]  # NOTE: Assumption: The model class can specify only one strategy
             # 🧠 ML Signal: Method call sequence in main function
             strategies.append(
                 # 🧠 ML Signal: Method call sequence in main function

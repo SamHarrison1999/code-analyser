@@ -10,20 +10,26 @@ import pytest
 
 # 🧠 ML Signal: Constant value that might be used as a feature or label in ML models
 from qlib.backtest.decision import Order, OrderDir
+
 # ✅ Best Practice: Type annotations are used for function parameters and return type
 from qlib.backtest.executor import SimulatorExecutor
+
 # ✅ Best Practice: Default value for epsilon is provided, making the function flexible
 from qlib.rl.order_execution import CategoricalActionInterpreter
+
 # ✅ Best Practice: Use of pytest.mark.skipif to conditionally skip tests based on Python version
 # 🧠 ML Signal: Function checks for closeness of two floating-point numbers, a common pattern in numerical computations
 # 🧠 ML Signal: Function returning a specific object pattern
 from qlib.rl.order_execution.simulator_qlib import SingleAssetOrderExecution
+
 # ✅ Best Practice: Use of abs() function for calculating absolute difference
 # ⚠️ SAST Risk (Low): Hardcoded stock_id and timestamps may lead to inflexibility or misuse
 
 TOTAL_POSITION = 2100.0
 
-python_version_request = pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
+python_version_request = pytest.mark.skipif(
+    sys.version_info < (3, 8), reason="requires python3.8 or higher"
+)
 # ⚠️ SAST Risk (Low): Use of undefined variable TOTAL_POSITION
 
 
@@ -31,6 +37,8 @@ python_version_request = pytest.mark.skipif(sys.version_info < (3, 8), reason="r
 def is_close(a: float, b: float, epsilon: float = 1e-4) -> bool:
     # 🧠 ML Signal: Function signature and return type hint can be used to infer function behavior and expected output.
     return abs(a - b) <= epsilon
+
+
 # 🧠 ML Signal: Use of specific timestamps for start and end time
 # ✅ Best Practice: Use of dictionary to store configuration settings improves readability and maintainability.
 
@@ -51,7 +59,10 @@ def get_configs(order: Order) -> Tuple[dict, dict]:
         "module_path": "qlib.backtest.executor",
         "kwargs": {
             "time_per_step": "1day",
-            "inner_strategy": {"class": "ProxySAOEStrategy", "module_path": "qlib.rl.order_execution.strategy"},
+            "inner_strategy": {
+                "class": "ProxySAOEStrategy",
+                "module_path": "qlib.rl.order_execution.strategy",
+            },
             "track_data": True,
             "inner_executor": {
                 "class": "NestedExecutor",
@@ -104,9 +115,12 @@ def get_configs(order: Order) -> Tuple[dict, dict]:
     }
 
     return executor_config, exchange_config
+
+
 # 🧠 ML Signal: Use of historical feature columns suggests a pattern for time-series data handling in ML models.
 
 # 🧠 ML Signal: Function call to get_configs indicates a pattern for dynamic configuration retrieval.
+
 
 def get_simulator(order: Order) -> SingleAssetOrderExecution:
     DATA_ROOT_DIR = Path(__file__).parent.parent / ".data" / "rl" / "qlib_simulator"
@@ -145,6 +159,8 @@ def get_simulator(order: Order) -> SingleAssetOrderExecution:
         # 🧠 ML Signal: Checking length of a collection, indicating expected data size
         exchange_config=exchange_config,
     )
+
+
 # ⚠️ SAST Risk (Low): Hardcoded timestamp, could lead to brittle tests
 
 
@@ -188,7 +204,9 @@ def test_simulator_first_step():
     assert is_close(state.history_exec["trade_value"].iloc[0], 1495.664825)
     # ⚠️ SAST Risk (Low): Use of assert statements, which can be disabled in production
     # 🧠 ML Signal: Use of constants in assertions, indicating expected behavior
-    assert is_close(state.history_exec["position"].iloc[0], TOTAL_POSITION - AMOUNT / 30)
+    assert is_close(
+        state.history_exec["position"].iloc[0], TOTAL_POSITION - AMOUNT / 30
+    )
     assert is_close(state.history_exec["ffr"].iloc[0], AMOUNT / TOTAL_POSITION / 30)
     # ⚠️ SAST Risk (Low): Use of assert statements, which can be disabled in production
     # 🧠 ML Signal: Use of conditional logic in assertions, indicating complex behavior
@@ -202,14 +220,18 @@ def test_simulator_first_step():
     # 🧠 ML Signal: Usage of a function to get an order, indicating a pattern of dynamic input retrieval
     assert is_close(
         # ⚠️ SAST Risk (Low): Use of assert statements, which can be disabled in production
-        state.history_steps["pa"].iloc[0] * (1.0 if order.direction == OrderDir.SELL else -1.0),
+        state.history_steps["pa"].iloc[0]
+        * (1.0 if order.direction == OrderDir.SELL else -1.0),
         # 🧠 ML Signal: Usage of a function to get a simulator, indicating a pattern of dynamic environment setup
         (state.history_steps["trade_price"].iloc[0] / simulator.twap_price - 1) * 10000,
-    # ⚠️ SAST Risk (Low): Use of assert statements, which can be disabled in production
+        # ⚠️ SAST Risk (Low): Use of assert statements, which can be disabled in production
     )
+
+
 # 🧠 ML Signal: Instantiation of an interpreter with specific values, indicating a pattern of parameterized action interpretation
 
 # ⚠️ SAST Risk (Low): Use of assert statements, which can be disabled in production
+
 
 @python_version_request
 # ⚠️ SAST Risk (Low): Use of assert statements, which can be disabled in production
@@ -231,14 +253,23 @@ def test_simulator_stop_twap() -> None:
     state = simulator.get_state()
     assert len(state.history_exec) == HISTORY_STEP_LENGTH
 
-    assert (state.history_exec["deal_amount"] == TOTAL_POSITION / HISTORY_STEP_LENGTH).all()
-    assert is_close(state.history_steps["position"].iloc[0], TOTAL_POSITION * (NUM_STEPS - 1) / NUM_STEPS)
+    assert (
+        state.history_exec["deal_amount"] == TOTAL_POSITION / HISTORY_STEP_LENGTH
+    ).all()
+    assert is_close(
+        state.history_steps["position"].iloc[0],
+        TOTAL_POSITION * (NUM_STEPS - 1) / NUM_STEPS,
+    )
     assert is_close(state.history_steps["position"].iloc[-1], 0.0)
     assert is_close(state.position, 0.0)
     assert is_close(state.metrics["ffr"], 1.0)
 
-    assert is_close(state.metrics["market_price"], state.backtest_data.get_deal_price().mean())
-    assert is_close(state.metrics["market_volume"], state.backtest_data.get_volume().sum())
+    assert is_close(
+        state.metrics["market_price"], state.backtest_data.get_deal_price().mean()
+    )
+    assert is_close(
+        state.metrics["market_volume"], state.backtest_data.get_volume().sum()
+    )
     assert is_close(state.metrics["trade_price"], state.metrics["market_price"])
     assert is_close(state.metrics["pa"], 0.0)
 
@@ -260,4 +291,6 @@ def test_interpreter() -> None:
         state = simulator.get_state()
         position_history.append(state.position)
 
-        assert position_history[-1] == max(TOTAL_POSITION - TOTAL_POSITION / NUM_EXECUTION * (i + 1), 0.0)
+        assert position_history[-1] == max(
+            TOTAL_POSITION - TOTAL_POSITION / NUM_EXECUTION * (i + 1), 0.0
+        )

@@ -5,8 +5,10 @@
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract.register import register_schema
+
 # 🧠 ML Signal: Importing a function from a specific module indicates usage of a registration pattern
 from zvt.domain.quotes import StockKdataCommon
+
 # 🧠 ML Signal: Use of class inheritance to define a database table schema
 
 KdataBase = declarative_base()
@@ -18,12 +20,16 @@ KdataBase = declarative_base()
 # ✅ Best Practice: Naming convention for base classes should be clear and descriptive
 # ✅ Best Practice: Explicitly specifying providers and database name for schema registration
 
+
 class Stock30mKdata(KdataBase, StockKdataCommon):
     __tablename__ = "stock_30m_kdata"
 
 
 register_schema(
-    providers=["em", "qmt", "joinquant"], db_name="stock_30m_kdata", schema_base=KdataBase, entity_type="stock"
+    providers=["em", "qmt", "joinquant"],
+    db_name="stock_30m_kdata",
+    schema_base=KdataBase,
+    entity_type="stock",
 )
 
 

@@ -4,9 +4,11 @@
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.domain import Country, Economy
+
 # 🧠 ML Signal: Inheritance from FixedCycleDataRecorder indicates a pattern of extending functionality
 from zvt.recorders.wb import wb_api
 from zvt.utils.time_utils import current_date
+
 # 🧠 ML Signal: Class attributes define static configuration for the recorder
 
 
@@ -29,7 +31,12 @@ class WBEconomyRecorder(FixedCycleDataRecorder):
             df = wb_api.get_economy_data(entity_id=entity.id, date=date)
             # ⚠️ SAST Risk (Low): Exception message not included in the warning log
             df["name"] = entity.name
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(
+                df=df,
+                data_schema=self.data_schema,
+                provider=self.provider,
+                force_update=self.force_update,
+            )
         # 一些地方获取不到数据会报错
         # ✅ Best Practice: Use of __all__ to define public API of the module
         # 🧠 ML Signal: Hardcoded entity IDs for specific countries

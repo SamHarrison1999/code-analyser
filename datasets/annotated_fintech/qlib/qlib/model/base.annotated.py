@@ -5,10 +5,12 @@ import abc
 from typing import Text, Union
 from ..utils.serial import Serializable
 from ..data.dataset import Dataset
+
 # ✅ Best Practice: Use of abstract base class to define an interface for subclasses
 from ..data.dataset.weight import Reweighter
 
 # ✅ Best Practice: Include a docstring to describe the purpose of the function
+
 
 class BaseModel(Serializable, metaclass=abc.ABCMeta):
     # ✅ Best Practice: Include a docstring to describe the purpose of the function

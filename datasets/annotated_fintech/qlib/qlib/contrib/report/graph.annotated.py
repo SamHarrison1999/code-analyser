@@ -3,14 +3,17 @@
 # ✅ Best Practice: Group standard library imports together at the top.
 
 import math
+
 # ✅ Best Practice: Group third-party library imports together.
 import importlib
 from typing import Iterable
 
 import pandas as pd
+
 # ✅ Best Practice: Class attributes should be documented to explain their purpose
 
 import plotly.offline as py
+
 # ✅ Best Practice: Use of a single underscore indicates intended private use
 import plotly.graph_objs as go
 
@@ -22,7 +25,12 @@ class BaseGraph:
     _name = None
 
     def __init__(
-        self, df: pd.DataFrame = None, layout: dict = None, graph_kwargs: dict = None, name_dict: dict = None, **kwargs
+        self,
+        df: pd.DataFrame = None,
+        layout: dict = None,
+        graph_kwargs: dict = None,
+        name_dict: dict = None,
+        **kwargs,
     ):
         """
 
@@ -50,6 +58,7 @@ class BaseGraph:
         # ✅ Best Practice: Use of self to access instance variables
         self._init_parameters(**kwargs)
         self._init_data()
+
     # ✅ Best Practice: Checking for None before initializing a dictionary
 
     def _init_data(self):
@@ -62,6 +71,7 @@ class BaseGraph:
         # ⚠️ SAST Risk (Medium): No validation on 'graph_type' could lead to importing unintended modules or classes.
 
         self.data = self._get_data()
+
     # ⚠️ SAST Risk (Medium): Dynamic import using user-controlled input can lead to code execution vulnerabilities.
 
     def _init_parameters(self, **kwargs):
@@ -143,6 +153,7 @@ class BaseGraph:
         # 🧠 ML Signal: Usage of dropna() indicates data cleaning, which is common in data preprocessing.
         """
         return go.Layout(**self._layout)
+
     # 🧠 ML Signal: Iterating over a dictionary to create a list of data columns is a common pattern in data processing.
 
     # ✅ Best Practice: Class should inherit from a base class to promote code reuse and maintainability
@@ -158,7 +169,11 @@ class BaseGraph:
         # 🧠 ML Signal: Usage of class attributes to determine behavior.
         _data = [
             self.get_instance_with_graph_parameters(
-                graph_type=self._graph_type, x=self._df.index, y=self._df[_col], name=_name, **self._graph_kwargs
+                graph_type=self._graph_type,
+                x=self._df.index,
+                y=self._df[_col],
+                name=_name,
+                **self._graph_kwargs,
             )
             for _col, _name in self._name_dict.items()
         ]
@@ -182,6 +197,8 @@ class BaseGraph:
 
 class ScatterGraph(BaseGraph):
     _name = "scatter"
+
+
 # 🧠 ML Signal: Use of instance method with parameters, indicating object-oriented design.
 
 
@@ -189,7 +206,9 @@ class ScatterGraph(BaseGraph):
 class BarGraph(BaseGraph):
     _name = "bar"
 
+
 # ✅ Best Practice: Class docstring provides a brief description of the class functionality
+
 
 class DistplotGraph(BaseGraph):
     _name = "distplot"
@@ -203,7 +222,9 @@ class DistplotGraph(BaseGraph):
         # ✅ Best Practice: Use of docstring to describe parameters and their types
         _data_list = [_t_df[_col] for _col in self._name_dict]
         _label_list = list(self._name_dict.values())
-        _fig = create_distplot(_data_list, _label_list, show_rug=False, **self._graph_kwargs)
+        _fig = create_distplot(
+            _data_list, _label_list, show_rug=False, **self._graph_kwargs
+        )
 
         return _fig["data"]
 
@@ -238,12 +259,17 @@ class HistogramGraph(BaseGraph):
         """
         _data = [
             self.get_instance_with_graph_parameters(
-                graph_type=self._graph_type, x=self._df[_col], name=_name, **self._graph_kwargs
+                graph_type=self._graph_type,
+                x=self._df[_col],
+                name=_name,
+                **self._graph_kwargs,
             )
             # ⚠️ SAST Risk (Low): Potential for KeyError if 'cols' is not in self._subplots_kwargs
             for _col, _name in self._name_dict.items()
         ]
         return _data
+
+
 # ⚠️ SAST Risk (Low): Potential for AttributeError if self._df is None
 
 
@@ -402,8 +428,12 @@ class SubplotsGraph:
                 _graph_obj = column_name
             elif isinstance(column_name, str):
                 temp_name = column_map.get("name", column_name.replace("_", " "))
-                kind = column_map.get("kind", self._kind_map.get("kind", "ScatterGraph"))
-                _graph_kwargs = column_map.get("graph_kwargs", self._kind_map.get("kwargs", {}))
+                kind = column_map.get(
+                    "kind", self._kind_map.get("kind", "ScatterGraph")
+                )
+                _graph_kwargs = column_map.get(
+                    "graph_kwargs", self._kind_map.get("kwargs", {})
+                )
                 _graph_obj = BaseGraph.get_instance_with_graph_parameters(
                     kind,
                     **dict(

@@ -5,9 +5,11 @@
 import numpy as np
 import torch
 from torch import nn
+
 # ✅ Best Practice: Explicitly calling the superclass initializer ensures proper initialization of inherited attributes.
 
 from .utils import preds_to_weight_with_clamp, SingleMetaBase
+
 # 🧠 ML Signal: Usage of nn.Linear indicates a linear transformation layer, common in neural networks.
 
 
@@ -26,7 +28,9 @@ class TimeWeightMeta(SingleMetaBase):
         hist_step_n = self.linear.in_features
         # 🧠 ML Signal: Concatenating predictions, common in model output processing
         # NOTE: the reshape order is very important
-        time_perf = time_perf.reshape(hist_step_n, time_perf.shape[0] // hist_step_n, *time_perf.shape[1:])
+        time_perf = time_perf.reshape(
+            hist_step_n, time_perf.shape[0] // hist_step_n, *time_perf.shape[1:]
+        )
         # 🧠 ML Signal: Normalizing predictions by subtracting the mean
         time_perf = torch.mean(time_perf, dim=1, keepdim=False)
 
@@ -47,7 +51,9 @@ class TimeWeightMeta(SingleMetaBase):
             else:
                 return time_belong @ preds
         else:
-            weights = preds_to_weight_with_clamp(preds, self.clip_weight, self.clip_method)
+            weights = preds_to_weight_with_clamp(
+                preds, self.clip_weight, self.clip_method
+            )
             if time_belong is None:
                 return weights
             # 🧠 ML Signal: Matrix multiplication with weights, common in weighted sum calculations
@@ -55,11 +61,20 @@ class TimeWeightMeta(SingleMetaBase):
                 # ✅ Best Practice: Calling superclass initializer ensures proper inheritance.
                 return time_belong @ weights
 
+
 # 🧠 ML Signal: Storing step value, possibly for iterative or time-based operations.
+
 
 class PredNet(nn.Module):
     # 🧠 ML Signal: Instantiating TimeWeightMeta, indicating use of time-weighted meta-learning.
-    def __init__(self, step, hist_step_n, clip_weight=None, clip_method="tanh", alpha: float = 0.0):
+    def __init__(
+        self,
+        step,
+        hist_step_n,
+        clip_weight=None,
+        clip_method="tanh",
+        alpha: float = 0.0,
+    ):
         """
         Parameters
         ----------
@@ -71,7 +86,9 @@ class PredNet(nn.Module):
         self.step = step
         # 🧠 ML Signal: Use of sample weights in model training
         # 🧠 ML Signal: Usage of a method to compute weights based on time-related features
-        self.twm = TimeWeightMeta(hist_step_n=hist_step_n, clip_weight=clip_weight, clip_method=clip_method)
+        self.twm = TimeWeightMeta(
+            hist_step_n=hist_step_n, clip_weight=clip_weight, clip_method=clip_method
+        )
         self.init_paramters(hist_step_n)
         # ✅ Best Practice: Element-wise multiplication to adjust weights based on computed values
         # ✅ Best Practice: Transposing X for matrix operations
@@ -95,11 +112,15 @@ class PredNet(nn.Module):
 
     def forward(self, X, y, time_perf, time_belong, X_test, ignore_weight=False):
         """Please refer to the docs of MetaTaskDS for the description of the variables"""
-        weights = self.get_sample_weights(X, time_perf, time_belong, ignore_weight=ignore_weight)
+        weights = self.get_sample_weights(
+            X, time_perf, time_belong, ignore_weight=ignore_weight
+        )
         X_w = X.T * weights.view(1, -1)
         theta = torch.inverse(X_w @ X + self.alpha * torch.eye(X_w.shape[0])) @ X_w @ y
         return X_test @ theta, weights
 
     def init_paramters(self, hist_step_n):
-        self.twm.linear.weight.data = 1.0 / hist_step_n + self.twm.linear.weight.data * 0.01
+        self.twm.linear.weight.data = (
+            1.0 / hist_step_n + self.twm.linear.weight.data * 0.01
+        )
         self.twm.linear.bias.data.fill_(0.0)

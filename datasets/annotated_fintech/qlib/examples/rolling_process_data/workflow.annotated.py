@@ -8,12 +8,15 @@ import pickle
 from datetime import datetime
 from qlib.constant import REG_CN
 from qlib.data.dataset.handler import DataHandlerLP
+
 # 🧠 ML Signal: Static configuration for start time, could be used to identify time-based patterns
 from qlib.utils import init_instance_by_config
 from qlib.tests.data import GetData
+
 # 🧠 ML Signal: Static configuration for end time, could be used to identify time-based patterns
 
 # ✅ Best Practice: Method name should be descriptive and follow naming conventions
+
 
 # 🧠 ML Signal: Static configuration for rolling count, could be used to identify data processing patterns
 class RollingDataWorkflow:
@@ -49,8 +52,8 @@ class RollingDataWorkflow:
                 # ⚠️ SAST Risk (Low): File operations can raise exceptions if the file does not exist or is inaccessible.
                 "learn_processors": [],
             },
-        # ⚠️ SAST Risk (Medium): Path traversal risk if 'path' is not properly validated or sanitized.
-        # 🧠 ML Signal: Usage of pickle for deserialization.
+            # ⚠️ SAST Risk (Medium): Path traversal risk if 'path' is not properly validated or sanitized.
+            # 🧠 ML Signal: Usage of pickle for deserialization.
         }
         # ⚠️ SAST Risk (Medium): Deserializing with pickle can execute arbitrary code if the data is tampered.
         # 🧠 ML Signal: Initialization of a custom library, indicating a setup step for ML workflows
@@ -93,19 +96,25 @@ class RollingDataWorkflow:
                         "fit_start_time": datetime(*train_start_time),
                         "fit_end_time": datetime(*train_end_time),
                         "infer_processors": [
-                            {"class": "RobustZScoreNorm", "kwargs": {"fields_group": "feature"}},
+                            {
+                                "class": "RobustZScoreNorm",
+                                "kwargs": {"fields_group": "feature"},
+                            },
                         ],
                         "learn_processors": [
                             {"class": "DropnaLabel"},
-                            {"class": "CSZScoreNorm", "kwargs": {"fields_group": "label"}},
+                            {
+                                "class": "CSZScoreNorm",
+                                "kwargs": {"fields_group": "label"},
+                            },
                         ],
                         "data_loader_kwargs": {
                             "handler_config": pre_handler,
                         },
                     },
-                # 🧠 ML Signal: Initialization of a dataset instance, indicating a step in ML data preparation
-                # 🧠 ML Signal: Logging of the rolling process, useful for tracking ML experiments
-                # 🧠 ML Signal: Dynamic reconfiguration of dataset for rolling window, common in time-series ML tasks
+                    # 🧠 ML Signal: Initialization of a dataset instance, indicating a step in ML data preparation
+                    # 🧠 ML Signal: Logging of the rolling process, useful for tracking ML experiments
+                    # 🧠 ML Signal: Dynamic reconfiguration of dataset for rolling window, common in time-series ML tasks
                 },
                 "segments": {
                     "train": (datetime(*train_start_time), datetime(*train_end_time)),
@@ -122,21 +131,40 @@ class RollingDataWorkflow:
             if rolling_offset:
                 dataset.config(
                     handler_kwargs={
-                        "start_time": datetime(train_start_time[0] + rolling_offset, *train_start_time[1:]),
-                        "end_time": datetime(test_end_time[0] + rolling_offset, *test_end_time[1:]),
+                        "start_time": datetime(
+                            train_start_time[0] + rolling_offset, *train_start_time[1:]
+                        ),
+                        "end_time": datetime(
+                            test_end_time[0] + rolling_offset, *test_end_time[1:]
+                        ),
                         "processor_kwargs": {
-                            "fit_start_time": datetime(train_start_time[0] + rolling_offset, *train_start_time[1:]),
-                            "fit_end_time": datetime(train_end_time[0] + rolling_offset, *train_end_time[1:]),
+                            "fit_start_time": datetime(
+                                train_start_time[0] + rolling_offset,
+                                *train_start_time[1:],
+                            ),
+                            "fit_end_time": datetime(
+                                train_end_time[0] + rolling_offset, *train_end_time[1:]
+                            ),
                         },
                     },
                     segments={
                         "train": (
-                            datetime(train_start_time[0] + rolling_offset, *train_start_time[1:]),
-                            datetime(train_end_time[0] + rolling_offset, *train_end_time[1:]),
+                            datetime(
+                                train_start_time[0] + rolling_offset,
+                                *train_start_time[1:],
+                            ),
+                            datetime(
+                                train_end_time[0] + rolling_offset, *train_end_time[1:]
+                            ),
                         ),
                         "valid": (
-                            datetime(valid_start_time[0] + rolling_offset, *valid_start_time[1:]),
-                            datetime(valid_end_time[0] + rolling_offset, *valid_end_time[1:]),
+                            datetime(
+                                valid_start_time[0] + rolling_offset,
+                                *valid_start_time[1:],
+                            ),
+                            datetime(
+                                valid_end_time[0] + rolling_offset, *valid_end_time[1:]
+                            ),
                         ),
                         # 🧠 ML Signal: Setup of data for a new rolling window, indicating a step in ML data preparation
                         "test": (
@@ -144,8 +172,13 @@ class RollingDataWorkflow:
                             # 🧠 ML Signal: Logging of prepared datasets, useful for tracking ML experiments
                             # ✅ Best Practice: Use of a main guard to ensure the script is run as a standalone program
                             # 🧠 ML Signal: Use of a command-line interface for running ML workflows
-                            datetime(test_start_time[0] + rolling_offset, *test_start_time[1:]),
-                            datetime(test_end_time[0] + rolling_offset, *test_end_time[1:]),
+                            datetime(
+                                test_start_time[0] + rolling_offset,
+                                *test_start_time[1:],
+                            ),
+                            datetime(
+                                test_end_time[0] + rolling_offset, *test_end_time[1:]
+                            ),
                         ),
                     },
                 )

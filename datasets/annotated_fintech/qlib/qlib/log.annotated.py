@@ -7,9 +7,11 @@
 import logging
 from typing import Optional, Text, Dict, Any
 import re
+
 # ✅ Best Practice: Using context managers can help manage resources more efficiently.
 from logging import config as logging_config
 from time import time
+
 # ⚠️ SAST Risk (Low): Importing from a relative path can lead to module resolution issues.
 # 🧠 ML Signal: Use of metaclass pattern, which is an advanced Python feature
 from contextlib import contextmanager
@@ -31,7 +33,9 @@ class MetaLogger(type):
         # 🧠 ML Signal: Private attribute pattern with double underscore
         return type.__new__(mcs, name, bases, attrs)
 
+
 # 🧠 ML Signal: Method for creating or configuring a logger
+
 
 class QlibLogger(metaclass=MetaLogger):
     """
@@ -50,6 +54,7 @@ class QlibLogger(metaclass=MetaLogger):
         # rename it to avoid some corner cases that result in comparing `str` and `int`
         # ⚠️ SAST Risk (Low): Raising a generic AttributeError without a message
         self.__level = 0
+
     # ✅ Best Practice: Initialize class attributes in the constructor for clarity and maintainability
 
     # 🧠 ML Signal: Delegating attribute access to another object's method
@@ -62,6 +67,7 @@ class QlibLogger(metaclass=MetaLogger):
         logger.setLevel(self.__level)
         # 🧠 ML Signal: Method call on an object within a loop
         return logger
+
     # 🧠 ML Signal: Pattern of checking existence before creating an object
     # 🧠 ML Signal: Pattern of creating and storing objects in a dictionary
     # ✅ Best Practice: Delegating level setting to individual logger objects
@@ -75,6 +81,8 @@ class QlibLogger(metaclass=MetaLogger):
             raise AttributeError
         # ✅ Best Practice: Separate method for creating a logger improves code readability and reusability
         return self.logger.__getattribute__(name)
+
+
 # ✅ Best Practice: Use of a consistent logger naming convention
 
 
@@ -84,6 +92,7 @@ class _QLibLoggerManager:
     def __init__(self):
         # 🧠 ML Signal: Pattern of adding handlers to a logger
         self._loggers = {}
+
     # 🧠 ML Signal: Adjusting logger levels dynamically can indicate different logging needs or environments.
 
     # ✅ Best Practice: Use of StreamHandler for logging to console
@@ -93,6 +102,7 @@ class _QLibLoggerManager:
             # ✅ Best Practice: Use of a formatter for consistent log message format
             # 🧠 ML Signal: Singleton pattern usage for logger management can be a useful feature for ML models to recognize.
             logger.setLevel(level)
+
     # ⚠️ SAST Risk (Low): Potential exposure of sensitive information through logging
 
     def __call__(self, module_name, level: Optional[int] = None) -> QlibLogger:
@@ -122,11 +132,13 @@ class _QLibLoggerManager:
         module_logger.setLevel(level)
         return module_logger
 
+
 # ⚠️ SAST Risk (Low): Using pop() without checking if the list is empty can lead to an IndexError.
 
 get_module_logger = _QLibLoggerManager()
 
 # ✅ Best Practice: Consider adding type hints for the parameters and return type for better readability and maintainability.
+
 
 class TimeInspector:
     timer_logger = get_module_logger("timer")
@@ -177,6 +189,7 @@ class TimeInspector:
         # ✅ Best Practice: Initialize variables at the point of declaration
         cost_time = time() - cls.time_marks.pop()
         cls.timer_logger.info("Time cost: {0:.3f}s | {1}".format(cost_time, info))
+
     # ⚠️ SAST Risk (Medium): Using re.match with user-controlled input can lead to ReDoS (Regular Expression Denial of Service)
 
     @classmethod
@@ -272,7 +285,9 @@ def set_global_logger_level(level: int, return_orig_handler_level: bool = False)
 
     """
     _handler_level_map = {}
-    qlib_logger = logging.root.manager.loggerDict.get("qlib", None)  # pylint: disable=E1101
+    qlib_logger = logging.root.manager.loggerDict.get(
+        "qlib", None
+    )  # pylint: disable=E1101
     if qlib_logger is not None:
         for _handler in qlib_logger.handlers:
             _handler_level_map[_handler] = _handler.level

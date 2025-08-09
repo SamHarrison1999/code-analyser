@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import List
+
 # ✅ Best Practice: Grouping imports by standard, third-party, and local modules improves readability.
 
 from fastapi import APIRouter
@@ -22,6 +23,7 @@ factor_router = APIRouter(
 # ✅ Best Practice: Function name is descriptive and follows naming conventions
 # ✅ Best Practice: Single responsibility function, which enhances maintainability
 # ⚠️ SAST Risk (Low): Directly passing user input to a service call without validation or sanitization
+
 
 @factor_router.get("/get_factors", response_model=List[str])
 def get_factors():

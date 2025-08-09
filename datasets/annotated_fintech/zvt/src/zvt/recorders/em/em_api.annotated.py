@@ -6,6 +6,7 @@ from typing import Union
 import demjson3
 import pandas as pd
 import requests
+
 # ✅ Best Practice: Grouping imports by standard library, third-party, and local modules improves readability.
 import sqlalchemy
 from requests import Session
@@ -30,9 +31,10 @@ from zvt.utils.time_utils import (
     to_time_str,
     current_date,
     now_pd_timestamp,
-# 🧠 ML Signal: Use of logging indicates tracking and debugging practices.
-# 🧠 ML Signal: Function signature and parameters can be used to understand API usage patterns
+    # 🧠 ML Signal: Use of logging indicates tracking and debugging practices.
+    # 🧠 ML Signal: Function signature and parameters can be used to understand API usage patterns
 )
+
 # 🧠 ML Signal: API call pattern with specific parameters
 from zvt.utils.utils import to_float, json_callback_param
 
@@ -89,9 +91,11 @@ def get_treasury_yield(pn=1, ps=2000, fetch_all=True):
                 "yield_10": item.get("EMG00001310"),
                 "yield_30": item.get("EMG00001312"),
             }
-        # 🧠 ML Signal: Function call with dynamic argument, useful for learning how functions are composed
+            # 🧠 ML Signal: Function call with dynamic argument, useful for learning how functions are composed
         )
     return yields
+
+
 # 🧠 ML Signal: Function with date range parameters, common in time-series data processing
 
 
@@ -108,10 +112,12 @@ def get_ii_holder_report_dates(code):
         filters=generate_filters(code=code),
         sort_by="REPORT_DATE",
         sort="desc",
-    # 🧠 ML Signal: Function call with multiple parameters, indicating complex data retrieval
+        # 🧠 ML Signal: Function call with multiple parameters, indicating complex data retrieval
     )
 
+
 # 🧠 ML Signal: Use of specific request type for data retrieval
+
 
 # 🧠 ML Signal: Function name suggests a specific domain-related operation, useful for domain-specific model training
 def get_dragon_and_tiger_list(start_date, end_date=None):
@@ -152,16 +158,21 @@ def get_dragon_and_tiger(code, start_date=None):
         # ✅ Best Practice: Using named arguments improves readability and maintainability
         request_type="RPT_OPERATEDEPT_TRADE",
         fields="TRADE_ID,TRADE_DATE,EXPLANATION,SECUCODE,SECURITY_CODE,SECURITY_NAME_ABBR,ACCUM_AMOUNT,CHANGE_RATE,NET_BUY,BUY_BUY_TOTAL,BUY_SELL_TOTAL,BUY_RATIO_TOTAL,SELL_BUY_TOTAL,SELL_SELL_TOTAL,SELL_RATIO_TOTAL,TRADE_DIRECTION,RANK,OPERATEDEPT_NAME,BUY_AMT_REAL,SELL_AMT_REAL,BUY_RATIO,SELL_RATIO,BUY_TOTAL,SELL_TOTAL,BUY_TOTAL_NET,SELL_TOTAL_NET,NET",
-        filters=generate_filters(code=code, trade_date=start_date, field_op={"trade_date": ">="}),
+        filters=generate_filters(
+            code=code, trade_date=start_date, field_op={"trade_date": ">="}
+        ),
         params='(groupField=TRADE_ID)(groupedFields=TRADE_DIRECTION,RANK,OPERATEDEPT_NAME,BUY_AMT_REAL,SELL_AMT_REAL,BUY_RATIO,SELL_RATIO,NET")(groupListName="LIST")',
         sort_by="TRADE_DATE,RANK",
         sort="asc,asc",
-    # 🧠 ML Signal: Function call with dynamic filters based on input parameter
+        # 🧠 ML Signal: Function call with dynamic filters based on input parameter
     )
+
+
 # 🧠 ML Signal: Function definition with a specific pattern of parameters
 
 # ✅ Best Practice: Sorting parameters are explicitly defined, improving clarity
 # 🧠 ML Signal: Usage of a specific API call pattern
+
 
 # 十大股东持仓日期
 def get_holder_report_dates(code):
@@ -179,7 +190,9 @@ def get_holder_report_dates(code):
         sort="desc",
     )
 
+
 # 🧠 ML Signal: Function with multiple parameters, indicating a pattern for ML models to learn parameter usage.
+
 
 # 🧠 ML Signal: Use of a filter generation function, indicating a pattern of data filtering
 # 🧠 ML Signal: Usage of a specific request type string, which could be a pattern for ML models to learn API usage.
@@ -236,7 +249,9 @@ def get_ii_summary(code, report_date, org_type):
         filters=generate_filters(code=code, report_date=report_date, org_type=org_type),
     )
 
+
 # ⚠️ SAST Risk (Low): Catching broad exceptions can hide unexpected errors
+
 
 # 🧠 ML Signal: Function to retrieve controlling shareholder data based on a code
 # ✅ Best Practice: Use logging with exception information for better debugging
@@ -250,7 +265,9 @@ def get_free_holders(code, end_date):
         sort_by="HOLDER_RANK",
     )
 
+
 # ✅ Best Practice: Initializing a dictionary to store control information
+
 
 def get_top_ten_free_holder_stats(code):
     datas = get_holder_report_dates(code=code)
@@ -295,10 +312,12 @@ def get_top_ten_free_holder_stats(code):
                 # 🧠 ML Signal: Conditional logic based on input parameters.
                 "ratio": ratio,
                 "change": change,
-            # 🧠 ML Signal: URL construction pattern with multiple query parameters.
+                # 🧠 ML Signal: URL construction pattern with multiple query parameters.
             }
 
+
 # 🧠 ML Signal: Function definition with a single responsibility
+
 
 # 🧠 ML Signal: URL construction pattern with multiple query parameters.
 def get_controlling_shareholder(code):
@@ -337,7 +356,9 @@ def get_holders(code, end_date):
         sort_by="HOLDER_RANK",
     )
 
+
 # 🧠 ML Signal: Conditional logic based on the presence of 'code'
+
 
 # ⚠️ SAST Risk (Low): Potential injection risk if 'code' is not properly sanitized
 def _order_param(order: str):
@@ -348,7 +369,17 @@ def _order_param(order: str):
     return order
 
 
-def get_url(type, sty, source="SECURITIES", filters=None, order_by="", order="asc", pn=1, ps=2000, params=None):
+def get_url(
+    type,
+    sty,
+    source="SECURITIES",
+    filters=None,
+    order_by="",
+    order="asc",
+    pn=1,
+    ps=2000,
+    params=None,
+):
     # 根据 url 映射如下
     # 🧠 ML Signal: Use of a dictionary to determine operation type
     # type=RPT_F10_MAIN_ORGHOLDDETAILS
@@ -380,6 +411,8 @@ def get_exchange(code):
         return "BJ"
     else:
         return "SZ"
+
+
 # 🧠 ML Signal: Logging usage pattern
 
 
@@ -404,10 +437,23 @@ def actor_type_to_org_type(actor_type: ActorType):
         return "07"
     assert False
 
+
 # 🧠 ML Signal: Recursive function call pattern
 
-def generate_filters(code=None, trade_date=None, report_date=None, end_date=None, org_type=None, field_op: dict = None):
-    args = [item for item in locals().items() if item[1] and (item[0] not in ("code", "org_type", "field_op"))]
+
+def generate_filters(
+    code=None,
+    trade_date=None,
+    report_date=None,
+    end_date=None,
+    org_type=None,
+    field_op: dict = None,
+):
+    args = [
+        item
+        for item in locals().items()
+        if item[1] and (item[0] not in ("code", "org_type", "field_op"))
+    ]
 
     result = ""
     if code:
@@ -506,6 +552,8 @@ def get_em_data(
                 return data
         return None
     raise RuntimeError(f"request em data code: {resp.status_code}, error: {resp.text}")
+
+
 # 🧠 ML Signal: Function signature with default parameters
 
 
@@ -665,7 +713,13 @@ def get_quotes():
 # 🧠 ML Signal: Default case for codes not matching specific patterns
 # secid=1.512660&klt=101&fqt=1&lmt=66&end=20500000&iscca=1&fields1=f1,f2,f3,f4,f5,f6,f7,f8&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1
 # ⚠️ SAST Risk (Low): Potential for unhandled HTTP errors
-def get_kdata(entity_id, session=None, level=IntervalLevel.LEVEL_1DAY, adjust_type=AdjustType.qfq, limit=10000):
+def get_kdata(
+    entity_id,
+    session=None,
+    level=IntervalLevel.LEVEL_1DAY,
+    adjust_type=AdjustType.qfq,
+    limit=10000,
+):
     # ⚠️ SAST Risk (Low): URL construction with user-controlled parameters can lead to SSRF or information disclosure if not properly validated.
     entity_type, exchange, code = decode_entity_id(entity_id)
     # ⚠️ SAST Risk (Medium): Assumes the JSON response structure without validation
@@ -713,7 +767,9 @@ def get_kdata(entity_id, session=None, level=IntervalLevel.LEVEL_1DAY, adjust_ty
             the_timestamp = to_pd_timestamp(fields[0])
 
             # ✅ Best Practice: Explicit type conversion for DataFrame columns.
-            the_id = generate_kdata_id(entity_id=entity_id, timestamp=the_timestamp, level=level)
+            the_id = generate_kdata_id(
+                entity_id=entity_id, timestamp=the_timestamp, level=level
+            )
 
             # 🧠 ML Signal: Data normalization by scaling values.
             open = to_float(fields[1])
@@ -837,7 +893,9 @@ def get_future_list():
     # ⚠️ SAST Risk (Medium): URL contains dynamic query parameters, which could be manipulated if not properly validated.
     return df
 
+
 # ⚠️ SAST Risk (Medium): URL construction with dynamic parameters can lead to injection attacks if inputs are not sanitized.
+
 
 def _calculate_limit(row):
     code = row["code"]
@@ -853,7 +911,9 @@ def _calculate_limit(row):
     else:
         return change_pct > 0.09, change_pct < -0.09
 
+
 # 🧠 ML Signal: Pattern of converting stock codes to IDs, useful for entity recognition models.
+
 
 def get_stock_turnover():
     sz_url = "https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2&fields2=f51,f57&ut=fa5fd1943c7b386f172d6893dbfba10b&iscr=0&iscca=0&secid=0.399001&time=0&ndays=2"
@@ -866,7 +926,9 @@ def get_stock_turnover():
     return data
 
 
-def get_top_tradable_list(entity_type, fields, limit, entity_flag, exchange=None, return_quote=False):
+def get_top_tradable_list(
+    entity_type, fields, limit, entity_flag, exchange=None, return_quote=False
+):
     url = f"https://push2.eastmoney.com/api/qt/clist/get?np=1&fltt=2&invt=2&fields={fields}&pn=1&pz={limit}&fid=f3&po=1&{entity_flag}&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&cb=cbCallbackMore&&callback=jQuery34109676853980006124_{now_timestamp() - 1}&_={now_timestamp()}"
     # ✅ Best Practice: Use of format method for string formatting improves readability.
     resp = requests.get(url, headers=DEFAULT_HEADER)
@@ -883,7 +945,22 @@ def get_top_tradable_list(entity_type, fields, limit, entity_flag, exchange=None
     df = pd.DataFrame.from_records(data=data)
 
     if return_quote:
-        df = df[["f12", "f14", "f2", "f3", "f5", "f8", "f6", "f15", "f16", "f17", "f20", "f21"]]
+        df = df[
+            [
+                "f12",
+                "f14",
+                "f2",
+                "f3",
+                "f5",
+                "f8",
+                "f6",
+                "f15",
+                "f16",
+                "f17",
+                "f20",
+                "f21",
+            ]
+        ]
         # 🧠 ML Signal: Specific market code for Hong Kong stock exchange indicates a pattern for HK market handling.
         df.columns = [
             "code",
@@ -903,7 +980,7 @@ def get_top_tradable_list(entity_type, fields, limit, entity_flag, exchange=None
             "open",
             "total_cap",
             "float_cap",
-        # ⚠️ SAST Risk (Low): Returning the code directly if no conditions match may lead to unexpected results.
+            # ⚠️ SAST Risk (Low): Returning the code directly if no conditions match may lead to unexpected results.
         ]
         # 🧠 ML Signal: Logging usage can indicate debugging or monitoring practices
 
@@ -914,28 +991,41 @@ def get_top_tradable_list(entity_type, fields, limit, entity_flag, exchange=None
         df = df[df.turnover != "-"]
 
         # ⚠️ SAST Risk (Low): No exception handling for network request failures
-        df = df.astype({"change_pct": "float", "turnover_rate": "float", "turnover": "float", "volume": "float"})
+        df = df.astype(
+            {
+                "change_pct": "float",
+                "turnover_rate": "float",
+                "turnover": "float",
+                "volume": "float",
+            }
+        )
 
         df["change_pct"] = df["change_pct"] / 100
         # ⚠️ SAST Risk (Low): Assumes JSON response without validation
         df["turnover_rate"] = df["turnover_rate"] / 100
         df["volume"] = df["volume"] * 100
 
-        df[["is_limit_up", "is_limit_down"]] = df.apply(lambda row: _calculate_limit(row), axis=1, result_type="expand")
+        df[["is_limit_up", "is_limit_down"]] = df.apply(
+            lambda row: _calculate_limit(row), axis=1, result_type="expand"
+        )
 
     else:
         # 🧠 ML Signal: Usage of list comprehensions can indicate coding style
         if entity_type == TradableType.stock:
             df = df[["f12", "f13", "f14", "f20", "f21", "f9", "f23"]]
             df.columns = ["code", "exchange", "name", "cap", "cap1", "pe", "pb"]
-            df[["cap", "cap1", "pe", "pb"]] = df[["cap", "cap1", "pe", "pb"]].apply(pd.to_numeric, errors="coerce")
+            df[["cap", "cap1", "pe", "pb"]] = df[["cap", "cap1", "pe", "pb"]].apply(
+                pd.to_numeric, errors="coerce"
+            )
         else:
             df = df[["f12", "f13", "f14"]]
             df.columns = ["code", "exchange", "name"]
         if exchange:
             df["exchange"] = exchange.value
         df["entity_type"] = entity_type.value
-        df["id"] = df[["entity_type", "exchange", "code"]].apply(lambda x: "_".join(x.astype(str)), axis=1)
+        df["id"] = df[["entity_type", "exchange", "code"]].apply(
+            lambda x: "_".join(x.astype(str)), axis=1
+        )
         df["entity_id"] = df["id"]
 
     return df
@@ -951,11 +1041,17 @@ def get_top_stocks(limit=100):
     fields = "f2,f3,f5,f6,f8,f12,f14,f15,f16,f17,f20,f21"
     return get_top_tradable_list(
         # 🧠 ML Signal: Logging usage pattern
-        entity_type=TradableType.stock, fields=fields, limit=limit, entity_flag=entity_flag, return_quote=True
-    # 🧠 ML Signal: Error logging can be used to identify error handling practices
+        entity_type=TradableType.stock,
+        fields=fields,
+        limit=limit,
+        entity_flag=entity_flag,
+        return_quote=True,
+        # 🧠 ML Signal: Error logging can be used to identify error handling practices
     )
 
+
 # 🧠 ML Signal: DataFrame creation from records
+
 
 def get_top_stockhks(limit=20):
     # 🧠 ML Signal: Function call with multiple parameters
@@ -965,8 +1061,12 @@ def get_top_stockhks(limit=20):
     fields = "f2,f3,f5,f6,f8,f12,f14,f15,f16,f17,f20,f21"
     # ⚠️ SAST Risk (Low): URL construction with f-strings can lead to injection if inputs are not sanitized.
     return get_top_tradable_list(
-        entity_type=TradableType.stockhk, fields=fields, limit=limit, entity_flag=entity_flag, return_quote=True
-    # ✅ Best Practice: Logging the URL for debugging purposes.
+        entity_type=TradableType.stockhk,
+        fields=fields,
+        limit=limit,
+        entity_flag=entity_flag,
+        return_quote=True,
+        # ✅ Best Practice: Logging the URL for debugging purposes.
     )
 
 
@@ -978,8 +1078,8 @@ def get_tradable_list(
     hk_south=False,
     # ⚠️ SAST Risk (Medium): Directly manipulating response text without validation can lead to security issues.
     block_category=BlockCategory.concept,
-# ✅ Best Practice: Closing the response to free up resources.
-# 🧠 ML Signal: Pattern of filtering and transforming data from an API response.
+    # ✅ Best Practice: Closing the response to free up resources.
+    # 🧠 ML Signal: Pattern of filtering and transforming data from an API response.
 ):
     entity_type = TradableType(entity_type)
     if entity_type == TradableType.future:
@@ -1018,7 +1118,12 @@ def get_tradable_list(
                 assert False
         # ✅ Best Practice: Logging errors with detailed information for troubleshooting.
         # m为交易所代码，t为交易类型
-        elif entity_type in [TradableType.block, TradableType.stock, TradableType.stockus, TradableType.stockhk]:
+        elif entity_type in [
+            TradableType.block,
+            TradableType.stock,
+            TradableType.stockus,
+            TradableType.stockhk,
+        ]:
             if exchange == Exchange.sh:
                 # t=2 主板
                 # t=23 科创板
@@ -1038,19 +1143,19 @@ def get_tradable_list(
                 else:
                     # t=3 主板
                     # t=4 创业板
-                    entity_flag = f"fs=m:116+t:3,m:116+t:4"
+                    entity_flag = "fs=m:116+t:3,m:116+t:4"
             if exchange == Exchange.nasdaq:
                 # t=1
                 # t=3 中概股
                 # ✅ Best Practice: Consider adding type hints for the return type of the function
-                entity_flag = f"fs=m:105+t:1,m:105+t:3"
+                entity_flag = "fs=m:105+t:1,m:105+t:3"
             if exchange == Exchange.nyse:
                 # 🧠 ML Signal: Conversion of input to a specific type (Exchange) indicates a pattern of type normalization
                 # t=1
                 # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and parameters.
                 # t=3 中概股
                 # 🧠 ML Signal: Use of a dictionary for mapping suggests a pattern of key-value retrieval
-                entity_flag = f"fs=m:106+t:1,m:105+t:3"
+                entity_flag = "fs=m:106+t:1,m:105+t:3"
             # ✅ Best Practice: Ensure the input is of the correct type by converting it to AdjustType.
             if exchange == Exchange.cn:
                 if block_category == BlockCategory.industry:
@@ -1071,7 +1176,11 @@ def get_tradable_list(
             fields = fields + ",f20,f21,f9,f23"
 
         df = get_top_tradable_list(
-            entity_type=entity_type, fields=fields, limit=limit, entity_flag=entity_flag, exchange=exchange
+            entity_type=entity_type,
+            fields=fields,
+            limit=limit,
+            entity_flag=entity_flag,
+            exchange=exchange,
         )
         if entity_type == TradableType.block:
             df["category"] = block_category.value
@@ -1164,7 +1273,9 @@ def get_hot_topic(session: Session = None):
             for position, data in enumerate(data_list):
                 if data["stockList"]:
                     entity_ids = [
-                        market_code_to_entity_id(market=stock["qMarket"], code=stock["qCode"])
+                        market_code_to_entity_id(
+                            market=stock["qMarket"], code=stock["qCode"]
+                        )
                         for stock in data["stockList"]
                     ]
                 else:
@@ -1195,11 +1306,17 @@ def record_hot_topic():
     if hot_topics:
         df = pd.DataFrame.from_records(hot_topics)
         df_to_db(
-            df=df, data_schema=StockHotTopic, provider="em", force_update=True, dtype={"entity_ids": sqlalchemy.JSON}
+            df=df,
+            data_schema=StockHotTopic,
+            provider="em",
+            force_update=True,
+            dtype={"entity_ids": sqlalchemy.JSON},
         )
 
 
-def get_news(entity_id, ps=200, index=1, start_timestamp=None, session=None, latest_code=None):
+def get_news(
+    entity_id, ps=200, index=1, start_timestamp=None, session=None, latest_code=None
+):
     sec_id = to_em_sec_id(entity_id=entity_id)
     url = f"https://np-listapi.eastmoney.com/comm/wap/getListInfo?cb=callback&client=wap&type=1&mTypeAndCode={sec_id}&pageSize={ps}&pageIndex={index}&callback=jQuery1830017478247906740352_{now_timestamp() - 1}&_={now_timestamp()}"
     logger.debug(f"get news from: {url}")

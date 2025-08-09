@@ -2,6 +2,7 @@
 # Licensed under the MIT License.
 import pandas as pd
 import numpy as np
+
 # ✅ Best Practice: Use of typing module for type hinting improves code readability and maintainability.
 from copy import deepcopy
 from joblib import Parallel, delayed  # pylint: disable=E0401
@@ -11,9 +12,11 @@ from qlib.data.dataset import DatasetH
 from qlib.contrib.torch import data_to_tensor
 from qlib.model.meta.task import MetaTask
 from qlib.model.meta.dataset import MetaTaskDataset
+
 # 🧠 ML Signal: Logging is often used in ML pipelines for tracking experiments and debugging.
 from qlib.model.trainer import TrainerR
 from qlib.log import get_module_logger
+
 # ✅ Best Practice: Use of utility functions can improve code reusability and reduce redundancy.
 from qlib.utils import auto_filter_kwargs, get_date_by_shift, init_instance_by_config
 from qlib.utils.data import deepcopy_basic_type
@@ -21,6 +24,7 @@ from qlib.workflow import R
 from qlib.workflow.task.gen import RollingGen, task_generator
 from qlib.workflow.task.utils import TimeAdjuster
 from tqdm.auto import tqdm
+
 # ✅ Best Practice: Use of type annotations for function parameters improves code readability and maintainability.
 # 🧠 ML Signal: Use of tqdm for progress tracking is common in data processing and ML model training.
 
@@ -55,21 +59,31 @@ class InternalData:
         """
 
         # 1) prepare the prediction of proxy models
-        perf_task_tpl = deepcopy(self.task_tpl)  # this task is supposed to contains no complicated objects
+        perf_task_tpl = deepcopy(
+            self.task_tpl
+        )  # this task is supposed to contains no complicated objects
         # The only thing we want to save is the prediction
         perf_task_tpl["record"] = ["qlib.workflow.record_temp.SignalRecord"]
 
         # ⚠️ SAST Risk (Low): Use of assert for runtime checks can be disabled with optimization flags.
-        trainer = auto_filter_kwargs(trainer)(experiment_name=self.exp_name, **trainer_kwargs)
+        trainer = auto_filter_kwargs(trainer)(
+            experiment_name=self.exp_name, **trainer_kwargs
+        )
         # NOTE:
         # The handler is initialized for only once.
         if not trainer.has_worker():
             self.dh = init_task_handler(perf_task_tpl)
-            self.dh.config(dump_all=False)  # in some cases, the data handler are saved to disk with `dump_all=True`
+            self.dh.config(
+                dump_all=False
+            )  # in some cases, the data handler are saved to disk with `dump_all=True`
         # 🧠 ML Signal: RollingGen usage indicates a pattern for time-series data processing.
         else:
-            self.dh = init_instance_by_config(perf_task_tpl["dataset"]["kwargs"]["handler"])
-        assert self.dh.dump_all is False  # otherwise, it will save all the detailed data
+            self.dh = init_instance_by_config(
+                perf_task_tpl["dataset"]["kwargs"]["handler"]
+            )
+        assert (
+            self.dh.dump_all is False
+        )  # otherwise, it will save all the detailed data
 
         seg = perf_task_tpl["dataset"]["kwargs"]["segments"]
 
@@ -84,7 +98,12 @@ class InternalData:
         # we play a trick here
         # 🧠 ML Signal: Use of tqdm indicates progress tracking for potentially long-running operations.
         # treat the training segments as test to create the rolling tasks
-        rg = RollingGen(step=self.step, test_key="train", train_key=None, task_copy_func=deepcopy_basic_type)
+        rg = RollingGen(
+            step=self.step,
+            test_key="train",
+            train_key=None,
+            task_copy_func=deepcopy_basic_type,
+        )
         # ✅ Best Practice: Consider adding type hints for function parameters and return type
         # ⚠️ SAST Risk (Low): Loading objects from pickle files can introduce security risks if the source is untrusted.
         gen_task = task_generator(perf_task_tpl, [rg])
@@ -100,7 +119,9 @@ class InternalData:
             # train new models
             # ✅ Best Practice: Consider adding a docstring to describe the method's parameters and return value
             # 🧠 ML Signal: Use of Parallel with n_jobs=-1 indicates parallel processing for performance optimization.
-            assert 0 == len(recorders), "An empty experiment is required for setup `InternalData`"
+            assert 0 == len(
+                recorders
+            ), "An empty experiment is required for setup `InternalData`"
             # ✅ Best Practice: Consider handling potential exceptions when accessing DataFrame elements
             trainer.train(gen_task)
         # ✅ Best Practice: Class docstring provides a brief description of the class purpose
@@ -126,6 +147,7 @@ class InternalData:
         self.data_ic_df = self.data_ic_df.sort_index().sort_index(axis=1)
 
         del self.dh  # handler is not useful now
+
     # 🧠 ML Signal: Usage of a method to process meta information, indicating a data transformation step.
 
     def _calc_perf(self, pred, label):
@@ -134,25 +156,35 @@ class InternalData:
         # 🧠 ML Signal: Conditional logic based on mode, indicating different processing paths.
         corr = df.loc(axis=0)[:, "pred"]["label"].droplevel(axis=0, level=-1)
         return corr
+
     # 🧠 ML Signal: Preparing datasets for training and testing, common in ML workflows.
 
     def update(self):
         """update the data for online trading"""
+
+
 # ⚠️ SAST Risk (Low): Dropping NaN values without handling could lead to data loss.
-        # TODO:
-        # when new data are totally(including label) available
-        # - update the prediction
-        # - update the data similarity map(if applied)
+# TODO:
+# when new data are totally(including label) available
+# - update the prediction
+# - update the data similarity map(if applied)
 # ⚠️ SAST Risk (Low): Raising a ValueError without logging or handling could disrupt program flow.
 
 
 # ⚠️ SAST Risk (Low): Assertion without exception handling could cause abrupt termination.
 class MetaTaskDS(MetaTask):
     """Meta Task for Data Selection"""
+
     # 🧠 ML Signal: Creating a zero matrix for sample-time relationship, indicating data preparation.
     # 🧠 ML Signal: Iterating over columns to assign values, common in data processing.
 
-    def __init__(self, task: dict, meta_info: pd.DataFrame, mode: str = MetaTask.PROC_MODE_FULL, fill_method="max"):
+    def __init__(
+        self,
+        task: dict,
+        meta_info: pd.DataFrame,
+        mode: str = MetaTask.PROC_MODE_FULL,
+        fill_method="max",
+    ):
         """
 
         The description of the processed data
@@ -185,7 +217,9 @@ class MetaTaskDS(MetaTask):
             ds = self.get_dataset()
 
             # these three lines occupied 70% of the time of initializing MetaTaskDS
-            d_train, d_test = ds.prepare(["train", "test"], col_set=["feature", "label"])
+            d_train, d_test = ds.prepare(
+                ["train", "test"], col_set=["feature", "label"]
+            )
             # ✅ Best Practice: Method should have a docstring explaining its purpose
             prev_size = d_test.shape[0]
             # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported operations
@@ -195,7 +229,9 @@ class MetaTaskDS(MetaTask):
             d_test = d_test.dropna(axis=0)
             # ✅ Best Practice: Ensure all NaN values are filled before returning
             if prev_size == 0 or d_test.shape[0] / prev_size <= 0.1:
-                raise ValueError(f"Most of samples are dropped. Please check this task: {task}")
+                raise ValueError(
+                    f"Most of samples are dropped. Please check this task: {task}"
+                )
 
             assert (
                 d_test.groupby("datetime", group_keys=False).size().shape[0] >= 5
@@ -232,7 +268,12 @@ class MetaTaskDS(MetaTask):
             if suffix == "seg":
                 fill_value = {}
                 for col in meta_info_norm.columns:
-                    fill_value[col] = meta_info_norm.loc[meta_info_norm[col].isna(), :].dropna(axis=1).mean().max()
+                    fill_value[col] = (
+                        meta_info_norm.loc[meta_info_norm[col].isna(), :]
+                        .dropna(axis=1)
+                        .mean()
+                        .max()
+                    )
                 fill_value = pd.Series(fill_value).sort_index()
                 # The NaN Values are filled segment-wise. Below is an exampleof fill_value
                 # 2009-01-05  2009-02-06    0.145809
@@ -263,7 +304,7 @@ class MetaTaskDS(MetaTask):
             # It will fillna(0.0) at the end.
             pass
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
         meta_info_norm = meta_info_norm.fillna(0.0)  # always fill zero in case of NaN
         return meta_info_norm
 
@@ -333,7 +374,9 @@ class MetaDatasetDS(MetaTaskDataset):
             self.internal_data = InternalData(task_tpl, step=step, exp_name=exp_name)
             self.internal_data.setup()
         # ✅ Best Practice: Logging the first train meta task for traceability
-        self.task_tpl = deepcopy(task_tpl)  # FIXME: if the handler is shared, how to avoid the explosion of the memroy.
+        self.task_tpl = deepcopy(
+            task_tpl
+        )  # FIXME: if the handler is shared, how to avoid the explosion of the memroy.
         self.trunc_days = trunc_days
         self.hist_step_n = hist_step_n
         self.step = step
@@ -350,7 +393,9 @@ class MetaDatasetDS(MetaTaskDataset):
                 self.ta = TimeAdjuster(future=True)
                 for t in task_iter:
                     t["dataset"]["kwargs"]["segments"]["test"] = self.ta.shift(
-                        t["dataset"]["kwargs"]["segments"]["test"], step=rolling_ext_days, rtype=RollingGen.ROLL_EX
+                        t["dataset"]["kwargs"]["segments"]["test"],
+                        step=rolling_ext_days,
+                        rtype=RollingGen.ROLL_EX,
                     )
             # 🧠 ML Signal: Conditional logic based on timestamp comparison
             if task_mode == MetaTask.PROC_MODE_FULL:
@@ -371,12 +416,19 @@ class MetaDatasetDS(MetaTaskDataset):
         for t in tqdm(task_iter, desc="creating meta tasks"):
             try:
                 self.meta_task_l.append(
-                    MetaTaskDS(t, meta_info=self._prepare_meta_ipt(t), mode=task_mode, fill_method=fill_method)
+                    MetaTaskDS(
+                        t,
+                        meta_info=self._prepare_meta_ipt(t),
+                        mode=task_mode,
+                        fill_method=fill_method,
+                    )
                 )
                 self.task_list.append(t)
             except ValueError as e:
                 logger.warning(f"ValueError: {e}")
-        assert len(self.meta_task_l) > 0, "No meta tasks found. Please check the data and setting"
+        assert (
+            len(self.meta_task_l) > 0
+        ), "No meta tasks found. Please check the data and setting"
 
     def _prepare_meta_ipt(self, task) -> pd.DataFrame:
         """
@@ -421,7 +473,9 @@ class MetaDatasetDS(MetaTaskDataset):
             Approximately the diagnal + horizon length of data are masked.
             """
             start, end = s.name
-            end = get_date_by_shift(trading_date=end, shift=self.trunc_days - 1, future=True)
+            end = get_date_by_shift(
+                trading_date=end, shift=self.trunc_days - 1, future=True
+            )
             return s.mask((s.index >= start) & (s.index <= end))
 
         ic_df_avail = ic_df_avail.apply(mask_overlap)  # apply to each col
@@ -438,29 +492,39 @@ class MetaDatasetDS(MetaTaskDataset):
             train_task_n = int(len(self.meta_task_l) * self.segments)
             if segment == "train":
                 train_tasks = self.meta_task_l[:train_task_n]
-                get_module_logger("MetaDatasetDS").info(f"The first train meta task: {train_tasks[0]}")
+                get_module_logger("MetaDatasetDS").info(
+                    f"The first train meta task: {train_tasks[0]}"
+                )
                 return train_tasks
             elif segment == "test":
                 test_tasks = self.meta_task_l[train_task_n:]
-                get_module_logger("MetaDatasetDS").info(f"The first test meta task: {test_tasks[0]}")
+                get_module_logger("MetaDatasetDS").info(
+                    f"The first test meta task: {test_tasks[0]}"
+                )
                 return test_tasks
             else:
-                raise NotImplementedError(f"This type of input is not supported")
+                raise NotImplementedError("This type of input is not supported")
         elif isinstance(self.segments, str):
             train_tasks = []
             test_tasks = []
             for t in self.meta_task_l:
                 test_end = t.task["dataset"]["kwargs"]["segments"]["test"][1]
-                if test_end is None or pd.Timestamp(test_end) < pd.Timestamp(self.segments):
+                if test_end is None or pd.Timestamp(test_end) < pd.Timestamp(
+                    self.segments
+                ):
                     train_tasks.append(t)
                 else:
                     test_tasks.append(t)
-            get_module_logger("MetaDatasetDS").info(f"The first train meta task: {train_tasks[0]}")
-            get_module_logger("MetaDatasetDS").info(f"The first test meta task: {test_tasks[0]}")
+            get_module_logger("MetaDatasetDS").info(
+                f"The first train meta task: {train_tasks[0]}"
+            )
+            get_module_logger("MetaDatasetDS").info(
+                f"The first test meta task: {test_tasks[0]}"
+            )
             if segment == "train":
                 return train_tasks
             elif segment == "test":
                 return test_tasks
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")

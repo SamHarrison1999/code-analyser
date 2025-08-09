@@ -2,9 +2,11 @@ import os
 import pickle
 import shutil
 import unittest
+
 # 🧠 ML Signal: Importing specific modules from a package indicates usage patterns
 from qlib.tests import TestAutoData
 from qlib.data import D
+
 # 🧠 ML Signal: Importing specific modules from a package indicates usage patterns
 from qlib.data.dataset.handler import DataHandlerLP
 
@@ -12,18 +14,22 @@ from qlib.data.dataset.handler import DataHandlerLP
 # 🧠 ML Signal: Class definition for test cases, useful for identifying test patterns
 # ✅ Best Practice: Method should have a docstring explaining its purpose and parameters
 
+
 # ✅ Best Practice: Inherits from a base test class, promoting code reuse and consistency
 class HandlerTests(TestAutoData):
     # 🧠 ML Signal: Conversion of objects to strings is a common pattern
     def to_str(self, obj):
         # ✅ Best Practice: Use of str() ensures that the object is converted to a string
         return "".join(str(obj).split())
+
     # ✅ Best Practice: "".join() is an efficient way to remove whitespace from strings
     # 🧠 ML Signal: Usage of a specific feature extraction method with parameters
 
     def test_handler_df(self):
         # 🧠 ML Signal: Conversion of DataFrame to a custom data handler
-        df = D.features(["sh600519"], start_time="20190101", end_time="20190201", fields=["$close"])
+        df = D.features(
+            ["sh600519"], start_time="20190101", end_time="20190201", fields=["$close"]
+        )
         dh = DataHandlerLP.from_df(df)
         # ⚠️ SAST Risk (Low): Use of print statements in test code
         print(dh.fetch())

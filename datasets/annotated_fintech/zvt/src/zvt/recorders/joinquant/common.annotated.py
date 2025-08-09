@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from zvt.contract import IntervalLevel
+
 # 🧠 ML Signal: Importing specific classes from modules indicates usage patterns and dependencies
 # 🧠 ML Signal: Function uses conditional logic to map input to specific output values
 from zvt.domain import ReportPeriod
 
 # 🧠 ML Signal: Conditional check for input value
+
 
 def to_jq_trading_level(trading_level: IntervalLevel):
     if trading_level < IntervalLevel.LEVEL_1HOUR:
@@ -26,6 +28,8 @@ def to_jq_trading_level(trading_level: IntervalLevel):
     # 🧠 ML Signal: Conditional check for specific entity types
     if trading_level == IntervalLevel.LEVEL_1MON:
         return "1M"
+
+
 # 🧠 ML Signal: Specific condition and return value mapping
 # 🧠 ML Signal: Nested conditional check for exchange type
 
@@ -78,4 +82,9 @@ def jq_to_report_period(jq_report_type):
 
 
 # the __all__ is generated
-__all__ = ["to_jq_trading_level", "to_jq_entity_id", "to_entity_id", "jq_to_report_period"]
+__all__ = [
+    "to_jq_trading_level",
+    "to_jq_entity_id",
+    "to_entity_id",
+    "jq_to_report_period",
+]

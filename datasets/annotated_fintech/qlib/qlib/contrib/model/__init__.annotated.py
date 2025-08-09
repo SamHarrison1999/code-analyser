@@ -6,7 +6,9 @@ try:
 except ModuleNotFoundError:
     # ✅ Best Practice: Consider logging the error instead of printing to standard output.
     CatBoostModel = None
-    print("ModuleNotFoundError. CatBoostModel are skipped. (optional: maybe installing CatBoostModel can fix it.)")
+    print(
+        "ModuleNotFoundError. CatBoostModel are skipped. (optional: maybe installing CatBoostModel can fix it.)"
+    )
 try:
     from .double_ensemble import DEnsembleModel
     from .gbdt import LGBModel
@@ -21,19 +23,25 @@ try:
     from .xgboost import XGBModel
 except ModuleNotFoundError:
     XGBModel = None
-    print("ModuleNotFoundError. XGBModel is skipped(optional: maybe installing xgboost can fix it).")
+    print(
+        "ModuleNotFoundError. XGBModel is skipped(optional: maybe installing xgboost can fix it)."
+    )
 try:
     # ⚠️ SAST Risk (Low): Catching broad exceptions like ModuleNotFoundError without specific handling can hide other issues.
     from .linear import LinearModel
 # ✅ Best Practice: Consider logging the error instead of printing to standard output.
 except ModuleNotFoundError:
     LinearModel = None
-    print("ModuleNotFoundError. LinearModel is skipped(optional: maybe installing scipy and sklearn can fix it).")
+    print(
+        "ModuleNotFoundError. LinearModel is skipped(optional: maybe installing scipy and sklearn can fix it)."
+    )
 # import pytorch models
 try:
     from .pytorch_alstm import ALSTM
+
     # ⚠️ SAST Risk (Low): Catching broad exceptions like ModuleNotFoundError without specific handling can hide other issues.
     from .pytorch_gats import GATs
+
     # ✅ Best Practice: Consider logging the error instead of printing to standard output.
     from .pytorch_gru import GRU
     from .pytorch_lstm import LSTM
@@ -47,9 +55,27 @@ try:
     # ⚠️ SAST Risk (Low): Catching broad exceptions like ModuleNotFoundError without specific handling can hide other issues.
     # ✅ Best Practice: Consider logging the error instead of printing to standard output.
     # 🧠 ML Signal: Aggregating model classes into a single tuple for unified handling.
-    pytorch_classes = (ALSTM, GATs, GRU, LSTM, DNNModelPytorch, TabnetModel, SFM_Model, TCN, ADD)
+    pytorch_classes = (
+        ALSTM,
+        GATs,
+        GRU,
+        LSTM,
+        DNNModelPytorch,
+        TabnetModel,
+        SFM_Model,
+        TCN,
+        ADD,
+    )
 except ModuleNotFoundError:
     pytorch_classes = ()
-    print("ModuleNotFoundError.  PyTorch models are skipped (optional: maybe installing pytorch can fix it).")
+    print(
+        "ModuleNotFoundError.  PyTorch models are skipped (optional: maybe installing pytorch can fix it)."
+    )
 
-all_model_classes = (CatBoostModel, DEnsembleModel, LGBModel, XGBModel, LinearModel) + pytorch_classes
+all_model_classes = (
+    CatBoostModel,
+    DEnsembleModel,
+    LGBModel,
+    XGBModel,
+    LinearModel,
+) + pytorch_classes

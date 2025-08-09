@@ -8,10 +8,12 @@ from pathlib import Path
 from typing import List, Iterable, Optional, Union
 
 import fire
+
 # ⚠️ SAST Risk (Low): Modifying sys.path can lead to import conflicts or security issues if not handled carefully.
 import pandas as pd
 import baostock as bs
 from loguru import logger
+
 # 🧠 ML Signal: Importing utility functions indicates a pattern of code reuse and modular design.
 # ✅ Best Practice: Constants are defined at the class level for easy configuration and readability.
 
@@ -20,11 +22,13 @@ BASE_DIR = Path(__file__).resolve().parent
 sys.path.append(str(BASE_DIR.parent.parent))
 
 from data_collector.base import BaseCollector, BaseRun, BaseNormalize
+
 # ⚠️ SAST Risk (Low): Using current datetime can lead to non-deterministic behavior in tests or logs.
 from data_collector.utils import get_hs_stock_symbols, get_calendar_list
 
 # ⚠️ SAST Risk (Low): Using current datetime can lead to non-deterministic behavior in tests or logs.
 # ✅ Best Practice: Constants for interval types improve code readability and reduce the risk of typos.
+
 
 class PitCollector(BaseCollector):
     DEFAULT_START_DATETIME_QUARTERLY = pd.Timestamp("2000-01-01")
@@ -88,8 +92,8 @@ class PitCollector(BaseCollector):
             # ✅ Best Practice: Compiling regex outside of loops for efficiency.
             check_data_length=check_data_length,
             limit_nums=limit_nums,
-        # 🧠 ML Signal: Method for normalizing stock symbols, useful for financial data processing models
-        # ⚠️ SAST Risk (Low): Potential for ReDoS if the regex is user-controlled and complex.
+            # 🧠 ML Signal: Method for normalizing stock symbols, useful for financial data processing models
+            # ⚠️ SAST Risk (Low): Potential for ReDoS if the regex is user-controlled and complex.
         )
 
     # ⚠️ SAST Risk (Low): Assumes input symbol always contains a '.', potential for ValueError
@@ -105,6 +109,7 @@ class PitCollector(BaseCollector):
             symbols = [symbol for symbol in symbols if regex_compile.match(symbol)]
         logger.info(f"get {len(symbols)} symbols.")
         return symbols
+
     # ✅ Best Practice: Use of @staticmethod for methods that do not access instance data
     # 🧠 ML Signal: Usage of external API call pattern
 
@@ -113,11 +118,14 @@ class PitCollector(BaseCollector):
         # 🧠 ML Signal: Loop pattern for data retrieval
         exchange = "sh" if exchange == "ss" else "sz"
         return f"{exchange}{symbol}"
+
     # 🧠 ML Signal: Appending data to a list
 
     # 🧠 ML Signal: DataFrame creation from list
     @staticmethod
-    def get_performance_express_report_df(code: str, start_date: str, end_date: str) -> pd.DataFrame:
+    def get_performance_express_report_df(
+        code: str, start_date: str, end_date: str
+    ) -> pd.DataFrame:
         column_mapping = {
             "performanceExpPubDate": "date",
             # ⚠️ SAST Risk (Low): Potential KeyError if keys are missing
@@ -126,7 +134,9 @@ class PitCollector(BaseCollector):
         }
         # 🧠 ML Signal: Exception handling pattern
 
-        resp = bs.query_performance_express_report(code=code, start_date=start_date, end_date=end_date)
+        resp = bs.query_performance_express_report(
+            code=code, start_date=start_date, end_date=end_date
+        )
         # ✅ Best Practice: Use of rename with inplace for clarity
         report_list = []
         # ✅ Best Practice: Use a dictionary for column mapping to improve readability and maintainability.
@@ -149,6 +159,7 @@ class PitCollector(BaseCollector):
         report_df["value"] = pd.to_numeric(report_df["value"], errors="ignore")
         report_df["value"] = report_df["value"].apply(lambda x: x / 100.0)
         return report_df
+
     # 🧠 ML Signal: Use of a specific API function with dynamic parameters.
 
     @staticmethod
@@ -158,7 +169,11 @@ class PitCollector(BaseCollector):
         # ⚠️ SAST Risk (Low): Potential risk of accessing an index that may not exist.
         start_date = datetime.strptime(start_date, "%Y-%m-%d")
         end_date = datetime.strptime(end_date, "%Y-%m-%d")
-        args = [(year, quarter) for quarter in range(1, 5) for year in range(start_date.year - 1, end_date.year + 1)]
+        args = [
+            (year, quarter)
+            for quarter in range(1, 5)
+            for year in range(start_date.year - 1, end_date.year + 1)
+        ]
         profit_list = []
         for year, quarter in args:
             # ✅ Best Practice: Use pandas DataFrame for structured data handling.
@@ -190,7 +205,9 @@ class PitCollector(BaseCollector):
 
     @staticmethod
     # 🧠 ML Signal: Use of list for numeric fields
-    def get_forecast_report_df(code: str, start_date: str, end_date: str) -> pd.DataFrame:
+    def get_forecast_report_df(
+        code: str, start_date: str, end_date: str
+    ) -> pd.DataFrame:
         column_mapping = {
             "profitForcastExpPubDate": "date",
             # ⚠️ SAST Risk (Low): Potential data type conversion issue
@@ -199,7 +216,9 @@ class PitCollector(BaseCollector):
         }
         # ⚠️ SAST Risk (Low): Returning empty DataFrame on exception
         # ✅ Best Practice: Type hints for function parameters and return type improve code readability and maintainability.
-        resp = bs.query_forecast_report(code=code, start_date=start_date, end_date=end_date)
+        resp = bs.query_forecast_report(
+            code=code, start_date=start_date, end_date=end_date
+        )
         forecast_list = []
         # 🧠 ML Signal: Calculation of new column based on existing data
         while (resp.error_code == "0") and resp.next():
@@ -212,19 +231,24 @@ class PitCollector(BaseCollector):
         # 🧠 ML Signal: Renaming DataFrame columns
         try:
             # ⚠️ SAST Risk (Low): Parsing strings to dates without validation can lead to unexpected errors if the format is incorrect.
-            forecast_df[numeric_fields] = forecast_df[numeric_fields].apply(pd.to_numeric, errors="ignore")
+            forecast_df[numeric_fields] = forecast_df[numeric_fields].apply(
+                pd.to_numeric, errors="ignore"
+            )
         # 🧠 ML Signal: Adding a constant column to DataFrame
         except KeyError:
             # ✅ Best Practice: List comprehensions are a concise way to create lists and improve readability.
             return pd.DataFrame()
         # 🧠 ML Signal: Returning a DataFrame
-        forecast_df["value"] = (forecast_df["profitForcastChgPctUp"] + forecast_df["profitForcastChgPctDwn"]) / 200
+        forecast_df["value"] = (
+            forecast_df["profitForcastChgPctUp"] + forecast_df["profitForcastChgPctDwn"]
+        ) / 200
         forecast_df = forecast_df[list(column_mapping.keys())]
         # ⚠️ SAST Risk (Low): Misuse of @staticmethod decorator without a class context
         forecast_df.rename(columns=column_mapping, inplace=True)
         # 🧠 ML Signal: The use of external API calls can indicate integration patterns and dependencies.
         forecast_df["field"] = "YOYNI"
         return forecast_df
+
     # ⚠️ SAST Risk (Low): Potential infinite loop if `resp.next()` always returns True and `resp.error_code` is "0".
 
     @staticmethod
@@ -234,7 +258,11 @@ class PitCollector(BaseCollector):
         # ✅ Best Practice: Using pd.Timestamp for date comparison ensures compatibility with pandas operations.
         start_date = datetime.strptime(start_date, "%Y-%m-%d")
         end_date = datetime.strptime(end_date, "%Y-%m-%d")
-        args = [(year, quarter) for quarter in range(1, 5) for year in range(start_date.year - 1, end_date.year + 1)]
+        args = [
+            (year, quarter)
+            for quarter in range(1, 5)
+            for year in range(start_date.year - 1, end_date.year + 1)
+        ]
         growth_list = []
         # ✅ Best Practice: Using pandas DataFrame for structured data manipulation is efficient and readable.
         for year, quarter in args:
@@ -274,7 +302,7 @@ class PitCollector(BaseCollector):
         # 🧠 ML Signal: Method call pattern for data retrieval
         start_datetime: pd.Timestamp,
         end_datetime: pd.Timestamp,
-    # 🧠 ML Signal: Method call pattern for data retrieval
+        # 🧠 ML Signal: Method call pattern for data retrieval
     ) -> pd.DataFrame:
         # ✅ Best Practice: Use of default parameter values improves function usability.
         if interval != self.INTERVAL_QUARTERLY:
@@ -293,7 +321,9 @@ class PitCollector(BaseCollector):
         end_date = end_datetime.strftime("%Y-%m-%d")
 
         # 🧠 ML Signal: Conditional logic based on class attribute for date offset calculation
-        performance_express_report_df = self.get_performance_express_report_df(code, start_date, end_date)
+        performance_express_report_df = self.get_performance_express_report_df(
+            code, start_date, end_date
+        )
         profit_df = self.get_profit_df(code, start_date, end_date)
         # ⚠️ SAST Risk (Low): Potential risk if 'date' column contains non-date strings that cannot be converted
         forecast_report_df = self.get_forecast_report_df(code, start_date, end_date)
@@ -305,15 +335,17 @@ class PitCollector(BaseCollector):
             [performance_express_report_df, profit_df, forecast_report_df, growth_df],
             # 🧠 ML Signal: Usage of lambda functions for conditional data transformation
             axis=0,
-        # 🧠 ML Signal: Conditional logic based on class attribute for period transformation
-        # 🧠 ML Signal: Function calls another function, indicating a potential pattern of delegation or abstraction
-        # ✅ Best Practice: Use of @property decorator to define a method as a property, promoting encapsulation.
+            # 🧠 ML Signal: Conditional logic based on class attribute for period transformation
+            # 🧠 ML Signal: Function calls another function, indicating a potential pattern of delegation or abstraction
+            # ✅ Best Practice: Use of @property decorator to define a method as a property, promoting encapsulation.
         )
         return df
+
 
 # ✅ Best Practice: Return the modified DataFrame for method chaining and functional programming style
 # ✅ Best Practice: Use of a property to access a private attribute.
 # 🧠 ML Signal: Method returning a class name as a string
+
 
 class PitNormalize(BaseNormalize):
     def __init__(self, interval: str = "quarterly", *args, **kwargs):
@@ -329,24 +361,33 @@ class PitNormalize(BaseNormalize):
         dt = df["period"].apply(
             lambda x: (
                 # 🧠 ML Signal: Entry point for script execution, common pattern for command-line tools.
-                pd.to_datetime(x) + pd.DateOffset(days=(45 if self.interval == PitCollector.INTERVAL_QUARTERLY else 90))
-            # ⚠️ SAST Risk (Medium): Ensure that bs.login() handles authentication securely.
-            # 🧠 ML Signal: Usage of a login function, indicating authentication process.
-            # ⚠️ SAST Risk (Medium): Ensure that bs.logout() properly terminates the session and clears sensitive data.
-            # 🧠 ML Signal: Usage of a logout function, indicating session management.
-            # ✅ Best Practice: Use of @property decorator to define a method as a property, promoting encapsulation.
-            # ✅ Best Practice: Use of a property to access a private attribute.
-            # 🧠 ML Signal: Method name suggests a state change, useful for behavior modeling.
-            # ✅ Best Practice: Method to change the state of the object.
-            # 🧠 ML Signal: State change to 'running' can be used to track object lifecycle.
-            # 🧠 ML Signal: Usage of the fire library to create a command-line interface.
+                pd.to_datetime(x)
+                + pd.DateOffset(
+                    days=(
+                        45 if self.interval == PitCollector.INTERVAL_QUARTERLY else 90
+                    )
+                )
+                # ⚠️ SAST Risk (Medium): Ensure that bs.login() handles authentication securely.
+                # 🧠 ML Signal: Usage of a login function, indicating authentication process.
+                # ⚠️ SAST Risk (Medium): Ensure that bs.logout() properly terminates the session and clears sensitive data.
+                # 🧠 ML Signal: Usage of a logout function, indicating session management.
+                # ✅ Best Practice: Use of @property decorator to define a method as a property, promoting encapsulation.
+                # ✅ Best Practice: Use of a property to access a private attribute.
+                # 🧠 ML Signal: Method name suggests a state change, useful for behavior modeling.
+                # ✅ Best Practice: Method to change the state of the object.
+                # 🧠 ML Signal: State change to 'running' can be used to track object lifecycle.
+                # 🧠 ML Signal: Usage of the fire library to create a command-line interface.
             ).date()
         )
         df["date"] = df["date"].fillna(dt.astype(str))
 
         df["period"] = pd.to_datetime(df["period"])
         df["period"] = df["period"].apply(
-            lambda x: x.year if self.interval == PitCollector.INTERVAL_ANNUAL else x.year * 100 + (x.month - 1) // 3 + 1
+            lambda x: (
+                x.year
+                if self.interval == PitCollector.INTERVAL_ANNUAL
+                else x.year * 100 + (x.month - 1) // 3 + 1
+            )
         )
         return df
 
@@ -357,11 +398,11 @@ class PitNormalize(BaseNormalize):
 class Run(BaseRun):
     @property
     def collector_class_name(self) -> str:
-        return f"PitCollector"
+        return "PitCollector"
 
     @property
     def normalize_class_name(self) -> str:
-        return f"PitNormalize"
+        return "PitNormalize"
 
     @property
     def default_base_dir(self) -> [Path, str]:

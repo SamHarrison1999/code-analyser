@@ -5,6 +5,7 @@ from sqlalchemy.orm import declarative_base
 
 # 🧠 ML Signal: Usage of SQLAlchemy's declarative_base indicates ORM pattern.
 from zvt.contract.register import register_schema
+
 # 🧠 ML Signal: Inheritance from multiple classes, indicating a use of multiple behaviors or interfaces.
 from zvt.domain.quotes import IndexusKdataCommon
 
@@ -19,7 +20,12 @@ class Indexus1dKdata(KdataBase, IndexusKdataCommon):
     __tablename__ = "indexus_1d_kdata"
 
 
-register_schema(providers=["em"], db_name="indexus_1d_kdata", schema_base=KdataBase, entity_type="indexus")
+register_schema(
+    providers=["em"],
+    db_name="indexus_1d_kdata",
+    schema_base=KdataBase,
+    entity_type="indexus",
+)
 
 
 # the __all__ is generated

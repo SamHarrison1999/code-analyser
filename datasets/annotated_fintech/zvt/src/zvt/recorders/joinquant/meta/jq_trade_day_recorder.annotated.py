@@ -2,18 +2,22 @@
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 import pandas as pd
 from jqdatapy.api import get_trade_days
+
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 
 from zvt.contract.api import df_to_db
+
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.domain import StockTradeDay, Stock
+
 # 🧠 ML Signal: Inheritance from TimeSeriesDataRecorder indicates a pattern of extending functionality for time series data.
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 from zvt.utils.time_utils import to_time_str
 
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 # 🧠 ML Signal: Use of a specific data provider can indicate a preference or dependency on certain data sources.
+
 
 class StockTradeDayRecorder(TimeSeriesDataRecorder):
     # 🧠 ML Signal: Association with a specific schema suggests a pattern of data organization and usage.
@@ -62,7 +66,7 @@ class StockTradeDayRecorder(TimeSeriesDataRecorder):
             # 🧠 ML Signal: The fix_duplicate_way parameter suggests a pattern for handling duplicate data.
             start_timestamp=start_timestamp,
             end_timestamp=end_timestamp,
-        # 🧠 ML Signal: Logging information about dates can be useful for understanding data processing patterns.
+            # 🧠 ML Signal: Logging information about dates can be useful for understanding data processing patterns.
         )
 
     # ✅ Best Practice: Ensure that the 'dates' are valid and correctly formatted before conversion.
@@ -80,7 +84,12 @@ class StockTradeDayRecorder(TimeSeriesDataRecorder):
         df["id"] = [to_time_str(date) for date in dates]
         df["entity_id"] = "stock_sz_000001"
 
-        df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+        df_to_db(
+            df=df,
+            data_schema=self.data_schema,
+            provider=self.provider,
+            force_update=self.force_update,
+        )
 
 
 if __name__ == "__main__":

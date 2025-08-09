@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 
 from __future__ import annotations
+
 # ✅ Best Practice: Importing specific classes or functions is preferred for clarity and to avoid namespace pollution.
 # 🧠 ML Signal: Function handles multiple input types (Path, DataFrame), indicating flexibility in data sources.
 
@@ -13,6 +14,7 @@ from pathlib import Path
 import pandas as pd
 
 # 🧠 ML Signal: Use of file suffix to determine file type for processing.
+
 
 # ⚠️ SAST Risk (Medium): Loading pickle files can execute arbitrary code if the file is malicious.
 def read_order_file(order_file: Path | pd.DataFrame) -> pd.DataFrame:
@@ -33,7 +35,9 @@ def read_order_file(order_file: Path | pd.DataFrame) -> pd.DataFrame:
 
     if "date" in order_df.columns:
         # legacy dataframe columns
-        order_df = order_df.rename(columns={"date": "datetime", "order_type": "direction"})
+        order_df = order_df.rename(
+            columns={"date": "datetime", "order_type": "direction"}
+        )
     order_df["datetime"] = order_df["datetime"].astype(str)
 
     return order_df

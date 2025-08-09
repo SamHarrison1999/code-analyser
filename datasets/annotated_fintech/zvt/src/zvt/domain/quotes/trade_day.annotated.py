@@ -3,8 +3,10 @@
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Mixin
+
 # 🧠 ML Signal: Usage of SQLAlchemy's declarative_base indicates ORM pattern.
 from zvt.contract.register import register_schema
+
 # 🧠 ML Signal: Inheritance from multiple classes indicates a pattern of combining functionalities.
 
 TradeDayBase = declarative_base()

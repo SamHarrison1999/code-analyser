@@ -3,12 +3,14 @@
 # 🧠 ML Signal: Usage of custom imports from a specific package
 from sqlalchemy import Column, String
 from sqlalchemy.orm import declarative_base
+
 # 🧠 ML Signal: Usage of custom imports from a specific package
 
 # 🧠 ML Signal: Usage of custom imports from a specific package
 from zvt.contract import Portfolio, PortfolioStockHistory
 from zvt.contract.register import register_schema, register_entity
 from zvt.utils.time_utils import now_pd_timestamp
+
 # 🧠 ML Signal: Inheritance from multiple classes, indicating a complex class structure
 
 # ✅ Best Practice: Naming convention for base class
@@ -16,6 +18,7 @@ from zvt.utils.time_utils import now_pd_timestamp
 EtfMetaBase = declarative_base()
 
 # ✅ Best Practice: Consider adding type hints for better code readability and maintainability
+
 
 # 🧠 ML Signal: Usage of a decorator for entity registration
 # 🧠 ML Signal: Definition of a database column with a specific data type and length
@@ -32,17 +35,28 @@ class Etf(EtfMetaBase, Portfolio):
     # ✅ Best Practice: Use __all__ to explicitly declare the public API of the module, improving code readability and maintainability.
 
     @classmethod
-    def get_stocks(cls, code=None, codes=None, ids=None, timestamp=now_pd_timestamp(), provider=None):
+    def get_stocks(
+        cls,
+        code=None,
+        codes=None,
+        ids=None,
+        timestamp=now_pd_timestamp(),
+        provider=None,
+    ):
         from zvt.api.portfolio import get_etf_stocks
 
-        return get_etf_stocks(code=code, codes=codes, ids=ids, timestamp=timestamp, provider=provider)
+        return get_etf_stocks(
+            code=code, codes=codes, ids=ids, timestamp=timestamp, provider=provider
+        )
 
 
 class EtfStock(EtfMetaBase, PortfolioStockHistory):
     __tablename__ = "etf_stock"
 
 
-register_schema(providers=["exchange", "joinquant"], db_name="etf_meta", schema_base=EtfMetaBase)
+register_schema(
+    providers=["exchange", "joinquant"], db_name="etf_meta", schema_base=EtfMetaBase
+)
 
 
 # the __all__ is generated

@@ -7,6 +7,7 @@ from zvt.contract import Mixin
 
 # 🧠 ML Signal: Use of financial indicators as class attributes
 
+
 class MaStatsFactorCommon(Mixin):
     # 🧠 ML Signal: Use of financial indicators as class attributes
     open = Column(Float)

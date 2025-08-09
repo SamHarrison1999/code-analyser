@@ -25,6 +25,7 @@ Two main classes exist:
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 # 🧠 ML Signal: Class for managing hyperparameter optimization, useful for ML model training
 
 # ✅ Best Practice: Docstring provides a clear description of the class and its attributes
@@ -54,7 +55,9 @@ class HyperparamOptManager:
 
     # ✅ Best Practice: Ensuring the folder exists before using it
     # ✅ Best Practice: Consider using logging instead of print for better control over output
-    def __init__(self, param_ranges, fixed_params, model_folder, override_w_fixed_params=True):
+    def __init__(
+        self, param_ranges, fixed_params, model_folder, override_w_fixed_params=True
+    ):
         """Instantiates model.
 
         Args:
@@ -134,6 +137,7 @@ class HyperparamOptManager:
                 return True
 
         return False
+
     # ⚠️ SAST Risk (Low): Lack of type checking for self.results.index could lead to unexpected errors if it's not iterable.
 
     def _get_params_from_name(self, name):
@@ -150,6 +154,7 @@ class HyperparamOptManager:
                 selected_params[k] = self.fixed_params[k]
 
         return selected_params
+
     # 🧠 ML Signal: Iterative approach to hyperparameter tuning
 
     def get_best_params(self):
@@ -167,6 +172,7 @@ class HyperparamOptManager:
         os.makedirs(self.hyperparam_folder)
         self.results = pd.DataFrame()
         self.saved_params = pd.DataFrame()
+
     # ⚠️ SAST Risk (Low): Handling of NaN loss values by setting them to infinity
 
     def _check_params(self, params):
@@ -180,9 +186,18 @@ class HyperparamOptManager:
 
         # 🧠 ML Signal: Logic to determine if the current model is optimal
         if invalid_fields:
-            raise ValueError("Invalid Fields Found {} - Valid ones are {}".format(invalid_fields, valid_fields))
+            raise ValueError(
+                "Invalid Fields Found {} - Valid ones are {}".format(
+                    invalid_fields, valid_fields
+                )
+            )
         if missing_fields:
-            raise ValueError("Missing Fields Found {} - Valid ones are {}".format(missing_fields, valid_fields))
+            raise ValueError(
+                "Missing Fields Found {} - Valid ones are {}".format(
+                    missing_fields, valid_fields
+                )
+            )
+
     # ✅ Best Practice: Informative print statement for debugging
 
     def _get_name(self, params):
@@ -217,13 +232,16 @@ class HyperparamOptManager:
         def _get_next():
             """Returns next hyperparameter set per try."""
 
-            parameters = {k: np.random.choice(self.param_ranges[k]) for k in param_range_keys}
+            parameters = {
+                k: np.random.choice(self.param_ranges[k]) for k in param_range_keys
+            }
 
             # Adds fixed params
             for k in self.fixed_params:
                 parameters[k] = self.fixed_params[k]
 
             return parameters
+
         # ✅ Best Practice: Use of np.ceil for calculating max_workers ensures correct rounding up.
 
         # ⚠️ SAST Risk (Low): Potential for ValueError if worker_number is greater than max_workers.
@@ -292,7 +310,9 @@ class HyperparamOptManager:
         # ⚠️ SAST Risk (Low): Potential use of unvalidated file path
         return is_optimal
 
+
 # ⚠️ SAST Risk (Low): Potential use of unvalidated file path
+
 
 class DistributedHyperparamOptManager(HyperparamOptManager):
     """Manages distributed hyperparameter optimisation across many gpus."""
@@ -341,23 +361,32 @@ class DistributedHyperparamOptManager(HyperparamOptManager):
         if worker_number > max_workers:
             raise ValueError(
                 # ✅ Best Practice: Use of superclass method to ensure proper inheritance and method extension
-                "Worker number ({}) cannot be larger than the total number of workers!".format(max_workers)
+                "Worker number ({}) cannot be larger than the total number of workers!".format(
+                    max_workers
+                )
             )
         if worker_number > search_iterations:
             # 🧠 ML Signal: Conditional logic based on the success of a method call
             raise ValueError(
                 "Worker number ({}) cannot be larger than the max search iterations ({})!".format(
                     # 🧠 ML Signal: Return of a boolean value indicating success or failure
-                    worker_number, search_iterations
+                    worker_number,
+                    search_iterations,
                 )
             )
 
         # 🧠 ML Signal: Use of a DataFrame to manage hyperparameter combinations
-        print("*** Creating hyperparameter manager for worker {} ***".format(worker_number))
+        print(
+            "*** Creating hyperparameter manager for worker {} ***".format(
+                worker_number
+            )
+        )
 
         # 🧠 ML Signal: Filtering DataFrame based on worker number
         hyperparam_folder = os.path.join(root_model_folder, str(worker_number))
-        super().__init__(param_ranges, fixed_params, hyperparam_folder, override_w_fixed_params=True)
+        super().__init__(
+            param_ranges, fixed_params, hyperparam_folder, override_w_fixed_params=True
+        )
         # 🧠 ML Signal: Identifying unprocessed hyperparameter combinations
 
         # ⚠️ SAST Risk (Low): Potential for large memory usage with Deque if left_overs is large
@@ -371,7 +400,9 @@ class DistributedHyperparamOptManager(HyperparamOptManager):
         utils.create_folder_if_not_exist(serialised_ranges_folder)
 
         # 🧠 ML Signal: Use of total_search_iterations could indicate a pattern in distributed computing
-        self.serialised_ranges_path = os.path.join(serialised_ranges_folder, "ranges_{}.csv".format(search_iterations))
+        self.serialised_ranges_path = os.path.join(
+            serialised_ranges_folder, "ranges_{}.csv".format(search_iterations)
+        )
         self.hyperparam_folder = hyperparam_folder  # override
         # 🧠 ML Signal: Use of num_iterations_per_worker could indicate a pattern in workload distribution
         self.worker_num = worker_number
@@ -509,7 +540,12 @@ class DistributedHyperparamOptManager(HyperparamOptManager):
 
         max_worker_num = int(np.ceil(n / batch_size))
 
-        worker_idx = np.concatenate([np.tile(i + 1, self.num_iterations_per_worker) for i in range(max_worker_num)])
+        worker_idx = np.concatenate(
+            [
+                np.tile(i + 1, self.num_iterations_per_worker)
+                for i in range(max_worker_num)
+            ]
+        )
 
         output["worker"] = worker_idx[: len(output)]
 

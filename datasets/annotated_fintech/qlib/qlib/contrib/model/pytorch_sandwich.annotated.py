@@ -4,21 +4,26 @@
 
 from __future__ import division
 from __future__ import print_function
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 
 import numpy as np
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import pandas as pd
 from typing import Text, Union
 import copy
 from ...utils import get_or_create_path
 from ...log import get_module_logger
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 
 import torch
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 # 🧠 ML Signal: Custom model class definition for PyTorch
 import torch.nn as nn
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import torch.optim as optim
 
@@ -170,7 +175,9 @@ class Sandwich(Model):
         self.early_stop = early_stop
         self.optimizer = optimizer.lower()
         self.loss = loss
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.seed = seed
 
         self.logger.info(
@@ -251,12 +258,18 @@ class Sandwich(Model):
         )
         # ⚠️ SAST Risk (Low): Use of string interpolation in exception message could expose internal state
         if optimizer.lower() == "adam":
-            self.train_optimizer = optim.Adam(self.sandwich_model.parameters(), lr=self.lr)
+            self.train_optimizer = optim.Adam(
+                self.sandwich_model.parameters(), lr=self.lr
+            )
         elif optimizer.lower() == "gd":
-            self.train_optimizer = optim.SGD(self.sandwich_model.parameters(), lr=self.lr)
+            self.train_optimizer = optim.SGD(
+                self.sandwich_model.parameters(), lr=self.lr
+            )
         # 🧠 ML Signal: Shuffling data indices for training
         else:
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
 
         self.fitted = False
         # ⚠️ SAST Risk (Low): Potential for device mismatch if self.device is not set correctly
@@ -293,6 +306,7 @@ class Sandwich(Model):
 
         # 🧠 ML Signal: Model prediction step, a key operation in ML workflows.
         raise ValueError("unknown metric `%s`" % self.metric)
+
     # 🧠 ML Signal: Loss calculation is a critical step in evaluating model performance.
 
     def train_epoch(self, x_train, y_train):
@@ -309,8 +323,16 @@ class Sandwich(Model):
             if len(indices) - i < self.batch_size:
                 break
 
-            feature = torch.from_numpy(x_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
-            label = torch.from_numpy(y_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            feature = (
+                torch.from_numpy(x_train_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
+            label = (
+                torch.from_numpy(y_train_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
             # ⚠️ SAST Risk (Low): Potential directory traversal if save_path is user-controlled
 
             pred = self.sandwich_model(feature)
@@ -341,8 +363,16 @@ class Sandwich(Model):
             if len(indices) - i < self.batch_size:
                 break
 
-            feature = torch.from_numpy(x_values[indices[i : i + self.batch_size]]).float().to(self.device)
-            label = torch.from_numpy(y_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            feature = (
+                torch.from_numpy(x_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
+            label = (
+                torch.from_numpy(y_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
 
             # 🧠 ML Signal: Model checkpointing
             pred = self.sandwich_model(feature)
@@ -372,7 +402,9 @@ class Sandwich(Model):
             data_key=DataHandlerLP.DK_L,
         )
         if df_train.empty or df_valid.empty:
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
 
         x_train, y_train = df_train["feature"], df_train["label"]
         # 🧠 ML Signal: Model prediction without gradient tracking
@@ -425,7 +457,9 @@ class Sandwich(Model):
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
 
-        x_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        x_test = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
         index = x_test.index
         self.sandwich_model.eval()
         x_values = x_test.values

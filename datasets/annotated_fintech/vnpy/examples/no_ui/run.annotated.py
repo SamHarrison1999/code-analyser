@@ -2,9 +2,11 @@ import multiprocessing
 import sys
 from time import sleep
 from datetime import datetime, time
+
 # 🧠 ML Signal: Importing specific modules from a package
 
 from vnpy.event import EventEngine
+
 # 🧠 ML Signal: Accessing settings from a configuration module
 from vnpy.trader.setting import SETTINGS
 from vnpy.trader.engine import MainEngine, LogEngine
@@ -31,8 +33,8 @@ ctp_setting = {
     "产品名称": "",
     "授权编码": "",
     # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and parameters
-    "产品信息": ""
-# ⚠️ SAST Risk (Low): Ensure DAY_START, DAY_END, NIGHT_START, and NIGHT_END are properly validated and defined
+    "产品信息": "",
+    # ⚠️ SAST Risk (Low): Ensure DAY_START, DAY_END, NIGHT_START, and NIGHT_END are properly validated and defined
 }
 
 # 🧠 ML Signal: Defining constants for time intervals
@@ -58,12 +60,14 @@ def check_trading_period() -> bool:
         # 🧠 ML Signal: Dependency injection pattern
         or (current_time >= NIGHT_START)
         or (current_time <= NIGHT_END)
-    # 🧠 ML Signal: Plugin or extension pattern
+        # 🧠 ML Signal: Plugin or extension pattern
     ):
         trading = True
     # 🧠 ML Signal: Plugin or extension pattern
 
     return trading
+
+
 # 🧠 ML Signal: Logging usage
 
 
@@ -85,7 +89,7 @@ def run_child() -> None:
     main_engine.write_log("主引擎创建成功")
 
     # 🧠 ML Signal: Initialization pattern
-    log_engine: LogEngine = main_engine.get_engine("log")       # type: ignore
+    log_engine: LogEngine = main_engine.get_engine("log")  # type: ignore
     event_engine.register(EVENT_CTA_LOG, log_engine.process_log_event)
     # 🧠 ML Signal: Logging usage
     main_engine.write_log("注册日志事件监听")
@@ -107,7 +111,7 @@ def run_child() -> None:
     # 🧠 ML Signal: Logging usage
     cta_engine.init_all_strategies()
     # ✅ Best Practice: Use of print statements for logging can be replaced with a logging framework for better control over log levels and outputs.
-    sleep(60)   # Leave enough time to complete strategy initialization
+    sleep(60)  # Leave enough time to complete strategy initialization
     main_engine.write_log("CTA策略全部初始化")
     # ⚠️ SAST Risk (Low): Arbitrary sleep can lead to performance issues
     # ⚠️ SAST Risk (Medium): Starting a new process without proper exception handling can lead to resource leaks or unhandled errors.

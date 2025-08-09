@@ -26,10 +26,13 @@ executors = {"default": ThreadPoolExecutor(20), "processpool": ProcessPoolExecut
 job_defaults = {"coalesce": False, "max_instances": 1}
 # ⚠️ SAST Risk (Low): Ensure that the function 'record_tick' is safe to execute and does not have side effects.
 
-zvt_scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
+zvt_scheduler = BackgroundScheduler(
+    jobstores=jobstores, executors=executors, job_defaults=job_defaults
+)
 # 🧠 ML Signal: Job configuration settings that control behavior of scheduled tasks.
 
 # ⚠️ SAST Risk (Low): Logging the exception without traceback might hide the root cause.
+
 
 def sched_tasks():
     # 🧠 ML Signal: Starting a scheduler service.
@@ -42,7 +45,13 @@ def sched_tasks():
         try:
             from zvt.broker.qmt.qmt_quote import record_tick
 
-            zvt_scheduler.add_job(func=record_tick, trigger="cron", hour=9, minute=19, day_of_week="mon-fri")
+            zvt_scheduler.add_job(
+                func=record_tick,
+                trigger="cron",
+                hour=9,
+                minute=19,
+                day_of_week="mon-fri",
+            )
         except Exception as e:
             logger.error("QMT not work", e)
     else:

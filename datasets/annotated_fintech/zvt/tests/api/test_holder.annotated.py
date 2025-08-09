@@ -5,6 +5,7 @@ from ..context import init_test_context
 init_test_context()
 
 from typing import List
+
 # 🧠 ML Signal: Usage of a specific provider and database name can indicate user preferences or common configurations.
 # 🧠 ML Signal: Function name follows a pattern indicating a test case
 
@@ -13,7 +14,9 @@ from typing import List
 # ⚠️ SAST Risk (Low): Hardcoded database query parameters
 from zvt.domain import TopTenHolder, TopTenTradableHolder
 
-session = get_db_session(provider="eastmoney", db_name="holder")  # type: sqlalchemy.orm.Session
+session = get_db_session(
+    provider="eastmoney", db_name="holder"
+)  # type: sqlalchemy.orm.Session
 
 
 # 十大股东
@@ -28,8 +31,8 @@ def test_000778_top_ten_holder():
         # ✅ Best Practice: Use of assertions for test validation
         start_timestamp="2018-09-30",
         order=TopTenHolder.shareholding_ratio.desc(),
-    # 🧠 ML Signal: Function name follows a pattern indicating it's a test function
-    # ⚠️ SAST Risk (Low): Hardcoded expected values in assertions
+        # 🧠 ML Signal: Function name follows a pattern indicating it's a test function
+        # ⚠️ SAST Risk (Low): Hardcoded expected values in assertions
     )
     # ⚠️ SAST Risk (Low): Hardcoded expected values in assertions
     # 🧠 ML Signal: Type hinting used for variable 'result'

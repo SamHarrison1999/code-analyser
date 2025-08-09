@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from zvt.api.kdata import get_kdata_schema
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 from zvt.contract import IntervalLevel, AdjustType
 from zvt.contract.api import df_to_db
@@ -24,10 +25,13 @@ from zvt.domain import (
 from zvt.domain.meta.stockhk_meta import Stockhk
 from zvt.domain.meta.stockus_meta import Stockus
 from zvt.recorders.em import em_api
+
 # 🧠 ML Signal: Class definition for a data recorder, useful for identifying patterns in class-based architecture
 from zvt.utils.pd_utils import pd_is_not_null
+
 # 🧠 ML Signal: Usage of utility functions like time_utils can indicate time-based operations or scheduling.
 from zvt.utils.time_utils import count_interval, now_pd_timestamp, current_date
+
 # 🧠 ML Signal: Default size attribute, could indicate typical data batch sizes
 
 
@@ -69,7 +73,9 @@ class BaseEMStockKdataRecorder(FixedCycleDataRecorder):
         self.adjust_type = AdjustType(adjust_type)
         self.entity_type = self.entity_schema.__name__.lower()
 
-        self.data_schema = get_kdata_schema(entity_type=self.entity_type, level=level, adjust_type=self.adjust_type)
+        self.data_schema = get_kdata_schema(
+            entity_type=self.entity_type, level=level, adjust_type=self.adjust_type
+        )
 
         super().__init__(
             force_update,
@@ -92,7 +98,7 @@ class BaseEMStockKdataRecorder(FixedCycleDataRecorder):
             # ⚠️ SAST Risk (Medium): Potential risk if 'entity.id' is not validated or sanitized
             one_day_trading_minutes,
             return_unfinished,
-        # ✅ Best Practice: Check for null data before proceeding with database operations
+            # ✅ Best Practice: Check for null data before proceeding with database operations
         )
 
     # 🧠 ML Signal: Usage of 'df_to_db' indicates a pattern of storing data in a database
@@ -100,10 +106,19 @@ class BaseEMStockKdataRecorder(FixedCycleDataRecorder):
         # 🧠 ML Signal: Checking for missing attributes in an entity
         # ✅ Best Practice: Logging information when no data is found for traceability
         df = em_api.get_kdata(
-            session=self.http_session, entity_id=entity.id, limit=size, adjust_type=self.adjust_type, level=self.level
+            session=self.http_session,
+            entity_id=entity.id,
+            limit=size,
+            adjust_type=self.adjust_type,
+            level=self.level,
         )
         if pd_is_not_null(df):
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(
+                df=df,
+                data_schema=self.data_schema,
+                provider=self.provider,
+                force_update=self.force_update,
+            )
         else:
             self.logger.info(f"no kdata for {entity.id}")
 
@@ -122,7 +137,7 @@ class BaseEMStockKdataRecorder(FixedCycleDataRecorder):
                 limit=1,
                 # 🧠 ML Signal: Conditional assignment based on attribute presence
                 return_type="domain",
-            # ✅ Best Practice: Class attributes should be documented for clarity
+                # ✅ Best Practice: Class attributes should be documented for clarity
             )
             # ⚠️ SAST Risk (Low): Potential risk of SQL injection if entity data is not sanitized
             if kdatas:
@@ -155,7 +170,9 @@ class EMStockKdataRecorder(BaseEMStockKdataRecorder):
         # 🧠 ML Signal: Fetching additional statistics for the entity.
         # fill holder
         # 🧠 ML Signal: Inheritance from a base class indicates a common pattern for extending functionality.
-        if not entity.holder_modified_date or (count_interval(entity.holder_modified_date, now_pd_timestamp()) > 30):
+        if not entity.holder_modified_date or (
+            count_interval(entity.holder_modified_date, now_pd_timestamp()) > 30
+        ):
             holder = em_api.get_controlling_shareholder(code=entity.code)
             # 🧠 ML Signal: Use of a string constant for provider name, useful for categorization.
             # ✅ Best Practice: Use of get method to safely access dictionary keys.
@@ -191,6 +208,8 @@ class EMStockKdataRecorder(BaseEMStockKdataRecorder):
                 self.entity_session.add(entity)
                 # 🧠 ML Signal: Inheritance from a base class indicates a usage pattern for extending functionality.
                 self.entity_session.commit()
+
+
 # 🧠 ML Signal: Static configuration of data schema
 # ✅ Best Practice: Class attributes are defined at the top for clarity and easy access.
 
@@ -203,6 +222,8 @@ class EMStockusKdataRecorder(BaseEMStockKdataRecorder):
     # 🧠 ML Signal: Use of schema attributes indicates a pattern for data structure definition.
     entity_schema = Stockus
     data_schema = StockusKdataCommon
+
+
 # 🧠 ML Signal: Class attribute definition, useful for understanding default values and configurations
 # 🧠 ML Signal: Use of schema attributes indicates a pattern for data structure definition.
 
@@ -214,7 +235,9 @@ class EMStockhkKdataRecorder(BaseEMStockKdataRecorder):
     # ✅ Best Practice: Use of __name__ == "__main__" to ensure code only runs when script is executed directly
     data_schema = StockhkKdataCommon
 
+
 # 🧠 ML Signal: Querying data from a specific provider and filtering by exchange
+
 
 class EMIndexKdataRecorder(BaseEMStockKdataRecorder):
     entity_provider = "em"
@@ -259,7 +282,10 @@ if __name__ == "__main__":
     df = Stock.query_data(filters=[Stock.exchange == "bj"], provider="em")
     entity_ids = df["entity_id"].tolist()
     recorder = EMStockKdataRecorder(
-        level=IntervalLevel.LEVEL_1DAY, entity_ids=entity_ids, sleeping_time=0, adjust_type=AdjustType.hfq
+        level=IntervalLevel.LEVEL_1DAY,
+        entity_ids=entity_ids,
+        sleeping_time=0,
+        adjust_type=AdjustType.hfq,
     )
     recorder.run()
 

@@ -13,9 +13,11 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+
 # 🧠 ML Signal: Conditional device selection for model training
 
 from tqdm import tqdm
+
 # 🧠 ML Signal: Use of model configuration and training configuration parameters
 # 🧠 ML Signal: Default model type is set to "LSTM"
 # 🧠 ML Signal: Use of random seed for reproducibility
@@ -69,17 +71,25 @@ class TRAModel(Model):
 
         self.model = eval(model_type)(**model_config).to(device)
         if model_init_state:
-            self.model.load_state_dict(torch.load(model_init_state, map_location="cpu")["model"])
+            self.model.load_state_dict(
+                torch.load(model_init_state, map_location="cpu")["model"]
+            )
         if freeze_model:
             for param in self.model.parameters():
                 param.requires_grad_(False)
         else:
-            self.logger.info("# model params: %d" % sum([p.numel() for p in self.model.parameters()]))
+            self.logger.info(
+                "# model params: %d" % sum([p.numel() for p in self.model.parameters()])
+            )
 
         self.tra = TRA(self.model.output_size, **tra_config).to(device)
-        self.logger.info("# tra params: %d" % sum([p.numel() for p in self.tra.parameters()]))
+        self.logger.info(
+            "# tra params: %d" % sum([p.numel() for p in self.tra.parameters()])
+        )
 
-        self.optimizer = optim.Adam(list(self.model.parameters()) + list(self.tra.parameters()), lr=lr)
+        self.optimizer = optim.Adam(
+            list(self.model.parameters()) + list(self.tra.parameters()), lr=lr
+        )
 
         self.model_config = model_config
         self.tra_config = tra_config
@@ -336,10 +346,14 @@ class TRAModel(Model):
         if self.logdir:
             self.logger.info("save model & pred to local directory")
 
-            pd.concat({name: pd.DataFrame(evals_result[name]) for name in evals_result}, axis=1).to_csv(
-                self.logdir + "/logs.csv", index=False
-            # ✅ Best Practice: Using nn.Dropout for regularization
-            # ✅ Best Practice: Using nn.LSTM for sequence modeling
+            pd.concat(
+                {name: pd.DataFrame(evals_result[name]) for name in evals_result},
+                axis=1,
+            ).to_csv(
+                self.logdir + "/logs.csv",
+                index=False,
+                # ✅ Best Practice: Using nn.Dropout for regularization
+                # ✅ Best Practice: Using nn.LSTM for sequence modeling
             )
 
             torch.save(best_params, self.logdir + "/model.bin")
@@ -370,8 +384,8 @@ class TRAModel(Model):
                     # 🧠 ML Signal: Extracting the last output from RNN for further processing
                     "seed": self.seed,
                     "logdir": self.logdir,
-                # 🧠 ML Signal: Use of attention mechanism
-                # 🧠 ML Signal: Custom neural network module definition
+                    # 🧠 ML Signal: Use of attention mechanism
+                    # 🧠 ML Signal: Custom neural network module definition
                 },
                 "best_eval_metric": -best_score,  # NOTE: minux -1 for minimize
                 # 🧠 ML Signal: Linear transformation followed by non-linearity
@@ -382,6 +396,7 @@ class TRAModel(Model):
             # 🧠 ML Signal: Use of softmax for attention score calculation
             with open(self.logdir + "/info.json", "w") as f:
                 json.dump(info, f)
+
     # 🧠 ML Signal: Initialization of positional encoding matrix, a common pattern in transformer models
     # 🧠 ML Signal: Weighted sum for attention output
 
@@ -438,7 +453,7 @@ class LSTM(nn.Module):
         # 🧠 ML Signal: Storing model hyperparameters as instance variables
         *args,
         **kwargs,
-    # 🧠 ML Signal: Storing model hyperparameters as instance variables
+        # 🧠 ML Signal: Storing model hyperparameters as instance variables
     ):
         # 🧠 ML Signal: Storing model hyperparameters as instance variables
         super().__init__()
@@ -469,9 +484,9 @@ class LSTM(nn.Module):
             # 🧠 ML Signal: Storing model output size as an instance variable
             # 🧠 ML Signal: Class definition for a neural network module, indicating a pattern for model architecture
             dropout=dropout,
-        # 🧠 ML Signal: Use of positional encoding in sequence models
-        # 🧠 ML Signal: Projection layer applied to input data
-        # 🧠 ML Signal: Use of encoder suggests a transformer or similar architecture
+            # 🧠 ML Signal: Use of positional encoding in sequence models
+            # 🧠 ML Signal: Projection layer applied to input data
+            # 🧠 ML Signal: Use of encoder suggests a transformer or similar architecture
         )
 
         if self.use_attn:
@@ -513,7 +528,9 @@ class PositionalEncoding(nn.Module):
 
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        div_term = torch.exp(
+            torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)
+        )
         # ⚠️ SAST Risk (Low): Using random values can lead to non-deterministic behavior
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
@@ -527,8 +544,10 @@ class PositionalEncoding(nn.Module):
         # 🧠 ML Signal: Function for evaluating prediction accuracy
         return self.dropout(x)
 
+
 # 🧠 ML Signal: Different behavior during training and inference
 # 🧠 ML Signal: Usage of rank and percentage transformation
+
 
 class Transformer(nn.Module):
     """Transformer Model
@@ -576,12 +595,16 @@ class Transformer(nn.Module):
         self.pe = PositionalEncoding(input_size, dropout)
         layer = nn.TransformerEncoderLayer(
             # ⚠️ SAST Risk (Low): Assumes inp_tensor has non-inf values to compute max, which may not always be the case.
-            nhead=num_heads, dropout=dropout, d_model=hidden_size, dim_feedforward=hidden_size * 4
+            nhead=num_heads,
+            dropout=dropout,
+            d_model=hidden_size,
+            dim_feedforward=hidden_size * 4,
         )
         self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
         # ⚠️ SAST Risk (Medium): Use of torch.no_grad() can lead to silent errors if gradients are needed later.
 
         self.output_size = hidden_size
+
     # ⚠️ SAST Risk (Low): Function assumes Q is a tensor, lack of input validation.
 
     def forward(self, x):
@@ -618,7 +641,9 @@ class TRA(nn.Module):
         tau (float): gumbel softmax temperature
     """
 
-    def __init__(self, input_size, num_states=1, hidden_size=8, tau=1.0, src_info="LR_TPE"):
+    def __init__(
+        self, input_size, num_states=1, hidden_size=8, tau=1.0, src_info="LR_TPE"
+    ):
         super().__init__()
 
         self.num_states = num_states

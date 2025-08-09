@@ -1,6 +1,6 @@
-# -*- coding:utf-8 -*- 
+# -*- coding:utf-8 -*-
 """
-connection for api 
+connection for api
 Created on 2017/09/23
 @author: Jimmy Liu
 @group : waditu
@@ -8,9 +8,11 @@ Created on 2017/09/23
 # 🧠 ML Signal: Importing specific modules from a package indicates usage patterns and dependencies
 """
 from pytdx.hq import TdxHq_API
+
 # 🧠 ML Signal: Importing specific modules from a package indicates usage patterns and dependencies
 from pytdx.exhq import TdxExHq_API
 from tushare.stock import cons as ct
+
 # 🧠 ML Signal: Importing specific modules from a package indicates usage patterns and dependencies
 # 🧠 ML Signal: Use of retry logic pattern
 
@@ -32,8 +34,10 @@ def api(retry_count=3):
     # ✅ Best Practice: Return early to avoid unnecessary iterations
     raise IOError(ct.NETWORK_URL_ERROR_MSG)
 
+
 # 🧠 ML Signal: API instantiation pattern
 # ⚠️ SAST Risk (Low): Raising a generic IOError; consider using a more specific exception
+
 
 def xapi(retry_count=3):
     # 🧠 ML Signal: API connection pattern
@@ -52,7 +56,9 @@ def xapi(retry_count=3):
     # 🧠 ML Signal: Instantiation of API object with heartbeat enabled
     raise IOError(ct.NETWORK_URL_ERROR_MSG)
 
+
 # ⚠️ SAST Risk (Medium): Potential for unhandled exceptions if connect fails
+
 
 def xapi_x(retry_count=3):
     for _ in range(retry_count):
@@ -72,8 +78,10 @@ def xapi_x(retry_count=3):
             return api
     raise IOError(ct.NETWORK_URL_ERROR_MSG)
 
+
 # ⚠️ SAST Risk (Low): Catching broad exceptions can hide specific errors and make debugging difficult.
 # ✅ Best Practice: Log exceptions using a logging framework instead of print for better control over logging levels and outputs.
+
 
 def get_apis():
     return api(), xapi()

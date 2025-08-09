@@ -48,7 +48,9 @@ class User:
         """
         self.account.init_state(today=date)
         # ✅ Best Practice: Check for None to avoid attribute errors
-        self.strategy.init_state(trade_date=date, model=self.model, account=self.account)
+        self.strategy.init_state(
+            trade_date=date, model=self.model, account=self.account
+        )
         return
 
     # ✅ Best Practice: Convert date to string for consistent return type
@@ -75,16 +77,28 @@ class User:
                     bench that to be compared, 'SH000905' for csi500
         """
         # 🧠 ML Signal: Calculation of excess return with cost
-        bench = D.features([benchmark], ["$change"], disk_cache=True).loc[benchmark, "$change"]
+        bench = D.features([benchmark], ["$change"], disk_cache=True).loc[
+            benchmark, "$change"
+        ]
         # ✅ Best Practice: Logging results for transparency and debugging
         # 🧠 ML Signal: Usage of 'risk_analysis' function for risk assessment
         # ✅ Best Practice: Returning data for further use or testing
-        portfolio_metrics = self.account.portfolio_metrics.generate_portfolio_metrics_dataframe()
+        portfolio_metrics = (
+            self.account.portfolio_metrics.generate_portfolio_metrics_dataframe()
+        )
         portfolio_metrics["bench"] = bench
-        analysis_result = {"pred": {}, "excess_return_without_cost": {}, "excess_return_with_cost": {}}
+        analysis_result = {
+            "pred": {},
+            "excess_return_without_cost": {},
+            "excess_return_with_cost": {},
+        }
         r = (portfolio_metrics["return"] - portfolio_metrics["bench"]).dropna()
         analysis_result["excess_return_without_cost"][0] = risk_analysis(r)
-        r = (portfolio_metrics["return"] - portfolio_metrics["bench"] - portfolio_metrics["cost"]).dropna()
+        r = (
+            portfolio_metrics["return"]
+            - portfolio_metrics["bench"]
+            - portfolio_metrics["cost"]
+        ).dropna()
         analysis_result["excess_return_with_cost"][0] = risk_analysis(r)
         self.logger.info("Result of porfolio:")
         self.logger.info("excess_return_without_cost:")

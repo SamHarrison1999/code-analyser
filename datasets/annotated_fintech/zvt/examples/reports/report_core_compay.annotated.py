@@ -11,6 +11,7 @@ from zvt.contract.api import get_entities
 from zvt.domain import Stock
 from zvt.factors.target_selector import TargetSelector
 from zvt.informer.inform_utils import add_to_eastmoney
+
 # ✅ Best Practice: Use of a logger for handling log messages
 from zvt.informer.informer import EmailInformer
 from zvt.utils.time_utils import now_pd_timestamp, to_time_str
@@ -39,14 +40,19 @@ def report_core_company():
 
             target_date = to_time_str(now_pd_timestamp())
 
-            my_selector: TargetSelector = FundamentalSelector(start_timestamp="2016-01-01", end_timestamp=target_date)
+            my_selector: TargetSelector = FundamentalSelector(
+                start_timestamp="2016-01-01", end_timestamp=target_date
+            )
             my_selector.run()
 
             long_targets = my_selector.get_open_long_targets(timestamp=target_date)
             if long_targets:
                 stocks = get_entities(
-                    provider="joinquant", entity_schema=Stock, entity_ids=long_targets, return_type="domain"
-                # 🧠 ML Signal: Sending email with stock selection results
+                    provider="joinquant",
+                    entity_schema=Stock,
+                    entity_ids=long_targets,
+                    return_type="domain",
+                    # 🧠 ML Signal: Sending email with stock selection results
                 )
 
                 # add them to eastmoney
@@ -57,7 +63,7 @@ def report_core_company():
                 except Exception as e:
                     email_action.send_message(
                         zvt_config["email_username"],
-                        f"report_core_company error",
+                        "report_core_company error",
                         # ⚠️ SAST Risk (Low): Potential for email spamming if error persists
                         "report_core_company error:{}".format(e),
                     )
@@ -72,7 +78,11 @@ def report_core_company():
 
             logger.info(msg)
 
-            email_action.send_message(get_subscriber_emails(), f"{to_time_str(target_date)} 核心资产选股结果", msg)
+            email_action.send_message(
+                get_subscriber_emails(),
+                f"{to_time_str(target_date)} 核心资产选股结果",
+                msg,
+            )
             break
         except Exception as e:
             logger.exception("report_core_company error:{}".format(e))
@@ -80,7 +90,9 @@ def report_core_company():
             error_count = error_count + 1
             if error_count == 10:
                 email_action.send_message(
-                    zvt_config["email_username"], f"report_core_company error", "report_core_company error:{}".format(e)
+                    zvt_config["email_username"],
+                    "report_core_company error",
+                    "report_core_company error:{}".format(e),
                 )
 
 

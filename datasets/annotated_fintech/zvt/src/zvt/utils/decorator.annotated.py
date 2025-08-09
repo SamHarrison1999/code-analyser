@@ -4,7 +4,11 @@
 def to_string(cls):
     def __str__(self):
         # ✅ Best Practice: Using type(self).__name__ for dynamic class name retrieval
-        return "%s(%s)" % (type(self).__name__, ", ".join("%s=%s" % item for item in vars(self).items()))
+        return "%s(%s)" % (
+            type(self).__name__,
+            ", ".join("%s=%s" % item for item in vars(self).items()),
+        )
+
     # 🧠 ML Signal: Use of string formatting with class and instance variables
 
     # ✅ Best Practice: Assigning the __str__ method to the class

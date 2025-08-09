@@ -5,9 +5,11 @@ from functools import partial
 import pandas as pd
 
 import plotly.graph_objs as go
+
 # ⚠️ SAST Risk (Low): Importing from a relative path can lead to module resolution issues.
 
 import statsmodels.api as sm
+
 # ⚠️ SAST Risk (Low): Importing from a relative path can lead to module resolution issues.
 import matplotlib.pyplot as plt
 
@@ -23,7 +25,10 @@ from ..utils import guess_plotly_rangebreaks
 
 # ⚠️ SAST Risk (Low): Modifying the 'score' column in place can lead to unintended side effects if 'pred_label' is used elsewhere.
 
-def _group_return(pred_label: pd.DataFrame = None, reverse: bool = False, N: int = 5, **kwargs) -> tuple:
+
+def _group_return(
+    pred_label: pd.DataFrame = None, reverse: bool = False, N: int = 5, **kwargs
+) -> tuple:
     """
 
     :param pred_label:
@@ -46,10 +51,14 @@ def _group_return(pred_label: pd.DataFrame = None, reverse: bool = False, N: int
     t_df = pd.DataFrame(
         {
             "Group%d"
-            % (i + 1): pred_label_drop.groupby(level="datetime", group_keys=False)["label"].apply(
+            % (i + 1): pred_label_drop.groupby(level="datetime", group_keys=False)[
+                "label"
+            ].apply(
                 # ✅ Best Practice: Dropping rows with all NaN values to clean the DataFrame.
-                lambda x: x[len(x) // N * i : len(x) // N * (i + 1)].mean()  # pylint: disable=W0640
-            # 🧠 ML Signal: Visualization of cumulative returns is a common pattern in financial ML models.
+                lambda x: x[
+                    len(x) // N * i : len(x) // N * (i + 1)
+                ].mean()  # pylint: disable=W0640
+                # 🧠 ML Signal: Visualization of cumulative returns is a common pattern in financial ML models.
             )
             for i in range(N)
         }
@@ -60,7 +69,10 @@ def _group_return(pred_label: pd.DataFrame = None, reverse: bool = False, N: int
     t_df["long-short"] = t_df["Group1"] - t_df["Group%d" % N]
 
     # Long-Average
-    t_df["long-average"] = t_df["Group1"] - pred_label.groupby(level="datetime", group_keys=False)["label"].mean()
+    t_df["long-average"] = (
+        t_df["Group1"]
+        - pred_label.groupby(level="datetime", group_keys=False)["label"].mean()
+    )
     # ✅ Best Practice: Calculating bin size dynamically for histograms ensures better visualization.
 
     # 🧠 ML Signal: Function uses statistical methods to generate a Q-Q plot, indicating data analysis usage.
@@ -70,8 +82,13 @@ def _group_return(pred_label: pd.DataFrame = None, reverse: bool = False, N: int
         t_df.cumsum(),
         layout=dict(
             title="Cumulative Return",
-            xaxis=dict(tickangle=45, rangebreaks=kwargs.get("rangebreaks", guess_plotly_rangebreaks(t_df.index))),
-        # ⚠️ SAST Risk (Low): Potential risk if data is not validated before being passed to the function.
+            xaxis=dict(
+                tickangle=45,
+                rangebreaks=kwargs.get(
+                    "rangebreaks", guess_plotly_rangebreaks(t_df.index)
+                ),
+            ),
+            # ⚠️ SAST Risk (Low): Potential risk if data is not validated before being passed to the function.
         ),
     ).figure
     # ✅ Best Practice: Returning a tuple of figures for further use or display.
@@ -132,16 +149,20 @@ def _plot_qq(data: pd.Series = None, dist=stats.norm) -> go.Figure:
             "mode": "lines",
             # ✅ Best Practice: Use of get_level_values and string operations for index manipulation is clear and concise
             "line": {"color": "#636efa"},
-        # ✅ Best Practice: Grouping and calculating mean is a common pattern for time series data
+            # ✅ Best Practice: Grouping and calculating mean is a common pattern for time series data
         }
     )
     del qqplot_data
     return fig
+
+
 # ✅ Best Practice: Use of MultiIndex for hierarchical indexing is a good practice for time series data
 
 
 def _pred_ic(
-    pred_label: pd.DataFrame = None, methods: Sequence[Literal["IC", "Rank IC"]] = ("IC", "Rank IC"), **kwargs
+    pred_label: pd.DataFrame = None,
+    methods: Sequence[Literal["IC", "Rank IC"]] = ("IC", "Rank IC"),
+    **kwargs,
 ) -> tuple:
     """
 
@@ -169,15 +190,17 @@ def _pred_ic(
             .apply(partial(_corr_series, method=_methods_mapping[m]))
             .rename(m)
             for m in methods
-        # ✅ Best Practice: Use of stats.norm for statistical distribution is a standard practice
-        # 🧠 ML Signal: Visualization of data using figures can be a signal for ML model training
-        # ✅ Best Practice: Use of isinstance for type checking is a standard practice
+            # ✅ Best Practice: Use of stats.norm for statistical distribution is a standard practice
+            # 🧠 ML Signal: Visualization of data using figures can be a signal for ML model training
+            # ✅ Best Practice: Use of isinstance for type checking is a standard practice
         ],
         axis=1,
     )
     _ic = ic_df.iloc(axis=1)[0]
 
-    _index = _ic.index.get_level_values(0).astype("str").str.replace("-", "").str.slice(0, 6)
+    _index = (
+        _ic.index.get_level_values(0).astype("str").str.replace("-", "").str.slice(0, 6)
+    )
     _monthly_ic = _ic.groupby(_index, group_keys=False).mean()
     _monthly_ic.index = pd.MultiIndex.from_arrays(
         [_monthly_ic.index.str.slice(0, 4), _monthly_ic.index.str.slice(4, 6)],
@@ -211,9 +234,13 @@ def _pred_ic(
     ic_heatmap_figure = HeatmapGraph(
         # 🧠 ML Signal: Using groupby and shift to calculate lagged values, a common pattern in time series analysis.
         _monthly_ic.unstack(),
-        layout=dict(title="Monthly IC", xaxis=dict(dtick=1), yaxis=dict(tickformat="04d", dtick=1)),
+        layout=dict(
+            title="Monthly IC",
+            xaxis=dict(dtick=1),
+            yaxis=dict(tickformat="04d", dtick=1),
+        ),
         graph_kwargs=dict(xtype="array", ytype="array"),
-    # 🧠 ML Signal: Applying a lambda function to calculate correlation, a common pattern in statistical analysis.
+        # 🧠 ML Signal: Applying a lambda function to calculate correlation, a common pattern in statistical analysis.
     ).figure
     # 🧠 ML Signal: Converting a Series to a DataFrame, a common pattern for preparing data for visualization.
 
@@ -247,8 +274,8 @@ def _pred_ic(
             ),
         ),
         (_qqplot_fig, dict(row=1, col=2)),
-    # 🧠 ML Signal: Grouping and applying functions to DataFrames, a common pattern in data analysis.
-    # 🧠 ML Signal: Use of lambda functions for concise operations on DataFrames.
+        # 🧠 ML Signal: Grouping and applying functions to DataFrames, a common pattern in data analysis.
+        # 🧠 ML Signal: Use of lambda functions for concise operations on DataFrames.
     ]
     ic_hist_figure = SubplotsGraph(
         _ic_df.dropna(),
@@ -264,10 +291,10 @@ def _pred_ic(
         layout=dict(
             yaxis2=dict(title="Observed Quantile"),
             xaxis2=dict(title=f"{dist_name} Distribution Quantile"),
-        # 🧠 ML Signal: Function definition with parameters and return type can be used to understand function usage patterns.
-        # ⚠️ SAST Risk (Low): Ensure that ScatterGraph is properly imported and validated to prevent potential misuse.
+            # 🧠 ML Signal: Function definition with parameters and return type can be used to understand function usage patterns.
+            # ⚠️ SAST Risk (Low): Ensure that ScatterGraph is properly imported and validated to prevent potential misuse.
         ),
-    # ✅ Best Practice: Docstring provides a clear explanation of the function's purpose and parameters.
+        # ✅ Best Practice: Docstring provides a clear explanation of the function's purpose and parameters.
     ).figure
 
     return ic_bar_figure, ic_heatmap_figure, ic_hist_figure
@@ -276,36 +303,49 @@ def _pred_ic(
 def _pred_autocorr(pred_label: pd.DataFrame, lag=1, **kwargs) -> tuple:
     pred = pred_label.copy()
     # ✅ Best Practice: Use of get method for safe dictionary access with a default value.
-    pred["score_last"] = pred.groupby(level="instrument", group_keys=False)["score"].shift(lag)
+    pred["score_last"] = pred.groupby(level="instrument", group_keys=False)[
+        "score"
+    ].shift(lag)
     # ✅ Best Practice: Returning a tuple, even with a single element, for consistency and future extensibility.
     ac = pred.groupby(level="datetime", group_keys=False).apply(
         # 🧠 ML Signal: Conditional logic based on function parameters can indicate feature usage patterns.
-        lambda x: x["score"].rank(pct=True).corr(x["score_last"].rank(pct=True))
-    # ⚠️ SAST Risk (Low): Reindexing without handling missing data can lead to NaNs in the DataFrame.
+        lambda x: x["score"]
+        .rank(pct=True)
+        .corr(x["score_last"].rank(pct=True))
+        # ⚠️ SAST Risk (Low): Reindexing without handling missing data can lead to NaNs in the DataFrame.
     )
     _df = ac.to_frame("value")
     ac_figure = ScatterGraph(
         _df,
         layout=dict(
             title="Auto Correlation",
-            xaxis=dict(tickangle=45, rangebreaks=kwargs.get("rangebreaks", guess_plotly_rangebreaks(_df.index))),
-        # 🧠 ML Signal: Object instantiation with specific parameters can be used to learn about object usage.
+            xaxis=dict(
+                tickangle=45,
+                rangebreaks=kwargs.get(
+                    "rangebreaks", guess_plotly_rangebreaks(_df.index)
+                ),
+            ),
+            # 🧠 ML Signal: Object instantiation with specific parameters can be used to learn about object usage.
         ),
-    # ✅ Best Practice: Using `get` with a default value for dictionary access improves code robustness.
-    # 🧠 ML Signal: Return statements indicate the output of the function, useful for understanding data flow.
-    # ⚠️ SAST Risk (Low): Importing 'pd' without checking if it's defined or imported elsewhere in the code.
+        # ✅ Best Practice: Using `get` with a default value for dictionary access improves code robustness.
+        # 🧠 ML Signal: Return statements indicate the output of the function, useful for understanding data flow.
+        # ⚠️ SAST Risk (Low): Importing 'pd' without checking if it's defined or imported elsewhere in the code.
     ).figure
     return (ac_figure,)
 
 
 def _pred_turnover(pred_label: pd.DataFrame, N=5, lag=1, **kwargs) -> tuple:
     pred = pred_label.copy()
-    pred["score_last"] = pred.groupby(level="instrument", group_keys=False)["score"].shift(lag)
+    pred["score_last"] = pred.groupby(level="instrument", group_keys=False)[
+        "score"
+    ].shift(lag)
     top = pred.groupby(level="datetime", group_keys=False).apply(
         lambda x: 1
-        - x.nlargest(len(x) // N, columns="score").index.isin(x.nlargest(len(x) // N, columns="score_last").index).sum()
+        - x.nlargest(len(x) // N, columns="score")
+        .index.isin(x.nlargest(len(x) // N, columns="score_last").index)
+        .sum()
         / (len(x) // N)
-    # ✅ Best Practice: Provide a clear and concise docstring for function documentation.
+        # ✅ Best Practice: Provide a clear and concise docstring for function documentation.
     )
     bottom = pred.groupby(level="datetime", group_keys=False).apply(
         lambda x: 1
@@ -324,12 +364,19 @@ def _pred_turnover(pred_label: pd.DataFrame, N=5, lag=1, **kwargs) -> tuple:
         r_df,
         layout=dict(
             title="Top-Bottom Turnover",
-            xaxis=dict(tickangle=45, rangebreaks=kwargs.get("rangebreaks", guess_plotly_rangebreaks(r_df.index))),
+            xaxis=dict(
+                tickangle=45,
+                rangebreaks=kwargs.get(
+                    "rangebreaks", guess_plotly_rangebreaks(r_df.index)
+                ),
+            ),
         ),
     ).figure
     return (turnover_figure,)
 
+
 # 🧠 ML Signal: Iterating over a list of graph names to dynamically call functions.
+
 
 def ic_figure(ic_df: pd.DataFrame, show_nature_day=True, **kwargs) -> go.Figure:
     r"""IC figure
@@ -349,7 +396,12 @@ def ic_figure(ic_df: pd.DataFrame, show_nature_day=True, **kwargs) -> go.Figure:
         ic_df,
         layout=dict(
             title="Information Coefficient (IC)",
-            xaxis=dict(tickangle=45, rangebreaks=kwargs.get("rangebreaks", guess_plotly_rangebreaks(ic_df.index))),
+            xaxis=dict(
+                tickangle=45,
+                rangebreaks=kwargs.get(
+                    "rangebreaks", guess_plotly_rangebreaks(ic_df.index)
+                ),
+            ),
         ),
     ).figure
     return ic_bar_figure
@@ -396,7 +448,13 @@ def model_performance_graph(
     figure_list = []
     for graph_name in graph_names:
         fun_res = eval(f"_{graph_name}")(
-            pred_label=pred_label, lag=lag, N=N, reverse=reverse, rank=rank, show_nature_day=show_nature_day, **kwargs
+            pred_label=pred_label,
+            lag=lag,
+            N=N,
+            reverse=reverse,
+            rank=rank,
+            show_nature_day=show_nature_day,
+            **kwargs,
         )
         figure_list += fun_res
 

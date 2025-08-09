@@ -3,16 +3,20 @@
 
 import logging
 import pandas as pd
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import numpy as np
 from sklearn.metrics import mean_squared_error
+
 # ✅ Best Practice: Grouping imports from the same module together
 from typing import Dict, Text, Any
 
 from ...contrib.eva.alpha import calc_ic
+
 # ✅ Best Practice: Use of descriptive alias for imported module
 from ...workflow.record_temp import RecordTemp
 from ...workflow.record_temp import SignalRecord
+
 # ✅ Best Practice: Use of a dedicated logger for the module
 # 🧠 ML Signal: Custom logger setup for tracking and debugging
 # ✅ Best Practice: Include a docstring to describe the purpose and usage of the class.
@@ -23,11 +27,13 @@ logger = get_module_logger("workflow", logging.INFO)
 
 # ✅ Best Practice: Call to super() ensures proper initialization of the base class
 
+
 class MultiSegRecord(RecordTemp):
     """
     This is the multiple segments signal record class that generates the signal prediction.
     This class inherits the ``RecordTemp`` class.
     """
+
     # 🧠 ML Signal: Storing model and dataset as instance variables, indicating usage in ML workflows
     # 🧠 ML Signal: Iterating over segments to generate predictions
 
@@ -37,9 +43,14 @@ class MultiSegRecord(RecordTemp):
         super().__init__(recorder=recorder)
         if not isinstance(dataset, qlib_dataset.DatasetH):
             # ✅ Best Practice: Check if predictions are in the expected format
-            raise ValueError("The type of dataset is not DatasetH instead of {:}".format(type(dataset)))
+            raise ValueError(
+                "The type of dataset is not DatasetH instead of {:}".format(
+                    type(dataset)
+                )
+            )
         self.model = model
         self.dataset = dataset
+
     # 🧠 ML Signal: Preparing dataset labels for evaluation
 
     def generate(self, segments: Dict[Text, Any], save: bool = False):
@@ -50,14 +61,21 @@ class MultiSegRecord(RecordTemp):
                 predics = predics.to_frame("score")
             # 🧠 ML Signal: Storing evaluation results
             labels = self.dataset.prepare(
-                segments=segment, col_set="label", data_key=qlib_dataset.handler.DataHandlerLP.DK_R
-            # 🧠 ML Signal: Logging results for each segment
+                segments=segment,
+                col_set="label",
+                data_key=qlib_dataset.handler.DataHandlerLP.DK_R,
+                # 🧠 ML Signal: Logging results for each segment
             )
             # Compute the IC and Rank IC
             ic, ric = calc_ic(predics.iloc[:, 0], labels.iloc[:, 0])
             # ⚠️ SAST Risk (Low): Potential division by zero if ic_x100.std() is zero
             # 🧠 ML Signal: Logging IC and Rank IC metrics
-            results = {"all-IC": ic, "mean-IC": ic.mean(), "all-Rank-IC": ric, "mean-Rank-IC": ric.mean()}
+            results = {
+                "all-IC": ic,
+                "mean-IC": ic.mean(),
+                "all-Rank-IC": ric,
+                "mean-Rank-IC": ric.mean(),
+            }
             logger.info("--- Results for {:} ({:}) ---".format(key, segment))
             ic_x100, ric_x100 = ic * 100, ric * 100
             logger.info("IC: {:.4f}%".format(ic_x100.mean()))
@@ -78,10 +96,13 @@ class MultiSegRecord(RecordTemp):
                     # ✅ Best Practice: Clearly defining dependencies helps in understanding class relationships.
                     "The record '{:}' has been saved as the artifact of the Experiment {:}".format(
                         # 🧠 ML Signal: Logging the save operation
-                        save_name, self.recorder.experiment_id
-                    # 🧠 ML Signal: Use of **kwargs for flexible argument passing
+                        save_name,
+                        self.recorder.experiment_id,
+                        # 🧠 ML Signal: Use of **kwargs for flexible argument passing
                     )
                 )
+
+
 # ✅ Best Practice: Consider handling exceptions when loading files to prevent runtime errors.
 
 

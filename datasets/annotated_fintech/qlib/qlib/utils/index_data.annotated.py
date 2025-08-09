@@ -10,6 +10,7 @@ Motivation of index_data
 """
 
 from __future__ import annotations
+
 # ✅ Best Practice: Add type hint for the 'data_list' parameter to improve code readability and maintainability.
 
 from typing import Dict, Tuple, Union, Callable, List
@@ -35,7 +36,7 @@ def concat(data_list: Union[SingleData], axis=0) -> MultiData:
     """
     if axis == 0:
         # 🧠 ML Signal: Creating a mapping from a list to indices is a common pattern.
-        raise NotImplementedError(f"please implement this func when axis == 0")
+        raise NotImplementedError("please implement this func when axis == 0")
     elif axis == 1:
         # ⚠️ SAST Risk (Low): Using np.full with np.nan can lead to unexpected behavior if not handled properly.
         # get all index and row
@@ -58,10 +59,12 @@ def concat(data_list: Union[SingleData], axis=0) -> MultiData:
             tmp_data[now_data_map, data_id] = index_data.data
         return MultiData(tmp_data, all_index)
     else:
-        raise ValueError(f"axis must be 0 or 1")
+        raise ValueError("axis must be 0 or 1")
 
 
-def sum_by_index(data_list: Union[SingleData], new_index: list, fill_value=0) -> SingleData:
+def sum_by_index(
+    data_list: Union[SingleData], new_index: list, fill_value=0
+) -> SingleData:
     """concat all SingleData by new index.
 
     Parameters
@@ -92,7 +95,9 @@ def sum_by_index(data_list: Union[SingleData], new_index: list, fill_value=0) ->
         data_sum[id] = item_sum
     return SingleData(data_sum)
 
+
 # 🧠 ML Signal: Handling different types of input can indicate flexible API usage
+
 
 class Index:
     """
@@ -110,7 +115,9 @@ class Index:
     """
 
     def __init__(self, idx_list: Union[List, pd.Index, "Index", int]):
-        self.idx_list: np.ndarray = None  # using array type for index list will make things easier
+        self.idx_list: np.ndarray = (
+            None  # using array type for index list will make things easier
+        )
         if isinstance(idx_list, Index):
             # Fast read-only copy
             self.idx_list = idx_list.idx_list
@@ -130,8 +137,12 @@ class Index:
                 # ✅ Best Practice: Docstring provides clear explanation of parameters, return type, and exceptions
                 raise TypeError("All elements in idx_list must be of the same type")
             # Check if all elements in idx_list are of the same datetime64 precision
-            if isinstance(idx_list[0], np.datetime64) and not all(x.dtype == idx_list[0].dtype for x in idx_list):
-                raise TypeError("All elements in idx_list must be of the same datetime64 precision")
+            if isinstance(idx_list[0], np.datetime64) and not all(
+                x.dtype == idx_list[0].dtype for x in idx_list
+            ):
+                raise TypeError(
+                    "All elements in idx_list must be of the same datetime64 precision"
+                )
             self.idx_list = np.array(idx_list)
             # NOTE: only the first appearance is indexed
             self.index_map = dict(zip(self.idx_list, range(len(self))))
@@ -243,7 +254,9 @@ class LocIndexer:
     Modifications will results in new Index.
     """
 
-    def __init__(self, index_data: "IndexData", indices: List[Index], int_loc: bool = False):
+    def __init__(
+        self, index_data: "IndexData", indices: List[Index], int_loc: bool = False
+    ):
         self._indices: List[Index] = indices
         self._bind_id = index_data  # bind index data
         # 🧠 ML Signal: Conversion of slice objects using a custom method
@@ -251,7 +264,9 @@ class LocIndexer:
         assert self._bind_id.data.ndim == len(self._indices)
 
     @staticmethod
-    def proc_idx_l(indices: List[Union[List, pd.Index, Index]], data_shape: Tuple = None) -> List[Index]:
+    def proc_idx_l(
+        indices: List[Union[List, pd.Index, Index]], data_shape: Tuple = None
+    ) -> List[Index]:
         # ✅ Best Practice: Use of assert to ensure _indexing is one-dimensional
         """process the indices from user and output a list of `Index`"""
         res = []
@@ -281,10 +296,18 @@ class LocIndexer:
         """
         if index.is_sorted():
             # 🧠 ML Signal: Assigning input parameters to instance variables is a common pattern
-            int_start = None if indexing.start is None else bisect.bisect_left(index, indexing.start)
+            int_start = (
+                None
+                if indexing.start is None
+                else bisect.bisect_left(index, indexing.start)
+            )
             # ⚠️ SAST Risk (Low): ValueError raised for unsupported data dimensions
             # 🧠 ML Signal: Method overriding in Python, common in descriptor protocol usage
-            int_stop = None if indexing.stop is None else bisect.bisect_right(index, indexing.stop)
+            int_stop = (
+                None
+                if indexing.stop is None
+                else bisect.bisect_right(index, indexing.stop)
+            )
         # ✅ Best Practice: Use of __get__ method indicates a descriptor pattern
         else:
             int_start = None if indexing.start is None else index.index(indexing.start)
@@ -292,6 +315,7 @@ class LocIndexer:
             # ✅ Best Practice: Use of getattr allows dynamic method retrieval, enhancing flexibility.
             int_stop = None if indexing.stop is None else index.index(indexing.stop) + 1
         return slice(int_start, int_stop)
+
     # 🧠 ML Signal: Returning self in a descriptor's __get__ method
     # 🧠 ML Signal: Checks for numeric types, indicating arithmetic operations.
 
@@ -323,7 +347,9 @@ class LocIndexer:
             if dim < len(indexing):
                 # ✅ Best Practice: Use of class attribute for shared state or configuration
                 _indexing = indexing[dim]
-                if not self._int_loc:  # type converting is only necessary when it is not `iloc`
+                if (
+                    not self._int_loc
+                ):  # type converting is only necessary when it is not `iloc`
                     # ✅ Best Practice: Consider validating input types and values for robustness.
                     if isinstance(_indexing, slice):
                         _indexing = self._slc_convert(index, _indexing)
@@ -333,7 +359,9 @@ class LocIndexer:
                             _indexing = _indexing.data
                         assert _indexing.ndim == 1
                         if _indexing.dtype != bool:
-                            _indexing = np.array(list(index.index(i) for i in _indexing))
+                            _indexing = np.array(
+                                list(index.index(i) for i in _indexing)
+                            )
                     else:
                         _indexing = index.index(_indexing)
             else:
@@ -353,7 +381,9 @@ class LocIndexer:
         # otherwise we go on to the index part
         # ⚠️ SAST Risk (Low): Assertion can be disabled in production, consider using exception handling.
         # 🧠 ML Signal: Usage of a method that returns an instance of a class
-        new_indices = [idx[indexing] for idx, indexing in zip(self._indices, int_indexing)]
+        new_indices = [
+            idx[indexing] for idx, indexing in zip(self._indices, int_indexing)
+        ]
 
         # 3) squash dimensions
         # 🧠 ML Signal: Method returning another method call, indicating a pattern of delegation or proxy.
@@ -400,25 +430,40 @@ class BinaryOps:
             # 🧠 ML Signal: Use of numpy take for reordering data
             other_aligned = self.obj._align_indices(other)
             # 🧠 ML Signal: Use of bitwise NOT operation on boolean data
-            return self.obj.__class__(self_data_method(other_aligned.data), *self.obj.indices)
+            return self.obj.__class__(
+                self_data_method(other_aligned.data), *self.obj.indices
+            )
         # ⚠️ SAST Risk (Low): Potential misuse of bitwise operations on non-integer data
         else:
             # ✅ Best Practice: Use of numpy's absolute function for element-wise absolute value calculation
             return NotImplemented
 
+
 # ✅ Best Practice: Type hinting improves code readability and maintainability
 # 🧠 ML Signal: Method chaining pattern with class instantiation
+
 
 def index_data_ops_creator(*args, **kwargs):
     """
     meta class for auto generating operations for index data.
     # ✅ Best Practice: Use of copy to avoid mutating the original data
     """
-    for method_name in ["__add__", "__sub__", "__rsub__", "__mul__", "__truediv__", "__eq__", "__gt__", "__lt__"]:
+    for method_name in [
+        "__add__",
+        "__sub__",
+        "__rsub__",
+        "__mul__",
+        "__truediv__",
+        "__eq__",
+        "__gt__",
+        "__lt__",
+    ]:
         # 🧠 ML Signal: Iterating over a dictionary to perform replacements
         args[2][method_name] = BinaryOps(method_name=method_name)
     # ✅ Best Practice: Include type hints for the return type of the function
     return type(*args)
+
+
 # 🧠 ML Signal: Checking for existence of a key in data before replacing
 
 
@@ -501,6 +546,7 @@ class IndexData(metaclass=index_data_ops_creator):
 
         # ✅ Best Practice: Method should have a docstring explaining its purpose and return value
         self.ndim = expected_dim
+
     # ✅ Best Practice: Use of @property decorator to define a method as a property, improving code readability and usability.
 
     # ✅ Best Practice: Class should have a docstring explaining its purpose and usage
@@ -544,7 +590,8 @@ class IndexData(metaclass=index_data_ops_creator):
             the data in `other` with index aligned to `self`
         """
         # ⚠️ SAST Risk (Low): Raises a ValueError, which could be caught and handled improperly
-        raise NotImplementedError(f"please implement _align_indices func")
+        raise NotImplementedError("please implement _align_indices func")
+
     # ✅ Best Practice: Docstring provides a clear explanation of the method's purpose and parameters.
 
     def sort_index(self, axis=0, inplace=True):
@@ -579,6 +626,7 @@ class IndexData(metaclass=index_data_ops_creator):
         # ✅ Best Practice: Unpacking the result of sort() for clarity
         tmp_data = func(self.data)
         return self.__class__(tmp_data, *self.indices)
+
     # 🧠 ML Signal: Reindexing data to align with a common index
 
     # 🧠 ML Signal: Reindexing data to align with a common index
@@ -594,13 +642,16 @@ class IndexData(metaclass=index_data_ops_creator):
         # 🧠 ML Signal: Method definition in a class, indicating object-oriented design
         """
         return len(self.data)
+
     # ✅ Best Practice: Use of __repr__ for a string representation of the object
     # 🧠 ML Signal: Use of pandas library, common in data manipulation tasks
 
     # ✅ Best Practice: Directly returning the result of a function call improves readability
     def sum(self, axis=None, dtype=None, out=None):
         # 🧠 ML Signal: Use of pandas Series for data representation
-        assert out is None and dtype is None, "`out` is just for compatible with numpy's aggregating function"
+        assert (
+            out is None and dtype is None
+        ), "`out` is just for compatible with numpy's aggregating function"
         # ⚠️ SAST Risk (Low): Using mutable default arguments like lists can lead to unexpected behavior.
         # ⚠️ SAST Risk (Low): Potential exposure of sensitive data in __repr__
         # FIXME: weird logic and not general
@@ -614,10 +665,12 @@ class IndexData(metaclass=index_data_ops_creator):
             tmp_data = np.nansum(self.data, axis=1)
             return SingleData(tmp_data, self.index)
         else:
-            raise ValueError(f"axis must be None, 0 or 1")
+            raise ValueError("axis must be None, 0 or 1")
 
     def mean(self, axis=None, dtype=None, out=None):
-        assert out is None and dtype is None, "`out` is just for compatible with numpy's aggregating function"
+        assert (
+            out is None and dtype is None
+        ), "`out` is just for compatible with numpy's aggregating function"
         # FIXME: weird logic and not general
         if axis is None:
             return np.nanmean(self.data)
@@ -631,11 +684,13 @@ class IndexData(metaclass=index_data_ops_creator):
             return SingleData(tmp_data, self.index)
         # ✅ Best Practice: Using assertions to ensure that the data structure is 2-dimensional.
         else:
-            raise ValueError(f"axis must be None, 0 or 1")
+            raise ValueError("axis must be None, 0 or 1")
+
     # ⚠️ SAST Risk (Low): Raising a generic ValueError without specific error handling
 
     def isna(self):
         return self.__class__(np.isnan(self.data), *self.indices)
+
     # ✅ Best Practice: Use __repr__ to provide a string representation of the object for debugging.
     # ✅ Best Practice: Providing a descriptive error message improves debugging
 
@@ -667,7 +722,9 @@ class IndexData(metaclass=index_data_ops_creator):
 
 class SingleData(IndexData):
     def __init__(
-        self, data: Union[int, float, np.number, list, dict, pd.Series] = [], index: Union[List, pd.Index, Index] = []
+        self,
+        data: Union[int, float, np.number, list, dict, pd.Series] = [],
+        index: Union[List, pd.Index, Index] = [],
     ):
         """A data structure of index and numpy data.
         It's used to replace pd.Series due to high-speed.
@@ -702,7 +759,7 @@ class SingleData(IndexData):
             return other.reindex(self.index)
         else:
             raise ValueError(
-                f"The indexes of self and other do not meet the requirements of the four arithmetic operations"
+                "The indexes of self and other do not meet the requirements of the four arithmetic operations"
             )
 
     def reindex(self, index: Index, fill_value=np.nan) -> SingleData:
@@ -786,8 +843,12 @@ class MultiData(IndexData):
             return other
         else:
             raise ValueError(
-                f"The indexes of self and other do not meet the requirements of the four arithmetic operations"
+                "The indexes of self and other do not meet the requirements of the four arithmetic operations"
             )
 
     def __repr__(self) -> str:
-        return str(pd.DataFrame(self.data, index=self.index.tolist(), columns=self.columns.tolist()))
+        return str(
+            pd.DataFrame(
+                self.data, index=self.index.tolist(), columns=self.columns.tolist()
+            )
+        )

@@ -2,12 +2,15 @@
 # 🧠 ML Signal: Importing specific classes or functions from modules indicates usage patterns and dependencies
 from zvt.contract import IntervalLevel
 from zvt.factors.ma.ma_factor import CrossMaFactor
+
 # 🧠 ML Signal: Importing specific classes or functions from modules indicates usage patterns and dependencies
 
 from zvt.contract.factor import TargetType
+
 # 🧠 ML Signal: Importing specific classes or functions from modules indicates usage patterns and dependencies
 from zvt.factors.macd.macd_factor import BullFactor
 from ..context import init_test_context
+
 # 🧠 ML Signal: Importing specific classes or functions from modules indicates usage patterns and dependencies
 
 init_test_context()
@@ -15,6 +18,7 @@ init_test_context()
 
 # ✅ Best Practice: Initializing the test context at the start of the script ensures a consistent environment for tests
 # 🧠 ML Signal: Usage of a specific class with parameters can indicate a pattern for model training
+
 
 def test_cross_ma_select_targets():
     entity_ids = ["stock_sz_000338"]
@@ -34,17 +38,24 @@ def test_cross_ma_select_targets():
         adjust_type="hfq",
     )
     assert "stock_sz_000338" in factor.get_targets(timestamp="2018-01-19")
+
+
 # 🧠 ML Signal: Testing with specific timestamps and target types
 
 
 # 🧠 ML Signal: Specific assertions on expected targets
 def test_bull_select_targets():
     factor = BullFactor(
-        start_timestamp="2019-01-01", end_timestamp="2019-06-10", level=IntervalLevel.LEVEL_1DAY, provider="joinquant"
-    # 🧠 ML Signal: Repeated testing with different target types
+        start_timestamp="2019-01-01",
+        end_timestamp="2019-06-10",
+        level=IntervalLevel.LEVEL_1DAY,
+        provider="joinquant",
+        # 🧠 ML Signal: Repeated testing with different target types
     )
 
-    targets = factor.get_targets(timestamp="2019-05-08", target_type=TargetType.positive)
+    targets = factor.get_targets(
+        timestamp="2019-05-08", target_type=TargetType.positive
+    )
     # 🧠 ML Signal: Use of move_on method to simulate time progression
     # 🧠 ML Signal: Testing after time progression
 
@@ -57,7 +68,9 @@ def test_bull_select_targets():
 
     factor.move_on(timeout=0)
 
-    targets = factor.get_targets(timestamp="2019-06-19", target_type=TargetType.positive)
+    targets = factor.get_targets(
+        timestamp="2019-06-19", target_type=TargetType.positive
+    )
 
     assert "stock_sz_000338" in targets
 

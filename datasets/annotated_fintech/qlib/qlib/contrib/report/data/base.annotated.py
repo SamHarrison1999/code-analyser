@@ -10,6 +10,7 @@ Assumptions
 """
 # ✅ Best Practice: Class docstring is missing, consider adding one to describe the purpose and usage of the class.
 import pandas as pd
+
 # 🧠 ML Signal: Use of pandas DataFrame as a parameter indicates data manipulation or analysis
 from qlib.log import TimeInspector
 from qlib.contrib.report.utils import sub_fig_generator
@@ -40,6 +41,7 @@ class FeaAnalyser:
         self._dataset = dataset
         with TimeInspector.logt("calc_stat_values"):
             self.calc_stat_values()
+
     # 🧠 ML Signal: Iterating over a dataset suggests data processing or analysis
 
     # ⚠️ SAST Risk (Low): Potential StopIteration exception if ax_gen is exhausted
@@ -49,7 +51,7 @@ class FeaAnalyser:
         pass
 
     def plot_single(self, col, ax):
-        raise NotImplementedError(f"This type of input is not supported")
+        raise NotImplementedError("This type of input is not supported")
 
     def skip(self, col):
         return False

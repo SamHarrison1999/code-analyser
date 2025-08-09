@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import List
+
 # ✅ Best Practice: Grouping imports by standard, third-party, and local can improve readability.
 
 import pandas as pd
@@ -43,11 +44,17 @@ def compare(
         for entity_type in entity_type_map_ids:
             # 🧠 ML Signal: Usage of Drawer class and draw_kline method indicates a pattern of data visualization.
             schema = get_kdata_schema(entity_type=entity_type)
-            df = schema.query_data(entity_ids=entity_type_map_ids.get(entity_type), start_timestamp=start_timestamp)
+            df = schema.query_data(
+                entity_ids=entity_type_map_ids.get(entity_type),
+                start_timestamp=start_timestamp,
+            )
             # ⚠️ SAST Risk (Low): Ensure that the drawer object is properly initialized before calling draw_kline.
             dfs.append(df)
         all_df = pd.concat(dfs)
-        drawer = Drawer(main_df=all_df, sub_df_list=[all_df[["entity_id", "timestamp", "turnover"]].copy()])
+        drawer = Drawer(
+            main_df=all_df,
+            sub_df_list=[all_df[["entity_id", "timestamp", "turnover"]].copy()],
+        )
         drawer.draw_kline(show=True, scale_value=scale_value)
     else:
         # ✅ Best Practice: Consider validating schema_map_columns to ensure it contains valid schemas and columns.
@@ -56,14 +63,22 @@ def compare(
                 # 🧠 ML Signal: Usage of query_data method indicates a pattern of data retrieval based on schema and columns.
                 columns = ["entity_id", "timestamp"] + schema_map_columns.get(schema)
                 df = schema.query_data(
-                    entity_ids=entity_ids, codes=codes, columns=columns, start_timestamp=start_timestamp
+                    entity_ids=entity_ids,
+                    codes=codes,
+                    columns=columns,
+                    start_timestamp=start_timestamp,
                 )
                 # ✅ Best Practice: Consider importing necessary modules at the beginning of the file
                 dfs.append(df)
         # ✅ Best Practice: Consider validating columns to ensure it contains valid column names.
         elif schema:
             columns = ["entity_id", "timestamp"] + columns
-            df = schema.query_data(entity_ids=entity_ids, codes=codes, columns=columns, start_timestamp=start_timestamp)
+            df = schema.query_data(
+                entity_ids=entity_ids,
+                codes=codes,
+                columns=columns,
+                start_timestamp=start_timestamp,
+            )
             dfs.append(df)
 
         # 🧠 ML Signal: Usage of query_data method indicates a pattern of data retrieval based on schema and columns.
@@ -72,6 +87,8 @@ def compare(
         # 🧠 ML Signal: Usage of a class to encapsulate drawing functionality
         drawer = Drawer(main_df=all_df)
         drawer.draw(main_chart=chart_type, show=True, scale_value=scale_value)
+
+
 # 🧠 ML Signal: Usage of Drawer class and draw method indicates a pattern of data visualization.
 # 🧠 ML Signal: Method call with parameters indicating a drawing operation
 # ⚠️ SAST Risk (Low): Ensure that the drawer object is properly initialized before calling draw.
@@ -88,9 +105,19 @@ def compare_df(df: pd.DataFrame, chart_type: ChartType = ChartType.line):
     # ✅ Best Practice: Consider validating input parameters for expected types and values
     drawer.draw(main_chart=chart_type, show=True)
 
+
 # 🧠 ML Signal: Usage of data_schema.query_data could indicate a pattern for data retrieval
 
-def distribute(data_schema, columns, entity_ids=None, codes=None, histnorm="percent", nbinsx=20, filters=None):
+
+def distribute(
+    data_schema,
+    columns,
+    entity_ids=None,
+    codes=None,
+    histnorm="percent",
+    nbinsx=20,
+    filters=None,
+):
     """
     distribute indicators(columns) of entities
 
@@ -105,7 +132,9 @@ def distribute(data_schema, columns, entity_ids=None, codes=None, histnorm="perc
     # 🧠 ML Signal: Method call with parameters that could influence the behavior of the histogram drawing.
     # ⚠️ SAST Risk (Low): Potential risk if 'show' parameter allows execution of untrusted code or data.
     columns = ["entity_id", "timestamp"] + columns
-    df = data_schema.query_data(entity_ids=entity_ids, codes=codes, columns=columns, filters=filters)
+    df = data_schema.query_data(
+        entity_ids=entity_ids, codes=codes, columns=columns, filters=filters
+    )
     if not entity_ids or codes:
         df["entity_id"] = "entity_x_distribute"
     distribute_df(df=df, histnorm=histnorm, nbinsx=nbinsx)
@@ -123,9 +152,12 @@ def distribute_df(df, histnorm="percent", nbinsx=20):
     drawer = Drawer(main_df=df)
     # ✅ Best Practice: Use of a docstring to describe the function and its parameters
     drawer.draw_histogram(show=True, histnorm=histnorm, nbinsx=nbinsx)
+
+
 # ✅ Best Practice: Consider using isinstance() for type checking to support inheritance.
 
 # 🧠 ML Signal: Instantiation of a class with a DataFrame, indicating object-oriented data manipulation
+
 
 def composite(entity_id, data_schema, columns, filters=None):
     """
@@ -152,12 +184,17 @@ def composite_df(df):
     drawer = Drawer(main_df=df)
     # 🧠 ML Signal: Instantiation of Drawer class indicates a visualization operation.
     drawer.draw_pie(show=True)
+
+
 # 🧠 ML Signal: Decoding entity ID to extract entity type
 
 # 🧠 ML Signal: Method call to draw_pie suggests a visualization task.
 
+
 # ✅ Best Practice: Using setdefault to initialize and append to a list in a dictionary
-def composite_all(data_schema, column, timestamp, provider=None, entity_ids=None, filters=None):
+def composite_all(
+    data_schema, column, timestamp, provider=None, entity_ids=None, filters=None
+):
     if type(column) is not str:
         column = column.name
     # ⚠️ SAST Risk (Low): Importing within a function scope can lead to unexpected behavior
@@ -237,4 +274,12 @@ if __name__ == "__main__":
 
 
 # the __all__ is generated
-__all__ = ["compare", "compare_df", "distribute", "distribute_df", "composite", "composite_df", "composite_all"]
+__all__ = [
+    "compare",
+    "compare_df",
+    "distribute",
+    "distribute_df",
+    "composite",
+    "composite_df",
+    "composite_all",
+]

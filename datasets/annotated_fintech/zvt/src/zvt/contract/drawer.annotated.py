@@ -2,23 +2,29 @@
 # ✅ Best Practice: Use of Enum for defining a set of named values
 import logging
 from enum import Enum
+
 # ✅ Best Practice: Use of typing for type hinting improves code readability and maintainability
 from typing import List, Optional
 
 # ✅ Best Practice: Use of numpy for numerical operations is efficient and widely accepted
 import numpy as np
 import pandas as pd
+
 # ✅ Best Practice: Use of pandas for data manipulation is efficient and widely accepted
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
+
 # ✅ Best Practice: Use of plotly for interactive plots is a good choice for visualization
 
 from zvt.contract.api import decode_entity_id
+
 # ✅ Best Practice: Use of make_subplots for creating complex plot layouts
 from zvt.contract.data_type import Bean
 from zvt.contract.normal_data import NormalData
+
 # ⚠️ SAST Risk (Low): Importing from external modules can introduce security risks if not properly managed
 from zvt.utils.decorator import to_string
+
 # ⚠️ SAST Risk (Low): Importing from external modules can introduce security risks if not properly managed
 from zvt.utils.pd_utils import pd_is_not_null
 
@@ -33,6 +39,7 @@ class ChartType(Enum):
     """
     Chart type enum
     """
+
     # ✅ Best Practice: Enum members should be in uppercase to follow Python naming conventions.
     # ✅ Best Practice: Use of logging for tracking and debugging
 
@@ -59,9 +66,14 @@ class ChartType(Enum):
     #: bar chart
     bar = "bar"
 
+
 # ✅ Best Practice: Use of keyword arguments with default values improves function flexibility and readability
 
-_zvt_chart_type_map_scatter_mode = {ChartType.line: "lines", ChartType.area: "none", ChartType.scatter: "markers"}
+_zvt_chart_type_map_scatter_mode = {
+    ChartType.line: "lines",
+    ChartType.area: "none",
+    ChartType.scatter: "markers",
+}
 
 
 @to_string
@@ -89,7 +101,14 @@ class Rect(Bean):
 
 class Draw(object):
     def draw_kline(
-        self, width=None, height=None, title=None, keep_ui_state=True, show=False, scale_value=None, **kwargs
+        self,
+        width=None,
+        height=None,
+        title=None,
+        keep_ui_state=True,
+        show=False,
+        scale_value=None,
+        **kwargs,
     ):
         return self.draw(
             # ✅ Best Practice: Using named parameters with default values improves code readability and maintainability.
@@ -107,7 +126,14 @@ class Draw(object):
     # ✅ Best Practice: Use of default parameter values for flexibility and readability
     # 🧠 ML Signal: The use of a method to draw an area chart indicates a pattern of data visualization.
     def draw_line(
-        self, width=None, height=None, title=None, keep_ui_state=True, show=False, scale_value=None, **kwargs
+        self,
+        width=None,
+        height=None,
+        title=None,
+        keep_ui_state=True,
+        show=False,
+        scale_value=None,
+        **kwargs,
     ):
         # ✅ Best Practice: Delegating functionality to another method (`self.draw`) promotes code reuse and separation of concerns.
         # 🧠 ML Signal: Method chaining pattern with self.draw
@@ -122,13 +148,21 @@ class Draw(object):
             scale_value=scale_value,
             **kwargs,
         )
+
     # 🧠 ML Signal: Method signature with multiple optional parameters indicates flexibility in usage patterns
     # ✅ Best Practice: Use of default parameter values for optional parameters improves function usability
 
     def draw_area(
-        self, width=None, height=None, title=None, keep_ui_state=True, show=False, scale_value=None, **kwargs
-    # 🧠 ML Signal: Delegating functionality to another method (self.draw) shows a pattern of code reuse
-    # ✅ Best Practice: Use of named arguments improves code readability and maintainability
+        self,
+        width=None,
+        height=None,
+        title=None,
+        keep_ui_state=True,
+        show=False,
+        scale_value=None,
+        **kwargs,
+        # 🧠 ML Signal: Delegating functionality to another method (self.draw) shows a pattern of code reuse
+        # ✅ Best Practice: Use of named arguments improves code readability and maintainability
     ):
         return self.draw(
             main_chart=ChartType.area,
@@ -139,13 +173,21 @@ class Draw(object):
             show=show,
             scale_value=scale_value,
             **kwargs,
-        # ✅ Best Practice: Consider providing default values for parameters to improve function usability
+            # ✅ Best Practice: Consider providing default values for parameters to improve function usability
         )
+
     # 🧠 ML Signal: Method chaining pattern with self.draw can indicate a fluent interface design
     # 🧠 ML Signal: Use of enum-like pattern with ChartType.bar can indicate a fixed set of options
 
     def draw_scatter(
-        self, width=None, height=None, title=None, keep_ui_state=True, show=False, scale_value=None, **kwargs
+        self,
+        width=None,
+        height=None,
+        title=None,
+        keep_ui_state=True,
+        show=False,
+        scale_value=None,
+        **kwargs,
     ):
         return self.draw(
             main_chart=ChartType.scatter,
@@ -163,7 +205,14 @@ class Draw(object):
         )
 
     def draw_histogram(
-        self, width=None, height=None, title=None, keep_ui_state=True, show=False, scale_value=None, **kwargs
+        self,
+        width=None,
+        height=None,
+        title=None,
+        keep_ui_state=True,
+        show=False,
+        scale_value=None,
+        **kwargs,
     ):
         return self.draw(
             ChartType.histogram,
@@ -177,7 +226,16 @@ class Draw(object):
             **kwargs,
         )
 
-    def draw_bar(self, width=None, height=None, title=None, keep_ui_state=True, show=False, scale_value=None, **kwargs):
+    def draw_bar(
+        self,
+        width=None,
+        height=None,
+        title=None,
+        keep_ui_state=True,
+        show=False,
+        scale_value=None,
+        **kwargs,
+    ):
         return self.draw(
             ChartType.bar,
             width=width,
@@ -191,7 +249,16 @@ class Draw(object):
             **kwargs,
         )
 
-    def draw_pie(self, width=None, height=None, title=None, keep_ui_state=True, show=False, scale_value=None, **kwargs):
+    def draw_pie(
+        self,
+        width=None,
+        height=None,
+        title=None,
+        keep_ui_state=True,
+        show=False,
+        scale_value=None,
+        **kwargs,
+    ):
         return self.draw(
             ChartType.pie,
             width=width,
@@ -218,7 +285,15 @@ class Draw(object):
 
         raise NotImplementedError()
 
-    def default_layout(self, main_chart=None, width=None, height=None, title=None, keep_ui_state=True, **layout_params):
+    def default_layout(
+        self,
+        main_chart=None,
+        width=None,
+        height=None,
+        title=None,
+        keep_ui_state=True,
+        **layout_params,
+    ):
         if keep_ui_state:
             uirevision = True
         else:
@@ -239,14 +314,20 @@ class Draw(object):
                 rangeselector=dict(
                     buttons=list(
                         [
-                            dict(count=1, label="1m", step="month", stepmode="backward"),
+                            dict(
+                                count=1, label="1m", step="month", stepmode="backward"
+                            ),
                             # 🧠 ML Signal: Method instantiation pattern with multiple parameters
-                            dict(count=3, label="3m", step="month", stepmode="backward"),
+                            dict(
+                                count=3, label="3m", step="month", stepmode="backward"
+                            ),
                             # ✅ Best Practice: Consider using keyword arguments for clarity
                             # 🧠 ML Signal: Object creation with multiple data sources
                             # ✅ Best Practice: Use descriptive variable names for readability
                             # 🧠 ML Signal: Method chaining pattern for data retrieval
-                            dict(count=6, label="6m", step="month", stepmode="backward"),
+                            dict(
+                                count=6, label="6m", step="month", stepmode="backward"
+                            ),
                             dict(count=1, label="YTD", step="year", stepmode="todate"),
                             dict(count=1, label="1y", step="year", stepmode="backward"),
                             dict(step="all"),
@@ -257,7 +338,7 @@ class Draw(object):
                     visible=True,
                 ),
                 type="date",
-            # 🧠 ML Signal: Method chaining pattern for data retrieval
+                # 🧠 ML Signal: Method chaining pattern for data retrieval
             )
         # 🧠 ML Signal: Method chaining pattern for data retrieval
 
@@ -290,6 +371,8 @@ class Draw(object):
             # ✅ Best Practice: Include type hints for better code readability and maintainability
             **layout_params,
         )
+
+
 # ✅ Best Practice: Explicitly returning None improves code clarity
 # ✅ Best Practice: Type hinting improves code readability and maintainability
 
@@ -318,10 +401,11 @@ class Drawable(object):
             # ✅ Best Practice: Explicitly returning None clarifies the function's behavior
             annotation_df=self.drawer_annotation_df(),
             rects=self.drawer_rects(),
-        # ✅ Best Practice: Explicitly returning None can improve code clarity
-        # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability
+            # ✅ Best Practice: Explicitly returning None can improve code clarity
+            # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability
         )
         return drawer
+
     # ✅ Best Practice: Explicitly returning None can improve code clarity
     # ✅ Best Practice: Class should inherit from object for compatibility with Python 2 and 3
 
@@ -353,6 +437,7 @@ class Drawable(object):
 
     def drawer_main_df(self) -> Optional[pd.DataFrame]:
         return None
+
     # 🧠 ML Signal: Use of list comprehension for domain calculation.
 
     def drawer_main_data(self) -> Optional[NormalData]:
@@ -439,12 +524,17 @@ class StackedDrawer(Draw):
                 break
         for index, drawer in enumerate(self.drawers, start=start):
             traces, sub_traces = drawer.make_traces(
-                main_chart=main_chart, sub_chart=sub_chart, scale_value=scale_value, **kwargs
+                main_chart=main_chart,
+                sub_chart=sub_chart,
+                scale_value=scale_value,
+                **kwargs,
             )
 
             # fix sub traces as the bottom
             if sub_traces:
-                yaxis, y, layout = self.make_y_layout(index=1, total=1, domain_range=(0, 0.2))
+                yaxis, y, layout = self.make_y_layout(
+                    index=1, total=1, domain_range=(0, 0.2)
+                )
                 # ✅ Best Practice: Lazy initialization of main_data if not provided
                 # update sub_traces with yaxis
                 for trace in sub_traces:
@@ -493,17 +583,23 @@ class StackedDrawer(Draw):
                         # fillcolor="LightSkyBlue",
                         # 🧠 ML Signal: Checks for non-empty sub_data_list, indicating data validation logic
                         yref=y,
-                    # ⚠️ SAST Risk (Low): Potential AttributeError if sub_data_list is not a list or does not have an empty method
+                        # ⚠️ SAST Risk (Low): Potential AttributeError if sub_data_list is not a list or does not have an empty method
                     )
 
             # annotations
             if pd_is_not_null(drawer.annotation_df):
                 # ✅ Best Practice: Use copy to avoid modifying the original dataframe
-                stacked_fig.layout["annotations"] = annotations(drawer.annotation_df, yref=y)
+                stacked_fig.layout["annotations"] = annotations(
+                    drawer.annotation_df, yref=y
+                )
 
         stacked_fig.update_layout(
             self.default_layout(
-                main_chart=main_chart, width=width, height=height, title=title, keep_ui_state=keep_ui_state
+                main_chart=main_chart,
+                width=width,
+                height=height,
+                title=title,
+                keep_ui_state=keep_ui_state,
             )
         )
 
@@ -600,7 +696,14 @@ class Drawer(Draw):
 
     # 🧠 ML Signal: Pattern of converting data to list for plotting
     # 🧠 ML Signal: List comprehension used for data transformation
-    def make_traces(self, main_chart=ChartType.kline, sub_chart="bar", yaxis="y", scale_value=None, **kwargs):
+    def make_traces(
+        self,
+        main_chart=ChartType.kline,
+        sub_chart="bar",
+        yaxis="y",
+        scale_value=None,
+        **kwargs,
+    ):
         traces = []
         sub_traces = []
 
@@ -636,7 +739,11 @@ class Drawer(Draw):
                     # ✅ Best Practice: Use of update_shapes to apply consistent properties to all shapes
                     trace_name = "{}_{}".format(code, col)
                     ydata = df[col].values.tolist()
-                    traces.append(go.Bar(x=df.index, y=ydata, name=trace_name, yaxis=yaxis, **kwargs))
+                    traces.append(
+                        go.Bar(
+                            x=df.index, y=ydata, name=trace_name, yaxis=yaxis, **kwargs
+                        )
+                    )
             elif main_chart == ChartType.kline:
                 trace_name = "{}_kdata".format(code)
                 trace = go.Candlestick(
@@ -657,7 +764,16 @@ class Drawer(Draw):
                 for col in df.columns:
                     trace_name = "{}_{}".format(code, col)
                     ydata = df[col].values.tolist()
-                    traces.append(go.Scatter(x=df.index, y=ydata, mode=mode, name=trace_name, yaxis=yaxis, **kwargs))
+                    traces.append(
+                        go.Scatter(
+                            x=df.index,
+                            y=ydata,
+                            mode=mode,
+                            name=trace_name,
+                            yaxis=yaxis,
+                            **kwargs,
+                        )
+                    )
             elif main_chart == ChartType.histogram:
                 for col in df.columns:
                     trace_name = "{}_{}".format(code, col)
@@ -672,10 +788,14 @@ class Drawer(Draw):
                             flag=f"{trace_name}:{x[-1]}",
                         )
                     ]
-                    annotation_df = pd.DataFrame.from_records(annotation, index=["entity_id", "timestamp"])
+                    annotation_df = pd.DataFrame.from_records(
+                        annotation, index=["entity_id", "timestamp"]
+                    )
                     # ⚠️ SAST Risk (Low): Using fig.show() can lead to potential security risks if the figure contains sensitive data.
                     if pd_is_not_null(self.annotation_df):
-                        self.annotation_df = pd.concat([self.annotation_df, annotation_df])
+                        self.annotation_df = pd.concat(
+                            [self.annotation_df, annotation_df]
+                        )
                     # 🧠 ML Signal: Usage of DataFrame index and columns to generate table headers
                     else:
                         self.annotation_df = annotation_df
@@ -685,7 +805,14 @@ class Drawer(Draw):
                     # 🧠 ML Signal: Accessing DataFrame index level values
                     # 🧠 ML Signal: Iterating over DataFrame columns to extract values
                     # ✅ Best Practice: Use of Plotly's go.Table for structured data visualization
-                    traces.append(go.Pie(name=entity_id, labels=df.columns.tolist(), values=row.tolist(), **kwargs))
+                    traces.append(
+                        go.Pie(
+                            name=entity_id,
+                            labels=df.columns.tolist(),
+                            values=row.tolist(),
+                            **kwargs,
+                        )
+                    )
             else:
                 assert False
 
@@ -704,7 +831,12 @@ class Drawer(Draw):
                                 # ✅ Best Practice: Adding traces to the Plotly figure
                                 # ✅ Best Practice: Updating layout with dynamic parameters
                                 line = go.Scatter(
-                                    x=factor_df.index, y=ydata, mode="lines", name=trace_name, yaxis=yaxis, **kwargs
+                                    x=factor_df.index,
+                                    y=ydata,
+                                    mode="lines",
+                                    name=trace_name,
+                                    yaxis=yaxis,
+                                    **kwargs,
                                 )
                                 traces.append(line)
 
@@ -742,15 +874,24 @@ class Drawer(Draw):
 
                             if the_sub_chart == ChartType.line:
                                 sub_trace = go.Scatter(
-                                    x=sub_df.index, y=ydata, name=trace_name, yaxis="y2", marker=dict(color=colors)
+                                    x=sub_df.index,
+                                    y=ydata,
+                                    name=trace_name,
+                                    yaxis="y2",
+                                    marker=dict(color=colors),
                                 )
                             else:
                                 sub_trace = go.Bar(
-                                    x=sub_df.index, y=ydata, name=trace_name, yaxis="y2", marker=dict(color=colors)
+                                    x=sub_df.index,
+                                    y=ydata,
+                                    name=trace_name,
+                                    yaxis="y2",
+                                    marker=dict(color=colors),
                                 )
                             sub_traces.append(sub_trace)
 
         return traces, sub_traces
+
     # ✅ Best Practice: Use of __all__ to define public API of the module
 
     def add_rects(self, fig, yaxis="y"):
@@ -781,13 +922,25 @@ class Drawer(Draw):
     ):
         yaxis = "y"
         traces, sub_traces = self.make_traces(
-            main_chart=main_chart, sub_chart=sub_chart, yaxis=yaxis, scale_value=scale_value, **kwargs
+            main_chart=main_chart,
+            sub_chart=sub_chart,
+            yaxis=yaxis,
+            scale_value=scale_value,
+            **kwargs,
         )
 
         if sub_traces:
-            fig = make_subplots(rows=2, cols=1, row_heights=[0.8, 0.2], vertical_spacing=0.08, shared_xaxes=True)
+            fig = make_subplots(
+                rows=2,
+                cols=1,
+                row_heights=[0.8, 0.2],
+                vertical_spacing=0.08,
+                shared_xaxes=True,
+            )
             fig.add_traces(traces, rows=[1] * len(traces), cols=[1] * len(traces))
-            fig.add_traces(sub_traces, rows=[2] * len(sub_traces), cols=[1] * len(sub_traces))
+            fig.add_traces(
+                sub_traces, rows=[2] * len(sub_traces), cols=[1] * len(sub_traces)
+            )
         else:
             fig = go.Figure()
             fig.add_traces(traces)
@@ -797,13 +950,19 @@ class Drawer(Draw):
 
         fig.update_layout(
             self.default_layout(
-                main_chart=main_chart, width=width, height=height, title=title, keep_ui_state=keep_ui_state
+                main_chart=main_chart,
+                width=width,
+                height=height,
+                title=title,
+                keep_ui_state=keep_ui_state,
             )
         )
 
         if sub_traces:
             fig.update_layout(xaxis_rangeslider_visible=False)
-            fig.update_layout(xaxis2_rangeslider_visible=True, xaxis2_rangeslider_thickness=0.1)
+            fig.update_layout(
+                xaxis2_rangeslider_visible=True, xaxis2_rangeslider_thickness=0.1
+            )
         # 绘制标志
         if pd_is_not_null(self.annotation_df):
             fig.layout["annotations"] = annotations(self.annotation_df, yref=yaxis)
@@ -813,17 +972,26 @@ class Drawer(Draw):
         else:
             return fig
 
-    def draw_table(self, width=None, height=None, title=None, keep_ui_state=True, **kwargs):
-        cols = self.main_data.data_df.index.names + self.main_data.data_df.columns.tolist()
+    def draw_table(
+        self, width=None, height=None, title=None, keep_ui_state=True, **kwargs
+    ):
+        cols = (
+            self.main_data.data_df.index.names + self.main_data.data_df.columns.tolist()
+        )
 
         index1 = self.main_data.data_df.index.get_level_values(0).tolist()
         index2 = self.main_data.data_df.index.get_level_values(1).tolist()
-        values = [index1] + [index2] + [self.main_data.data_df[col] for col in self.main_data.data_df.columns]
+        values = (
+            [index1]
+            + [index2]
+            + [self.main_data.data_df[col] for col in self.main_data.data_df.columns]
+        )
 
         data = go.Table(
             header=dict(
                 values=cols,
-                fill_color=["#000080", "#000080"] + ["#0066cc"] * len(self.main_data.data_df.columns),
+                fill_color=["#000080", "#000080"]
+                + ["#0066cc"] * len(self.main_data.data_df.columns),
                 align="left",
                 font=dict(color="white", size=13),
             ),
@@ -833,7 +1001,11 @@ class Drawer(Draw):
 
         fig = go.Figure()
         fig.add_traces([data])
-        fig.update_layout(self.default_layout(width=width, height=height, title=title, keep_ui_state=keep_ui_state))
+        fig.update_layout(
+            self.default_layout(
+                width=width, height=height, title=title, keep_ui_state=keep_ui_state
+            )
+        )
 
         fig.show()
 
@@ -887,4 +1059,12 @@ def annotations(annotation_df: pd.DataFrame, yref="y"):
 
 
 # the __all__ is generated
-__all__ = ["ChartType", "Rect", "Draw", "Drawable", "StackedDrawer", "Drawer", "annotations"]
+__all__ = [
+    "ChartType",
+    "Rect",
+    "Draw",
+    "Drawable",
+    "StackedDrawer",
+    "Drawer",
+    "annotations",
+]

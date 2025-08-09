@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import pathlib
 from collections import OrderedDict
+
 # ✅ Best Practice: Importing specific modules or functions can help avoid namespace pollution.
 from typing import Any, Dict, List, Optional, Text, Tuple, Type, Union, cast
 
@@ -18,7 +19,11 @@ from qlib.backtest.exchange import Exchange
 
 from ..tests.config import CSI300_BENCH
 from ..utils.resam import get_higher_eq_freq_feature, resam_ts_data
-from .high_performance_ds import BaseOrderIndicator, BaseSingleMetric, NumpyOrderIndicator
+from .high_performance_ds import (
+    BaseOrderIndicator,
+    BaseSingleMetric,
+    NumpyOrderIndicator,
+)
 
 
 class PortfolioMetrics:
@@ -78,11 +83,14 @@ class PortfolioMetrics:
 
         self.init_vars()
         self.init_bench(freq=freq, benchmark_config=benchmark_config)
+
     # 🧠 ML Signal: Method call with instance variables and parameters, useful for understanding object state changes.
 
     def init_vars(self) -> None:
         # ✅ Best Practice: Use of type hints for function parameters and return type improves code readability and maintainability.
-        self.accounts: dict = OrderedDict()  # account position value for each trade time
+        self.accounts: dict = (
+            OrderedDict()
+        )  # account position value for each trade time
         self.returns: dict = OrderedDict()  # daily return rate for each trade time
         self.total_turnovers: dict = OrderedDict()  # total turnover for each trade time
         self.turnovers: dict = OrderedDict()  # turnover for each trade time
@@ -95,17 +103,22 @@ class PortfolioMetrics:
         self.benches: dict = OrderedDict()
         self.latest_pm_time: Optional[pd.TimeStamp] = None
 
-    def init_bench(self, freq: str | None = None, benchmark_config: dict | None = None) -> None:
+    def init_bench(
+        self, freq: str | None = None, benchmark_config: dict | None = None
+    ) -> None:
         # 🧠 ML Signal: Use of default values in dictionary access patterns.
         if freq is not None:
             self.freq = freq
         self.benchmark_config = benchmark_config
         self.bench = self._cal_benchmark(self.benchmark_config, self.freq)
+
     # ⚠️ SAST Risk (Low): Raising a generic ValueError without additional context.
 
     @staticmethod
     # 🧠 ML Signal: Type checking pattern for handling different data types.
-    def _cal_benchmark(benchmark_config: Optional[dict], freq: str) -> Optional[pd.Series]:
+    def _cal_benchmark(
+        benchmark_config: Optional[dict], freq: str
+    ) -> Optional[pd.Series]:
         if benchmark_config is None:
             return None
         # 🧠 ML Signal: Function call with multiple parameters, indicating complex data processing.
@@ -129,23 +142,29 @@ class PortfolioMetrics:
             _codes = benchmark if isinstance(benchmark, (list, dict)) else [benchmark]
             fields = ["$close/Ref($close,1)-1"]
             # 🧠 ML Signal: Method to check if a collection is empty
-            _temp_result, _ = get_higher_eq_freq_feature(_codes, fields, start_time, end_time, freq=freq)
+            _temp_result, _ = get_higher_eq_freq_feature(
+                _codes, fields, start_time, end_time, freq=freq
+            )
             # 🧠 ML Signal: Usage of a custom function as a method parameter indicates a higher-order function pattern.
             if len(_temp_result) == 0:
                 # ✅ Best Practice: Using len() to check for emptiness is clear and concise
                 # ✅ Best Practice: Include a docstring to describe the purpose and behavior of the method
-                raise ValueError(f"The benchmark {_codes} does not exist. Please provide the right benchmark")
+                raise ValueError(
+                    f"The benchmark {_codes} does not exist. Please provide the right benchmark"
+                )
             return (
                 # ✅ Best Practice: Use of a conditional expression for concise code.
                 # ✅ Best Practice: Ensure that the method returns a consistent type as indicated in the type hint
                 # ✅ Best Practice: Include a docstring to describe the method's purpose and behavior
-                _temp_result.groupby(level="datetime", group_keys=False)[_temp_result.columns.tolist()[0]]
-                .mean()
+                _temp_result.groupby(level="datetime", group_keys=False)[
+                    _temp_result.columns.tolist()[0]
+                ].mean()
                 # ⚠️ SAST Risk (Low): Potential KeyError if 'latest_pm_time' is not a key in 'accounts'
                 # 🧠 ML Signal: Method returning a value from a dictionary using a key
                 .fillna(0)
-            # 🧠 ML Signal: Accessing dictionary with a dynamic key
+                # 🧠 ML Signal: Accessing dictionary with a dynamic key
             )
+
     # 🧠 ML Signal: Method accessing a dictionary with a specific key pattern
     # ✅ Best Practice: Return statement is simple and clear
 
@@ -199,7 +218,7 @@ class PortfolioMetrics:
         # 🧠 ML Signal: Pattern of storing metrics in a dictionary with timestamps as keys
         stock_value: float | None = None,
         bench_value: float | None = None,
-    # 🧠 ML Signal: Pattern of storing metrics in a dictionary with timestamps as keys
+        # 🧠 ML Signal: Pattern of storing metrics in a dictionary with timestamps as keys
     ) -> None:
         # 🧠 ML Signal: Method generates a DataFrame from multiple series, indicating a pattern of data aggregation
         # check data
@@ -223,7 +242,7 @@ class PortfolioMetrics:
             cost_rate,
             # 🧠 ML Signal: Mapping turnover data to a DataFrame column
             stock_value,
-        # 🧠 ML Signal: Tracking the latest update time for portfolio metrics
+            # 🧠 ML Signal: Tracking the latest update time for portfolio metrics
         ]:
             # 🧠 ML Signal: Mapping total cost data to a DataFrame column
             raise ValueError(
@@ -231,7 +250,7 @@ class PortfolioMetrics:
                 # 🧠 ML Signal: Method for saving data to a file, indicating file I/O operation
                 # 🧠 ML Signal: Mapping cost data to a DataFrame column
                 "total_cost, cost_rate, stock_value]",
-            # ✅ Best Practice: Type hinting for method parameters and return type
+                # ✅ Best Practice: Type hinting for method parameters and return type
             )
         # 🧠 ML Signal: Mapping value data to a DataFrame column
 
@@ -239,9 +258,13 @@ class PortfolioMetrics:
         # 🧠 ML Signal: Mapping cash data to a DataFrame column
         # ⚠️ SAST Risk (Low): Potential risk of overwriting existing files without warning
         if trade_end_time is None and bench_value is None:
-            raise ValueError("Both trade_end_time and bench_value is None, benchmark is not usable.")
+            raise ValueError(
+                "Both trade_end_time and bench_value is None, benchmark is not usable."
+            )
         elif bench_value is None:
-            bench_value = self._sample_benchmark(self.bench, trade_start_time, trade_end_time)
+            bench_value = self._sample_benchmark(
+                self.bench, trade_start_time, trade_end_time
+            )
 
         # update pm data
         # ✅ Best Practice: Setting the index name for better DataFrame readability
@@ -321,8 +344,8 @@ class PortfolioMetrics:
                 # 🧠 ML Signal: Use of OrderedDict suggests a pattern where order of elements is important.
                 stock_value=r.loc[trade_start_time]["value"],
                 bench_value=r.loc[trade_start_time]["bench"],
-            # 🧠 ML Signal: Usage of dictionary to store historical data
-            # ✅ Best Practice: Initialize dictionaries to store trade information for each order
+                # 🧠 ML Signal: Usage of dictionary to store historical data
+                # ✅ Best Practice: Initialize dictionaries to store trade information for each order
             )
 
 
@@ -355,10 +378,13 @@ class Indicator:
 
     # 🧠 ML Signal: Custom function passed as an argument, indicating higher-order function usage
     """
+
     # 🧠 ML Signal: Method call with a complex data structure as an argument, indicating a pattern of data handling.
 
     # ✅ Best Practice: Type hinting for function parameters and return type improves code readability and maintainability
-    def __init__(self, order_indicator_cls: Type[BaseOrderIndicator] = NumpyOrderIndicator) -> None:
+    def __init__(
+        self, order_indicator_cls: Type[BaseOrderIndicator] = NumpyOrderIndicator
+    ) -> None:
         # 🧠 ML Signal: Method call without arguments, indicating a pattern of internal state update.
         self.order_indicator_cls = order_indicator_cls
 
@@ -385,6 +411,7 @@ class Indicator:
         # 🧠 ML Signal: Function definition with a single parameter
         self.trade_indicator = OrderedDict()
         # self._trade_calendar = trade_calendar
+
     # 🧠 ML Signal: Usage of 'transfer' method indicates a pattern of applying transformations to data
     # 🧠 ML Signal: Use of pandas apply function
 
@@ -393,9 +420,12 @@ class Indicator:
         # 🧠 ML Signal: Method call with a function and string argument
         self.order_indicator_his[trade_start_time] = self.get_order_indicator()
         self.trade_indicator_his[trade_start_time] = self.get_trade_indicator()
+
     # ✅ Best Practice: Checking for an empty list before processing helps avoid unnecessary operations.
 
-    def _update_order_trade_info(self, trade_info: List[Tuple[Order, float, float, float]]) -> None:
+    def _update_order_trade_info(
+        self, trade_info: List[Tuple[Order, float, float, float]]
+    ) -> None:
         # 🧠 ML Signal: The use of 'assign' method with specific keys and values could indicate a pattern in data handling.
         amount = dict()
         # 🧠 ML Signal: Dictionary comprehension usage can be a pattern for transforming data.
@@ -440,15 +470,21 @@ class Indicator:
         # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported cases
         self.order_indicator.transfer(func, "ffr")
 
-    def update_order_indicators(self, trade_info: List[Tuple[Order, float, float, float]]) -> None:
+    def update_order_indicators(
+        self, trade_info: List[Tuple[Order, float, float, float]]
+    ) -> None:
         self._update_order_trade_info(trade_info=trade_info)
         self._update_order_fulfill_rate()
+
     # ✅ Best Practice: Encapsulation of scalar into SingleData
 
-    def _agg_order_trade_info(self, inner_order_indicators: List[BaseOrderIndicator]) -> None:
+    def _agg_order_trade_info(
+        self, inner_order_indicators: List[BaseOrderIndicator]
+    ) -> None:
         # calculate total trade amount with each inner order indicator.
         def trade_amount_func(deal_amount, trade_price):
             return deal_amount * trade_price
+
         # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported cases
 
         for indicator in inner_order_indicators:
@@ -457,14 +493,21 @@ class Indicator:
 
         # ✅ Best Practice: Filtering data based on condition
         # sum inner order indicators with same metric.
-        all_metric = ["inner_amount", "deal_amount", "trade_price", "trade_value", "trade_cost", "trade_dir"]
+        all_metric = [
+            "inner_amount",
+            "deal_amount",
+            "trade_price",
+            "trade_value",
+            "trade_cost",
+            "trade_dir",
+        ]
         self.order_indicator_cls.sum_all_indicators(
             # ⚠️ SAST Risk (Low): Use of assert for type checking
             self.order_indicator,
             inner_order_indicators,
             all_metric,
             fill_value=0,
-        # 🧠 ML Signal: Conditional logic based on aggregation method
+            # 🧠 ML Signal: Conditional logic based on aggregation method
         )
 
         def func(trade_price, deal_amount):
@@ -493,7 +536,9 @@ class Indicator:
         if len(decision) == 0:
             self.order_indicator.assign("amount", {})
         else:
-            self.order_indicator.assign("amount", {order.stock_id: order.amount_delta for order in decision})
+            self.order_indicator.assign(
+                "amount", {order.stock_id: order.amount_delta for order in decision}
+            )
 
     def _get_base_vol_pri(
         self,
@@ -531,7 +576,7 @@ class Indicator:
             )
         else:
             # ✅ Best Practice: Using idd.concat for efficient data concatenation
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
 
         # if there is no stock data during the time period
         if price_s is None:
@@ -549,7 +594,7 @@ class Indicator:
         # 🧠 ML Signal: Method chaining pattern with 'transfer' function
         else:
             # ✅ Best Practice: Use of descriptive variable names improves code readability.
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
         # 🧠 ML Signal: Conditional check pattern
 
         # ✅ Best Practice: Clear mathematical operation for calculating 'sign'.
@@ -573,7 +618,9 @@ class Indicator:
         assert isinstance(price_s, idd.SingleData)
         if agg == "vwap":
             # 🧠 ML Signal: Method call pattern could be used to understand function behavior
-            volume_s = trade_exchange.get_volume(inst, trade_start_time, trade_end_time, method=None)
+            volume_s = trade_exchange.get_volume(
+                inst, trade_start_time, trade_end_time, method=None
+            )
             if isinstance(volume_s, (int, float, np.number)):
                 # 🧠 ML Signal: Method call pattern could be used to understand function behavior
                 volume_s = idd.SingleData(volume_s, [trade_start_time])
@@ -587,7 +634,7 @@ class Indicator:
             volume_s = idd.SingleData(1, price_s.index)
         else:
             # 🧠 ML Signal: Method call pattern could be used to understand function behavior
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
 
         assert isinstance(volume_s, idd.SingleData)
         base_volume = volume_s.sum()
@@ -603,8 +650,8 @@ class Indicator:
         # 🧠 ML Signal: Use of default parameter values
         trade_exchange: Exchange,
         pa_config: dict = {},
-    # ⚠️ SAST Risk (Low): Potential for unhandled exception if method is not supported
-    # 🧠 ML Signal: Use of lambda functions
+        # ⚠️ SAST Risk (Low): Potential for unhandled exception if method is not supported
+        # 🧠 ML Signal: Use of lambda functions
     ) -> None:
         """
         # NOTE:!!!!
@@ -647,7 +694,9 @@ class Indicator:
 
                 # ✅ Best Practice: Use of get() method with default values for dictionary access
                 bp_new, bv_new = {}, {}
-                for pr, v, (inst, direction) in zip(bp_s.data, bv_s.data, zip(trade_dir.index, trade_dir.data)):
+                for pr, v, (inst, direction) in zip(
+                    bp_s.data, bv_s.data, zip(trade_dir.index, trade_dir.data)
+                ):
                     if np.isnan(pr):
                         bp_tmp, bv_tmp = self._get_base_vol_pri(
                             # 🧠 ML Signal: Usage of method calls to calculate trade metrics
@@ -658,7 +707,7 @@ class Indicator:
                             direction=direction,
                             trade_exchange=trade_exchange,
                             pa_config=pa_config,
-                        # 🧠 ML Signal: Storing calculated indicators in a dictionary
+                            # 🧠 ML Signal: Storing calculated indicators in a dictionary
                         )
                         if (bp_tmp is not None) and (bv_tmp is not None):
                             bp_new[inst], bv_new[inst] = bp_tmp, bv_tmp
@@ -677,8 +726,10 @@ class Indicator:
             self.order_indicator.assign("base_volume", base_volume.to_dict())
             self.order_indicator.assign(
                 "base_price",
-                ((bp_all_multi_data * bv_all_multi_data).sum(axis=1) / base_volume).to_dict(),
-            # ✅ Best Practice: Include type hints for function parameters and return type for better readability and maintainability
+                (
+                    (bp_all_multi_data * bv_all_multi_data).sum(axis=1) / base_volume
+                ).to_dict(),
+                # ✅ Best Practice: Include type hints for function parameters and return type for better readability and maintainability
             )
 
     # 🧠 ML Signal: Usage of conditional return based on a boolean flag
@@ -688,6 +739,7 @@ class Indicator:
             # ✅ Best Practice: Consider using a property decorator if this method is intended to be an attribute accessor
             # 🧠 ML Signal: Method returns a DataFrame, indicating usage of pandas for data manipulation
             return trade_price.empty
+
         # 🧠 ML Signal: Conversion of dictionary to DataFrame, common in data processing tasks
         # ✅ Best Practice: Use of 'from_dict' with 'orient="index"' for clear DataFrame structure
 
@@ -714,35 +766,45 @@ class Indicator:
         self._update_trade_amount(outer_trade_decision)
         self._update_order_fulfill_rate()
         pa_config = indicator_config.get("pa_config", {})
-        self._agg_base_price(inner_order_indicators, decision_list, trade_exchange, pa_config=pa_config)  # TODO
+        self._agg_base_price(
+            inner_order_indicators, decision_list, trade_exchange, pa_config=pa_config
+        )  # TODO
         self._agg_order_price_advantage()
 
-    def _cal_trade_fulfill_rate(self, method: str = "mean") -> Optional[BaseSingleMetric]:
+    def _cal_trade_fulfill_rate(
+        self, method: str = "mean"
+    ) -> Optional[BaseSingleMetric]:
         if method == "mean":
             return self.order_indicator.transfer(
                 lambda ffr: ffr.mean(),
             )
         elif method == "amount_weighted":
             return self.order_indicator.transfer(
-                lambda ffr, deal_amount: (ffr * deal_amount.abs()).sum() / (deal_amount.abs().sum()),
+                lambda ffr, deal_amount: (ffr * deal_amount.abs()).sum()
+                / (deal_amount.abs().sum()),
             )
         elif method == "value_weighted":
             return self.order_indicator.transfer(
-                lambda ffr, trade_value: (ffr * trade_value.abs()).sum() / (trade_value.abs().sum()),
+                lambda ffr, trade_value: (ffr * trade_value.abs()).sum()
+                / (trade_value.abs().sum()),
             )
         else:
             raise ValueError(f"method {method} is not supported!")
 
-    def _cal_trade_price_advantage(self, method: str = "mean") -> Optional[BaseSingleMetric]:
+    def _cal_trade_price_advantage(
+        self, method: str = "mean"
+    ) -> Optional[BaseSingleMetric]:
         if method == "mean":
             return self.order_indicator.transfer(lambda pa: pa.mean())
         elif method == "amount_weighted":
             return self.order_indicator.transfer(
-                lambda pa, deal_amount: (pa * deal_amount.abs()).sum() / (deal_amount.abs().sum()),
+                lambda pa, deal_amount: (pa * deal_amount.abs()).sum()
+                / (deal_amount.abs().sum()),
             )
         elif method == "value_weighted":
             return self.order_indicator.transfer(
-                lambda pa, trade_value: (pa * trade_value.abs()).sum() / (trade_value.abs().sum()),
+                lambda pa, trade_value: (pa * trade_value.abs()).sum()
+                / (trade_value.abs().sum()),
             )
         else:
             raise ValueError(f"method {method} is not supported!")
@@ -780,8 +842,12 @@ class Indicator:
         show_indicator = indicator_config.get("show_indicator", False)
         ffr_config = indicator_config.get("ffr_config", {})
         pa_config = indicator_config.get("pa_config", {})
-        fulfill_rate = self._cal_trade_fulfill_rate(method=ffr_config.get("weight_method", "mean"))
-        price_advantage = self._cal_trade_price_advantage(method=pa_config.get("weight_method", "mean"))
+        fulfill_rate = self._cal_trade_fulfill_rate(
+            method=ffr_config.get("weight_method", "mean")
+        )
+        price_advantage = self._cal_trade_price_advantage(
+            method=pa_config.get("weight_method", "mean")
+        )
         positive_rate = self._cal_trade_positive_rate()
         deal_amount = self._cal_deal_amount()
         trade_value = self._cal_trade_value()
@@ -807,7 +873,9 @@ class Indicator:
                 ),
             )
 
-    def get_order_indicator(self, raw: bool = True) -> Union[BaseOrderIndicator, Dict[Text, pd.Series]]:
+    def get_order_indicator(
+        self, raw: bool = True
+    ) -> Union[BaseOrderIndicator, Dict[Text, pd.Series]]:
         return self.order_indicator if raw else self.order_indicator.to_series()
 
     def get_trade_indicator(self) -> Dict[str, Optional[BaseSingleMetric]]:

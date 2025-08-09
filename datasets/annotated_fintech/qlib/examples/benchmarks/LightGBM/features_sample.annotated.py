@@ -1,11 +1,14 @@
 import datetime
 import pandas as pd
+
 # ✅ Best Practice: Import only necessary components to reduce memory usage and improve readability
 
 from qlib.data.inst_processor import InstProcessor
+
 # ✅ Best Practice: Class docstring provides a clear description of the class functionality
 
 # ✅ Best Practice: Use of type annotations for function parameters improves code readability and maintainability
+
 
 class Resample1minProcessor(InstProcessor):
     # 🧠 ML Signal: Storing parameters as instance attributes is a common pattern
@@ -17,6 +20,7 @@ class Resample1minProcessor(InstProcessor):
         # ✅ Best Practice: Type hint for df parameter improves code readability and maintainability
         self.hour = hour
         self.minute = minute
+
     # 🧠 ML Signal: Filtering DataFrame based on specific time, common in time-series data processing
     # ⚠️ SAST Risk (Low): Potential for timezone-related issues when converting to datetime
     # 🧠 ML Signal: Normalizing datetime index, typical in time-series data preprocessing

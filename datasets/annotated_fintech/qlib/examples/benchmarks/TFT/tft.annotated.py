@@ -3,6 +3,7 @@
 
 from pathlib import Path
 from typing import Union
+
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local application sections improves readability.
 import numpy as np
 import pandas as pd
@@ -12,6 +13,7 @@ import expt_settings.configs
 import libs.hyperparam_opt
 import libs.tft_model
 import libs.utils as utils
+
 # 🧠 ML Signal: Usage of specific datasets and models can indicate the type of ML tasks being performed.
 import os
 import datetime as dte
@@ -81,20 +83,25 @@ DATASET_SETTING = {
             # ✅ Best Practice: Use of default parameter values for flexibility
             # ✅ Best Practice: Use of .copy() to avoid modifying the original DataFrame
             "VOLUME11",
-        # ⚠️ SAST Risk (Low): Potential risk if 'instrument' column is not present in data_df
-        # 🧠 ML Signal: Identifying feature columns by excluding those containing 'label'
+            # ⚠️ SAST Risk (Low): Potential risk if 'instrument' column is not present in data_df
+            # 🧠 ML Signal: Identifying feature columns by excluding those containing 'label'
         ],
         "label_col": "LABEL0",
     },
-# 🧠 ML Signal: Grouping by 'datetime' and filling NaN values with the mean, a common data imputation technique
+    # 🧠 ML Signal: Grouping by 'datetime' and filling NaN values with the mean, a common data imputation technique
 }
 
 # 🧠 ML Signal: Function processes data for a specific ML model (TFT model)
 
+
 # ✅ Best Practice: Assigning the filled DataFrame back to the original DataFrame's feature columns
 # 🧠 ML Signal: Returning a DataFrame after preprocessing, typical in data transformation functions
 def get_shifted_label(data_df, shifts=5, col_shift="LABEL0"):
-    return data_df[[col_shift]].groupby("instrument", group_keys=False).apply(lambda df: df.shift(shifts))
+    return (
+        data_df[[col_shift]]
+        .groupby("instrument", group_keys=False)
+        .apply(lambda df: df.shift(shifts))
+    )
 
 
 def fill_test_na(test_df):
@@ -102,11 +109,15 @@ def fill_test_na(test_df):
     feature_cols = ~test_df_res.columns.str.contains("label", case=False)
     test_feature_fna = (
         # 🧠 ML Signal: Usage of a configuration dictionary to determine feature and label columns
-        test_df_res.loc[:, feature_cols].groupby("datetime", group_keys=False).apply(lambda df: df.fillna(df.mean()))
+        test_df_res.loc[:, feature_cols]
+        .groupby("datetime", group_keys=False)
+        .apply(lambda df: df.fillna(df.mean()))
     )
     # 🧠 ML Signal: Usage of a configuration dictionary to determine feature and label columns
     test_df_res.loc[:, feature_cols] = test_feature_fna
     return test_df_res
+
+
 # ✅ Best Practice: Use of loc for selecting specific columns ensures better readability and maintainability
 
 
@@ -149,8 +160,10 @@ def process_qlib_data(df, dataset, fillna=False):
     # 🧠 ML Signal: Shifting labels is a common preprocessing step in time series forecasting.
     return temp_df
 
+
 # ⚠️ SAST Risk (Low): Dropping NaN values without handling could lead to data loss if not intended.
 # 🧠 ML Signal: Accessing a specific column in a DataFrame
+
 
 def process_predicted(df, col_name):
     """Transform the TFT predicted data into Qlib format.
@@ -165,7 +178,13 @@ def process_predicted(df, col_name):
     """
     # ✅ Best Practice: Use of descriptive parameter names improves code readability
     df_res = df.copy()
-    df_res = df_res.rename(columns={"forecast_time": "datetime", "identifier": "instrument", "t+4": col_name})
+    df_res = df_res.rename(
+        columns={
+            "forecast_time": "datetime",
+            "identifier": "instrument",
+            "t+4": col_name,
+        }
+    )
     df_res = df_res.set_index(["datetime", "instrument"]).sort_index()
     # 🧠 ML Signal: Transforming data is a common step in ML data preprocessing
     df_res = df_res[[col_name]]
@@ -196,23 +215,33 @@ class TFTModel(ModelFT):
     # ⚠️ SAST Risk (Medium): GPU configuration might lead to resource exhaustion if not handled properly
     def _prepare_data(self, dataset: DatasetH):
         df_train, df_valid = dataset.prepare(
-            ["train", "valid"], col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+            ["train", "valid"],
+            col_set=["feature", "label"],
+            data_key=DataHandlerLP.DK_L,
         )
         return transform_df(df_train), transform_df(df_valid)
 
-    def fit(self, dataset: DatasetH, MODEL_FOLDER="qlib_tft_model", USE_GPU_ID=0, **kwargs):
+    def fit(
+        self, dataset: DatasetH, MODEL_FOLDER="qlib_tft_model", USE_GPU_ID=0, **kwargs
+    ):
         DATASET = self.params["DATASET"]
         LABEL_SHIFT = self.params["label_shift"]
         # ⚠️ SAST Risk (Low): Potential race condition if multiple processes attempt to create the directory simultaneously
         LABEL_COL = DATASET_SETTING[DATASET]["label_col"]
 
         if DATASET not in ALLOW_DATASET:
-            raise AssertionError("The dataset is not supported, please make a new formatter to fit this dataset")
+            raise AssertionError(
+                "The dataset is not supported, please make a new formatter to fit this dataset"
+            )
 
         dtrain, dvalid = self._prepare_data(dataset)
         # ⚠️ SAST Risk (Medium): Using `tf.reset_default_graph()` can lead to issues in multi-threaded environments
-        dtrain.loc[:, LABEL_COL] = get_shifted_label(dtrain, shifts=LABEL_SHIFT, col_shift=LABEL_COL)
-        dvalid.loc[:, LABEL_COL] = get_shifted_label(dvalid, shifts=LABEL_SHIFT, col_shift=LABEL_COL)
+        dtrain.loc[:, LABEL_COL] = get_shifted_label(
+            dtrain, shifts=LABEL_SHIFT, col_shift=LABEL_COL
+        )
+        dvalid.loc[:, LABEL_COL] = get_shifted_label(
+            dvalid, shifts=LABEL_SHIFT, col_shift=LABEL_COL
+        )
 
         train = process_qlib_data(dtrain, DATASET, fillna=True).dropna()
         valid = process_qlib_data(dvalid, DATASET, fillna=True).dropna()
@@ -233,12 +262,14 @@ class TFTModel(ModelFT):
         # ===========================Training Process===========================
         # 🧠 ML Signal: Logging the completion time of training
         ModelClass = libs.tft_model.TemporalFusionTransformer
-        if not isinstance(self.data_formatter, data_formatters.base.GenericDataFormatter):
+        if not isinstance(
+            self.data_formatter, data_formatters.base.GenericDataFormatter
+        ):
             raise ValueError(
                 # 🧠 ML Signal: Usage of a custom transformation function on the dataset
                 "Data formatters should inherit from"
                 + "AbstractDataFormatter! Type={}".format(type(self.data_formatter))
-            # 🧠 ML Signal: Shifting labels in the dataset, which is a common preprocessing step in time series forecasting
+                # 🧠 ML Signal: Shifting labels in the dataset, which is a common preprocessing step in time series forecasting
             )
 
         # 🧠 ML Signal: Processing data with a specific function, indicating a custom data pipeline
@@ -246,7 +277,9 @@ class TFTModel(ModelFT):
 
         # 🧠 ML Signal: Decision to use GPU for prediction, which is relevant for model performance optimization
         if use_gpu[0]:
-            self.tf_config = utils.get_default_tensorflow_config(tf_device="gpu", gpu_id=use_gpu[1])
+            self.tf_config = utils.get_default_tensorflow_config(
+                tf_device="gpu", gpu_id=use_gpu[1]
+            )
         # ⚠️ SAST Risk (Low): Using TensorFlow's default session can lead to issues in multi-threaded environments
         else:
             self.tf_config = utils.get_default_tensorflow_config(tf_device="cpu")
@@ -298,7 +331,13 @@ class TFTModel(ModelFT):
             # ✅ Best Practice: Using a list to manage attributes that need to be temporarily removed is clear and maintainable.
             def extract_numerical_data(data):
                 """Strips out forecast time and identifier columns."""
-                return data[[col for col in data.columns if col not in {"forecast_time", "identifier"}]]
+                return data[
+                    [
+                        col
+                        for col in data.columns
+                        if col not in {"forecast_time", "identifier"}
+                    ]
+                ]
 
             # 🧠 ML Signal: Iterating over attributes to temporarily set them to None before pickling.
             # p50_loss = utils.numpy_normalised_quantile_loss(
@@ -318,7 +357,9 @@ class TFTModel(ModelFT):
             raise ValueError("model is not fitted yet!")
         d_test = dataset.prepare("test", col_set=["feature", "label"])
         d_test = transform_df(d_test)
-        d_test.loc[:, self.label_col] = get_shifted_label(d_test, shifts=self.label_shift, col_shift=self.label_col)
+        d_test.loc[:, self.label_col] = get_shifted_label(
+            d_test, shifts=self.label_shift, col_shift=self.label_col
+        )
         test = process_qlib_data(d_test, self.expt_name, fillna=True).dropna()
 
         use_gpu = (True, self.gpu_id)

@@ -3,19 +3,24 @@
 
 import multiprocessing
 import time
+
 # ✅ Best Practice: Import only necessary components from a module to improve code readability and maintainability.
 
 import numpy as np
+
 # ✅ Best Practice: Class definition should include a docstring explaining its purpose and usage.
 import pandas as pd
+
 # ✅ Best Practice: Use of constructor to initialize object attributes
 
 from torch.utils.data import Dataset, DataLoader
+
 # ⚠️ SAST Risk (Low): Use of assert for input validation can be bypassed if Python is run with optimizations.
 from qlib.rl.utils.data_queue import DataQueue
 
 # 🧠 ML Signal: Generates a DataFrame with random data, which could indicate synthetic data generation.
 # ✅ Best Practice: Implementing __len__ allows objects to be used with len() function
+
 
 # ✅ Best Practice: Consider parameterizing the range and size for better flexibility and testing.
 class DummyDataset(Dataset):
@@ -23,19 +28,25 @@ class DummyDataset(Dataset):
     # 🧠 ML Signal: Returning an attribute in __len__ suggests the object has a length property
     def __init__(self, length):
         self.length = length
+
     # 🧠 ML Signal: Iterating over a dataloader, common in data processing tasks
 
     # ✅ Best Practice: Use of a private function name to indicate internal use
     def __getitem__(self, index):
         # 🧠 ML Signal: Collecting data length, indicative of data size tracking
         assert 0 <= index < self.length
-        return pd.DataFrame(np.random.randint(0, 100, size=(index + 1, 4)), columns=list("ABCD"))
+        return pd.DataFrame(
+            np.random.randint(0, 100, size=(index + 1, 4)), columns=list("ABCD")
+        )
+
     # 🧠 ML Signal: Iterating over a queue to convert it to a list
 
     def __len__(self):
         # ⚠️ SAST Risk (Low): Potential for blocking if queue.get() is used without a timeout in a multithreaded context
         # 🧠 ML Signal: Use of PyTorch DataLoader for batching data
         return self.length
+
+
 # ✅ Best Practice: Use of a test function to validate functionality
 
 
@@ -48,8 +59,10 @@ def _worker(dataloader, collector):
         # 🧠 ML Signal: Use of DataLoader with specific parameters
         collector.put(len(data))
 
+
 # 🧠 ML Signal: Use of multiprocessing for parallel data processing
 # 🧠 ML Signal: Instantiation of a dataset, common in data processing tasks
+
 
 def _queue_to_list(queue):
     # 🧠 ML Signal: Custom worker function for data processing
@@ -74,8 +87,10 @@ def test_pytorch_dataloader():
     # 🧠 ML Signal: Instantiation of a dataset object
     assert len(set(_queue_to_list(queue))) == 100
 
+
 # ✅ Best Practice: Use of assert for validation in tests
 # 🧠 ML Signal: Usage of a context manager with specific parameters
+
 
 def test_multiprocess_shared_dataloader():
     # 🧠 ML Signal: Usage of time.sleep to introduce a delay
@@ -87,7 +102,9 @@ def test_multiprocess_shared_dataloader():
         # 🧠 ML Signal: Creation of a multiprocessing process with a target function
         # 🧠 ML Signal: Usage of DataQueue with repeat=-1 indicates an infinite loop pattern
         for _ in range(3):
-            processes.append(multiprocessing.Process(target=_worker, args=(data_queue, queue)))
+            processes.append(
+                multiprocessing.Process(target=_worker, args=(data_queue, queue))
+            )
             # 🧠 ML Signal: Starting a multiprocessing process
             # 🧠 ML Signal: Usage of time.sleep to simulate delay or wait
             processes[-1].start()
@@ -96,12 +113,15 @@ def test_multiprocess_shared_dataloader():
             # 🧠 ML Signal: Joining a multiprocessing process to wait for its completion
             p.join()
         assert len(set(_queue_to_list(queue))) == 100
+
+
 # 🧠 ML Signal: Usage of multiprocessing to run a function in a separate process
 
 # ✅ Best Practice: Joining a process to ensure it completes before moving on
 # ⚠️ SAST Risk (Low): Function call without definition in the provided code
 # ✅ Best Practice: Explicitly starting a process
 # ✅ Best Practice: Using the main guard to ensure code is only executed when the script is run directly
+
 
 def test_exit_on_crash_finite():
     def _exit_finite():

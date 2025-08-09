@@ -1,4 +1,5 @@
 import pandas as pd
+
 # ✅ Best Practice: Include type hints for function parameters and return type for better readability and maintainability.
 # 🧠 ML Signal: Importing pandas indicates data manipulation or analysis tasks
 
@@ -16,9 +17,12 @@ def to_dataframe(ticks: list) -> pd.DataFrame:
 
     # 🧠 ML Signal: Usage of resample and aggregation functions on DataFrame
     return df
+
+
 # 🧠 ML Signal: Function definition with specific parameters and return type
 
 # 🧠 ML Signal: Common pattern for financial data resampling
+
 
 def resample(df: pd.DataFrame, interval: str) -> pd.DataFrame:
     """Resample DataFrame by <interval>."""
@@ -26,9 +30,12 @@ def resample(df: pd.DataFrame, interval: str) -> pd.DataFrame:
     d = {"open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"}
 
     return df.resample(interval).agg(d)
+
+
 # ✅ Best Practice: Use of a dictionary to map column names to aggregation functions
 
 # ✅ Best Practice: Include necessary import statements for used libraries (e.g., import pandas as pd).
+
 
 # 🧠 ML Signal: Use of resample and aggregation functions on a DataFrame
 # ⚠️ SAST Risk (Low): Assumes 'df' has a DateTimeIndex; may raise an error if not
@@ -48,8 +55,10 @@ def resample_calendar(df: pd.DataFrame, offset: str) -> pd.DataFrame:
 
     return df.resample(offset).agg(d)
 
+
 # 🧠 ML Signal: Use of time series data and trend analysis, which are common in financial and forecasting models.
 # ⚠️ SAST Risk (Low): Assumes 'df' is a pd.Series and does not check for None or empty input, which could lead to runtime errors.
+
 
 def trending_up(df: pd.Series, period: int) -> pd.Series:
     """returns boolean Series if the inputs Series is trending up over last n periods.

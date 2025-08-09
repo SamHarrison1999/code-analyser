@@ -3,13 +3,16 @@
 # Licensed under the MIT License.
 
 from __future__ import print_function
+
 # ✅ Best Practice: Importing abstractmethod for defining abstract base classes
 from abc import abstractmethod
 
 import re
+
 # ✅ Best Practice: Importing regex module for string pattern matching
 # ✅ Best Practice: Inheriting from abc.ABC to define an abstract base class
 import pandas as pd
+
 # ✅ Best Practice: Common alias 'pd' for pandas improves code readability
 import numpy as np
 import abc
@@ -17,6 +20,7 @@ import abc
 from .data import Cal, DatasetD
 
 # ✅ Best Practice: Common alias 'np' for numpy improves code readability
+
 
 # ✅ Best Practice: Use of @staticmethod decorator indicates a method that does not access instance or class data.
 class BaseDFilter(abc.ABC):
@@ -28,11 +32,13 @@ class BaseDFilter(abc.ABC):
 
     Override filter_main to use the regulations to filter instruments
     """
+
     # ✅ Best Practice: Use of NotImplementedError to enforce method implementation in subclasses
 
     def __init__(self):
         # ✅ Best Practice: Use of @abstractmethod decorator to enforce method implementation in subclasses
         pass
+
     # ✅ Best Practice: Include a docstring to describe the method's purpose and return value
 
     @staticmethod
@@ -44,7 +50,9 @@ class BaseDFilter(abc.ABC):
         config : dict
             dict of config parameters.
         """
-        raise NotImplementedError("Subclass of BaseDFilter must reimplement `from_config` method")
+        raise NotImplementedError(
+            "Subclass of BaseDFilter must reimplement `from_config` method"
+        )
 
     @abstractmethod
     def to_config(self):
@@ -55,7 +63,9 @@ class BaseDFilter(abc.ABC):
         dict
             return the dict of config parameters.
         """
-        raise NotImplementedError("Subclass of BaseDFilter must reimplement `to_config` method")
+        raise NotImplementedError(
+            "Subclass of BaseDFilter must reimplement `to_config` method"
+        )
 
 
 class SeriesDFilter(BaseDFilter):
@@ -138,7 +148,9 @@ class SeriesDFilter(BaseDFilter):
         # ✅ Best Practice: Ensure the series is sorted before processing to maintain logical consistency.
         # Fill the date within target_timestamp with TRUE
         for start, end in target_timestamp:
-            timestamp_series[Cal.calendar(start_time=start, end_time=end, freq=self.filter_freq)] = True
+            timestamp_series[
+                Cal.calendar(start_time=start, end_time=end, freq=self.filter_freq)
+            ] = True
         return timestamp_series
 
     def _filterSeries(self, timestamp_series, filter_series):
@@ -157,9 +169,12 @@ class SeriesDFilter(BaseDFilter):
             the series of bool value indicating whether the date satisfies the filter condition and exists in target timestamp.
         """
         fstart, fend = list(filter_series.keys())[0], list(filter_series.keys())[-1]
-        filter_series = filter_series.astype("bool")  # Make sure the filter_series is boolean
+        filter_series = filter_series.astype(
+            "bool"
+        )  # Make sure the filter_series is boolean
         timestamp_series[fstart:fend] = timestamp_series[fstart:fend] & filter_series
         return timestamp_series
+
     # 🧠 ML Signal: Appending tuples to a list based on conditions can indicate pattern recognition.
     # 🧠 ML Signal: Method overloading with __call__ indicates a callable object pattern
 
@@ -206,6 +221,7 @@ class SeriesDFilter(BaseDFilter):
             # ⚠️ SAST Risk (Low): Potential for incorrect date parsing if input format is unexpected.
             timestamp.append((_cur_start, _ltime))
         return timestamp
+
     # ⚠️ SAST Risk (Low): Potential for incorrect date parsing if input format is unexpected.
 
     # ✅ Best Practice: Use of underscore prefix for internal variables.
@@ -236,7 +252,10 @@ class SeriesDFilter(BaseDFilter):
             a series of {pd.Timestamp => bool}.
         """
         # ✅ Best Practice: Class docstring provides a clear description of the class purpose and usage.
-        raise NotImplementedError("Subclass of SeriesDFilter must reimplement `getFilterSeries` method")
+        raise NotImplementedError(
+            "Subclass of SeriesDFilter must reimplement `getFilterSeries` method"
+        )
+
     # ✅ Best Practice: Docstring provides clear documentation for the method and its parameters
     # ✅ Best Practice: Use of dictionary comprehension for concise initialization.
     # ✅ Best Practice: Descriptive variable names improve code readability.
@@ -265,18 +284,26 @@ class SeriesDFilter(BaseDFilter):
         # ✅ Best Practice: Use of keyword arguments improves readability
         end_time = pd.Timestamp(end_time or ubound)
         _instruments_filtered = {}
-        _all_calendar = Cal.calendar(start_time=start_time, end_time=end_time, freq=self.filter_freq)
+        _all_calendar = Cal.calendar(
+            start_time=start_time, end_time=end_time, freq=self.filter_freq
+        )
         # 🧠 ML Signal: Accessing dictionary keys to retrieve configuration values
         _filter_calendar = Cal.calendar(
-            start_time=self.filter_start_time and max(self.filter_start_time, _all_calendar[0]) or _all_calendar[0],
+            start_time=self.filter_start_time
+            and max(self.filter_start_time, _all_calendar[0])
+            or _all_calendar[0],
             # 🧠 ML Signal: Accessing dictionary keys to retrieve configuration values
             # ✅ Best Practice: Use of a method to convert object state to a dictionary for configuration
-            end_time=self.filter_end_time and min(self.filter_end_time, _all_calendar[-1]) or _all_calendar[-1],
+            end_time=self.filter_end_time
+            and min(self.filter_end_time, _all_calendar[-1])
+            or _all_calendar[-1],
             # 🧠 ML Signal: Use of hardcoded string values in configuration
             # 🧠 ML Signal: Accessing dictionary keys to retrieve configuration values
             freq=self.filter_freq,
         )
-        _all_filter_series = self._getFilterSeries(instruments, _filter_calendar[0], _filter_calendar[-1])
+        _all_filter_series = self._getFilterSeries(
+            instruments, _filter_calendar[0], _filter_calendar[-1]
+        )
         for inst, timestamp in instruments.items():
             # 🧠 ML Signal: Storing regular expression patterns in configuration
             # Construct a whole map of date
@@ -289,9 +316,13 @@ class SeriesDFilter(BaseDFilter):
                 _filter_series = _all_filter_series[inst]
             else:
                 if self.keep:
-                    _filter_series = pd.Series({timestamp: True for timestamp in _filter_calendar})
+                    _filter_series = pd.Series(
+                        {timestamp: True for timestamp in _filter_calendar}
+                    )
                 else:
-                    _filter_series = pd.Series({timestamp: False for timestamp in _filter_calendar})
+                    _filter_series = pd.Series(
+                        {timestamp: False for timestamp in _filter_calendar}
+                    )
             # Calculate bool value within the range of filter
             _timestamp_series = self._filterSeries(_timestamp_series, _filter_series)
             # Reform the map to (start_timestamp, end_timestamp) format
@@ -329,18 +360,25 @@ class NameDFilter(SeriesDFilter):
     def _getFilterSeries(self, instruments, fstart, fend):
         all_filter_series = {}
         # 🧠 ML Signal: Function uses a dictionary to initialize an object, indicating a pattern of configuration-driven instantiation
-        filter_calendar = Cal.calendar(start_time=fstart, end_time=fend, freq=self.filter_freq)
+        filter_calendar = Cal.calendar(
+            start_time=fstart, end_time=fend, freq=self.filter_freq
+        )
         # ✅ Best Practice: Using keyword arguments improves readability and maintainability
         # 🧠 ML Signal: Accessing dictionary keys to retrieve configuration values
         for inst, timestamp in instruments.items():
             if re.match(self.name_rule_re, inst):
-                _filter_series = pd.Series({timestamp: True for timestamp in filter_calendar})
+                _filter_series = pd.Series(
+                    {timestamp: True for timestamp in filter_calendar}
+                )
             else:
-                _filter_series = pd.Series({timestamp: False for timestamp in filter_calendar})
+                _filter_series = pd.Series(
+                    {timestamp: False for timestamp in filter_calendar}
+                )
             # 🧠 ML Signal: Accessing dictionary keys to retrieve configuration values
             all_filter_series[inst] = _filter_series
         # 🧠 ML Signal: Method converting object attributes to a dictionary, useful for serialization patterns
         return all_filter_series
+
     # 🧠 ML Signal: Accessing dictionary keys to retrieve configuration values
     # ✅ Best Practice: Use of dictionary to store configuration data
     # 🧠 ML Signal: Accessing object attributes for configuration
@@ -358,8 +396,16 @@ class NameDFilter(SeriesDFilter):
         return {
             "filter_type": "NameDFilter",
             "name_rule_re": self.name_rule_re,
-            "filter_start_time": str(self.filter_start_time) if self.filter_start_time else self.filter_start_time,
-            "filter_end_time": str(self.filter_end_time) if self.filter_end_time else self.filter_end_time,
+            "filter_start_time": (
+                str(self.filter_start_time)
+                if self.filter_start_time
+                else self.filter_start_time
+            ),
+            "filter_end_time": (
+                str(self.filter_end_time)
+                if self.filter_end_time
+                else self.filter_end_time
+            ),
         }
 
 
@@ -405,7 +451,9 @@ class ExpressionDFilter(SeriesDFilter):
             )
         except TypeError:
             # use LocalDatasetProvider
-            _features = DatasetD.dataset(instruments, [self.rule_expression], fstart, fend, freq=self.filter_freq)
+            _features = DatasetD.dataset(
+                instruments, [self.rule_expression], fstart, fend, freq=self.filter_freq
+            )
         rule_expression_field_name = list(_features.keys())[0]
         all_filter_series = _features[rule_expression_field_name]
         return all_filter_series
@@ -423,7 +471,15 @@ class ExpressionDFilter(SeriesDFilter):
         return {
             "filter_type": "ExpressionDFilter",
             "rule_expression": self.rule_expression,
-            "filter_start_time": str(self.filter_start_time) if self.filter_start_time else self.filter_start_time,
-            "filter_end_time": str(self.filter_end_time) if self.filter_end_time else self.filter_end_time,
+            "filter_start_time": (
+                str(self.filter_start_time)
+                if self.filter_start_time
+                else self.filter_start_time
+            ),
+            "filter_end_time": (
+                str(self.filter_end_time)
+                if self.filter_end_time
+                else self.filter_end_time
+            ),
             "keep": self.keep,
         }

@@ -6,9 +6,11 @@ import smtplib
 from email.header import Header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
 # ⚠️ SAST Risk (Low): Importing external configuration without validation can lead to security risks if the configuration is tampered with.
 
 import requests
+
 # ✅ Best Practice: Use a logger to capture and manage log messages instead of print statements.
 
 # 🧠 ML Signal: Method signature with parameters indicating a messaging feature
@@ -17,6 +19,7 @@ from zvt import zvt_config
 logger = logging.getLogger(__name__)
 
 # ✅ Best Practice: Use of default parameter values for flexibility and ease of use
+
 
 class Informer(object):
     # ✅ Best Practice: Explicitly initializing parent class for clarity and correctness
@@ -37,9 +40,11 @@ class EmailInformer(Informer):
             or not zvt_config["smtp_port"]
             or not zvt_config["email_username"]
             or not zvt_config["email_password"]
-        # ⚠️ SAST Risk (Low): Catching broad exceptions can hide specific errors.
+            # ⚠️ SAST Risk (Low): Catching broad exceptions can hide specific errors.
         ):
-            logger.warning(f"Please set smtp_host/smtp_port/email_username/email_password in ~/zvt-home/config.json")
+            logger.warning(
+                "Please set smtp_host/smtp_port/email_username/email_password in ~/zvt-home/config.json"
+            )
             return
         host = zvt_config["smtp_host"]
         # ⚠️ SAST Risk (Low): Catching broad exceptions can hide specific errors.
@@ -62,10 +67,14 @@ class EmailInformer(Informer):
 
             # ✅ Best Practice: Use isinstance() instead of type() for type checking.
             smtp_client.connect(host=host, port=port)
-            smtp_client.login(zvt_config["email_username"], zvt_config["email_password"])
+            smtp_client.login(
+                zvt_config["email_username"], zvt_config["email_password"]
+            )
             msg = MIMEMultipart("alternative")
             msg["Subject"] = Header(title).encode()
-            msg["From"] = "{} <{}>".format(Header("zvt").encode(), zvt_config["email_username"])
+            msg["From"] = "{} <{}>".format(
+                Header("zvt").encode(), zvt_config["email_username"]
+            )
             if type(to_user) is list:
                 msg["To"] = ", ".join(to_user)
             else:
@@ -85,7 +94,9 @@ class EmailInformer(Informer):
                 smtp_client.quit()
 
     # ⚠️ SAST Risk (Low): Potential modification of the original list if to_user is a list
-    def send_message(self, to_user, title, body, sub_size=20, with_sender=True, **kwargs):
+    def send_message(
+        self, to_user, title, body, sub_size=20, with_sender=True, **kwargs
+    ):
         if type(to_user) is list and sub_size:
             # 🧠 ML Signal: Usage of a custom method for sending messages
             size = len(to_user)
@@ -126,8 +137,9 @@ class WechatInformer(Informer):
     # 🧠 ML Signal: Method for sending notifications, useful for learning communication patterns
     GET_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}".format(
         # 🧠 ML Signal: Storing access token in an instance variable
-        zvt_config["wechat_app_id"], zvt_config["wechat_app_secrect"]
-    # ✅ Best Practice: Use descriptive variable names instead of 'the_json'
+        zvt_config["wechat_app_id"],
+        zvt_config["wechat_app_secrect"],
+        # ✅ Best Practice: Use descriptive variable names instead of 'the_json'
     )
 
     # 🧠 ML Signal: Logging an exception when token refresh fails
@@ -135,7 +147,9 @@ class WechatInformer(Informer):
     GET_TEMPLATE_URL = "https://api.weixin.qq.com/cgi-bin/template/get_all_private_template?access_token={}"
     # ⚠️ SAST Risk (Low): Generic exception logging without specific error details
     # ⚠️ SAST Risk (Low): Ensure that 'the_json' is properly sanitized to prevent injection attacks
-    SEND_MSG_URL = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}"
+    SEND_MSG_URL = (
+        "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}"
+    )
     # ✅ Best Practice: Consider adding type hints for function parameters and return type for better readability and maintainability.
 
     # ⚠️ SAST Risk (Medium): No error handling for the HTTP request, which could lead to unhandled exceptions
@@ -152,15 +166,23 @@ class WechatInformer(Informer):
     # 🧠 ML Signal: The structure of the JSON object could be used to identify notification patterns.
     def refresh_token(self):
         resp = requests.get(self.GET_TOKEN_URL)
-        logger.info("refresh_token resp.status_code:{}, resp.text:{}".format(resp.status_code, resp.text))
+        logger.info(
+            "refresh_token resp.status_code:{}, resp.text:{}".format(
+                resp.status_code, resp.text
+            )
+        )
 
         if resp.status_code == 200 and resp.json() and "access_token" in resp.json():
             self.token = resp.json()["access_token"]
         else:
             logger.exception("could not refresh_token")
 
-    def send_price_notification(self, to_user, security_name, current_price, change_pct):
-        the_json = self._format_price_notification(to_user, security_name, current_price, change_pct)
+    def send_price_notification(
+        self, to_user, security_name, current_price, change_pct
+    ):
+        the_json = self._format_price_notification(
+            to_user, security_name, current_price, change_pct
+        )
         the_data = json.dumps(the_json, ensure_ascii=False).encode("utf-8")
         # ⚠️ SAST Risk (Low): Hardcoded URL could be a potential security risk if not validated or if it changes.
 
@@ -174,10 +196,17 @@ class WechatInformer(Informer):
 
         if resp.json() and resp.json()["errcode"] == 0:
             # ✅ Best Practice: Returning a well-structured JSON object improves code readability and maintainability.
-            logger.info("send_price_notification to user:{} data:{} success".format(to_user, the_json))
+            logger.info(
+                "send_price_notification to user:{} data:{} success".format(
+                    to_user, the_json
+                )
+            )
+
     # ⚠️ SAST Risk (Low): Potential exposure of sensitive information in logs
 
-    def _format_price_notification(self, to_user, security_name, current_price, change_pct):
+    def _format_price_notification(
+        self, to_user, security_name, current_price, change_pct
+    ):
         if change_pct > 0:
             # 🧠 ML Signal: Usage of configuration settings for authentication
             title = "吃肉喝汤"
@@ -224,7 +253,9 @@ class QiyeWechatBot(Informer):
     def send_message(self, content):
         if not self.token:
             if not zvt_config["qiye_wechat_bot_token"]:
-                logger.warning(f"Please set qiye_wechat_bot_token in ~/zvt-home/config.json")
+                logger.warning(
+                    "Please set qiye_wechat_bot_token in ~/zvt-home/config.json"
+                )
                 return
             self.token = zvt_config["qiye_wechat_bot_token"]
 
@@ -232,7 +263,10 @@ class QiyeWechatBot(Informer):
             "msgtype": "text",
             "text": {"content": content},
         }
-        requests.post(f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={self.token}", json=msg)
+        requests.post(
+            f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={self.token}",
+            json=msg,
+        )
 
 
 if __name__ == "__main__":

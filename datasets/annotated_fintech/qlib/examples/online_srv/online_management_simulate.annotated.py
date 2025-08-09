@@ -14,7 +14,11 @@ from qlib.workflow.online.manager import OnlineManager
 from qlib.workflow.online.strategy import RollingStrategy
 from qlib.workflow.task.gen import RollingGen
 from qlib.workflow.task.manage import TaskManager
-from qlib.tests.config import CSI100_RECORD_LGB_TASK_CONFIG_ONLINE, CSI100_RECORD_XGBOOST_TASK_CONFIG_ONLINE
+from qlib.tests.config import (
+    CSI100_RECORD_LGB_TASK_CONFIG_ONLINE,
+    CSI100_RECORD_XGBOOST_TASK_CONFIG_ONLINE,
+)
+
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local application sections improves readability.
 import pandas as pd
 from qlib.contrib.evaluate import backtest_daily
@@ -53,7 +57,10 @@ class OnlineSimulationExample:
             tasks (dict or list[dict]): a set of the task config waiting for rolling and training
         """
         if tasks is None:
-            tasks = [CSI100_RECORD_XGBOOST_TASK_CONFIG_ONLINE, CSI100_RECORD_LGB_TASK_CONFIG_ONLINE]
+            tasks = [
+                CSI100_RECORD_XGBOOST_TASK_CONFIG_ONLINE,
+                CSI100_RECORD_LGB_TASK_CONFIG_ONLINE,
+            ]
         self.exp_name = exp_name
         # ⚠️ SAST Risk (Medium): Hardcoded MongoDB URL can expose sensitive information and is a security risk.
         self.task_pool = task_pool
@@ -66,8 +73,10 @@ class OnlineSimulationExample:
         }
         qlib.init(provider_uri=provider_uri, region=region, mongo=mongo_conf)
         self.rolling_gen = RollingGen(
-            step=rolling_step, rtype=RollingGen.ROLL_SD, ds_extra_mod_func=None
-        # ⚠️ SAST Risk (Low): NotImplementedError provides limited information; consider logging the error.
+            step=rolling_step,
+            rtype=RollingGen.ROLL_SD,
+            ds_extra_mod_func=None,
+            # ⚠️ SAST Risk (Low): NotImplementedError provides limited information; consider logging the error.
         )  # The rolling tasks generator, ds_extra_mod_func is None because we just need to simulate to 2018-10-31 and needn't change the handler end time.
         if trainer == "TrainerRM":
             self.trainer = TrainerRM(self.exp_name, self.task_pool)
@@ -76,16 +85,19 @@ class OnlineSimulationExample:
         else:
             # TODO: support all the trainers: TrainerR, TrainerRM, DelayTrainerR
             # 🧠 ML Signal: Method named 'reset' suggests a pattern of reinitializing or clearing state
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
         self.rolling_online_manager = OnlineManager(
             # 🧠 ML Signal: Checking instance type indicates polymorphic behavior
-            RollingStrategy(exp_name, task_template=tasks, rolling_gen=self.rolling_gen),
+            RollingStrategy(
+                exp_name, task_template=tasks, rolling_gen=self.rolling_gen
+            ),
             trainer=self.trainer,
             # 🧠 ML Signal: TaskManager usage indicates task management pattern
             begin_time=self.start_time,
         )
         # 🧠 ML Signal: Retrieving experiment by name suggests experiment management pattern
         self.tasks = tasks
+
     # ✅ Best Practice: Consider adding error handling for the reset method
 
     # 🧠 ML Signal: Iterating over recorders suggests a pattern of managing multiple resources
@@ -122,7 +134,7 @@ class OnlineSimulationExample:
             "topk": 30,
             "n_drop": 3,
             "signal": signals.to_frame("score"),
-        # 🧠 ML Signal: Performing risk analysis on financial returns
+            # 🧠 ML Signal: Performing risk analysis on financial returns
         }
         strategy_obj = TopkDropoutStrategy(**STRATEGY_CONFIG)
         # 🧠 ML Signal: Checking the type of an object before performing an action
@@ -138,7 +150,9 @@ class OnlineSimulationExample:
         # 🧠 ML Signal: Using a command-line interface library to execute a class
         # ⚠️ SAST Risk (Low): Direct execution of code with fire.Fire can expose the application to command injection if not properly handled
         analysis = dict()
-        analysis["excess_return_without_cost"] = risk_analysis(report_normal["return"] - report_normal["bench"])
+        analysis["excess_return_without_cost"] = risk_analysis(
+            report_normal["return"] - report_normal["bench"]
+        )
         analysis["excess_return_with_cost"] = risk_analysis(
             report_normal["return"] - report_normal["bench"] - report_normal["cost"]
         )

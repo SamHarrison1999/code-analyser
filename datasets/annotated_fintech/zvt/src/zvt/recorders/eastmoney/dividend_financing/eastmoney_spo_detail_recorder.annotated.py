@@ -4,6 +4,7 @@ from zvt.recorders.eastmoney.common import EastmoneyPageabeDataRecorder
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import now_pd_timestamp
 from zvt.utils.utils import to_float
+
 # ✅ Best Practice: Define class variables for schema and URLs to improve readability and maintainability.
 
 
@@ -57,9 +58,9 @@ class SPODetailRecorder(EastmoneyPageabeDataRecorder):
                 # ⚠️ SAST Risk (Low): Direct database commit without error handling
                 start_timestamp=item.timestamp,
                 end_timestamp="{}-12-31".format(item.timestamp.year),
-            # ✅ Best Practice: Explicit call to superclass method
-            # 🧠 ML Signal: Instantiation and execution of a class with specific parameters
-            # ✅ Best Practice: Use of __all__ to define public API of the module
+                # ✅ Best Practice: Explicit call to superclass method
+                # 🧠 ML Signal: Instantiation and execution of a class with specific parameters
+                # ✅ Best Practice: Use of __all__ to define public API of the module
             )
             if pd_is_not_null(df):
                 item.spo_raising_fund = df["spo_raising_fund"].sum()

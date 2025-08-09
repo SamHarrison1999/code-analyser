@@ -5,16 +5,21 @@ import pandas as pd
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.contract import IntervalLevel
 from zvt.contract.api import df_to_db
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.domain import IndexMoneyFlow, Index, StockMoneyFlow
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.utils.pd_utils import pd_is_not_null
+
 # 🧠 ML Signal: Inheritance from a specific base class indicates a design pattern or framework usage
 from zvt.utils.time_utils import to_time_str
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 
 # 🧠 ML Signal: Hardcoded string values can indicate configuration or categorical data
+
 
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 class JoinquantIndexMoneyFlowRecorder(FixedCycleDataRecorder):
@@ -48,8 +53,8 @@ class JoinquantIndexMoneyFlowRecorder(FixedCycleDataRecorder):
         kdata_use_begin_time=False,
         one_day_trading_minutes=24 * 60,
         return_unfinished=False,
-    # ✅ Best Practice: Use of set intersection to filter supported codes
-    # ✅ Best Practice: Proper use of super() to initialize the parent class
+        # ✅ Best Practice: Use of set intersection to filter supported codes
+        # ✅ Best Practice: Proper use of super() to initialize the parent class
     ) -> None:
         # 上证指数，深证成指，创业板指，科创板
         support_codes = ["000001", "399001", "399006", "000688"]
@@ -84,12 +89,16 @@ class JoinquantIndexMoneyFlowRecorder(FixedCycleDataRecorder):
         # 上证
         if entity.code == "000001":
             all_df = StockMoneyFlow.query_data(
-                provider=self.provider, start_timestamp=start, filters=[StockMoneyFlow.entity_id.like("stock_sh%")]
+                provider=self.provider,
+                start_timestamp=start,
+                filters=[StockMoneyFlow.entity_id.like("stock_sh%")],
             )
         # 深证
         elif entity.code == "399001":
             all_df = StockMoneyFlow.query_data(
-                provider=self.provider, start_timestamp=start, filters=[StockMoneyFlow.entity_id.like("stock_sz%")]
+                provider=self.provider,
+                start_timestamp=start,
+                filters=[StockMoneyFlow.entity_id.like("stock_sz%")],
             )
         # ✅ Best Practice: Check if DataFrame is not null before processing
         # 创业板
@@ -97,12 +106,16 @@ class JoinquantIndexMoneyFlowRecorder(FixedCycleDataRecorder):
         # 🧠 ML Signal: Creating a series with specific data
         elif entity.code == "399006":
             all_df = StockMoneyFlow.query_data(
-                provider=self.provider, start_timestamp=start, filters=[StockMoneyFlow.code.like("300%")]
+                provider=self.provider,
+                start_timestamp=start,
+                filters=[StockMoneyFlow.code.like("300%")],
             )
         # 科创板
         elif entity.code == "000688":
             all_df = StockMoneyFlow.query_data(
-                provider=self.provider, start_timestamp=start, filters=[StockMoneyFlow.code.like("688%")]
+                provider=self.provider,
+                start_timestamp=start,
+                filters=[StockMoneyFlow.code.like("688%")],
             )
 
         if pd_is_not_null(all_df):
@@ -147,7 +160,10 @@ class JoinquantIndexMoneyFlowRecorder(FixedCycleDataRecorder):
                 self.logger.info(index_df)
 
                 df_to_db(
-                    df=index_df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update
+                    df=index_df,
+                    data_schema=self.data_schema,
+                    provider=self.provider,
+                    force_update=self.force_update,
                 )
 
         return None

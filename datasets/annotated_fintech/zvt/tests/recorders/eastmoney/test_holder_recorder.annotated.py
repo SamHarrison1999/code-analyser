@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from ...context import init_test_context
+
 # 🧠 ML Signal: Initialization of test context, indicating a setup phase for testing
 
 init_test_context()
@@ -7,14 +8,21 @@ init_test_context()
 
 # 🧠 ML Signal: Function definition for testing, indicating a test pattern
 from zvt.consts import SAMPLE_STOCK_CODES
+
 # 🧠 ML Signal: Importing a specific recorder class, indicating a pattern of data recording
 
 # 🧠 ML Signal: Instantiation of a class with a specific parameter
-from zvt.recorders.eastmoney.holder.eastmoney_top_ten_holder_recorder import TopTenHolderRecorder
+from zvt.recorders.eastmoney.holder.eastmoney_top_ten_holder_recorder import (
+    TopTenHolderRecorder,
+)
+
 # 🧠 ML Signal: Importing another specific recorder class, indicating a pattern of data recording
-from zvt.recorders.eastmoney.holder.eastmoney_top_ten_tradable_holder_recorder import TopTenTradableHolderRecorder
+from zvt.recorders.eastmoney.holder.eastmoney_top_ten_tradable_holder_recorder import (
+    TopTenTradableHolderRecorder,
+)
 
 # 🧠 ML Signal: Method invocation on an object
+
 
 # 🧠 ML Signal: Function definition for testing, indicating a test pattern
 def test_top_ten_holder_recorder():

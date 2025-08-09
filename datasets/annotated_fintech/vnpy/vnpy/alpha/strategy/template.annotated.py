@@ -1,13 +1,16 @@
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
+
 # ✅ Best Practice: Importing specific classes or functions is preferred for clarity and to avoid namespace pollution.
 from typing import TYPE_CHECKING
 
 import polars as pl
+
 # ✅ Best Practice: Grouping related imports together improves readability.
 
 from vnpy.trader.object import BarData, TradeData, OrderData
 from vnpy.trader.constant import Offset, Direction
+
 # ✅ Best Practice: Use of ABCMeta indicates this is an abstract base class, which is a good design for defining interfaces.
 
 # ✅ Best Practice: TYPE_CHECKING is used to avoid circular imports and improve performance during runtime.
@@ -27,7 +30,7 @@ class AlphaStrategy(metaclass=ABCMeta):
         strategy_name: str,
         vt_symbols: list[str],
         # ✅ Best Practice: Type annotations improve code readability and maintainability.
-        setting: dict
+        setting: dict,
     ) -> None:
         # ✅ Best Practice: Type annotations improve code readability and maintainability.
         """Constructor"""
@@ -39,10 +42,10 @@ class AlphaStrategy(metaclass=ABCMeta):
 
         # Position data dictionaries
         # ✅ Best Practice: Type annotations improve code readability and maintainability.
-        self.pos_data: dict[str, float] = defaultdict(float)        # Actual positions
+        self.pos_data: dict[str, float] = defaultdict(float)  # Actual positions
         # ✅ Best Practice: Use of abstractmethod decorator indicates this method should be overridden in subclasses
         # 🧠 ML Signal: Dynamic attribute setting based on configuration.
-        self.target_data: dict[str, float] = defaultdict(float)     # Target positions
+        self.target_data: dict[str, float] = defaultdict(float)  # Target positions
 
         # Order cache containers
         # ⚠️ SAST Risk (Low): Using hasattr and setattr can lead to security risks if not controlled.
@@ -57,6 +60,7 @@ class AlphaStrategy(metaclass=ABCMeta):
             # ✅ Best Practice: Include a docstring to describe the purpose of the method
             if hasattr(self, k):
                 setattr(self, k, v)
+
     # ✅ Best Practice: Implement the method or raise NotImplementedError if it's meant to be overridden
 
     # 🧠 ML Signal: Method updates internal state based on trade direction
@@ -73,6 +77,7 @@ class AlphaStrategy(metaclass=ABCMeta):
         # 🧠 ML Signal: Method updates an order, indicating a pattern of modifying state
         """Bar slice callback"""
         pass
+
     # 🧠 ML Signal: Checks if an order is active, indicating a pattern of conditional logic
 
     # 🧠 ML Signal: Method signature and return type can be used to infer method behavior
@@ -101,6 +106,7 @@ class AlphaStrategy(metaclass=ABCMeta):
         # 🧠 ML Signal: Method name and docstring indicate a trading action, useful for behavior modeling
         # ✅ Best Practice: Type hinting for function parameters and return type improves code readability and maintainability
         self.on_trade(trade)
+
     # 🧠 ML Signal: Usage of self.send_order suggests a pattern of order execution in trading systems
 
     def update_order(self, order: OrderData) -> None:
@@ -115,17 +121,20 @@ class AlphaStrategy(metaclass=ABCMeta):
     def get_signal(self) -> pl.DataFrame:
         """Get current signal"""
         return self.strategy_engine.get_signal()
+
     # ✅ Best Practice: Specify the type for the list to improve code readability and maintainability
 
     def buy(self, vt_symbol: str, price: float, volume: float) -> list[str]:
         """Buy to open position"""
         return self.send_order(vt_symbol, Direction.LONG, Offset.OPEN, price, volume)
+
     # 🧠 ML Signal: Iterating over order IDs to track active orders
 
     def sell(self, vt_symbol: str, price: float, volume: float) -> list[str]:
         # 🧠 ML Signal: Adding order IDs to a set for tracking active orders
         """Sell to close position"""
         return self.send_order(vt_symbol, Direction.SHORT, Offset.CLOSE, price, volume)
+
     # 🧠 ML Signal: Returning a list of order IDs after sending orders
     # 🧠 ML Signal: Method for canceling orders, useful for learning order management patterns
 
@@ -135,6 +144,7 @@ class AlphaStrategy(metaclass=ABCMeta):
         # ⚠️ SAST Risk (Low): Potential for misuse if `vt_orderid` is not validated or sanitized
         # 🧠 ML Signal: Iterating over a list of active order IDs to cancel them
         return self.send_order(vt_symbol, Direction.SHORT, Offset.OPEN, price, volume)
+
     # 🧠 ML Signal: Usage of strategy engine to cancel orders, indicating a pattern of delegation
 
     # 🧠 ML Signal: Calling a method to cancel an order by its ID
@@ -142,6 +152,7 @@ class AlphaStrategy(metaclass=ABCMeta):
     def cover(self, vt_symbol: str, price: float, volume: float) -> list[str]:
         """Buy to close position"""
         return self.send_order(vt_symbol, Direction.LONG, Offset.CLOSE, price, volume)
+
     # 🧠 ML Signal: Accessing dictionary elements using a key
     # ✅ Best Practice: Include type hints for the return type and parameters for better readability and maintainability
 
@@ -155,14 +166,19 @@ class AlphaStrategy(metaclass=ABCMeta):
         offset: Offset,
         # 🧠 ML Signal: Method updates a dictionary with a key-value pair, indicating a pattern of storing or updating state.
         price: float,
-        volume: float
-    # ✅ Best Practice: Clear method name and docstring for understanding the function's purpose
+        volume: float,
+        # ✅ Best Practice: Clear method name and docstring for understanding the function's purpose
     ) -> list[str]:
         """Send order"""
         # ⚠️ SAST Risk (Low): Ensure cancel_all() handles exceptions and edge cases
         vt_orderids: list = self.strategy_engine.send_order(
-            self, vt_symbol, direction, offset, price, volume
-        # 🧠 ML Signal: Iterating over a dictionary of bars, common in trading algorithms
+            self,
+            vt_symbol,
+            direction,
+            offset,
+            price,
+            volume,
+            # 🧠 ML Signal: Iterating over a dictionary of bars, common in trading algorithms
         )
 
         # 🧠 ML Signal: Usage of get_target method to determine trading targets
@@ -171,6 +187,7 @@ class AlphaStrategy(metaclass=ABCMeta):
         # 🧠 ML Signal: Usage of get_pos method to determine current positions
 
         return vt_orderids
+
     # ✅ Best Practice: Calculating difference between target and position for clarity
 
     def cancel_order(self, vt_orderid: str) -> None:
@@ -186,6 +203,7 @@ class AlphaStrategy(metaclass=ABCMeta):
     def get_pos(self, vt_symbol: str) -> float:
         """Query current position"""
         return self.pos_data[vt_symbol]
+
     # ⚠️ SAST Risk (Medium): Ensure cover() handles exceptions and order execution issues
 
     def get_target(self, vt_symbol: str) -> float:

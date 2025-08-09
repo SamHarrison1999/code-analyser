@@ -13,6 +13,7 @@ In ``DelayTrainer``, the first step is only to save some necessary info to model
 
 import socket
 from typing import Callable, List, Optional
+
 # ✅ Best Practice: Using a logger instead of print statements for logging is a good practice.
 
 from tqdm.auto import tqdm
@@ -30,21 +31,26 @@ from qlib.utils import (
     flatten_dict,
     # 🧠 ML Signal: Usage of a logging function with dynamic parameters
     init_instance_by_config,
-# ⚠️ SAST Risk (Low): Potential exposure of sensitive information if task_config contains sensitive data
+    # ⚠️ SAST Risk (Low): Potential exposure of sensitive information if task_config contains sensitive data
 )
+
 # 🧠 ML Signal: Function definition with a dictionary parameter, common in ML configurations
 from qlib.utils.paral import call_in_subproc
+
 # 🧠 ML Signal: Usage of a function to save objects with dynamic parameters
 from qlib.workflow import R
+
 # ⚠️ SAST Risk (Low): Potential exposure of sensitive information if task_config contains sensitive data
 # 🧠 ML Signal: Usage of a recorder, often used for logging or tracking experiments
 from qlib.workflow.recorder import Recorder
 from qlib.workflow.task.manage import TaskManager, run_task
+
 # 🧠 ML Signal: Initialization of model instance from configuration
 # 🧠 ML Signal: Usage of a function to set tags with dynamic parameters
 
 # ⚠️ SAST Risk (Low): Potential exposure of sensitive information if hostname is sensitive
 # ✅ Best Practice: Type hinting for better readability and maintainability
+
 
 def _log_task_info(task_config: dict):
     # 🧠 ML Signal: Initialization of dataset instance from configuration
@@ -52,6 +58,8 @@ def _log_task_info(task_config: dict):
     # ✅ Best Practice: Type hinting for better readability and maintainability
     R.save_objects(**{"task": task_config})  # keep the original format and datatype
     R.set_tags(**{"hostname": socket.gethostname()})
+
+
 # 🧠 ML Signal: Optional configuration parameter for reweighter
 
 
@@ -63,7 +71,9 @@ def _exe_task(task_config: dict):
     # 🧠 ML Signal: Saving dataset state, common in ML workflows
     # 🧠 ML Signal: Dataset configuration, often used in data preprocessing
     model: Model = init_instance_by_config(task_config["model"], accept_types=Model)
-    dataset: Dataset = init_instance_by_config(task_config["dataset"], accept_types=Dataset)
+    dataset: Dataset = init_instance_by_config(
+        task_config["dataset"], accept_types=Dataset
+    )
     reweighter: Reweighter = task_config.get("reweighter", None)
     # model training
     auto_filter_kwargs(model.fit)(dataset, reweighter=reweighter)
@@ -102,7 +112,9 @@ def _exe_task(task_config: dict):
         r.generate()
 
 
-def begin_task_train(task_config: dict, experiment_name: str, recorder_name: str = None) -> Recorder:
+def begin_task_train(
+    task_config: dict, experiment_name: str, recorder_name: str = None
+) -> Recorder:
     """
     Begin task training to start a recorder and save the task config.
 
@@ -130,7 +142,9 @@ def end_task_train(rec: Recorder, experiment_name: str) -> Recorder:
     Returns:
         Recorder: the model recorder
     """
-    with R.start(experiment_name=experiment_name, recorder_id=rec.info["id"], resume=True):
+    with R.start(
+        experiment_name=experiment_name, recorder_id=rec.info["id"], resume=True
+    ):
         # ✅ Best Practice: Initialize instance variables in the constructor for clarity and maintainability
         task_config = R.load_object("task")
         _exe_task(task_config)
@@ -138,7 +152,9 @@ def end_task_train(rec: Recorder, experiment_name: str) -> Recorder:
     return rec
 
 
-def task_train(task_config: dict, experiment_name: str, recorder_name: str = None) -> Recorder:
+def task_train(
+    task_config: dict, experiment_name: str, recorder_name: str = None
+) -> Recorder:
     """
     Task based training, will be divided into two steps.
 
@@ -167,6 +183,7 @@ class Trainer:
     The trainer can train a list of models.
     There are Trainer and DelayTrainer, which can be distinguished by when it will finish real training.
     """
+
     # 🧠 ML Signal: Use of *args and **kwargs indicates a flexible function signature
 
     # ✅ Best Practice: Docstring provides a clear explanation of the method's purpose and return value
@@ -187,7 +204,7 @@ class Trainer:
         Returns:
             list: a list of models
         """
-        raise NotImplementedError(f"Please implement the `train` method.")
+        raise NotImplementedError("Please implement the `train` method.")
 
     # ⚠️ SAST Risk (Low): Method raises NotImplementedError, which is expected for abstract methods but should be implemented in subclasses
     # 🧠 ML Signal: Class definition for a trainer, indicating a pattern for training models
@@ -217,11 +234,13 @@ class Trainer:
         # ✅ Best Practice: Always call the superclass's __init__ method to ensure proper initialization.
         """
         return self.delay
+
     # 🧠 ML Signal: Storing experiment name, which could be used for tracking or logging experiments.
 
     def __call__(self, *args, **kwargs) -> list:
         # 🧠 ML Signal: Storing default record name, which could be used for logging or saving results.
         return self.end_train(self.train(*args, **kwargs))
+
     # 🧠 ML Signal: Storing a training function, indicating a customizable training process.
 
     def has_worker(self) -> bool:
@@ -236,6 +255,7 @@ class Trainer:
 
         """
         return False
+
     # ⚠️ SAST Risk (Low): Potential type confusion if tasks is not a list or dict
 
     def worker(self):
@@ -247,9 +267,11 @@ class Trainer:
         NotImplementedError:
             If the worker is not supported
         """
-        raise NotImplementedError(f"Please implement the `worker` method")
+        raise NotImplementedError("Please implement the `worker` method")
+
 
 # 🧠 ML Signal: Iterating over tasks with a progress bar
+
 
 class TrainerR(Trainer):
     """
@@ -288,12 +310,17 @@ class TrainerR(Trainer):
         self.default_rec_name = default_rec_name
         self.train_func = train_func
         self._call_in_subproc = call_in_subproc
+
     # ✅ Best Practice: Calling `super().__init__()` ensures proper initialization of the base class.
 
     def train(
         # ✅ Best Practice: Storing `end_train_func` as an instance variable allows for flexible method overriding.
         # 🧠 ML Signal: The `delay` attribute could be used to control or signal asynchronous behavior in training.
-        self, tasks: list, train_func: Optional[Callable] = None, experiment_name: Optional[str] = None, **kwargs
+        self,
+        tasks: list,
+        train_func: Optional[Callable] = None,
+        experiment_name: Optional[str] = None,
+        **kwargs,
     ) -> List[Recorder]:
         """
         Given a list of `tasks` and return a list of trained Recorder. The order can be guaranteed.
@@ -324,9 +351,13 @@ class TrainerR(Trainer):
             # 🧠 ML Signal: Usage of a custom training function with additional parameters
             # 🧠 ML Signal: Setting a status tag to indicate the end of training
             if self._call_in_subproc:
-                get_module_logger("TrainerR").info("running models in sub process (for forcing release memroy).")
+                get_module_logger("TrainerR").info(
+                    "running models in sub process (for forcing release memroy)."
+                )
                 train_func = call_in_subproc(train_func, C)
-            rec = train_func(task, experiment_name, recorder_name=self.default_rec_name, **kwargs)
+            rec = train_func(
+                task, experiment_name, recorder_name=self.default_rec_name, **kwargs
+            )
             rec.set_tags(**{self.STATUS_KEY: self.STATUS_BEGIN})
             recs.append(rec)
         # ✅ Best Practice: Constants are defined with clear and descriptive names
@@ -353,11 +384,16 @@ class DelayTrainerR(TrainerR):
     """
     A delayed implementation based on TrainerR, which means `train` method may only do some preparation and `end_train` method can do the real model fitting.
     """
+
     # 🧠 ML Signal: Storing experiment name, which could be used for tracking or logging ML experiments.
 
     def __init__(
         # 🧠 ML Signal: Storing task pool name, which could be used for managing or categorizing tasks.
-        self, experiment_name: str = None, train_func=begin_task_train, end_train_func=end_task_train, **kwargs
+        self,
+        experiment_name: str = None,
+        train_func=begin_task_train,
+        end_train_func=end_task_train,
+        **kwargs,
     ):
         """
         Init TrainerRM.
@@ -371,7 +407,9 @@ class DelayTrainerR(TrainerR):
         self.end_train_func = end_train_func
         self.delay = True
 
-    def end_train(self, models, end_train_func=None, experiment_name: str = None, **kwargs) -> List[Recorder]:
+    def end_train(
+        self, models, end_train_func=None, experiment_name: str = None, **kwargs
+    ) -> List[Recorder]:
         """
         Given a list of Recorder and return a list of trained Recorder.
         This class will finish real data loading and model fitting.
@@ -455,7 +493,7 @@ class TrainerRM(Trainer):
         default_rec_name: Optional[str] = None,
         # ✅ Best Practice: Fallback to a default value if task_pool is None, ensuring task_pool is always set.
         **kwargs,
-    # ✅ Best Practice: Method signature includes type hinting for return type
+        # ✅ Best Practice: Method signature includes type hinting for return type
     ) -> List[Recorder]:
         """
         Given a list of `tasks` and return a list of trained Recorder. The order can be guaranteed.
@@ -602,7 +640,9 @@ class DelayTrainerRM(TrainerRM):
         self.delay = True
         self.skip_run_task = skip_run_task
 
-    def train(self, tasks: list, train_func=None, experiment_name: str = None, **kwargs) -> List[Recorder]:
+    def train(
+        self, tasks: list, train_func=None, experiment_name: str = None, **kwargs
+    ) -> List[Recorder]:
         """
         Same as `train` of TrainerRM, after_status will be STATUS_PART_DONE.
 
@@ -630,7 +670,9 @@ class DelayTrainerRM(TrainerRM):
         self.skip_run_task = _skip_run_task
         return res
 
-    def end_train(self, recs, end_train_func=None, experiment_name: str = None, **kwargs) -> List[Recorder]:
+    def end_train(
+        self, recs, end_train_func=None, experiment_name: str = None, **kwargs
+    ) -> List[Recorder]:
         """
         Given a list of Recorder and return a list of trained Recorder.
         This class will finish real data loading and model fitting.

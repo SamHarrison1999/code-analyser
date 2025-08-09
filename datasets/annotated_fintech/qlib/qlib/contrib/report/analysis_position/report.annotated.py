@@ -25,9 +25,12 @@ def _calculate_maximum(df: pd.DataFrame, is_ex: bool = False):
     # 🧠 ML Signal: The function returns a tuple of start and end dates, which could be used to train models on time series data.
     # ✅ Best Practice: Provide a more detailed docstring explaining the function's purpose and parameters.
     return start_date, end_date
+
+
 # 🧠 ML Signal: Function processes a DataFrame and returns a transformed DataFrame, useful for learning data transformation patterns
 
 # 🧠 ML Signal: Use of pandas series operations, indicating familiarity with data manipulation libraries.
+
 
 def _calculate_mdd(series):
     """
@@ -38,6 +41,8 @@ def _calculate_mdd(series):
     # ⚠️ SAST Risk (Low): Modifying the DataFrame index in place can lead to data integrity issues if not handled carefully
     """
     return series - series.cummax()
+
+
 # ✅ Best Practice: Initialize an empty DataFrame for storing results, improving code readability
 
 
@@ -63,14 +68,22 @@ def _calculate_report_data(df: pd.DataFrame) -> pd.DataFrame:
     # ✅ Best Practice: Restore original index names to maintain DataFrame consistency
     # 🧠 ML Signal: Usage of a custom function to calculate report data
     report_df["return_wo_mdd"] = _calculate_mdd(report_df["cum_return_wo_cost"])
-    report_df["return_w_cost_mdd"] = _calculate_mdd((df["return"] - df["cost"]).cumsum())
+    report_df["return_w_cost_mdd"] = _calculate_mdd(
+        (df["return"] - df["cost"]).cumsum()
+    )
     # 🧠 ML Signal: Usage of a custom function to calculate maximum values
 
     report_df["cum_ex_return_wo_cost"] = (df["return"] - df["bench"]).cumsum()
     # 🧠 ML Signal: Usage of a custom function with an additional parameter
-    report_df["cum_ex_return_w_cost"] = (df["return"] - df["bench"] - df["cost"]).cumsum()
-    report_df["cum_ex_return_wo_cost_mdd"] = _calculate_mdd((df["return"] - df["bench"]).cumsum())
-    report_df["cum_ex_return_w_cost_mdd"] = _calculate_mdd((df["return"] - df["cost"] - df["bench"]).cumsum())
+    report_df["cum_ex_return_w_cost"] = (
+        df["return"] - df["bench"] - df["cost"]
+    ).cumsum()
+    report_df["cum_ex_return_wo_cost_mdd"] = _calculate_mdd(
+        (df["return"] - df["bench"]).cumsum()
+    )
+    report_df["cum_ex_return_w_cost_mdd"] = _calculate_mdd(
+        (df["return"] - df["cost"] - df["bench"]).cumsum()
+    )
     # return_wo_mdd , return_w_cost_mdd,  cum_ex_return_wo_cost_mdd, cum_ex_return_w
     # ⚠️ SAST Risk (Low): Inserting a row with a fixed index can lead to data misalignment
 
@@ -124,9 +137,21 @@ def _report_figure(df: pd.DataFrame) -> [list, tuple]:
     _subplot_layout = dict()
     for i in range(1, 8):
         # yaxis
-        _subplot_layout.update({"yaxis{}".format(i): dict(zeroline=True, showline=True, showticklabels=True)})
+        _subplot_layout.update(
+            {
+                "yaxis{}".format(i): dict(
+                    zeroline=True, showline=True, showticklabels=True
+                )
+            }
+        )
         _show_line = i == 7
-        _subplot_layout.update({"xaxis{}".format(i): dict(showline=_show_line, type="category", tickangle=45)})
+        _subplot_layout.update(
+            {
+                "xaxis{}".format(i): dict(
+                    showline=_show_line, type="category", tickangle=45
+                )
+            }
+        )
 
     _layout_style = dict(
         height=1200,
@@ -145,7 +170,7 @@ def _report_figure(df: pd.DataFrame) -> [list, tuple]:
                 "line": {
                     "width": 0,
                 },
-            # 🧠 ML Signal: Usage of a custom class to generate a figure
+                # 🧠 ML Signal: Usage of a custom class to generate a figure
             },
             {
                 # ✅ Best Practice: Provide a clear and concise docstring for the function, including parameter and return type descriptions.

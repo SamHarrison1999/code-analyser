@@ -6,6 +6,7 @@ from sqlalchemy.orm import declarative_base
 # ✅ Best Practice: Naming convention for classes should follow CamelCase.
 from zvt.contract.register import register_schema
 from zvt.domain.quotes import EtfKdataCommon
+
 # 🧠 ML Signal: Class definition with inheritance, useful for understanding class hierarchies and relationships
 
 # 🧠 ML Signal: Function call with specific parameters, useful for understanding API usage patterns
@@ -18,7 +19,9 @@ class Etf1dKdata(KdataBase, EtfKdataCommon):
     __tablename__ = "etf_1d_kdata"
 
 
-register_schema(providers=["sina"], db_name="etf_1d_kdata", schema_base=KdataBase, entity_type="etf")
+register_schema(
+    providers=["sina"], db_name="etf_1d_kdata", schema_base=KdataBase, entity_type="etf"
+)
 
 
 # the __all__ is generated

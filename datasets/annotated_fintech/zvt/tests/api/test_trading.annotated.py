@@ -5,6 +5,7 @@ from ..context import init_test_context
 init_test_context()
 
 from typing import List
+
 # 🧠 ML Signal: Usage of a specific provider and database name can indicate a pattern in data source preferences.
 # 🧠 ML Signal: Function name follows a pattern that could indicate a test function
 
@@ -13,7 +14,9 @@ from typing import List
 # 🧠 ML Signal: Use of type hinting for the variable 'result'
 from zvt.domain import HolderTrading, ManagerTrading
 
-session = get_db_session(provider="eastmoney", db_name="trading")  # type: sqlalchemy.orm.Session
+session = get_db_session(
+    provider="eastmoney", db_name="trading"
+)  # type: sqlalchemy.orm.Session
 
 
 # 股东交易
@@ -32,10 +35,10 @@ def test_000778_holder_trading():
         # 🧠 ML Signal: Use of ordering in data query, indicating importance of data sorting
         # 🧠 ML Signal: Function name follows a specific pattern indicating a test case
         order=HolderTrading.holding_pct.desc(),
-    # 🧠 ML Signal: Validation of specific data attributes, indicating expected data structure
-    # 🧠 ML Signal: Use of assertions to validate data, indicating a testing pattern
-    # ⚠️ SAST Risk (Low): Hardcoded credentials or sensitive data in function parameters
-    # 🧠 ML Signal: Usage of a specific session object for querying data
+        # 🧠 ML Signal: Validation of specific data attributes, indicating expected data structure
+        # 🧠 ML Signal: Use of assertions to validate data, indicating a testing pattern
+        # ⚠️ SAST Risk (Low): Hardcoded credentials or sensitive data in function parameters
+        # 🧠 ML Signal: Usage of a specific session object for querying data
     )
     assert len(result) == 6
     assert result[0].holder_name == "新兴际华集团有限公司"

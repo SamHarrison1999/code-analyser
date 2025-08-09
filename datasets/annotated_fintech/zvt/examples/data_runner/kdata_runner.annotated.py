@@ -21,6 +21,7 @@ from zvt.domain import (
     LimitUpInfo,
 )
 from zvt.informer import EmailInformer
+
 # ✅ Best Practice: Use of a logger for the module allows for better debugging and monitoring.
 from zvt.utils.time_utils import current_date
 from zvt.utils.recorder_utils import run_data_recorder
@@ -53,27 +54,40 @@ def record_stock_news(data_provider="em"):
         # 🧠 ML Signal: Querying data within a specific timestamp range, a common pattern in time-series data processing
         force_update=False,
         sleeping_time=2,
-    # ✅ Best Practice: Using vectorized operations for string manipulation in pandas
+        # ✅ Best Practice: Using vectorized operations for string manipulation in pandas
     )
+
 
 # ⚠️ SAST Risk (Low): Directly printing data frames can expose sensitive information in logs
 # 🧠 ML Signal: Function call with parameter, indicating a pattern of fetching data with a specific time range
 
+
 def report_limit_up():
     # 🧠 ML Signal: Sending an email with a specific subject and body format, indicating a pattern of automated reporting
     # 🧠 ML Signal: Function call with parameter, indicating a pattern of fetching data with a specific time range
-    latest_data = LimitUpInfo.query_data(order=LimitUpInfo.timestamp.desc(), limit=1, return_type="domain")
+    latest_data = LimitUpInfo.query_data(
+        order=LimitUpInfo.timestamp.desc(), limit=1, return_type="domain"
+    )
     timestamp = latest_data[0].timestamp
     # ✅ Best Practice: Converting keys to a set for efficient membership testing and operations
-    df = LimitUpInfo.query_data(start_timestamp=timestamp, end_timestamp=timestamp, columns=["code", "name", "reason"])
+    df = LimitUpInfo.query_data(
+        start_timestamp=timestamp,
+        end_timestamp=timestamp,
+        columns=["code", "name", "reason"],
+    )
     df["reason"] = df["reason"].str.split("+")
     # ✅ Best Practice: Converting keys to a set for efficient membership testing and operations
     print(df)
-    EmailInformer().send_message(zvt_config["email_username"], f"{timestamp} 热门报告", f"{df}")
+    EmailInformer().send_message(
+        zvt_config["email_username"], f"{timestamp} 热门报告", f"{df}"
+    )
+
+
 # ✅ Best Practice: Using set intersection to find common elements
 
 # ⚠️ SAST Risk (Low): Printing sensitive data to console, consider logging instead
 # ✅ Best Practice: Using set difference to find unique elements
+
 
 def report_hot_topics():
     topics_long = get_hot_topics(days_ago=20)
@@ -109,7 +123,9 @@ def report_hot_topics():
     """
 
     print(msg)
-    EmailInformer().send_message(zvt_config["email_username"], f"{current_date()} 热门报告", msg)
+    EmailInformer().send_message(
+        zvt_config["email_username"], f"{current_date()} 热门报告", msg
+    )
 
 
 @sched.scheduled_job("cron", hour=15, minute=30, day_of_week="mon-fri")
@@ -131,7 +147,12 @@ def record_stock_data(data_provider="em", entity_provider="em", sleeping_time=0)
     )
 
     # 板块(概念，行业)
-    run_data_recorder(domain=Block, entity_provider=entity_provider, data_provider=entity_provider, force_update=False)
+    run_data_recorder(
+        domain=Block,
+        entity_provider=entity_provider,
+        data_provider=entity_provider,
+        force_update=False,
+    )
     # 板块行情(概念，行业)
     run_data_recorder(
         domain=Block1dKdata,

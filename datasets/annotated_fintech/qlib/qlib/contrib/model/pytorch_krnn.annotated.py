@@ -4,21 +4,26 @@
 
 from __future__ import division
 from __future__ import print_function
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 
 import numpy as np
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 import pandas as pd
 from typing import Text, Union
 import copy
 from ...utils import get_or_create_path
 from ...log import get_module_logger
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 
 # 🧠 ML Signal: Definition of a class likely used for machine learning model architecture
 import torch
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 import torch.nn as nn
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 import torch.optim as optim
 
@@ -31,6 +36,7 @@ from ...data.dataset.handler import DataHandlerLP
 ########################################################################
 
 # ✅ Best Practice: Call the superclass's __init__ method to ensure proper initialization
+
 
 class CNNEncoderBase(nn.Module):
     # 🧠 ML Signal: Storing input dimension as an instance variable
@@ -60,7 +66,9 @@ class CNNEncoderBase(nn.Module):
         # set padding to ensure the same length
         # 🧠 ML Signal: Permuting tensor dimensions is a common operation in neural networks
         # it is correct only when kernel_size is odd, dilation is 1, stride is 1
-        self.conv = nn.Conv1d(input_dim, output_dim, kernel_size, padding=(kernel_size - 1) // 2)
+        self.conv = nn.Conv1d(
+            input_dim, output_dim, kernel_size, padding=(kernel_size - 1) // 2
+        )
 
     def forward(self, x):
         """
@@ -83,9 +91,12 @@ class CNNEncoderBase(nn.Module):
         y = y.permute(0, 2, 1)  # [batch_size, conved_seq_len, output_dim]
 
         return y
+
+
 # 🧠 ML Signal: Pattern of creating multiple RNNs with the same architecture.
 
 # ✅ Best Practice: Appending RNN modules to a ModuleList allows for easy management and iteration.
+
 
 class KRNNEncoderBase(nn.Module):
     def __init__(self, input_dim, output_dim, dup_num, rnn_layers, dropout, device):
@@ -121,7 +132,11 @@ class KRNNEncoderBase(nn.Module):
         for _ in range(dup_num):
             # ✅ Best Practice: Permuting dimensions back to the original order for consistency in output.
             # ✅ Best Practice: Docstring provides clear documentation of parameters and purpose
-            self.rnn_modules.append(nn.GRU(input_dim, output_dim, num_layers=self.rnn_layers, dropout=dropout))
+            self.rnn_modules.append(
+                nn.GRU(
+                    input_dim, output_dim, num_layers=self.rnn_layers, dropout=dropout
+                )
+            )
 
     def forward(self, x):
         """
@@ -159,15 +174,26 @@ class KRNNEncoderBase(nn.Module):
         # ✅ Best Practice: Use of clear and descriptive variable names improves code readability.
 
         return hids
+
+
 # 🧠 ML Signal: Sequential processing of data through multiple layers is common in neural networks.
 
 # 🧠 ML Signal: Custom neural network model class definition
+
 
 # 🧠 ML Signal: Returning the output of a neural network layer is a common pattern in model definitions.
 class CNNKRNNEncoder(nn.Module):
     # ✅ Best Practice: Docstring provides clear documentation of parameters and purpose
     def __init__(
-        self, cnn_input_dim, cnn_output_dim, cnn_kernel_size, rnn_output_dim, rnn_dup_num, rnn_layers, dropout, device
+        self,
+        cnn_input_dim,
+        cnn_output_dim,
+        cnn_kernel_size,
+        rnn_output_dim,
+        rnn_dup_num,
+        rnn_layers,
+        dropout,
+        device,
     ):
         """Build an encoder composed of CNN and KRNN
 
@@ -188,8 +214,12 @@ class CNNKRNNEncoder(nn.Module):
         """
         super().__init__()
 
-        self.cnn_encoder = CNNEncoderBase(cnn_input_dim, cnn_output_dim, cnn_kernel_size, device)
-        self.krnn_encoder = KRNNEncoderBase(cnn_output_dim, rnn_output_dim, rnn_dup_num, rnn_layers, dropout, device)
+        self.cnn_encoder = CNNEncoderBase(
+            cnn_input_dim, cnn_output_dim, cnn_kernel_size, device
+        )
+        self.krnn_encoder = KRNNEncoderBase(
+            cnn_output_dim, rnn_output_dim, rnn_dup_num, rnn_layers, dropout, device
+        )
 
     def forward(self, x):
         """
@@ -212,7 +242,18 @@ class CNNKRNNEncoder(nn.Module):
 
 
 class KRNNModel(nn.Module):
-    def __init__(self, fea_dim, cnn_dim, cnn_kernel_size, rnn_dim, rnn_dups, rnn_layers, dropout, device, **params):
+    def __init__(
+        self,
+        fea_dim,
+        cnn_dim,
+        cnn_kernel_size,
+        rnn_dim,
+        rnn_dups,
+        rnn_layers,
+        dropout,
+        device,
+        **params,
+    ):
         """Build a KRNN model
 
         Parameters
@@ -322,7 +363,9 @@ class KRNN(Model):
         self.optimizer = optimizer.lower()
         # ✅ Best Practice: Set random seed for reproducibility
         self.loss = loss
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.seed = seed
         # 🧠 ML Signal: Checks if the computation is set to use GPU, indicating hardware preference
 
@@ -389,7 +432,7 @@ class KRNN(Model):
                 # ⚠️ SAST Risk (Low): Potential for device mismatch if self.device is not set correctly
                 self.use_gpu,
                 seed,
-            # ⚠️ SAST Risk (Low): Potential for device mismatch if self.device is not set correctly
+                # ⚠️ SAST Risk (Low): Potential for device mismatch if self.device is not set correctly
             )
         )
         # 🧠 ML Signal: Model prediction
@@ -425,10 +468,13 @@ class KRNN(Model):
         else:
             # 🧠 ML Signal: Model prediction step, key part of testing phase
             # 🧠 ML Signal: Loss calculation, essential for evaluating model performance
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
 
         self.fitted = False
         self.krnn_model.to(self.device)
+
     # 🧠 ML Signal: Collecting loss values for analysis
 
     @property
@@ -485,8 +531,16 @@ class KRNN(Model):
                 break
 
             # 🧠 ML Signal: Usage of dataset preparation for prediction
-            feature = torch.from_numpy(x_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
-            label = torch.from_numpy(y_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            feature = (
+                torch.from_numpy(x_train_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
+            label = (
+                torch.from_numpy(y_train_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
 
             # 🧠 ML Signal: Model evaluation mode set before prediction
             pred = self.krnn_model(feature)
@@ -517,8 +571,16 @@ class KRNN(Model):
             if len(indices) - i < self.batch_size:
                 break
 
-            feature = torch.from_numpy(x_values[indices[i : i + self.batch_size]]).float().to(self.device)
-            label = torch.from_numpy(y_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            feature = (
+                torch.from_numpy(x_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
+            label = (
+                torch.from_numpy(y_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
 
             pred = self.krnn_model(feature)
             loss = self.loss_fn(pred, label)
@@ -541,7 +603,9 @@ class KRNN(Model):
             data_key=DataHandlerLP.DK_L,
         )
         if df_train.empty or df_valid.empty:
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
 
         x_train, y_train = df_train["feature"], df_train["label"]
         x_valid, y_valid = df_valid["feature"], df_valid["label"]
@@ -591,7 +655,9 @@ class KRNN(Model):
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
 
-        x_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        x_test = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
         index = x_test.index
         self.krnn_model.eval()
         x_values = x_test.values

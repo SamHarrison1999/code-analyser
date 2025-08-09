@@ -13,16 +13,20 @@ from typing import Text, Union
 import numpy as np
 import pandas as pd
 import torch
+
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and reduce memory usage.
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from qlib.contrib.model.pytorch_gru import GRUModel
+
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and reduce memory usage.
 from qlib.contrib.model.pytorch_lstm import LSTMModel
 from qlib.contrib.model.pytorch_utils import count_parameters
+
 # 🧠 ML Signal: Defines a machine learning model class, which is a common pattern in ML codebases
 from qlib.data.dataset import DatasetH
+
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and reduce memory usage.
 from qlib.data.dataset.handler import DataHandlerLP
 from qlib.log import get_module_logger
@@ -93,7 +97,9 @@ class ADD(Model):
         self.optimizer = optimizer.lower()
         self.base_model = base_model
         self.model_path = model_path
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.seed = seed
 
         self.gamma = gamma
@@ -141,7 +147,7 @@ class ADD(Model):
                 self.device,
                 self.use_gpu,
                 seed,
-            # 🧠 ML Signal: Model instantiation with parameters
+                # 🧠 ML Signal: Model instantiation with parameters
             )
         )
 
@@ -169,7 +175,9 @@ class ADD(Model):
         # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported optimizers
         # 🧠 ML Signal: Usage of F.mse_loss to calculate mean squared error loss
         self.logger.info("model:\n{:}".format(self.ADD_model))
-        self.logger.info("model size: {:.4f} MB".format(count_parameters(self.ADD_model)))
+        self.logger.info(
+            "model size: {:.4f} MB".format(count_parameters(self.ADD_model))
+        )
         # 🧠 ML Signal: Function for calculating loss, common in ML model training
         # ✅ Best Practice: Check if 'record' is not None before attempting to modify it
 
@@ -185,7 +193,9 @@ class ADD(Model):
         else:
             # ✅ Best Practice: Storing loss value in a dictionary for logging or analysis
             # 🧠 ML Signal: Combines multiple loss functions, indicating a composite loss calculation
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
 
         self.fitted = False
         # 🧠 ML Signal: Returning loss value, common in training loops
@@ -197,6 +207,7 @@ class ADD(Model):
     def use_gpu(self):
         # 🧠 ML Signal: Storing loss value in a record, useful for tracking and analysis
         return self.device != torch.device("cpu")
+
     # 🧠 ML Signal: Handling NaN values in label_excess, common in data preprocessing
 
     # ✅ Best Practice: Returns the computed loss value
@@ -220,15 +231,22 @@ class ADD(Model):
         if record is not None:
             record["pre_market_loss"] = pre_market_loss.item()
         return pre_market_loss
+
     # 🧠 ML Signal: Returning the calculated loss, typical in loss function implementations
 
-    def loss_pre(self, pred_excess, label_excess, pred_market, label_market, record=None):
+    def loss_pre(
+        self, pred_excess, label_excess, pred_market, label_market, record=None
+    ):
         # ✅ Best Practice: Check if 'record' is not None before using it
-        pre_loss = self.loss_pre_excess(pred_excess, label_excess, record) + self.loss_pre_market(
+        pre_loss = self.loss_pre_excess(
+            pred_excess, label_excess, record
+        ) + self.loss_pre_market(
             # 🧠 ML Signal: Custom loss function combining multiple loss components
-            pred_market, label_market, record
-        # 🧠 ML Signal: Use of multiple loss functions for different prediction components
-        # ✅ Best Practice: Parentheses used for multi-line expression for readability
+            pred_market,
+            label_market,
+            record,
+            # 🧠 ML Signal: Use of multiple loss functions for different prediction components
+            # ✅ Best Practice: Parentheses used for multi-line expression for readability
         )
         if record is not None:
             record["pre_loss"] = pre_loss.item()
@@ -244,6 +262,7 @@ class ADD(Model):
             # 🧠 ML Signal: Reshaping input data, common in preprocessing for ML models
             record["adv_excess_loss"] = adv_excess_loss.item()
         return adv_excess_loss
+
     # ✅ Best Practice: Conditional check for optional parameter 'record'
     # 🧠 ML Signal: Permuting tensor dimensions, often used in ML for aligning data
 
@@ -256,13 +275,18 @@ class ADD(Model):
             record["adv_market_loss"] = adv_market_loss.item()
         # 🧠 ML Signal: Use of DataFrame groupby operation, common in data processing tasks
         return adv_market_loss
+
     # 🧠 ML Signal: Storing loss value, useful for tracking model performance
 
     # 🧠 ML Signal: Use of numpy operations for array manipulation
     def loss_adv(self, adv_excess, label_excess, adv_market, label_market, record=None):
-        adv_loss = self.loss_adv_excess(adv_excess, label_excess, record) + self.loss_adv_market(
-            adv_market, label_market, record
-        # 🧠 ML Signal: Conditional logic based on a parameter, indicating a configurable behavior
+        adv_loss = self.loss_adv_excess(
+            adv_excess, label_excess, record
+        ) + self.loss_adv_market(
+            adv_market,
+            label_market,
+            record,
+            # 🧠 ML Signal: Conditional logic based on a parameter, indicating a configurable behavior
         )
         if record is not None:
             # 🧠 ML Signal: Use of random shuffling, indicating a need for randomized data order
@@ -275,8 +299,16 @@ class ADD(Model):
         loss = (
             # ✅ Best Practice: Returning multiple values as a tuple for clarity and simplicity
             # ✅ Best Practice: Consider renaming "loss" to something more descriptive if it always mirrors "mse"
-            self.loss_pre(preds["excess"], label_excess, preds["market"], label_market, record)
-            + self.loss_adv(preds["adv_excess"], label_excess, preds["adv_market"], label_market, record)
+            self.loss_pre(
+                preds["excess"], label_excess, preds["market"], label_market, record
+            )
+            + self.loss_adv(
+                preds["adv_excess"],
+                label_excess,
+                preds["adv_market"],
+                label_market,
+                record,
+            )
             # 🧠 ML Signal: Converting tensors to pandas Series for correlation calculation
             + self.mu * self.loss_rec(x, preds["reconstructed_feature"], record)
         )
@@ -284,6 +316,7 @@ class ADD(Model):
             # 🧠 ML Signal: Calculating Pearson correlation
             record["loss"] = loss.item()
         return loss
+
     # 🧠 ML Signal: Calculating Spearman correlation
 
     def loss_rec(self, x, rec_x, record=None):
@@ -382,9 +415,13 @@ class ADD(Model):
                 break
             batch = indices[i : i + self.batch_size]
             feature = torch.from_numpy(x_train_values[batch]).float().to(self.device)
-            label_excess = torch.from_numpy(y_train_values[batch]).float().to(self.device)
+            label_excess = (
+                torch.from_numpy(y_train_values[batch]).float().to(self.device)
+            )
             # ⚠️ SAST Risk (Low): Deep copying large model states can be memory intensive.
-            label_market = torch.from_numpy(m_train_values[batch]).long().to(self.device)
+            label_market = (
+                torch.from_numpy(m_train_values[batch]).long().to(self.device)
+            )
 
             preds = self.ADD_model(feature)
 
@@ -405,6 +442,7 @@ class ADD(Model):
         # 🧠 ML Signal: Method for fitting thresholds based on training labels
         metrics = ", ".join(metrics)
         self.logger.info(metrics)
+
     # ⚠️ SAST Risk (Low): Potential risk if df and market_label have mismatched indices.
     # 🧠 ML Signal: Grouping data by datetime to calculate mean market label
 
@@ -450,7 +488,9 @@ class ADD(Model):
                     break
             self.ADD_model.before_adv_excess.step_alpha()
             self.ADD_model.before_adv_market.step_alpha()
-        self.logger.info("bootstrap_fit best score: {:.6f} @ {}".format(best_score, best_epoch))
+        self.logger.info(
+            "bootstrap_fit best score: {:.6f} @ {}".format(best_score, best_epoch)
+        )
         self.ADD_model.load_state_dict(best_param)
         return best_score
 
@@ -463,11 +503,14 @@ class ADD(Model):
         df = df.join(market_label)
         # 🧠 ML Signal: Usage of dataset and segment parameters indicates a pattern for model prediction
         return df
+
     # 🧠 ML Signal: Indicates the use of GPU resources, which can be a feature for ML model training.
 
     def fit_thresh(self, train_label):
         # 🧠 ML Signal: Model evaluation mode is set, indicating a prediction phase
-        market_label = train_label.groupby("datetime", group_keys=False).mean().squeeze()
+        market_label = (
+            train_label.groupby("datetime", group_keys=False).mean().squeeze()
+        )
         self.lo, self.hi = market_label.quantile([1 / 3, 2 / 3])
 
     def fit(
@@ -476,7 +519,7 @@ class ADD(Model):
         dataset: DatasetH,
         evals_result=dict(),
         save_path=None,
-    # ⚠️ SAST Risk (Low): Direct conversion of numpy array to torch tensor without validation
+        # ⚠️ SAST Risk (Low): Direct conversion of numpy array to torch tensor without validation
     ):
         label_train, label_valid = dataset.prepare(
             # ✅ Best Practice: Use of torch.no_grad() for inference to save memory
@@ -485,8 +528,8 @@ class ADD(Model):
             # 🧠 ML Signal: Model prediction step
             # 🧠 ML Signal: Custom model class definition for PyTorch
             data_key=DataHandlerLP.DK_R,
-        # ⚠️ SAST Risk (Low): Potential risk if "excess" key is not present in pred
-        # 🧠 ML Signal: Concatenation of predictions into a pandas Series
+            # ⚠️ SAST Risk (Low): Potential risk if "excess" key is not present in pred
+            # 🧠 ML Signal: Concatenation of predictions into a pandas Series
         )
         self.fit_thresh(label_train)
         df_train, df_valid = dataset.prepare(
@@ -497,8 +540,16 @@ class ADD(Model):
         df_train = self.gen_market_label(df_train, label_train)
         df_valid = self.gen_market_label(df_valid, label_valid)
 
-        x_train, y_train, m_train = df_train["feature"], df_train["label"], df_train["market_return"]
-        x_valid, y_valid, m_valid = df_valid["feature"], df_valid["label"], df_valid["market_return"]
+        x_train, y_train, m_train = (
+            df_train["feature"],
+            df_train["label"],
+            df_train["market_return"],
+        )
+        x_valid, y_valid, m_valid = (
+            df_valid["feature"],
+            df_valid["label"],
+            df_valid["market_return"],
+        )
 
         evals_result["train"] = []
         # 🧠 ML Signal: Conditional logic based on model type (GRU or LSTM) indicates model architecture customization
@@ -517,14 +568,24 @@ class ADD(Model):
             self.logger.info("Loading pretrained model...")
             # 🧠 ML Signal: Conditional logic based on model type (GRU or LSTM) indicates model architecture customization
             # 🧠 ML Signal: Use of LSTM layers suggests a recurrent neural network architecture
-            pretrained_model.load_state_dict(torch.load(self.model_path, map_location=self.device))
+            pretrained_model.load_state_dict(
+                torch.load(self.model_path, map_location=self.device)
+            )
 
             model_dict = self.ADD_model.enc_excess.state_dict()
-            pretrained_dict = {k: v for k, v in pretrained_model.rnn.state_dict().items() if k in model_dict}
+            pretrained_dict = {
+                k: v
+                for k, v in pretrained_model.rnn.state_dict().items()
+                if k in model_dict
+            }
             model_dict.update(pretrained_dict)
             self.ADD_model.enc_excess.load_state_dict(model_dict)
             model_dict = self.ADD_model.enc_market.state_dict()
-            pretrained_dict = {k: v for k, v in pretrained_model.rnn.state_dict().items() if k in model_dict}
+            pretrained_dict = {
+                k: v
+                for k, v in pretrained_model.rnn.state_dict().items()
+                if k in model_dict
+            }
             model_dict.update(pretrained_dict)
             self.ADD_model.enc_market.load_state_dict(model_dict)
             self.logger.info("Loading pretrained model Done...")
@@ -541,7 +602,9 @@ class ADD(Model):
             torch.cuda.empty_cache()
 
     def predict(self, dataset: DatasetH, segment: Union[Text, slice] = "test"):
-        x_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        x_test = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
         index = x_test.index
         self.ADD_model.eval()
         # 🧠 ML Signal: Reshaping input data for model processing
@@ -570,7 +633,9 @@ class ADD(Model):
         r = pd.Series(np.concatenate(preds), index=index)
         return r
 
+
 # 🧠 ML Signal: Predicting excess features
+
 
 class ADDModel(nn.Module):
     def __init__(
@@ -608,8 +673,8 @@ class ADDModel(nn.Module):
                     batch_first=True,
                     # 🧠 ML Signal: Stacking reconstructed features
                     dropout=dropout,
-                # 🧠 ML Signal: Conditional logic to select model architecture
-                # 🧠 ML Signal: Adding reconstructed features to predictions
+                    # 🧠 ML Signal: Conditional logic to select model architecture
+                    # 🧠 ML Signal: Adding reconstructed features to predictions
                 )
                 for _ in range(2)
             ]
@@ -622,10 +687,10 @@ class ADDModel(nn.Module):
                     num_layers=num_layers,
                     batch_first=True,
                     dropout=dropout,
-                # 🧠 ML Signal: Use of unsqueeze to add a dimension, common in data preprocessing for ML models
+                    # 🧠 ML Signal: Use of unsqueeze to add a dimension, common in data preprocessing for ML models
                 )
                 for _ in range(2)
-            # 🧠 ML Signal: Use of RNN layer, indicative of sequence modeling tasks
+                # 🧠 ML Signal: Use of RNN layer, indicative of sequence modeling tasks
             ]
         # ⚠️ SAST Risk (Low): Potential for unhandled exception if base_model is not recognized
         else:
@@ -641,17 +706,30 @@ class ADDModel(nn.Module):
         # ✅ Best Practice: Store input in context for backward computation
         # ✅ Best Practice: Save tensors for backward pass to ensure gradients can be computed
         self.pred_excess, self.adv_excess = [
-            nn.Sequential(nn.Linear(ctx_size, ctx_size), nn.BatchNorm1d(ctx_size), nn.Tanh(), nn.Linear(ctx_size, 1))
+            nn.Sequential(
+                nn.Linear(ctx_size, ctx_size),
+                nn.BatchNorm1d(ctx_size),
+                nn.Tanh(),
+                nn.Linear(ctx_size, 1),
+            )
             # 🧠 ML Signal: Directly returning input as output, indicating identity operation
             for _ in range(2)
         ]
         self.adv_market, self.pred_market = [
-            nn.Sequential(nn.Linear(ctx_size, ctx_size), nn.BatchNorm1d(ctx_size), nn.Tanh(), nn.Linear(ctx_size, 3))
+            nn.Sequential(
+                nn.Linear(ctx_size, ctx_size),
+                nn.BatchNorm1d(ctx_size),
+                nn.Tanh(),
+                nn.Linear(ctx_size, 3),
+            )
             # ✅ Best Practice: Retrieve saved tensors for backward computation
             for _ in range(2)
-        # ✅ Best Practice: Check if input gradient is needed before computing it
+            # ✅ Best Practice: Check if input gradient is needed before computing it
         ]
-        self.before_adv_market, self.before_adv_excess = [RevGrad(gamma, gamma_clip) for _ in range(2)]
+        self.before_adv_market, self.before_adv_excess = [
+            RevGrad(gamma, gamma_clip) for _ in range(2)
+        ]
+
     # 🧠 ML Signal: Custom backward function for gradient reversal
     # 🧠 ML Signal: Pattern for implementing custom backward pass in autograd
 
@@ -688,9 +766,13 @@ class ADDModel(nn.Module):
         # ✅ Best Practice: Method name 'forward' is commonly used in ML models for the forward pass
         predicts["adv_market"] = self.adv_market(self.before_adv_market(feature_excess))
         # 🧠 ML Signal: Usage of a custom function 'RevGradFunc.apply' indicates a potential custom gradient operation
-        predicts["adv_excess"] = self.adv_excess(self.before_adv_excess(feature_market).squeeze(1))
+        predicts["adv_excess"] = self.adv_excess(
+            self.before_adv_excess(feature_market).squeeze(1)
+        )
         if self.base_model == "LSTM":
-            hidden = [torch.cat([hidden_excess[i], hidden_market[i]], -1) for i in range(2)]
+            hidden = [
+                torch.cat([hidden_excess[i], hidden_market[i]], -1) for i in range(2)
+            ]
         else:
             hidden = torch.cat([hidden_excess, hidden_market], -1)
         x = torch.zeros_like(x[:, 1, :])
@@ -704,7 +786,9 @@ class ADDModel(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, d_feat=6, hidden_size=128, num_layers=1, dropout=0.5, base_model="GRU"):
+    def __init__(
+        self, d_feat=6, hidden_size=128, num_layers=1, dropout=0.5, base_model="GRU"
+    ):
         super().__init__()
         self.base_model = base_model
         if base_model == "GRU":
@@ -769,7 +853,10 @@ class RevGrad(nn.Module):
     def step_alpha(self):
         self._p += 1
         self._alpha = min(
-            self.gamma_clip, torch.tensor(2 / (1 + math.exp(-self.gamma * self._p)) - 1, requires_grad=False)
+            self.gamma_clip,
+            torch.tensor(
+                2 / (1 + math.exp(-self.gamma * self._p)) - 1, requires_grad=False
+            ),
         )
 
     def forward(self, input_):

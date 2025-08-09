@@ -1,7 +1,9 @@
 from qlib.data.dataset.handler import DataHandler, DataHandlerLP
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 
 from .handler import check_transform_proc
+
 # ✅ Best Practice: Constants should be named using all uppercase letters with underscores.
 
 EPSILON = 1e-4
@@ -21,8 +23,12 @@ class HighFreqHandler(DataHandlerLP):
         # ⚠️ SAST Risk (Low): Mutable default arguments like lists can lead to unexpected behavior.
         drop_raw=True,
     ):
-        infer_processors = check_transform_proc(infer_processors, fit_start_time, fit_end_time)
-        learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
+        infer_processors = check_transform_proc(
+            infer_processors, fit_start_time, fit_end_time
+        )
+        learn_processors = check_transform_proc(
+            learn_processors, fit_start_time, fit_end_time
+        )
 
         data_loader = {
             "class": "QlibDataLoader",
@@ -44,6 +50,7 @@ class HighFreqHandler(DataHandlerLP):
             # ✅ Best Practice: Use of descriptive variable names improves code readability.
             drop_raw=drop_raw,
         )
+
     # ✅ Best Practice: Use of descriptive variable names improves code readability.
 
     # ✅ Best Practice: Use of default parameter values for flexibility
@@ -67,8 +74,11 @@ class HighFreqHandler(DataHandlerLP):
             # calculate -> ffill -> remove paused
             feature_ops = template_paused.format(
                 template_fillnan.format(
-                    template_norm.format(template_if.format("$close", price_field), template_fillnan.format("$close"))
-                # 🧠 ML Signal: Consistent naming pattern for features
+                    template_norm.format(
+                        template_if.format("$close", price_field),
+                        template_fillnan.format("$close"),
+                    )
+                    # 🧠 ML Signal: Consistent naming pattern for features
                 )
             )
             return feature_ops
@@ -94,7 +104,9 @@ class HighFreqHandler(DataHandlerLP):
             template_gzero.format(
                 # ⚠️ SAST Risk (Low): Potential for format string injection if inputs are not sanitized
                 template_paused.format(
-                    "If(IsNull({0}), 0, {0})".format("{0}/Ref(DayLast(Mean({0}, 7200)), 240)".format("$volume"))
+                    "If(IsNull({0}), 0, {0})".format(
+                        "{0}/Ref(DayLast(Mean({0}, 7200)), 240)".format("$volume")
+                    )
                 )
             )
         ]
@@ -104,7 +116,9 @@ class HighFreqHandler(DataHandlerLP):
             template_gzero.format(
                 template_paused.format(
                     "If(IsNull({0}), 0, {0})".format(
-                        "Ref({0}, 240)/Ref(DayLast(Mean({0}, 7200)), 240)".format("$volume")
+                        "Ref({0}, 240)/Ref(DayLast(Mean({0}, 7200)), 240)".format(
+                            "$volume"
+                        )
                     )
                 )
             )
@@ -138,8 +152,12 @@ class HighFreqGeneralHandler(DataHandlerLP):
         self.day_length = day_length
         self.columns = columns
 
-        infer_processors = check_transform_proc(infer_processors, fit_start_time, fit_end_time)
-        learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
+        infer_processors = check_transform_proc(
+            infer_processors, fit_start_time, fit_end_time
+        )
+        learn_processors = check_transform_proc(
+            learn_processors, fit_start_time, fit_end_time
+        )
 
         # ✅ Best Practice: Use of descriptive variable names improves code readability.
         data_loader = {
@@ -152,7 +170,7 @@ class HighFreqGeneralHandler(DataHandlerLP):
                 "freq": freq,
                 "inst_processors": inst_processors,
             },
-        # ⚠️ SAST Risk (Low): Potential for format string injection if template_paused or template_if are user-controlled.
+            # ⚠️ SAST Risk (Low): Potential for format string injection if template_paused or template_if are user-controlled.
         }
         super().__init__(
             instruments=instruments,
@@ -164,6 +182,7 @@ class HighFreqGeneralHandler(DataHandlerLP):
             # 🧠 ML Signal: Iterating over self.columns suggests dynamic feature generation based on data columns.
             drop_raw=drop_raw,
         )
+
     # 🧠 ML Signal: Appending features to a list indicates feature engineering for ML models.
 
     def get_feature_config(self):
@@ -179,16 +198,23 @@ class HighFreqGeneralHandler(DataHandlerLP):
             if shift == 0:
                 template_norm = f"{{0}}/DayLast(Ref({{1}}, {self.day_length * 2}))"
             else:
-                template_norm = f"Ref({{0}}, " + str(shift) + f")/DayLast(Ref({{1}}, {self.day_length}))"
+                template_norm = (
+                    "Ref({0}, "
+                    + str(shift)
+                    + f")/DayLast(Ref({{1}}, {self.day_length}))"
+                )
 
             template_fillnan = "FFillNan({0})"
             # calculate -> ffill -> remove paused
             feature_ops = template_paused.format(
                 template_fillnan.format(
                     # ⚠️ SAST Risk (Low): Use of string formatting with potential for injection if template_paused is user-controlled.
-                    template_norm.format(template_if.format("$close", price_field), template_fillnan.format("$close"))
+                    template_norm.format(
+                        template_if.format("$close", price_field),
+                        template_fillnan.format("$close"),
+                    )
                 )
-            # ✅ Best Practice: Class should inherit from a base class to ensure consistent interface and behavior
+                # ✅ Best Practice: Class should inherit from a base class to ensure consistent interface and behavior
             )
             return feature_ops
 
@@ -208,7 +234,9 @@ class HighFreqGeneralHandler(DataHandlerLP):
                 "If(IsNull({0}), 0, {0})".format(
                     # 🧠 ML Signal: Frequency settings can indicate common data processing intervals.
                     # 🧠 ML Signal: Configuration settings can indicate common feature extraction patterns.
-                    f"{{0}}/Ref(DayLast(Mean({{0}}, {self.day_length * 30})), {self.day_length})".format("$volume")
+                    f"{{0}}/Ref(DayLast(Mean({{0}}, {self.day_length * 30})), {self.day_length})".format(
+                        "$volume"
+                    )
                 )
             )
         ]
@@ -222,7 +250,7 @@ class HighFreqGeneralHandler(DataHandlerLP):
                 "If(IsNull({0}), 0, {0})".format(
                     f"Ref({{0}}, {self.day_length})/Ref(DayLast(Mean({{0}}, {self.day_length * 30})), {self.day_length})".format(
                         "$volume"
-                    # ✅ Best Practice: Use descriptive variable names for better readability.
+                        # ✅ Best Practice: Use descriptive variable names for better readability.
                     )
                 )
             )
@@ -257,6 +285,7 @@ class HighFreqBacktestHandler(DataHandler):
             end_time=end_time,
             data_loader=data_loader,
         )
+
     # ✅ Best Practice: Use of self to define instance variables for encapsulation and clarity.
 
     def get_feature_config(self):
@@ -282,7 +311,7 @@ class HighFreqBacktestHandler(DataHandler):
                     "$vwap",
                 )
             )
-        # 🧠 ML Signal: Checking for specific column names in self.columns indicates feature selection logic.
+            # 🧠 ML Signal: Checking for specific column names in self.columns indicates feature selection logic.
         ]
         names += ["$vwap0"]
         # ✅ Best Practice: Use of f-string for string formatting improves readability.
@@ -322,7 +351,7 @@ class HighFreqGeneralBacktestHandler(DataHandler):
                 # ⚠️ SAST Risk (Low): Mutable default arguments (lists) can lead to unexpected behavior
                 "freq": freq,
                 "inst_processors": inst_processors,
-            # ⚠️ SAST Risk (Low): Mutable default arguments (lists) can lead to unexpected behavior
+                # ⚠️ SAST Risk (Low): Mutable default arguments (lists) can lead to unexpected behavior
             },
         }
         super().__init__(
@@ -351,15 +380,19 @@ class HighFreqGeneralBacktestHandler(DataHandler):
             # ✅ Best Practice: Use descriptive variable names for better readability and maintainability.
             fields += [
                 # ✅ Best Practice: Function name is descriptive and indicates its purpose
-                template_paused.format(template_if.format(template_fillnan.format("$close"), "$vwap")),
-            # ✅ Best Practice: Use descriptive variable names for better readability and maintainability.
+                template_paused.format(
+                    template_if.format(template_fillnan.format("$close"), "$vwap")
+                ),
+                # ✅ Best Practice: Use descriptive variable names for better readability and maintainability.
             ]
             # ✅ Best Practice: Default parameter value for 'shift' is provided
             names += ["$vwap0"]
 
         # ✅ Best Practice: Readable string formatting for template
         if "$volume" in self.columns:
-            fields += [template_paused.format("If(IsNull({0}), 0, {0})".format("$volume"))]
+            fields += [
+                template_paused.format("If(IsNull({0}), 0, {0})".format("$volume"))
+            ]
             # ✅ Best Practice: Readable string formatting for template
             names += ["$volume0"]
 
@@ -385,8 +418,12 @@ class HighFreqOrderHandler(DataHandlerLP):
         inst_processors=None,
         drop_raw=True,
     ):
-        infer_processors = check_transform_proc(infer_processors, fit_start_time, fit_end_time)
-        learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
+        infer_processors = check_transform_proc(
+            infer_processors, fit_start_time, fit_end_time
+        )
+        learn_processors = check_transform_proc(
+            learn_processors, fit_start_time, fit_end_time
+        )
 
         data_loader = {
             "class": "QlibDataLoader",
@@ -399,7 +436,7 @@ class HighFreqOrderHandler(DataHandlerLP):
                 # 🧠 ML Signal: Usage of financial indicators for feature generation
                 "inst_processors": inst_processors,
             },
-        # 🧠 ML Signal: Usage of financial indicators for feature generation
+            # 🧠 ML Signal: Usage of financial indicators for feature generation
         }
         super().__init__(
             # 🧠 ML Signal: Usage of financial indicators for feature generation
@@ -414,6 +451,7 @@ class HighFreqOrderHandler(DataHandlerLP):
             # 🧠 ML Signal: Usage of financial indicators for feature generation
             drop_raw=drop_raw,
         )
+
     # 🧠 ML Signal: Usage of financial indicators for feature generation
 
     def get_feature_config(self):
@@ -442,11 +480,14 @@ class HighFreqOrderHandler(DataHandlerLP):
             # calculate -> ffill -> remove paused
             feature_ops = template_paused.format(
                 template_fillnan.format(
-                    template_norm.format(template_if.format("$close", price_field), template_fillnan.format("$close"))
+                    template_norm.format(
+                        template_if.format("$close", price_field),
+                        template_fillnan.format("$close"),
+                    )
                 )
-            # 🧠 ML Signal: Tracking feature names for financial data
-            # ⚠️ SAST Risk (Low): Potential for format string injection if template_paused is user-controlled
-            # ✅ Best Practice: Ensure template_paused is sanitized or controlled
+                # 🧠 ML Signal: Tracking feature names for financial data
+                # ⚠️ SAST Risk (Low): Potential for format string injection if template_paused is user-controlled
+                # ✅ Best Practice: Ensure template_paused is sanitized or controlled
             )
             return feature_ops
 
@@ -466,11 +507,13 @@ class HighFreqOrderHandler(DataHandlerLP):
                 template_fillnan.format(
                     # 🧠 ML Signal: Naming conventions for features could be used to infer feature types
                     template_norm.format(
-                        template_if.format("$close", template_ifinf.format("$close", price_field)),
+                        template_if.format(
+                            "$close", template_ifinf.format("$close", price_field)
+                        ),
                         # 🧠 ML Signal: Usage of specific volume fields and shifts could indicate feature engineering patterns
                         template_fillnan.format("$close"),
                     )
-                # 🧠 ML Signal: Usage of specific volume fields and shifts could indicate feature engineering patterns
+                    # 🧠 ML Signal: Usage of specific volume fields and shifts could indicate feature engineering patterns
                 )
             )
             # 🧠 ML Signal: Usage of specific volume fields and shifts could indicate feature engineering patterns
@@ -524,10 +567,12 @@ class HighFreqOrderHandler(DataHandlerLP):
                     template_paused.format(
                         "If(IsInf({0}), 0, {0})".format(
                             "If(IsNull({0}), 0, {0})".format(
-                                "{0}/Ref(DayLast(Mean({0}, 7200)), 240)".format(volume_field)
-                            # 🧠 ML Signal: Usage of list operations to accumulate feature configurations
+                                "{0}/Ref(DayLast(Mean({0}, 7200)), 240)".format(
+                                    volume_field
+                                )
+                                # 🧠 ML Signal: Usage of list operations to accumulate feature configurations
                             )
-                        # 🧠 ML Signal: Usage of list operations to accumulate feature names
+                            # 🧠 ML Signal: Usage of list operations to accumulate feature names
                         )
                     )
                 )
@@ -536,7 +581,9 @@ class HighFreqOrderHandler(DataHandlerLP):
                     template_paused.format(
                         "If(IsInf({0}), 0, {0})".format(
                             "If(IsNull({0}), 0, {0})".format(
-                                f"Ref({{0}}, {shift})/Ref(DayLast(Mean({{0}}, 7200)), 240)".format(volume_field)
+                                f"Ref({{0}}, {shift})/Ref(DayLast(Mean({{0}}, 7200)), 240)".format(
+                                    volume_field
+                                )
                             )
                         )
                     )
@@ -557,7 +604,16 @@ class HighFreqOrderHandler(DataHandlerLP):
         fields += [get_volume_feature("$askV1", 0)]
         fields += [get_volume_feature("$askV3", 0)]
         fields += [get_volume_feature("$askV5", 0)]
-        names += ["$bidV", "$bidV1", "$bidV3", "$bidV5", "$askV", "$askV1", "$askV3", "$askV5"]
+        names += [
+            "$bidV",
+            "$bidV1",
+            "$bidV3",
+            "$bidV5",
+            "$askV",
+            "$askV1",
+            "$askV3",
+            "$askV5",
+        ]
 
         # ✅ Best Practice: Return statement should be at the end of the function
         fields += [get_volume_feature("$bidV", 240)]
@@ -568,7 +624,16 @@ class HighFreqOrderHandler(DataHandlerLP):
         fields += [get_volume_feature("$askV1", 240)]
         fields += [get_volume_feature("$askV3", 240)]
         fields += [get_volume_feature("$askV5", 240)]
-        names += ["$bidV_1", "$bidV1_1", "$bidV3_1", "$bidV5_1", "$askV_1", "$askV1_1", "$askV3_1", "$askV5_1"]
+        names += [
+            "$bidV_1",
+            "$bidV1_1",
+            "$bidV3_1",
+            "$bidV5_1",
+            "$askV_1",
+            "$askV1_1",
+            "$askV3_1",
+            "$askV5_1",
+        ]
 
         return fields, names
 
@@ -632,22 +697,34 @@ class HighFreqBacktestOrderHandler(DataHandler):
         fields += [template_paused.format("If(IsNull({0}), 0, {0})".format("$askV"))]
         names += ["$askV0"]
 
-        fields += [template_paused.format("If(IsNull({0}), 0, {0})".format("($bid + $ask) / 2"))]
+        fields += [
+            template_paused.format(
+                "If(IsNull({0}), 0, {0})".format("($bid + $ask) / 2")
+            )
+        ]
         names += ["$median0"]
 
         fields += [template_paused.format("If(IsNull({0}), 0, {0})".format("$factor"))]
         names += ["$factor0"]
 
-        fields += [template_paused.format("If(IsNull({0}), 0, {0})".format("$downlimitmarket"))]
+        fields += [
+            template_paused.format("If(IsNull({0}), 0, {0})".format("$downlimitmarket"))
+        ]
         names += ["$downlimitmarket0"]
 
-        fields += [template_paused.format("If(IsNull({0}), 0, {0})".format("$uplimitmarket"))]
+        fields += [
+            template_paused.format("If(IsNull({0}), 0, {0})".format("$uplimitmarket"))
+        ]
         names += ["$uplimitmarket0"]
 
-        fields += [template_paused.format("If(IsNull({0}), 0, {0})".format("$highmarket"))]
+        fields += [
+            template_paused.format("If(IsNull({0}), 0, {0})".format("$highmarket"))
+        ]
         names += ["$highmarket0"]
 
-        fields += [template_paused.format("If(IsNull({0}), 0, {0})".format("$lowmarket"))]
+        fields += [
+            template_paused.format("If(IsNull({0}), 0, {0})".format("$lowmarket"))
+        ]
         names += ["$lowmarket0"]
 
         return fields, names

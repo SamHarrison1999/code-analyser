@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 # 🧠 ML Signal: Importing specific classes or functions indicates usage patterns and dependencies
 from zvt.api.kdata import get_kdata
+
 # 🧠 ML Signal: Function definition for testing a specific transformer
 from zvt.factors.algorithm import MaTransformer, MacdTransformer
+
 # 🧠 ML Signal: Usage of a data retrieval function with specific parameters
 # 🧠 ML Signal: Importing specific classes or functions indicates usage patterns and dependencies
 
@@ -13,7 +15,7 @@ def test_ma_transformer():
         start_timestamp="2019-01-01",
         provider="joinquant",
         index=["entity_id", "timestamp"],
-    # 🧠 ML Signal: Instantiation of a transformer with specific parameters
+        # 🧠 ML Signal: Instantiation of a transformer with specific parameters
     )
     # 🧠 ML Signal: Function definition for testing a transformer, useful for identifying test patterns
 

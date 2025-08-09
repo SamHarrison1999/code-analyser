@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 import numpy as np
+
 # ✅ Best Practice: Group related imports together for better readability
 import pandas as pd
 from datetime import datetime
@@ -37,9 +38,13 @@ def get_calendar_day(freq="1min", future=False):
     # 🧠 ML Signal: Usage of string formatting to create unique cache keys.
     else:
         # 🧠 ML Signal: Checking for the existence of a key in a dictionary to decide on cache usage.
-        _calendar = np.array(list(map(lambda x: x.date(), Cal.load_calendar(freq, future))))
+        _calendar = np.array(
+            list(map(lambda x: x.date(), Cal.load_calendar(freq, future)))
+        )
         H["c"][flag] = _calendar
     return _calendar
+
+
 # 🧠 ML Signal: Retrieving cached data from a dictionary.
 
 
@@ -52,7 +57,9 @@ def get_calendar_minute(freq="day", future=False):
     if flag in H["c"]:
         _calendar = H["c"][flag]
     else:
-        _calendar = np.array(list(map(lambda x: x.minute // 30, Cal.load_calendar(freq, future))))
+        _calendar = np.array(
+            list(map(lambda x: x.minute // 30, Cal.load_calendar(freq, future)))
+        )
         H["c"][flag] = _calendar
     return _calendar
 
@@ -83,7 +90,13 @@ class DayCumsum(ElemOperator):
 
     # ✅ Best Practice: Use of datetime.strptime for parsing time strings
     # ✅ Best Practice: Using assert for input validation to ensure df length is as expected
-    def __init__(self, feature, start: str = "9:30", end: str = "14:59", data_granularity: int = 1):
+    def __init__(
+        self,
+        feature,
+        start: str = "9:30",
+        end: str = "14:59",
+        data_granularity: int = 1,
+    ):
         self.feature = feature
         # ⚠️ SAST Risk (Low): Directly modifying DataFrame without checking bounds could lead to IndexError
         self.start = datetime.strptime(start, "%H:%M")
@@ -117,6 +130,7 @@ class DayCumsum(ElemOperator):
         # ✅ Best Practice: Consider adding type hints for better code readability and maintainability
         df.iloc[self.end_id + 1 : 240 // self.data_granularity] = 0
         return df
+
     # 🧠 ML Signal: Usage of a function to get a calendar day based on frequency
 
     def _load_internal(self, instrument, start_index, end_index, freq):
@@ -125,7 +139,9 @@ class DayCumsum(ElemOperator):
         # 🧠 ML Signal: Grouping and transforming data using a calendar index
         # ✅ Best Practice: Class docstring provides clear documentation of parameters and return values
         series = self.feature.load(instrument, start_index, end_index, freq)
-        return series.groupby(_calendar[series.index], group_keys=False).transform(self.period_cusum)
+        return series.groupby(_calendar[series.index], group_keys=False).transform(
+            self.period_cusum
+        )
 
 
 class DayLast(ElemOperator):
@@ -145,7 +161,9 @@ class DayLast(ElemOperator):
     def _load_internal(self, instrument, start_index, end_index, freq):
         _calendar = get_calendar_day(freq=freq)
         series = self.feature.load(instrument, start_index, end_index, freq)
-        return series.groupby(_calendar[series.index], group_keys=False).transform("last")
+        return series.groupby(_calendar[series.index], group_keys=False).transform(
+            "last"
+        )
 
 
 # ✅ Best Practice: Consider adding type hints for function parameters and return type
@@ -169,8 +187,10 @@ class FFillNan(ElemOperator):
         # 🧠 ML Signal: Usage of a function to get a calendar day based on frequency
         return series.fillna(method="ffill")
 
+
 # ✅ Best Practice: Class docstring provides a clear description of the class and its parameters.
 # 🧠 ML Signal: Loading a series of data based on instrument and indices
+
 
 # ✅ Best Practice: Returning a pandas Series with a specific index
 class BFillNan(ElemOperator):
@@ -194,6 +214,8 @@ class BFillNan(ElemOperator):
         # 🧠 ML Signal: Usage of method chaining with `load` method
         # ✅ Best Practice: Class docstring provides a clear description of the class and its parameters
         return series.fillna(method="bfill")
+
+
 # ⚠️ SAST Risk (Low): Potential risk if `series_condition` is not a boolean indexer
 
 
@@ -236,11 +258,17 @@ class Select(PairOperator):
     """
 
     def _load_internal(self, instrument, start_index, end_index, freq):
-        series_condition = self.feature_left.load(instrument, start_index, end_index, freq)
-        series_feature = self.feature_right.load(instrument, start_index, end_index, freq)
+        series_condition = self.feature_left.load(
+            instrument, start_index, end_index, freq
+        )
+        series_feature = self.feature_right.load(
+            instrument, start_index, end_index, freq
+        )
         return series_feature.loc[series_condition]
 
+
 # ✅ Best Practice: Initialize instance variables in the constructor for clarity and maintainability.
+
 
 class IsNull(ElemOperator):
     """IsNull Operator
@@ -255,6 +283,7 @@ class IsNull(ElemOperator):
     feature:
         A series indicating whether the feature is nan
     """
+
     # 🧠 ML Signal: Calls a method on a feature object, indicating a pattern of feature manipulation
     # ✅ Best Practice: Clear and concise arithmetic operation
     # ✅ Best Practice: Returns a tuple, which is a common and clear way to return multiple values
@@ -304,7 +333,9 @@ class Cut(ElemOperator):
     def __init__(self, feature, left=None, right=None):
         self.left = left
         self.right = right
-        if (self.left is not None and self.left <= 0) or (self.right is not None and self.right >= 0):
+        if (self.left is not None and self.left <= 0) or (
+            self.right is not None and self.right >= 0
+        ):
             raise ValueError("Cut operator l shoud > 0 and r should < 0")
 
         super(Cut, self).__init__(feature)

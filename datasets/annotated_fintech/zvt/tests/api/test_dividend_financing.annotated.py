@@ -5,14 +5,18 @@ init_test_context()
 
 from zvt.domain import SpoDetail, RightsIssueDetail, DividendFinancing
 from zvt.contract.api import get_db_session
+
 # 🧠 ML Signal: Function name pattern indicates a test function
 # 🧠 ML Signal: Usage of a specific provider and database name can indicate user preferences or common configurations.
 from zvt.utils.time_utils import to_pd_timestamp
+
 # 🧠 ML Signal: Querying data with specific parameters
 # 🧠 ML Signal: Use of session object for database operations
 # ⚠️ SAST Risk (Low): Potential exposure of sensitive data through query parameters
 
-session = get_db_session(provider="eastmoney", db_name="dividend_financing")  # type: sqlalchemy.orm.Session
+session = get_db_session(
+    provider="eastmoney", db_name="dividend_financing"
+)  # type: sqlalchemy.orm.Session
 
 
 # 增发详情
@@ -67,6 +71,8 @@ def test_000778_rights_issue_detail():
     assert latest.rights_issues == 43570000
     assert latest.rights_raising_fund == 492300000
     assert latest.rights_issue_price == 11.3
+
+
 # ⚠️ SAST Risk (Low): Potential for assertion to fail if data changes
 
 

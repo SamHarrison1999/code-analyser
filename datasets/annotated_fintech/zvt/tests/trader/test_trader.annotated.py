@@ -2,9 +2,11 @@
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.api.kdata import get_kdata
 from zvt.contract import IntervalLevel, AdjustType
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.samples import MyBullTrader, StockTrader
 from zvt.utils.time_utils import is_same_date
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 
 buy_timestamp = "2019-05-29"
@@ -77,8 +79,8 @@ def test_single_trader():
         # ✅ Best Practice: Consider adding type hints for the 'timestamp' parameter for better readability and maintainability.
         end_timestamp=sell_timestamp,
         return_type="domain",
-    # 🧠 ML Signal: Calculation of percentage change in price
-    # ⚠️ SAST Risk (Low): Potential for repeated buy actions due to lack of condition to prevent multiple buys on the same timestamp.
+        # 🧠 ML Signal: Calculation of percentage change in price
+        # ⚠️ SAST Risk (Low): Potential for repeated buy actions due to lack of condition to prevent multiple buys on the same timestamp.
     )[0]
 
     # 🧠 ML Signal: Calculation of profit rate
@@ -87,13 +89,19 @@ def test_single_trader():
     # ✅ Best Practice: Use of assert for validation of expected outcomes
     # ⚠️ SAST Risk (Low): Repeated buy action without condition check can lead to unintended behavior or errors.
     buy_lost = trader.account_service.slippage + trader.account_service.buy_cost
-    pct = (sell_price.close * (1 - sell_lost) - buy_price.close * (1 + buy_lost)) / buy_price.close * (1 + buy_lost)
+    pct = (
+        (sell_price.close * (1 - sell_lost) - buy_price.close * (1 + buy_lost))
+        / buy_price.close
+        * (1 + buy_lost)
+    )
 
     profit_rate = (account.all_value - account.input_money) / account.input_money
     # ⚠️ SAST Risk (Low): Potential for repeated sell actions due to lack of condition to prevent multiple sells on the same timestamp.
 
     # 🧠 ML Signal: Method name suggests a financial trading strategy pattern
     assert round(profit_rate, 2) == round(pct, 2)
+
+
 # 🧠 ML Signal: Conditional logic based on an attribute, indicating a decision-making pattern
 
 
@@ -174,7 +182,11 @@ def test_multiple_trader():
 
     sell_lost = trader.account_service.slippage + trader.account_service.sell_cost
     buy_lost = trader.account_service.slippage + trader.account_service.buy_cost
-    pct1 = (sell_price.close * (1 - sell_lost) - buy_price.close * (1 + buy_lost)) / buy_price.close * (1 + buy_lost)
+    pct1 = (
+        (sell_price.close * (1 - sell_lost) - buy_price.close * (1 + buy_lost))
+        / buy_price.close
+        * (1 + buy_lost)
+    )
 
     # 601318
     # 🧠 ML Signal: Financial calculation pattern
@@ -196,7 +208,11 @@ def test_multiple_trader():
         return_type="domain",
     )[0]
 
-    pct2 = (sell_price.close * (1 - sell_lost) - buy_price.close * (1 + buy_lost)) / buy_price.close * (1 + buy_lost)
+    pct2 = (
+        (sell_price.close * (1 - sell_lost) - buy_price.close * (1 + buy_lost))
+        / buy_price.close
+        * (1 + buy_lost)
+    )
 
     profit_rate = (account.all_value - account.input_money) / account.input_money
 

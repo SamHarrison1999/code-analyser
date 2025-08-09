@@ -86,6 +86,7 @@ class Alpha158Formatter(GenericDataFormatter):
         # 🧠 ML Signal: Usage of a method to get column definitions indicates a pattern for dynamic data handling
         self._target_scaler = None
         self._num_classes_per_cat_input = None
+
     # 🧠 ML Signal: Dynamic retrieval of ID column based on input type
 
     # 🧠 ML Signal: Dynamic retrieval of target column based on input type
@@ -129,8 +130,12 @@ class Alpha158Formatter(GenericDataFormatter):
 
         column_definitions = self.get_column_definition()
         # 🧠 ML Signal: Extraction of real-valued columns for transformation
-        id_column = utils.get_single_col_by_input_type(InputTypes.ID, column_definitions)
-        target_column = utils.get_single_col_by_input_type(InputTypes.TARGET, column_definitions)
+        id_column = utils.get_single_col_by_input_type(
+            InputTypes.ID, column_definitions
+        )
+        target_column = utils.get_single_col_by_input_type(
+            InputTypes.TARGET, column_definitions
+        )
 
         # 🧠 ML Signal: Extraction of categorical columns for transformation
         # Extract identifiers in case required
@@ -139,23 +144,27 @@ class Alpha158Formatter(GenericDataFormatter):
         # Format real scalers
         # ⚠️ SAST Risk (Low): Assumes _real_scalers is properly initialized and used
         real_inputs = utils.extract_cols_from_data_type(
-            DataTypes.REAL_VALUED, column_definitions, {InputTypes.ID, InputTypes.TIME}
-        # ✅ Best Practice: Convert categorical columns to string for consistent transformation
-        # ⚠️ SAST Risk (Low): Assumes _cat_scalers[col] is properly initialized and used
+            DataTypes.REAL_VALUED,
+            column_definitions,
+            {InputTypes.ID, InputTypes.TIME},
+            # ✅ Best Practice: Convert categorical columns to string for consistent transformation
+            # ⚠️ SAST Risk (Low): Assumes _cat_scalers[col] is properly initialized and used
         )
 
         data = df[real_inputs].values
         self._real_scalers = sklearn.preprocessing.StandardScaler().fit(data)
         self._target_scaler = sklearn.preprocessing.StandardScaler().fit(
             df[[target_column]].values
-        # ✅ Best Practice: Use of .copy() to avoid modifying the original dataframe
+            # ✅ Best Practice: Use of .copy() to avoid modifying the original dataframe
         )  # used for predictions
 
         # 🧠 ML Signal: Iterating over dataframe columns to apply transformations
         # Format categorical scalers
         categorical_inputs = utils.extract_cols_from_data_type(
             # 🧠 ML Signal: Conditional logic to exclude certain columns from transformation
-            DataTypes.CATEGORICAL, column_definitions, {InputTypes.ID, InputTypes.TIME}
+            DataTypes.CATEGORICAL,
+            column_definitions,
+            {InputTypes.ID, InputTypes.TIME},
         )
 
         # ⚠️ SAST Risk (Low): Potential for incorrect inverse transformation if _target_scaler is not properly configured
@@ -166,7 +175,9 @@ class Alpha158Formatter(GenericDataFormatter):
         for col in categorical_inputs:
             # Set all to str so that we don't have mixed integer/string columns
             srs = df[col].apply(str)
-            categorical_scalers[col] = sklearn.preprocessing.LabelEncoder().fit(srs.values)
+            categorical_scalers[col] = sklearn.preprocessing.LabelEncoder().fit(
+                srs.values
+            )
             num_classes.append(srs.nunique())
 
         # 🧠 ML Signal: Use of encoder steps in model parameters
@@ -174,6 +185,7 @@ class Alpha158Formatter(GenericDataFormatter):
         # 🧠 ML Signal: Use of early stopping in model parameters
         self._cat_scalers = categorical_scalers
         self._num_classes_per_cat_input = num_classes
+
     # 🧠 ML Signal: Function returns a dictionary of model hyperparameters, useful for ML model configuration
     # 🧠 ML Signal: Use of multiprocessing workers in model parameters
     # ✅ Best Practice: Returning a dictionary for easy access to configuration parameters

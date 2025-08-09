@@ -27,6 +27,8 @@ class TestServer(RpcServer):
         # ⚠️ SAST Risk (Low): Binding to all network interfaces with a wildcard address can expose the service to external access
         print(f"receiving:{a} {b}")
         return a + b
+
+
 # 🧠 ML Signal: Instantiation of a server object, indicating a server-client architecture
 
 

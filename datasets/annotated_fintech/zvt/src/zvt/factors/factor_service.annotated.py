@@ -5,9 +5,11 @@ import pandas as pd
 from zvt.contract import zvt_context
 from zvt.domain import Stock
 from zvt.factors.factor_models import FactorRequestModel
+
 # 🧠 ML Signal: Accessing attributes of a model object, indicating a pattern of object-oriented design.
 from zvt.factors.technical_factor import TechnicalFactor
 from zvt.trader import TradingSignalType
+
 # 🧠 ML Signal: Accessing attributes of a model object, indicating a pattern of object-oriented design.
 
 
@@ -51,8 +53,12 @@ def query_factor_result(factor_request_model: FactorRequestModel):
             return TradingSignalType.close_long
 
     df = df.rename(columns={"timestamp": "happen_timestamp"})
-    df["due_timestamp"] = df["happen_timestamp"] + pd.Timedelta(seconds=level.to_second())
-    df["trading_signal_type"] = df["filter_result"].apply(lambda x: to_trading_signal(x))
+    df["due_timestamp"] = df["happen_timestamp"] + pd.Timedelta(
+        seconds=level.to_second()
+    )
+    df["trading_signal_type"] = df["filter_result"].apply(
+        lambda x: to_trading_signal(x)
+    )
 
     print(df)
     return df.to_dict(orient="records")

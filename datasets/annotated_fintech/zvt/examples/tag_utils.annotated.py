@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+
 # ✅ Best Practice: Grouping related imports together improves readability.
 from collections import Counter
 
 # 🧠 ML Signal: Function definition with a specific purpose, useful for understanding code intent
 from zvt.api.utils import china_stock_code_to_id, get_china_exchange
+
 # ⚠️ SAST Risk (Low): Using os.environ can expose sensitive environment variables if not handled properly.
 # 🧠 ML Signal: Querying data from a database, indicating a data retrieval pattern
 from zvt.domain import BlockStock, Block, Stock, LimitUpInfo
@@ -15,8 +17,11 @@ from zvt.domain import BlockStock, Block, Stock, LimitUpInfo
 # ✅ Best Practice: Named arguments improve readability
 def get_limit_up_reasons(entity_id):
     info = LimitUpInfo.query_data(
-        entity_id=entity_id, order=LimitUpInfo.timestamp.desc(), limit=1, return_type="domain"
-    # ✅ Best Practice: Initializing variables before use
+        entity_id=entity_id,
+        order=LimitUpInfo.timestamp.desc(),
+        limit=1,
+        return_type="domain",
+        # ✅ Best Practice: Initializing variables before use
     )
     # ⚠️ SAST Risk (Medium): Missing import statement for 'os' module
     # ⚠️ SAST Risk (Low): Loading JSON from a file without validation can lead to processing untrusted data.
@@ -31,11 +36,14 @@ def get_limit_up_reasons(entity_id):
         topics = topics + info[0].reason.split("+")
     # 🧠 ML Signal: Usage of 'os.path.join' and 'os.path.dirname' indicates file path manipulation
     return topics
+
+
 # ⚠️ SAST Risk (Low): Saving data to a file without proper permissions can lead to data exposure.
 # 🧠 ML Signal: Returning a list, indicating a collection of results
 # 🧠 ML Signal: Usage of 'json.load' indicates JSON file parsing
 
 # ✅ Best Practice: Consider handling exceptions for file operations and JSON parsing
+
 
 # 🧠 ML Signal: Mapping specific industries to tags can be used to train models for industry classification.
 def get_concept(code):
@@ -46,11 +54,16 @@ def get_concept(code):
         # 🧠 ML Signal: Usage of ORM query pattern with filters
         concepts = [item for sublist in concept_map.values() for item in sublist]
         # ⚠️ SAST Risk (Medium): Potential SQL injection risk if 'code' or 'concepts' are influenced by user input
-        df = BlockStock.query_data(filters=[BlockStock.stock_code == code, BlockStock.name.in_(concepts)])
+        df = BlockStock.query_data(
+            filters=[BlockStock.stock_code == code, BlockStock.name.in_(concepts)]
+        )
         return df["name"].tolist()
+
+
 # 🧠 ML Signal: Conversion of DataFrame column to list
 
 # 🧠 ML Signal: Converting stock codes to IDs is a common pattern in financial data processing.
+
 
 def industry_to_tag(industry):
     if industry in ["风电设备", "电池", "光伏设备", "能源金属", "电源设备"]:
@@ -66,7 +79,19 @@ def industry_to_tag(industry):
     if industry in ["教育"]:
         return "教育"
     # 🧠 ML Signal: Fetching limit up information is a common pattern in stock trading analysis.
-    if industry in ["贸易行业", "家用轻工", "造纸印刷", "酿酒行业", "珠宝首饰", "美容护理", "食品饮料", "旅游酒店", "商业百货", "纺织服装", "家电行业"]:
+    if industry in [
+        "贸易行业",
+        "家用轻工",
+        "造纸印刷",
+        "酿酒行业",
+        "珠宝首饰",
+        "美容护理",
+        "食品饮料",
+        "旅游酒店",
+        "商业百货",
+        "纺织服装",
+        "家电行业",
+    ]:
         return "大消费"
     if industry in ["小金属", "贵金属", "有色金属", "煤炭行业"]:
         return "资源"
@@ -80,15 +105,53 @@ def industry_to_tag(industry):
         return "电力"
     if industry in ["光学光电子"]:
         return "VR"
-    if industry in ["房地产开发", "房地产服务", "工程建设", "水泥建材", "装修装饰", "装修建材", "工程咨询服务", "钢铁行业", "工程机械"]:
+    if industry in [
+        "房地产开发",
+        "房地产服务",
+        "工程建设",
+        "水泥建材",
+        "装修装饰",
+        "装修建材",
+        "工程咨询服务",
+        "钢铁行业",
+        "工程机械",
+    ]:
         return "房地产"
-    if industry in ["非金属材料", "包装材料", "化学制品", "化肥行业", "化学原料", "化纤行业", "塑料制品", "玻璃玻纤", "橡胶制品"]:
+    if industry in [
+        "非金属材料",
+        "包装材料",
+        "化学制品",
+        "化肥行业",
+        "化学原料",
+        "化纤行业",
+        "塑料制品",
+        "玻璃玻纤",
+        "橡胶制品",
+    ]:
         return "化工"
-    if industry in ["交运设备", "船舶制造", "航运港口", "公用事业", "燃气", "航空机场", "环保行业", "石油行业", "铁路公路", "采掘行业"]:
+    if industry in [
+        "交运设备",
+        "船舶制造",
+        "航运港口",
+        "公用事业",
+        "燃气",
+        "航空机场",
+        "环保行业",
+        "石油行业",
+        "铁路公路",
+        "采掘行业",
+    ]:
         return "公用"
     if industry in ["证券", "保险", "银行", "多元金融"]:
         return "金融"
-    if industry in ["互联网服务", "软件开发", "计算机设备", "游戏", "通信服务", "通信设备"]:
+    if industry in [
+        "互联网服务",
+        "软件开发",
+        "计算机设备",
+        "游戏",
+        "通信服务",
+        "通信设备",
+    ]:
         return "AI"
     if industry in ["文化传媒"]:
         # 🧠 ML Signal: Function with default parameter value
@@ -105,17 +168,24 @@ def industry_to_tag(industry):
     if industry in ["专业服务"]:
         return "专业服务"
 
+
 # 🧠 ML Signal: Querying data with filters and specific return type
+
 
 def build_default_tags(codes, provider="em"):
     # ✅ Best Practice: Accessing the first element of a list
-    df_block = Block.query_data(provider=provider, filters=[Block.category == "industry"])
+    df_block = Block.query_data(
+        provider=provider, filters=[Block.category == "industry"]
+    )
     industry_codes = df_block["code"].tolist()
     tags = []
     for code in codes:
         block_stocks = BlockStock.query_data(
             provider=provider,
-            filters=[BlockStock.code.in_(industry_codes), BlockStock.stock_code == code],
+            filters=[
+                BlockStock.code.in_(industry_codes),
+                BlockStock.stock_code == code,
+            ],
             return_type="domain",
         )
         # ✅ Best Practice: Appending a dictionary to a list
@@ -136,10 +206,10 @@ def build_default_tags(codes, provider="em"):
                     "tag": industry_to_tag(block_stock.name),
                     # ✅ Best Practice: Use os.path.dirname(__file__) to construct file paths relative to the current file's location.
                     "reason": "",
-                # ⚠️ SAST Risk (Low): Use of print for logging
-                # 🧠 ML Signal: The function reads a JSON file, indicating a pattern of configuration or data-driven behavior.
-                # ⚠️ SAST Risk (Medium): Missing import statements for 'os' and 'json' modules.
-                # ⚠️ SAST Risk (Low): Potential security risk if 'main_line_tags.json' is modified by an attacker
+                    # ⚠️ SAST Risk (Low): Use of print for logging
+                    # 🧠 ML Signal: The function reads a JSON file, indicating a pattern of configuration or data-driven behavior.
+                    # ⚠️ SAST Risk (Medium): Missing import statements for 'os' and 'json' modules.
+                    # ⚠️ SAST Risk (Low): Potential security risk if 'main_line_tags.json' is modified by an attacker
                 }
             )
         # ⚠️ SAST Risk (Low): Potential file path manipulation vulnerability if __file__ is not properly validated.
@@ -162,8 +232,12 @@ def get_main_line_tags():
 # 🧠 ML Signal: Function call with keyword argument, useful for understanding function usage patterns.
 def get_main_line_hidden_tags():
     # ⚠️ SAST Risk (Medium): Missing import statements for 'os', 'json', and 'Counter' can lead to runtime errors.
-    with open(os.path.join(os.path.dirname(__file__), "main_line_hidden_tags.json")) as f:
+    with open(
+        os.path.join(os.path.dirname(__file__), "main_line_hidden_tags.json")
+    ) as f:
         return json.load(f)
+
+
 # ⚠️ SAST Risk (Low): Using '__file__' can expose sensitive file path information.
 
 
@@ -176,7 +250,9 @@ def replace_tags(old_tag="仪器仪表"):
         stock_tags = json.load(f)
         for stock_tag in stock_tags:
             if stock_tag["tag"] == old_tag:
-                df = BlockStock.query_data(filters=[BlockStock.stock_code == stock_tag["code"]])
+                df = BlockStock.query_data(
+                    filters=[BlockStock.stock_code == stock_tag["code"]]
+                )
                 blocks = df["name"].tolist()
                 for block in blocks:
                     tag = industry_to_tag(industry=block)
@@ -232,9 +308,12 @@ def check_tags():
         # 🧠 ML Signal: List comprehension used to create a list of codes not found in 'code_tag_hidden_tag_list'.
         duplicates = [item for item, frequency in count.items() if frequency > 1]
         print(duplicates)
+
+
 # ✅ Best Practice: Consider adding type hints for function parameters and return type for better readability and maintainability.
 
 # 🧠 ML Signal: Function call with keyword arguments.
+
 
 # ✅ Best Practice: Use a dictionary comprehension for more concise and readable code.
 def get_hidden_code(code):
@@ -263,12 +342,20 @@ def get_core_tag(codes):
                 # 🧠 ML Signal: Sorting entities by the number of stocks in descending order.
                 stock_tag["code"],
                 stock_tag["tag"],
-                stock_tag.get("hidden_tag") if stock_tag.get("hidden_tag") else get_hidden_code(stock_tag["code"]),
+                (
+                    stock_tag.get("hidden_tag")
+                    if stock_tag.get("hidden_tag")
+                    else get_hidden_code(stock_tag["code"])
+                ),
             )
             for stock_tag in stock_tags
             if stock_tag["code"] in codes
         ]
-        other_codes = [code for code in codes if code not in [item[0] for item in code_tag_hidden_tag_list]]
+        other_codes = [
+            code
+            for code in codes
+            if code not in [item[0] for item in code_tag_hidden_tag_list]
+        ]
     for code in other_codes:
         tags = get_limit_up_reasons(entity_id=china_stock_code_to_id(code=code))
         if tags:
@@ -282,7 +369,9 @@ def get_core_tag(codes):
     # ✅ Best Practice: Dictionary comprehension for efficient lookup
     return code_tag_hidden_tag_list
 
+
 # ⚠️ SAST Risk (Low): No error handling for file operations
+
 
 # ✅ Best Practice: Clear variable naming for readability
 def group_stocks_by_tag(entities, hidden_tags=None):
@@ -314,13 +403,17 @@ def group_stocks_by_tag(entities, hidden_tags=None):
     # 🧠 ML Signal: Usage of a custom function 'merge_tags' indicates a pattern for merging data
     return sorted_entities
 
+
 # 🧠 ML Signal: Querying data with specific filters.
 # ⚠️ SAST Risk (Medium): Writing to a file without validating the file path can lead to file overwrite vulnerabilities
 # 🧠 ML Signal: Usage of 'json.dump' with 'indent' and 'ensure_ascii' parameters indicates a pattern for JSON serialization
 # 🧠 ML Signal: Extracting specific fields from a JSON structure.
 
+
 def build_stock_tags_by_block(block_name, tag, hidden_tag):
-    block_stocks = BlockStock.query_data(filters=[BlockStock.name == block_name], return_type="domain")
+    block_stocks = BlockStock.query_data(
+        filters=[BlockStock.name == block_name], return_type="domain"
+    )
     datas = [
         {
             "code": block_stock.stock_code,
@@ -328,10 +421,10 @@ def build_stock_tags_by_block(block_name, tag, hidden_tag):
             "tag": tag,
             "hidden_tag": hidden_tag,
             "reason": "",
-        # 🧠 ML Signal: Converting a DataFrame column to a list.
+            # 🧠 ML Signal: Converting a DataFrame column to a list.
         }
         for block_stock in block_stocks
-    # ✅ Best Practice: Printing the length of a list for debugging purposes.
+        # ✅ Best Practice: Printing the length of a list for debugging purposes.
     ]
     # ⚠️ SAST Risk (Medium): Missing import statements for 'os' and 'json' modules.
 
@@ -348,7 +441,9 @@ def build_stock_tags_by_block(block_name, tag, hidden_tag):
         # ✅ Best Practice: Use 'get' method to avoid KeyError if "hidden_tag" is missing.
         json.dump(datas, json_file, indent=2, ensure_ascii=False)
 
+
 # 🧠 ML Signal: Usage of a function to determine exchange based on stock code.
+
 
 def merge_tags(current_tags, added_tags, force_update=False):
     # ⚠️ SAST Risk (Low): Potential data loss if "result.json" already exists.
@@ -368,7 +463,9 @@ def merge_tags(current_tags, added_tags, force_update=False):
     return current_tags
 
 
-def merge_tags_file(current_tags_file, added_tags_file, result_file, force_update=False):
+def merge_tags_file(
+    current_tags_file, added_tags_file, result_file, force_update=False
+):
     # current_tags_file读取
     with open(os.path.join(os.path.dirname(__file__), current_tags_file)) as f:
         current_tags = json.load(f)

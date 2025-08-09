@@ -18,6 +18,7 @@ from zvt import zvt_env
 from zvt.contract import IntervalLevel
 from zvt.contract import zvt_context
 from zvt.contract.schema import Mixin, TradableEntity
+
 # ✅ Best Practice: Use of a logger is a best practice for tracking and debugging.
 # ✅ Best Practice: Use of type hinting for function return type improves readability and maintainability
 from zvt.utils.pd_utils import pd_is_not_null, index_df
@@ -40,8 +41,11 @@ def _get_db_name(data_schema: DeclarativeMeta) -> str:
 
 
 def get_db_engine(
-    provider: str, db_name: str = None, data_schema: object = None, data_path: str = zvt_env["data_path"]
-# ✅ Best Practice: Check if data_schema is provided to determine db_name, improving flexibility.
+    provider: str,
+    db_name: str = None,
+    data_schema: object = None,
+    data_path: str = zvt_env["data_path"],
+    # ✅ Best Practice: Check if data_schema is provided to determine db_name, improving flexibility.
 ) -> Engine:
     """
     get db engine from (provider,db_name) or (provider,data_schema)
@@ -64,28 +68,37 @@ def get_db_engine(
         # ✅ Best Practice: Consider using dependency injection to pass the context or providers as a parameter.
         os.makedirs(provider_path)
     # ✅ Best Practice: Add type hint for the return type to improve code readability and maintainability
-    db_path = os.path.join(provider_path, "{}_{}.db?check_same_thread=False".format(provider, db_name))
+    db_path = os.path.join(
+        provider_path, "{}_{}.db?check_same_thread=False".format(provider, db_name)
+    )
     # 🧠 ML Signal: Storing newly created database engine in a context map.
 
     engine_key = "{}_{}".format(provider, db_name)
     db_engine = zvt_context.db_engine_map.get(engine_key)
     if not db_engine:
         db_engine = create_engine(
-            "sqlite:///" + db_path, echo=False, json_serializer=lambda obj: json.dumps(obj, ensure_ascii=False)
+            "sqlite:///" + db_path,
+            echo=False,
+            json_serializer=lambda obj: json.dumps(obj, ensure_ascii=False),
         )
         # 🧠 ML Signal: Iterating over a dictionary to find matching keys
         zvt_context.db_engine_map[engine_key] = db_engine
     return db_engine
+
+
 # 🧠 ML Signal: Conditional check for equality
 
 
 # 🧠 ML Signal: Nested loop to iterate over a list of items
 def get_providers() -> List[str]:
     return zvt_context.providers
+
+
 # 🧠 ML Signal: Accessing dictionary values with a key
 
 # 🧠 ML Signal: Conditional check for truthiness
 # 🧠 ML Signal: List concatenation pattern
+
 
 def get_schemas(provider: str) -> List[DeclarativeMeta]:
     """
@@ -108,9 +121,16 @@ def get_schemas(provider: str) -> List[DeclarativeMeta]:
     # ⚠️ SAST Risk (Low): Potential for resource exhaustion if sessions are not properly managed.
     return schemas
 
+
 # 🧠 ML Signal: Use of a global context (zvt_context.sessions) to manage sessions.
 
-def get_db_session(provider: str, db_name: str = None, data_schema: object = None, force_new: bool = False) -> Session:
+
+def get_db_session(
+    provider: str,
+    db_name: str = None,
+    data_schema: object = None,
+    force_new: bool = False,
+) -> Session:
     """
     get db session from (provider,db_name) or (provider,data_schema)
 
@@ -142,10 +162,14 @@ def get_db_session(provider: str, db_name: str = None, data_schema: object = Non
         zvt_context.sessions[session_key] = session
     # ✅ Best Practice: Assigning a function to a variable for reuse
     return session
+
+
 # 🧠 ML Signal: Function with a single responsibility to retrieve schema by name
 
 
-def get_db_session_factory(provider: str, db_name: str = None, data_schema: object = None):
+def get_db_session_factory(
+    provider: str, db_name: str = None, data_schema: object = None
+):
     """
     get db session factory from (provider,db_name) or (provider,data_schema)
 
@@ -191,6 +215,8 @@ def get_schema_by_name(name: str) -> DeclarativeMeta:
     for schema in zvt_context.schemas:
         if schema.__name__ == name:
             return schema
+
+
 # 🧠 ML Signal: Usage of timestamp filtering in queries.
 
 
@@ -202,6 +228,8 @@ def get_schema_columns(schema: DeclarativeMeta) -> List[str]:
     :return: columns of the schema
     """
     return schema.__table__.columns.keys()
+
+
 # 🧠 ML Signal: Conditional ordering of query results.
 
 
@@ -312,6 +340,8 @@ def _row2dict(row):
         # 🧠 ML Signal: Default session creation logic
         d[column.name] = getattr(row, column.name)
     return d
+
+
 # ⚠️ SAST Risk (Low): Use of eval can lead to code injection vulnerabilities
 
 
@@ -468,7 +498,9 @@ def get_data(
         df = pd.read_sql(query.statement, query.session.bind)
         if pd_is_not_null(df):
             if index:
-                df = index_df(df, index=index, drop=drop_index_col, time_field=time_field)
+                df = index_df(
+                    df, index=index, drop=drop_index_col, time_field=time_field
+                )
         return df
     elif return_type == "domain":
         # 🧠 ML Signal: Pattern of unpacking values from a function return
@@ -509,7 +541,9 @@ def get_data_count(data_schema, filters=None, session=None):
         for filter in filters:
             query = query.filter(filter)
 
-    count_q = query.statement.with_only_columns(func.count(data_schema.id)).order_by(None)
+    count_q = query.statement.with_only_columns(func.count(data_schema.id)).order_by(
+        None
+    )
     count = session.execute(count_q).scalar()
     return count
 
@@ -525,7 +559,9 @@ def get_group(provider, data_schema, column, group_func=func.count, session=None
     df = pd.read_sql(query.statement, query.session.bind)
     return df
 
+
 # ⚠️ SAST Risk (Low): No validation for 'session' being a valid database session.
+
 
 def decode_entity_id(entity_id: str):
     """
@@ -552,6 +588,8 @@ def get_entity_type(entity_id: str):
     """
     entity_type, _, _ = decode_entity_id(entity_id)
     return entity_type
+
+
 # ⚠️ SAST Risk (Low): No validation for 'data_schema.__tablename__' being a valid table name.
 
 
@@ -644,9 +682,13 @@ def df_to_db(
             if force_update:
                 ids = df_current["id"].tolist()
                 if len(ids) == 1:
-                    sql = text(f'delete from `{data_schema.__tablename__}` where id = "{ids[0]}"')
+                    sql = text(
+                        f'delete from `{data_schema.__tablename__}` where id = "{ids[0]}"'
+                    )
                 else:
-                    sql = text(f"delete from `{data_schema.__tablename__}` where id in {tuple(ids)}")
+                    sql = text(
+                        f"delete from `{data_schema.__tablename__}` where id in {tuple(ids)}"
+                    )
 
                 session.execute(sql)
             else:
@@ -665,8 +707,12 @@ def df_to_db(
             saved = saved + len(df_current)
             # ⚠️ SAST Risk (Low): Potential risk if df is not properly validated before use
             df_current.to_sql(
-                data_schema.__tablename__, session.connection(), index=False, if_exists="append", dtype=dtype
-            # 🧠 ML Signal: Conversion of DataFrame column to list, common data manipulation pattern
+                data_schema.__tablename__,
+                session.connection(),
+                index=False,
+                if_exists="append",
+                dtype=dtype,
+                # 🧠 ML Signal: Conversion of DataFrame column to list, common data manipulation pattern
             )
         session.commit()
     # ✅ Best Practice: Use of __all__ to define public API of the module

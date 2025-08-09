@@ -8,17 +8,27 @@ from zvt.contract import IntervalLevel
 from zvt.factors.macd.macd_factor import BullFactor
 from zvt.trader import StockTrader
 from zvt.trader.trader_info_api import clear_trader
+
 # ✅ Best Practice: Class definition should follow PEP 8 naming conventions, which is followed here.
 from zvt.utils.time_utils import split_time_interval, date_time_by_interval
+
 # 🧠 ML Signal: Usage of logging to track application behavior and errors.
 
 logger = logging.getLogger(__name__)
 
 # ✅ Best Practice: Consider adding type hints for function parameters and return type for better readability and maintainability.
 
+
 class MultipleLevelTrader(StockTrader):
     def init_factors(
-        self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp, adjust_type=None
+        self,
+        entity_ids,
+        entity_schema,
+        exchanges,
+        codes,
+        start_timestamp,
+        end_timestamp,
+        adjust_type=None,
     ):
         start_timestamp = date_time_by_interval(start_timestamp, -50)
 
@@ -46,6 +56,7 @@ class MultipleLevelTrader(StockTrader):
             ),
         ]
 
+
 # 🧠 ML Signal: Iterating over time intervals indicates a pattern of processing data in chunks.
 
 if __name__ == "__main__":
@@ -66,11 +77,17 @@ if __name__ == "__main__":
             pct=0.3,
         )
         # 机构重仓
-        ii_df = get_top_fund_holding_stocks(timestamp=start_timestamp, pct=0.3, by="trading")
+        ii_df = get_top_fund_holding_stocks(
+            timestamp=start_timestamp, pct=0.3, by="trading"
+        )
 
-        current_entity_pool = list(set(vol_df.index.tolist()) & set(ii_df.index.tolist()))
+        current_entity_pool = list(
+            set(vol_df.index.tolist()) & set(ii_df.index.tolist())
+        )
 
-        logger.info(f"current_entity_pool({len(current_entity_pool)}):{current_entity_pool}")
+        logger.info(
+            f"current_entity_pool({len(current_entity_pool)}):{current_entity_pool}"
+        )
 
         trader = MultipleLevelTrader(
             start_timestamp=start_timestamp,

@@ -5,14 +5,18 @@ import pandas as pd
 from zvt.api.utils import get_recent_report_date
 from zvt.contract import ActorType, AdjustType
 from zvt.domain import StockActorSummary, Stock1dKdata, Stock
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.trader import StockTrader
+
 # ✅ Best Practice: Class-level attributes should be documented to explain their purpose and usage.
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import is_same_date, to_pd_timestamp
+
 # ✅ Best Practice: Initialize class attributes in the constructor for better readability and maintainability.
 
 # ✅ Best Practice: Convert to pandas timestamp for consistency in date operations
+
 
 class FollowIITrader(StockTrader):
     finish_date = None

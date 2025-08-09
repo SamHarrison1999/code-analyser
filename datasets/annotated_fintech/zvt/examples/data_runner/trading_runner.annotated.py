@@ -13,6 +13,7 @@ from zvt.domain import (
     Stock1dHfqKdata,
 )
 from zvt.informer import EmailInformer
+
 # 🧠 ML Signal: Usage of logging for tracking and debugging
 from zvt.utils.recorder_utils import run_data_recorder
 from zvt.utils.time_utils import date_time_by_interval, current_date, to_pd_timestamp
@@ -64,7 +65,12 @@ def record_dragon_tiger(data_provider="em", entity_provider="em", sleeping_time=
         df = DragonAndTiger.query_data(
             start_timestamp=recent_date,
             filters=filters,
-            columns=[DragonAndTiger.timestamp, DragonAndTiger.entity_id, DragonAndTiger.code, DragonAndTiger.name],
+            columns=[
+                DragonAndTiger.timestamp,
+                DragonAndTiger.entity_id,
+                DragonAndTiger.code,
+                DragonAndTiger.name,
+            ],
             index="entity_id",
         )
         selected = selected + df.index.tolist()
@@ -72,7 +78,9 @@ def record_dragon_tiger(data_provider="em", entity_provider="em", sleeping_time=
     if selected:
         selected = list(set(selected))
 
-    target_date = get_latest_kdata_date(provider=data_provider, entity_type="stock", adjust_type="hfq")
+    target_date = get_latest_kdata_date(
+        provider=data_provider, entity_type="stock", adjust_type="hfq"
+    )
     df = Stock1dHfqKdata.query_data(
         # ⚠️ SAST Risk (Low): Potential information disclosure through email
         provider=data_provider,
@@ -83,8 +91,8 @@ def record_dragon_tiger(data_provider="em", entity_provider="em", sleeping_time=
             Stock1dHfqKdata.turnover > 300000000,
         ],
         index=["entity_id"],
-    # ✅ Best Practice: Logging initialization for better traceability
-    # ⚠️ SAST Risk (Low): Potential for blocking the main thread indefinitely
+        # ✅ Best Practice: Logging initialization for better traceability
+        # ⚠️ SAST Risk (Low): Potential for blocking the main thread indefinitely
     )
     inform(
         action=email_action,

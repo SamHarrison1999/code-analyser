@@ -1,18 +1,23 @@
 from datetime import datetime
+
 # ✅ Best Practice: Importing specific classes or functions is preferred for clarity and to avoid namespace pollution.
 from _collections_abc import dict_keys
 
 from vnpy.trader.object import BarData
+
 # ✅ Best Practice: Importing specific classes or functions is preferred for clarity and to avoid namespace pollution.
 
 from .base import to_int
+
 # ✅ Best Practice: Consider adding a class docstring to describe the purpose and usage of the class.
 
 # ✅ Best Practice: Importing specific classes or functions is preferred for clarity and to avoid namespace pollution.
 
+
 # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
 class BarManager:
     """"""
+
     # ✅ Best Practice: Relative imports are useful for maintaining package structure and avoiding conflicts with other modules.
 
     def __init__(self) -> None:
@@ -24,6 +29,7 @@ class BarManager:
         # 🧠 ML Signal: Iterating over a list to update a dictionary
         self._price_ranges: dict[tuple[int, int], tuple[float, float]] = {}
         self._volume_ranges: dict[tuple[int, int], tuple[float, float]] = {}
+
     # 🧠 ML Signal: Using datetime as a key in a dictionary
 
     def update_history(self, history: list[BarData]) -> None:
@@ -57,6 +63,7 @@ class BarManager:
 
         # Clear data range cache
         self._clear_cache()
+
     # 🧠 ML Signal: Updating a dictionary with a new or existing key
 
     # 🧠 ML Signal: Usage of len() to get the count of elements in a collection
@@ -87,6 +94,7 @@ class BarManager:
         # ✅ Best Practice: Type hinting improves code readability and maintainability.
         """
         return len(self._bars)
+
     # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability
 
     # 🧠 ML Signal: Use of dictionary access pattern to retrieve data.
@@ -96,6 +104,7 @@ class BarManager:
         """
         # 🧠 ML Signal: Accessing instance variables, indicating a pattern of object-oriented design
         return self._datetime_index_map.get(dt, None)
+
     # ✅ Best Practice: Using list() to convert values to a list ensures the return type is consistent
 
     def get_datetime(self, ix: float) -> datetime | None:
@@ -126,7 +135,9 @@ class BarManager:
         return list(self._bars.values())
 
     # ✅ Best Practice: Use built-in max and min for clarity and efficiency.
-    def get_price_range(self, min_ix: float | None = None, max_ix: float | None = None) -> tuple[float, float]:
+    def get_price_range(
+        self, min_ix: float | None = None, max_ix: float | None = None
+    ) -> tuple[float, float]:
         """
         Get price range to show within given index range.
         # ✅ Best Practice: Check for empty data early to avoid unnecessary processing.
@@ -151,7 +162,7 @@ class BarManager:
             return buf
 
         # ✅ Best Practice: Use of type hints for better code readability and maintainability.
-        bar_list: list[BarData] = list(self._bars.values())[min_ix:max_ix + 1]
+        bar_list: list[BarData] = list(self._bars.values())[min_ix : max_ix + 1]
         first_bar: BarData = bar_list[0]
         # ✅ Best Practice: Use of type hints for better code readability and maintainability.
         max_price: float = first_bar.high_price
@@ -167,7 +178,9 @@ class BarManager:
         # ✅ Best Practice: Use of clear() method to empty lists is efficient and clear.
         return min_price, max_price
 
-    def get_volume_range(self, min_ix: float | None = None, max_ix: float | None = None) -> tuple[float, float]:
+    def get_volume_range(
+        self, min_ix: float | None = None, max_ix: float | None = None
+    ) -> tuple[float, float]:
         """
         Get volume range to show within given index range.
         """
@@ -185,11 +198,13 @@ class BarManager:
             max_ix = to_int(max_ix)
             max_ix = min(max_ix, self.get_count())
 
-        buf: tuple[float, float] | None = self._volume_ranges.get((min_ix, max_ix), None)
+        buf: tuple[float, float] | None = self._volume_ranges.get(
+            (min_ix, max_ix), None
+        )
         if buf:
             return buf
 
-        bar_list: list[BarData] = list(self._bars.values())[min_ix:max_ix + 1]
+        bar_list: list[BarData] = list(self._bars.values())[min_ix : max_ix + 1]
 
         first_bar: BarData = bar_list[0]
         max_volume = first_bar.volume

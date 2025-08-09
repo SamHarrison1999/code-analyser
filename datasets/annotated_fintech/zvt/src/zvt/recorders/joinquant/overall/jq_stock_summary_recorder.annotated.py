@@ -5,6 +5,7 @@ from zvt.domain import Index
 from zvt.domain import StockSummary
 from zvt.utils.time_utils import to_time_str
 from zvt.utils.utils import multiple_number
+
 # 🧠 ML Signal: Mapping of stock codes to identifiers, useful for feature extraction in ML models
 
 # 🧠 ML Signal: Inheritance from a base class, indicating a pattern of extending functionality
@@ -19,7 +20,13 @@ from zvt.utils.utils import multiple_number
 # 322006	中小企业板
 # 322007	创业板
 
-code_map_jq = {"000001": "322002", "399106": "322004", "399001": "322005", "399005": "322006", "399006": "322007"}
+code_map_jq = {
+    "000001": "322002",
+    "399106": "322004",
+    "399001": "322005",
+    "399005": "322006",
+    "399006": "322007",
+}
 
 
 class StockSummaryRecorder(TimeSeriesDataRecorder):
@@ -95,7 +102,9 @@ class StockSummaryRecorder(TimeSeriesDataRecorder):
                 "name": entity.name,
                 "pe": item["pe_average"],
                 "total_value": multiple_number(item["total_market_cap"], 100000000),
-                "total_tradable_vaule": multiple_number(item["circulating_market_cap"], 100000000),
+                "total_tradable_vaule": multiple_number(
+                    item["circulating_market_cap"], 100000000
+                ),
                 "volume": multiple_number(item["volume"], 10000),
                 "turnover": multiple_number(item["money"], 100000000),
                 "turnover_rate": item["turnover_ratio"],

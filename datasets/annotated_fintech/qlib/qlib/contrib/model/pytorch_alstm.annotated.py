@@ -4,20 +4,25 @@
 
 from __future__ import division
 from __future__ import print_function
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 
 import numpy as np
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import pandas as pd
 from typing import Text, Union
 import copy
 from ...utils import get_or_create_path
 from ...log import get_module_logger
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 
 import torch
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import torch.nn as nn
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 # ✅ Best Practice: Docstring provides clear documentation of class parameters and their types
 import torch.optim as optim
@@ -81,7 +86,9 @@ class ALSTM(Model):
         self.early_stop = early_stop
         self.optimizer = optimizer.lower()
         self.loss = loss
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.seed = seed
 
         self.logger.info(
@@ -135,13 +142,15 @@ class ALSTM(Model):
             num_layers=self.num_layers,
             # 🧠 ML Signal: Calculation of squared error, a key step in MSE
             dropout=self.dropout,
-        # 🧠 ML Signal: Custom loss function implementation
-        # ⚠️ SAST Risk (Low): Potential denial of service if unsupported optimizer is used
+            # 🧠 ML Signal: Custom loss function implementation
+            # ⚠️ SAST Risk (Low): Potential denial of service if unsupported optimizer is used
         )
         # 🧠 ML Signal: Use of torch.mean, indicating integration with PyTorch for tensor operations
         self.logger.info("model:\n{:}".format(self.ALSTM_model))
         # ✅ Best Practice: Use of torch.isnan to handle NaN values in labels
-        self.logger.info("model size: {:.4f} MB".format(count_parameters(self.ALSTM_model)))
+        self.logger.info(
+            "model size: {:.4f} MB".format(count_parameters(self.ALSTM_model))
+        )
         # 🧠 ML Signal: Moving model to the specified device (CPU/GPU)
 
         # 🧠 ML Signal: Conditional logic based on loss type
@@ -154,12 +163,15 @@ class ALSTM(Model):
         # ⚠️ SAST Risk (Low): Potential for unhandled loss types leading to exceptions
         # ⚠️ SAST Risk (Low): Potential for self.metric to be an unexpected value leading to ValueError
         else:
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
         # 🧠 ML Signal: Use of a mask to filter predictions and labels for loss calculation
 
         self.fitted = False
         # ⚠️ SAST Risk (Low): Use of string interpolation in exception message, potential for unexpected metric values
         self.ALSTM_model.to(self.device)
+
     # 🧠 ML Signal: Usage of model training method
 
     @property
@@ -170,6 +182,7 @@ class ALSTM(Model):
     def mse(self, pred, label):
         loss = (pred - label) ** 2
         return torch.mean(loss)
+
     # ⚠️ SAST Risk (Low): Potential for device mismatch if self.device is not set correctly
 
     def loss_fn(self, pred, label):
@@ -182,6 +195,7 @@ class ALSTM(Model):
         # 🧠 ML Signal: Loss calculation step
 
         raise ValueError("unknown loss `%s`" % self.loss)
+
     # 🧠 ML Signal: Optimizer step preparation
 
     # ✅ Best Practice: Set the model to evaluation mode to disable dropout and batch normalization.
@@ -196,6 +210,7 @@ class ALSTM(Model):
         # 🧠 ML Signal: Optimizer step execution
 
         raise ValueError("unknown metric `%s`" % self.metric)
+
     # ✅ Best Practice: Early exit if remaining data is less than batch size.
 
     def train_epoch(self, x_train, y_train):
@@ -216,10 +231,18 @@ class ALSTM(Model):
             if len(indices) - i < self.batch_size:
                 break
 
-            feature = torch.from_numpy(x_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            feature = (
+                torch.from_numpy(x_train_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
             # 🧠 ML Signal: Metric calculation step, useful for evaluating model performance.
             # ✅ Best Practice: Return average loss and score for better interpretability of results.
-            label = torch.from_numpy(y_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            label = (
+                torch.from_numpy(y_train_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
 
             pred = self.ALSTM_model(feature)
             loss = self.loss_fn(pred, label)
@@ -245,8 +268,16 @@ class ALSTM(Model):
             if len(indices) - i < self.batch_size:
                 break
 
-            feature = torch.from_numpy(x_values[indices[i : i + self.batch_size]]).float().to(self.device)
-            label = torch.from_numpy(y_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            feature = (
+                torch.from_numpy(x_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
+            label = (
+                torch.from_numpy(y_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
 
             with torch.no_grad():
                 pred = self.ALSTM_model(feature)
@@ -264,7 +295,7 @@ class ALSTM(Model):
         dataset: DatasetH,
         evals_result=dict(),
         save_path=None,
-    # ⚠️ SAST Risk (Low): Potential exception if 'self.fitted' is not a boolean
+        # ⚠️ SAST Risk (Low): Potential exception if 'self.fitted' is not a boolean
     ):
         df_train, df_valid, df_test = dataset.prepare(
             ["train", "valid", "test"],
@@ -274,7 +305,9 @@ class ALSTM(Model):
         )
         # 🧠 ML Signal: Model evaluation mode set before prediction
         if df_train.empty or df_valid.empty:
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
 
         x_train, y_train = df_train["feature"], df_train["label"]
         # ✅ Best Practice: Use of batch processing for predictions
@@ -343,7 +376,9 @@ class ALSTM(Model):
             raise ValueError("model is not fitted yet!")
         # 🧠 ML Signal: Use of view to reshape tensors, common in ML models for data manipulation
 
-        x_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        x_test = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
         # 🧠 ML Signal: Use of permute to change tensor dimensions, common in ML models for data manipulation
         index = x_test.index
         self.ALSTM_model.eval()
@@ -374,7 +409,9 @@ class ALSTM(Model):
 
 
 class ALSTMModel(nn.Module):
-    def __init__(self, d_feat=6, hidden_size=64, num_layers=2, dropout=0.0, rnn_type="GRU"):
+    def __init__(
+        self, d_feat=6, hidden_size=64, num_layers=2, dropout=0.0, rnn_type="GRU"
+    ):
         super().__init__()
         self.hid_size = hidden_size
         self.input_size = d_feat
@@ -389,7 +426,9 @@ class ALSTMModel(nn.Module):
         except Exception as e:
             raise ValueError("unknown rnn_type `%s`" % self.rnn_type) from e
         self.net = nn.Sequential()
-        self.net.add_module("fc_in", nn.Linear(in_features=self.input_size, out_features=self.hid_size))
+        self.net.add_module(
+            "fc_in", nn.Linear(in_features=self.input_size, out_features=self.hid_size)
+        )
         self.net.add_module("act", nn.Tanh())
         self.rnn = klass(
             input_size=self.hid_size,
@@ -415,8 +454,12 @@ class ALSTMModel(nn.Module):
     def forward(self, inputs):
         # inputs: [batch_size, input_size*input_day]
         inputs = inputs.view(len(inputs), self.input_size, -1)
-        inputs = inputs.permute(0, 2, 1)  # [batch, input_size, seq_len] -> [batch, seq_len, input_size]
-        rnn_out, _ = self.rnn(self.net(inputs))  # [batch, seq_len, num_directions * hidden_size]
+        inputs = inputs.permute(
+            0, 2, 1
+        )  # [batch, input_size, seq_len] -> [batch, seq_len, input_size]
+        rnn_out, _ = self.rnn(
+            self.net(inputs)
+        )  # [batch, seq_len, num_directions * hidden_size]
         attention_score = self.att_net(rnn_out)  # [batch, seq_len, 1]
         out_att = torch.mul(rnn_out, attention_score)
         out_att = torch.sum(out_att, dim=1)

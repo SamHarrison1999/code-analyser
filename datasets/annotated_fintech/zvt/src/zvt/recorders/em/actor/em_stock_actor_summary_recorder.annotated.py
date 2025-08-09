@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import List
+
 # ✅ Best Practice: Grouping imports into standard, third-party, and local sections improves readability.
 
 import pandas as pd
@@ -10,9 +11,15 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimestampsDataRecorder
 from zvt.domain import Stock
 from zvt.domain.actor.stock_actor import StockActorSummary
+
 # 🧠 ML Signal: Inheritance from TimestampsDataRecorder indicates a pattern of extending functionality
-from zvt.recorders.em.em_api import get_ii_holder_report_dates, actor_type_to_org_type, get_ii_summary
+from zvt.recorders.em.em_api import (
+    get_ii_holder_report_dates,
+    actor_type_to_org_type,
+    get_ii_summary,
+)
 from zvt.utils.time_utils import to_pd_timestamp, to_time_str
+
 # 🧠 ML Signal: Use of string literals for configuration or identification
 
 
@@ -39,6 +46,7 @@ from zvt.utils.time_utils import to_pd_timestamp, to_time_str
 
 # 🧠 ML Signal: Iterating over actor types for processing
 
+
 class EMStockActorSummaryRecorder(TimestampsDataRecorder):
     entity_provider = "em"
     # ✅ Best Practice: Skipping specific actor types early in the loop
@@ -60,10 +68,15 @@ class EMStockActorSummaryRecorder(TimestampsDataRecorder):
             the_date = to_time_str(timestamp)
             self.logger.info(f"to {entity.code} {the_date}")
             for actor_type in ActorType:
-                if actor_type == ActorType.private_equity or actor_type == ActorType.individual:
+                if (
+                    actor_type == ActorType.private_equity
+                    or actor_type == ActorType.individual
+                ):
                     continue
                 result = get_ii_summary(
-                    code=entity.code, report_date=the_date, org_type=actor_type_to_org_type(actor_type)
+                    code=entity.code,
+                    report_date=the_date,
+                    org_type=actor_type_to_org_type(actor_type),
                 )
                 # 🧠 ML Signal: Constructing unique ID for each summary
                 # 🧠 ML Signal: Extracting and transforming data from result
@@ -84,10 +97,14 @@ class EMStockActorSummaryRecorder(TimestampsDataRecorder):
                             # 🧠 ML Signal: Defining module exports
                             "report_date": timestamp,
                             "report_period": to_report_period_type(timestamp),
-                            "change_ratio": value_to_pct(item["CHANGE_RATIO"], default=1),
+                            "change_ratio": value_to_pct(
+                                item["CHANGE_RATIO"], default=1
+                            ),
                             "is_complete": item["IS_COMPLETE"],
                             "holding_numbers": item["TOTAL_FREE_SHARES"],
-                            "holding_ratio": value_to_pct(item["TOTAL_SHARES_RATIO"], default=0),
+                            "holding_ratio": value_to_pct(
+                                item["TOTAL_SHARES_RATIO"], default=0
+                            ),
                             "holding_values": item["TOTAL_MARKET_CAP"],
                         }
                         for item in result

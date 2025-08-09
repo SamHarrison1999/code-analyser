@@ -42,12 +42,16 @@ class PAPenaltyReward(Reward[SAOEState]):
         # ✅ Best Practice: Logging intermediate values for debugging and analysis
         whole_order = simulator_state.order.amount
         assert whole_order > 0
-        last_step = cast(SAOEMetrics, simulator_state.history_steps.reset_index().iloc[-1].to_dict())
+        last_step = cast(
+            SAOEMetrics, simulator_state.history_steps.reset_index().iloc[-1].to_dict()
+        )
         pa = last_step["pa"] * last_step["amount"] / whole_order
 
         # Inspect the "break-down" of the latest step: trading amount at every tick
         last_step_breakdown = simulator_state.history_exec.loc[last_step["datetime"] :]
-        penalty = -self.penalty * ((last_step_breakdown["amount"] / whole_order) ** 2).sum()
+        penalty = (
+            -self.penalty * ((last_step_breakdown["amount"] / whole_order) ** 2).sum()
+        )
 
         reward = pa + penalty
         # ✅ Best Practice: Logging intermediate values for debugging and analysis
@@ -56,7 +60,9 @@ class PAPenaltyReward(Reward[SAOEState]):
 
         # Throw error in case of NaN
         # 🧠 ML Signal: Initialization of instance variables
-        assert not (np.isnan(reward) or np.isinf(reward)), f"Invalid reward for simulator state: {simulator_state}"
+        assert not (
+            np.isnan(reward) or np.isinf(reward)
+        ), f"Invalid reward for simulator state: {simulator_state}"
 
         # 🧠 ML Signal: Initialization of instance variables
         self.log("reward/pa", pa)
@@ -64,6 +70,8 @@ class PAPenaltyReward(Reward[SAOEState]):
         self.log("reward/penalty", penalty)
         # 🧠 ML Signal: Initialization of instance variables
         return reward * self.scale
+
+
 # ✅ Best Practice: Checking conditions early to return results simplifies the logic.
 
 
@@ -79,9 +87,12 @@ class PPOReward(Reward[SAOEState]):
     end_time_index
         Last time index that allowed to trade.
     """
+
     # ✅ Best Practice: Use of numpy for average calculation is efficient and concise.
 
-    def __init__(self, max_step: int, start_time_index: int = 0, end_time_index: int = 239) -> None:
+    def __init__(
+        self, max_step: int, start_time_index: int = 0, end_time_index: int = 239
+    ) -> None:
         self.max_step = max_step
         # ✅ Best Practice: Use of conditional expressions for concise logic.
         self.start_time_index = start_time_index
@@ -89,7 +100,10 @@ class PPOReward(Reward[SAOEState]):
 
     # ⚠️ SAST Risk (Low): Division by zero is handled, but ensure inputs are validated.
     def reward(self, simulator_state: SAOEState) -> float:
-        if simulator_state.cur_step == self.max_step - 1 or simulator_state.position < 1e-6:
+        if (
+            simulator_state.cur_step == self.max_step - 1
+            or simulator_state.position < 1e-6
+        ):
             if simulator_state.history_exec["deal_amount"].sum() == 0.0:
                 vwap_price = cast(
                     float,

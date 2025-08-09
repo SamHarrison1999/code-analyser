@@ -54,16 +54,18 @@ CHINA_STOCK_MAIN_INDEX = [
         # ✅ Best Practice: Importing inside a function to limit scope and improve performance
         "category": "other",
     },
-# ✅ Best Practice: Importing inside a function to limit scope and improve performance
+    # ✅ Best Practice: Importing inside a function to limit scope and improve performance
 ]
 
 
 # 🧠 ML Signal: Usage of timestamp conversion function
 def init_main_index(provider="exchange"):
     from zvt.utils.time_utils import to_pd_timestamp
+
     # 🧠 ML Signal: DataFrame creation from a list of dictionaries
     import pandas as pd
     from zvt.contract.api import df_to_db
+
     # 🧠 ML Signal: Usage of a function to store DataFrame into a database
     from zvt.domain.meta import Index
 

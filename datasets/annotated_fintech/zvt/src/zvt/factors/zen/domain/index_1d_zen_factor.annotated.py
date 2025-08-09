@@ -3,6 +3,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Naming convention for classes should follow CamelCase.
 from zvt.factors.zen.domain.common import ZenFactorCommon
 
@@ -18,7 +19,12 @@ class Index1dZenFactor(Index1dZenFactorBase, ZenFactorCommon):
     __tablename__ = "index_1d_zen_factor"
 
 
-register_schema(providers=["zvt"], db_name="index_1d_zen_factor", schema_base=Index1dZenFactorBase, entity_type="index")
+register_schema(
+    providers=["zvt"],
+    db_name="index_1d_zen_factor",
+    schema_base=Index1dZenFactorBase,
+    entity_type="index",
+)
 
 
 # the __all__ is generated

@@ -9,14 +9,17 @@ from zvt.contract.drawer import Drawer
 from zvt.contract.factor import Accumulator
 from zvt.contract.factor import Transformer
 from zvt.contract.reader import DataReader
+
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local application sections improves readability.
 from zvt.domain import Stock, Stock1dKdata
 from zvt.factors.technical_factor import TechnicalFactor
+
 # ✅ Best Practice: Use of default parameter values for flexibility
 from zvt.utils.time_utils import now_pd_timestamp
 
 # ✅ Best Practice: Explicitly calling the superclass initializer
 # 🧠 ML Signal: Method name 'transform' suggests a data transformation operation, common in data preprocessing for ML.
+
 
 class TopBottomTransformer(Transformer):
     # 🧠 ML Signal: Tracking the initialization of instance variables
@@ -28,7 +31,12 @@ class TopBottomTransformer(Transformer):
 
     # ✅ Best Practice: Directly assigning new columns to 'input_df' makes the transformation clear and concise.
     def transform(self, input_df) -> pd.DataFrame:
-        top_df = input_df["high"].groupby(level=0).rolling(window=self.window, min_periods=self.window).max()
+        top_df = (
+            input_df["high"]
+            .groupby(level=0)
+            .rolling(window=self.window, min_periods=self.window)
+            .max()
+        )
         # ✅ Best Practice: Using descriptive variable names like 'bottom_df' improves code readability.
         top_df = top_df.reset_index(level=0, drop=True)
         # ✅ Best Practice: Resetting index with 'drop=True' to avoid unnecessary index column in the result.
@@ -36,7 +44,12 @@ class TopBottomTransformer(Transformer):
         # ✅ Best Practice: Returning the modified DataFrame allows for method chaining and functional programming style.
         input_df["top"] = top_df
 
-        bottom_df = input_df["low"].groupby(level=0).rolling(window=self.window, min_periods=self.window).min()
+        bottom_df = (
+            input_df["low"]
+            .groupby(level=0)
+            .rolling(window=self.window, min_periods=self.window)
+            .min()
+        )
         bottom_df = bottom_df.reset_index(level=0, drop=True)
         input_df["bottom"] = bottom_df
 
@@ -54,7 +67,16 @@ class TopBottomFactor(TechnicalFactor):
         codes: List[str] = None,
         start_timestamp: Union[str, pd.Timestamp] = None,
         end_timestamp: Union[str, pd.Timestamp] = None,
-        columns: List = ["id", "entity_id", "timestamp", "level", "open", "close", "high", "low"],
+        columns: List = [
+            "id",
+            "entity_id",
+            "timestamp",
+            "level",
+            "open",
+            "close",
+            "high",
+            "low",
+        ],
         filters: List = None,
         order: object = None,
         limit: int = None,
@@ -108,8 +130,10 @@ class TopBottomFactor(TechnicalFactor):
             clear_state,
             only_load_factor,
             adjust_type,
-        # 🧠 ML Signal: Printing the factor's dataframe, indicating usage pattern
+            # 🧠 ML Signal: Printing the factor's dataframe, indicating usage pattern
         )
+
+
 # 🧠 ML Signal: Example of creating a DataReader with specific parameters
 # 🧠 ML Signal: Example of using a Drawer to visualize data
 # 🧠 ML Signal: Drawing a kline chart, indicating visualization usage
@@ -126,9 +150,14 @@ if __name__ == "__main__":
     )
     print(factor.factor_df)
 
-    data_reader1 = DataReader(data_schema=Stock1dKdata, entity_schema=Stock, codes=["601318"])
+    data_reader1 = DataReader(
+        data_schema=Stock1dKdata, entity_schema=Stock, codes=["601318"]
+    )
 
-    drawer = Drawer(main_df=data_reader1.data_df, factor_df_list=[factor.factor_df[["top", "bottom"]]])
+    drawer = Drawer(
+        main_df=data_reader1.data_df,
+        factor_df_list=[factor.factor_df[["top", "bottom"]]],
+    )
     drawer.draw_kline(show=True)
 
 

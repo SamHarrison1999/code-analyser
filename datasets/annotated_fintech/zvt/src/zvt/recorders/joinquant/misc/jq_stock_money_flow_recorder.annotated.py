@@ -4,18 +4,23 @@ from jqdatapy import get_token, get_money_flow
 
 from zvt import zvt_config
 from zvt.api.kdata import generate_kdata_id
+
 # ✅ Best Practice: Group related imports together for better readability and organization
 from zvt.contract import IntervalLevel
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.domain import StockMoneyFlow, Stock
 from zvt.recorders.joinquant.common import to_jq_entity_id
-from zvt.recorders.joinquant.misc.jq_index_money_flow_recorder import JoinquantIndexMoneyFlowRecorder
+from zvt.recorders.joinquant.misc.jq_index_money_flow_recorder import (
+    JoinquantIndexMoneyFlowRecorder,
+)
 from zvt.utils.pd_utils import pd_is_not_null
+
 # 🧠 ML Signal: Inheritance from FixedCycleDataRecorder indicates a pattern of extending functionality
 from zvt.utils.time_utils import TIME_FORMAT_DAY, to_time_str
 
 # 🧠 ML Signal: Use of a specific data provider suggests a pattern in data source preference
+
 
 class JoinquantStockMoneyFlowRecorder(FixedCycleDataRecorder):
     # 🧠 ML Signal: Association with a specific schema indicates a pattern in data structure usage
@@ -73,18 +78,21 @@ class JoinquantStockMoneyFlowRecorder(FixedCycleDataRecorder):
             one_day_trading_minutes,
             # 🧠 ML Signal: Usage of a function to generate an ID based on entity and timestamp
             return_unfinished,
-        # ✅ Best Practice: Using descriptive function and parameter names for clarity
-        # 🧠 ML Signal: Method that triggers actions based on a condition
+            # ✅ Best Practice: Using descriptive function and parameter names for clarity
+            # 🧠 ML Signal: Method that triggers actions based on a condition
         )
         self.compute_index_money_flow = compute_index_money_flow
         # 🧠 ML Signal: Instantiation and execution of a specific recorder class
         get_token(zvt_config["jq_username"], zvt_config["jq_password"], force=True)
+
     # ⚠️ SAST Risk (Low): Potential for unhandled exceptions during execution
     # ⚠️ SAST Risk (Low): Potential risk if `self.end_timestamp` is not properly validated before use.
 
     # 🧠 ML Signal: Usage of external function `get_money_flow` with specific parameters.
     def generate_domain_id(self, entity, original_data):
-        return generate_kdata_id(entity_id=entity.id, timestamp=original_data["timestamp"], level=self.level)
+        return generate_kdata_id(
+            entity_id=entity.id, timestamp=original_data["timestamp"], level=self.level
+        )
 
     def on_finish(self):
         # 🧠 ML Signal: Conditional logic affecting function call parameters.
@@ -100,7 +108,11 @@ class JoinquantStockMoneyFlowRecorder(FixedCycleDataRecorder):
         if not self.end_timestamp:
             df = get_money_flow(code=to_jq_entity_id(entity), date=to_time_str(start))
         else:
-            df = get_money_flow(code=to_jq_entity_id(entity), date=start, end_date=to_time_str(self.end_timestamp))
+            df = get_money_flow(
+                code=to_jq_entity_id(entity),
+                date=start,
+                end_date=to_time_str(self.end_timestamp),
+            )
 
         df = df.dropna()
 
@@ -132,8 +144,8 @@ class JoinquantStockMoneyFlowRecorder(FixedCycleDataRecorder):
                 "net_big_inflows",
                 "net_medium_inflows",
                 "net_small_inflows",
-            # ✅ Best Practice: Dropping NaN values to ensure data integrity.
-            # ⚠️ SAST Risk (Low): Assumes `pd_is_not_null` correctly identifies non-null DataFrames.
+                # ✅ Best Practice: Dropping NaN values to ensure data integrity.
+                # ⚠️ SAST Risk (Low): Assumes `pd_is_not_null` correctly identifies non-null DataFrames.
             ]
             for col in inflows_cols:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -153,8 +165,8 @@ class JoinquantStockMoneyFlowRecorder(FixedCycleDataRecorder):
                 # ✅ Best Practice: Converting data to numeric type with error handling.
                 "net_medium_inflow_rate",
                 "net_small_inflow_rate",
-            # ✅ Best Practice: Dropping NaN values to ensure data integrity.
-            # ✅ Best Practice: Use of string formatting for constructing unique identifiers
+                # ✅ Best Practice: Dropping NaN values to ensure data integrity.
+                # ✅ Best Practice: Use of string formatting for constructing unique identifiers
             ]
             for col in inflow_rate_cols:
                 # ⚠️ SAST Risk (Low): Assumes `pd_is_not_null` correctly identifies non-null DataFrames.
@@ -177,7 +189,10 @@ class JoinquantStockMoneyFlowRecorder(FixedCycleDataRecorder):
 
             # 计算总流入
             df["net_inflows"] = (
-                df["net_huge_inflows"] + df["net_big_inflows"] + df["net_medium_inflows"] + df["net_small_inflows"]
+                df["net_huge_inflows"]
+                + df["net_big_inflows"]
+                + df["net_medium_inflows"]
+                + df["net_small_inflows"]
             )
             # 计算总流入率
             amount = df["net_main_inflows"] / df["net_main_inflow_rate"]
@@ -189,13 +204,20 @@ class JoinquantStockMoneyFlowRecorder(FixedCycleDataRecorder):
             df["code"] = entity.code
 
             def generate_kdata_id(se):
-                return "{}_{}".format(se["entity_id"], to_time_str(se["timestamp"], fmt=TIME_FORMAT_DAY))
+                return "{}_{}".format(
+                    se["entity_id"], to_time_str(se["timestamp"], fmt=TIME_FORMAT_DAY)
+                )
 
             df["id"] = df[["entity_id", "timestamp"]].apply(generate_kdata_id, axis=1)
 
             df = df.drop_duplicates(subset="id", keep="last")
 
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(
+                df=df,
+                data_schema=self.data_schema,
+                provider=self.provider,
+                force_update=self.force_update,
+            )
 
         return None
 

@@ -2,21 +2,34 @@
 import json
 import os
 from typing import List, Dict
+
 # 🧠 ML Signal: Importing specific modules from a package indicates usage patterns and dependencies
 
 import pandas as pd
+
 # 🧠 ML Signal: Importing specific functions or classes from a module indicates usage patterns
 
 from zvt import zvt_env
+
 # 🧠 ML Signal: Importing specific classes from a module indicates usage patterns
 from zvt.contract.api import df_to_db
+
 # ⚠️ SAST Risk (Low): Potential file path traversal if zvt_env["resource_path"] is user-controlled
 from zvt.domain import Block
+
 # 🧠 ML Signal: Importing specific classes from a module indicates usage patterns
 # ✅ Best Practice: Use a context manager to ensure the file is properly closed after reading
 from zvt.tag.common import StockPoolType
+
 # 🧠 ML Signal: Usage of os.path.join for constructing file paths
-from zvt.tag.tag_schemas import MainTagInfo, SubTagInfo, HiddenTagInfo, StockPoolInfo, IndustryInfo
+from zvt.tag.tag_schemas import (
+    MainTagInfo,
+    SubTagInfo,
+    HiddenTagInfo,
+    StockPoolInfo,
+    IndustryInfo,
+)
+
 # ✅ Best Practice: Use of type hints for function return type improves code readability and maintainability.
 # 🧠 ML Signal: Importing specific classes from a module indicates usage patterns
 # 🧠 ML Signal: Reading JSON data from a file
@@ -24,8 +37,13 @@ from zvt.tag.tag_schemas import MainTagInfo, SubTagInfo, HiddenTagInfo, StockPoo
 
 # 🧠 ML Signal: Calls a function to get a mapping, indicating a pattern of data transformation.
 def _get_default_industry_main_tag_mapping() -> Dict[str, str]:
-    with open(os.path.join(zvt_env["resource_path"], "industry_main_tag_mapping.json"), encoding="utf-8") as f:
+    with open(
+        os.path.join(zvt_env["resource_path"], "industry_main_tag_mapping.json"),
+        encoding="utf-8",
+    ) as f:
         return json.load(f)
+
+
 # 🧠 ML Signal: Iterating over dictionary items, a common pattern for data processing.
 
 
@@ -49,14 +67,20 @@ def _get_default_main_tag_industry_mapping() -> Dict[str, List[str]]:
 # ✅ Best Practice: Use setdefault to simplify dictionary initialization
 def _get_default_concept_main_tag_mapping() -> Dict[str, str]:
     # ✅ Best Practice: Use of type hinting for function return type improves code readability and maintainability.
-    with open(os.path.join(zvt_env["resource_path"], "concept_main_tag_mapping.json"), encoding="utf-8") as f:
+    with open(
+        os.path.join(zvt_env["resource_path"], "concept_main_tag_mapping.json"),
+        encoding="utf-8",
+    ) as f:
         # ✅ Best Practice: Use get method to safely access dictionary values
         return json.load(f)
+
+
 # ✅ Best Practice: Using list() to explicitly convert keys to a list for clarity.
 # 🧠 ML Signal: Use of query_data method to filter and order data
 
 # ⚠️ SAST Risk (Low): Potential risk of SQL injection if filters are not properly sanitized
 # ✅ Best Practice: Use of descriptive function name for clarity
+
 
 def _get_default_main_tag_concept_mapping() -> Dict[str, List[str]]:
     mapping = _get_default_concept_main_tag_mapping()
@@ -71,11 +95,14 @@ def _get_default_main_tag_concept_mapping() -> Dict[str, List[str]]:
         result.setdefault(main_tag, [])
         result.get(main_tag).append(concept)
     return result
+
+
 # ⚠️ SAST Risk (Low): Potential SQL injection risk if filters are not properly sanitized
 # 🧠 ML Signal: Use of filters to query specific data
 
 # 🧠 ML Signal: Filtering data based on a specific category
 # ✅ Best Practice: Function name is descriptive and indicates its purpose
+
 
 # 🧠 ML Signal: Selecting specific columns from the data
 # 🧠 ML Signal: Specifying columns to retrieve
@@ -83,11 +110,14 @@ def _get_initial_sub_tags() -> List[str]:
     # 🧠 ML Signal: Specifying the return type of the query
     # 🧠 ML Signal: Usage of a function to retrieve a mapping, indicating a pattern of data retrieval
     return list(_get_default_concept_main_tag_mapping().keys())
+
+
 # 🧠 ML Signal: Specifying return type for the query
 # 🧠 ML Signal: Ordering data by a timestamp in descending order
 # ✅ Best Practice: Function name is prefixed with an underscore, indicating it's intended for internal use.
 
 # 🧠 ML Signal: Conversion to set for set operations, indicating a pattern of data comparison
+
 
 # 🧠 ML Signal: Ordering data by timestamp in descending order
 # 🧠 ML Signal: Usage of list and set operations to find differences, indicating a pattern of data manipulation
@@ -96,9 +126,12 @@ def _get_industry_list():
     # 🧠 ML Signal: Converting a DataFrame column to a list
     df = Block.query_data(
         # 🧠 ML Signal: Use of set operations to find differences between two lists.
-        filters=[Block.category == "industry"], columns=[Block.name], return_type="df", order=Block.timestamp.desc()
-    # 🧠 ML Signal: Converting dataframe column to list
-    # 🧠 ML Signal: Hardcoded entity_id could indicate a default or special user
+        filters=[Block.category == "industry"],
+        columns=[Block.name],
+        return_type="df",
+        order=Block.timestamp.desc(),
+        # 🧠 ML Signal: Converting dataframe column to list
+        # 🧠 ML Signal: Hardcoded entity_id could indicate a default or special user
     )
     # 🧠 ML Signal: Use of f-string for id generation shows dynamic key creation
     return df["name"].tolist()
@@ -106,12 +139,17 @@ def _get_industry_list():
 
 def _get_concept_list():
     df = Block.query_data(
-        filters=[Block.category == "concept"], columns=[Block.name], return_type="df", order=Block.timestamp.desc()
+        filters=[Block.category == "concept"],
+        columns=[Block.name],
+        return_type="df",
+        order=Block.timestamp.desc(),
     )
 
     return df["name"].tolist()
 
+
 # 🧠 ML Signal: Use of f-string for tag_reason shows dynamic message creation
+
 
 # 🧠 ML Signal: Iterating over items of a mapping function
 def _check_missed_industry():
@@ -182,7 +220,7 @@ def _get_initial_industry_info():
             "main_tag": main_tag,
         }
         for industry, main_tag in _get_default_industry_main_tag_mapping().items()
-    # 🧠 ML Signal: Iteration over a predefined list of stock pool names
+        # 🧠 ML Signal: Iteration over a predefined list of stock pool names
     ]
     return industry_info
 
@@ -208,7 +246,9 @@ def _get_initial_sub_tag_info():
         for sub_tag, main_tag in _get_default_concept_main_tag_mapping().items()
     ]
 
+
 # 🧠 ML Signal: Function definition with no parameters, indicating a possible utility or helper function
+
 
 def _get_initial_stock_pool_info():
     # 🧠 ML Signal: Function call to a private or internal function, indicating encapsulation or modular design
@@ -231,12 +271,14 @@ def _get_initial_stock_pool_info():
             # 🧠 ML Signal: Data persistence pattern, saving DataFrame to a database
             # 🧠 ML Signal: Function call pattern to retrieve data
             "stock_pool_name": stock_pool_name,
-        # ⚠️ SAST Risk (Low): Potential risk if df_to_db does not handle SQL injection or data validation
+            # ⚠️ SAST Risk (Low): Potential risk if df_to_db does not handle SQL injection or data validation
         }
         # ✅ Best Practice: Consider adding type hints for the function parameters and return type for better readability and maintainability.
         # 🧠 ML Signal: Conversion of list to DataFrame
         for stock_pool_name in ["main_line", "vol_up", "大局", "all"]
     ]
+
+
 # ⚠️ SAST Risk (Low): Potential risk if df_to_db does not handle SQL injection or data validation
 # 🧠 ML Signal: Function calls a private function _get_initial_stock_pool_info, indicating encapsulation of logic.
 
@@ -256,13 +298,14 @@ _hidden_tags = {
     # 🧠 ML Signal: Function definition with a clear purpose and name
     "微盘股": "市值50亿以下",
     "次新股": "上市未满两年",
-# 🧠 ML Signal: Function call pattern to df_to_db, indicating data persistence
-# 🧠 ML Signal: Querying data from a database model
+    # 🧠 ML Signal: Function call pattern to df_to_db, indicating data persistence
+    # 🧠 ML Signal: Querying data from a database model
 }
 # ⚠️ SAST Risk (Low): Ensure df_to_db handles data securely to prevent injection attacks
 # 🧠 ML Signal: Function definition with specific input and output patterns
 
 # ✅ Best Practice: Returning a list of tags for better usability
+
 
 # 🧠 ML Signal: Querying data with specific filters
 def _get_initial_hidden_tag_info():
@@ -283,11 +326,13 @@ def _get_initial_hidden_tag_info():
             "tag_reason": tag_reason,
         }
         for tag, tag_reason in _hidden_tags.items()
-    # 🧠 ML Signal: Function definition with no parameters, indicating a possible utility function
-    # 🧠 ML Signal: Returning main tag if data is found
+        # 🧠 ML Signal: Function definition with no parameters, indicating a possible utility function
+        # 🧠 ML Signal: Returning main tag if data is found
     ]
 
+
 # 🧠 ML Signal: Querying a database model, indicating interaction with a database
+
 
 # ⚠️ SAST Risk (Medium): Potential for SQL injection if input is not properly sanitized
 # 🧠 ML Signal: Function definition with a specific purpose (get_hidden_tags)
@@ -299,9 +344,12 @@ def build_initial_main_tag_info():
     df = pd.DataFrame.from_records(main_tag_info_list)
     # 🧠 ML Signal: Function definition with a clear purpose of retrieving stock pool names
     df_to_db(df=df, data_schema=MainTagInfo, provider="zvt", force_update=False)
+
+
 # ✅ Best Practice: Returning a specific column as a list
 
 # 🧠 ML Signal: Querying a database model for specific columns
+
 
 # 🧠 ML Signal: Function with multiple conditional branches based on input parameter
 def build_initial_industry_info():
@@ -316,6 +364,8 @@ def build_initial_sub_tag_info(force_update=False):
     sub_tag_info_list = _get_initial_sub_tag_info()
     df = pd.DataFrame.from_records(sub_tag_info_list)
     df_to_db(df=df, data_schema=SubTagInfo, provider="zvt", force_update=force_update)
+
+
 # ⚠️ SAST Risk (Low): Use of assert for control flow can be disabled in production
 
 
@@ -339,7 +389,9 @@ def get_main_tags():
 
 
 def get_main_tag_by_sub_tag(sub_tag):
-    datas: List[SubTagInfo] = SubTagInfo.query_data(filters=[SubTagInfo.tag == sub_tag], return_type="domain")
+    datas: List[SubTagInfo] = SubTagInfo.query_data(
+        filters=[SubTagInfo.tag == sub_tag], return_type="domain"
+    )
     if datas:
         return datas[0].main_tag
     # ✅ Best Practice: Explicitly defining the entry point for script execution

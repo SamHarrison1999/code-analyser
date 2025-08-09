@@ -5,6 +5,7 @@ TaskGenerator module can generate many tasks based on TaskGen and some task temp
 """
 import abc
 import copy
+
 # ✅ Best Practice: Import only necessary functions or classes to avoid namespace pollution
 import pandas as pd
 from typing import Dict, List, Union, Callable
@@ -134,7 +135,9 @@ def handler_mod(task: dict, rolling_gen):
         pass
 
 
-def trunc_segments(ta: TimeAdjuster, segments: Dict[str, pd.Timestamp], days, test_key="test"):
+def trunc_segments(
+    ta: TimeAdjuster, segments: Dict[str, pd.Timestamp], days, test_key="test"
+):
     """
     To avoid the leakage of future information, the segments should be truncated according to the test start_time
 
@@ -152,8 +155,10 @@ def trunc_segments(ta: TimeAdjuster, segments: Dict[str, pd.Timestamp], days, te
             # ✅ Best Practice: Use of deepcopy to avoid unintended side-effects from mutable default arguments
             segments[k] = ta.truncate(segments[k], test_start, days)
 
+
 # ✅ Best Practice: Storing parameters as instance variables for later use in methods.
 # 🧠 ML Signal: Conditional execution based on the presence of a function, indicating dynamic behavior
+
 
 # ✅ Best Practice: Storing parameters as instance variables for later use in methods.
 # ⚠️ SAST Risk (Low): Potential for NoneType error if ds_extra_mod_func is not properly checked
@@ -245,10 +250,13 @@ class RollingGen(TaskGen):
 
             # 🧠 ML Signal: Aligning index for test segment start
             prev_seg = segments
-            t = self.task_copy_func(task)  # deepcopy is necessary to avoid replace task inplace
+            t = self.task_copy_func(
+                task
+            )  # deepcopy is necessary to avoid replace task inplace
             # 🧠 ML Signal: Adjusting test segment with step size
             self._update_task_segs(t, segments)
             yield t
+
     # ⚠️ SAST Risk (Low): Potential issue if trunc_days is not validated
 
     def generate(self, task: dict) -> List[dict]:
@@ -309,11 +317,16 @@ class RollingGen(TaskGen):
 
         # First rolling
         # 1) prepare the end point
-        segments: dict = copy.deepcopy(self.ta.align_seg(t["dataset"]["kwargs"]["segments"]))
+        segments: dict = copy.deepcopy(
+            self.ta.align_seg(t["dataset"]["kwargs"]["segments"])
+        )
         test_end = transform_end_date(segments[self.test_key][1])
         # 2) and init test segments
         test_start_idx = self.ta.align_idx(segments[self.test_key][0])
-        segments[self.test_key] = (self.ta.get(test_start_idx), self.ta.get(test_start_idx + self.step - 1))
+        segments[self.test_key] = (
+            self.ta.get(test_start_idx),
+            self.ta.get(test_start_idx + self.step - 1),
+        )
         if self.trunc_days is not None:
             trunc_segments(self.ta, segments, self.trunc_days, self.test_key)
 
@@ -370,7 +383,9 @@ class MultiHorizonGenBase(TaskGen):
 
             # adjust segment
             segments = self.ta.align_seg(t["dataset"]["kwargs"]["segments"])
-            trunc_segments(self.ta, segments, days=hr + self.label_leak_n, test_key=self.test_key)
+            trunc_segments(
+                self.ta, segments, days=hr + self.label_leak_n, test_key=self.test_key
+            )
             t["dataset"]["kwargs"]["segments"] = segments
             res.append(t)
         return res

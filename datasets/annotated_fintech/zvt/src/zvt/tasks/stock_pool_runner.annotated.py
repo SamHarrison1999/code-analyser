@@ -21,9 +21,11 @@ from zvt.factors import compute_top_stocks
 from zvt.informer import EmailInformer
 from zvt.informer.inform_utils import inform_email
 from zvt.tag.tag_stats import build_system_stock_pools, build_stock_pool_tag_stats
+
 # ✅ Best Practice: Use of a background scheduler for periodic tasks
 from zvt.utils.recorder_utils import run_data_recorder
 from zvt.utils.time_utils import current_date
+
 # 🧠 ML Signal: Instantiation of an EmailInformer object indicates email notifications are used
 # 🧠 ML Signal: Function definition with a specific task name, useful for identifying task-specific code patterns
 
@@ -40,15 +42,23 @@ email_informer = EmailInformer()
 # 🧠 ML Signal: String manipulation on DataFrame columns, common pattern in data processing
 # 🧠 ML Signal: Default parameter values indicate common usage patterns
 def report_limit_up():
-    latest_data = LimitUpInfo.query_data(order=LimitUpInfo.timestamp.desc(), limit=1, return_type="domain")
+    latest_data = LimitUpInfo.query_data(
+        order=LimitUpInfo.timestamp.desc(), limit=1, return_type="domain"
+    )
     # ⚠️ SAST Risk (Low): Lack of error handling for report_limit_up function
     # ⚠️ SAST Risk (Low): Printing data directly, could lead to information disclosure in logs
     timestamp = latest_data[0].timestamp
     # ⚠️ SAST Risk (Medium): Sending emails with potentially sensitive data, ensure secure handling of email credentials
-    df = LimitUpInfo.query_data(start_timestamp=timestamp, end_timestamp=timestamp, columns=["code", "name", "reason"])
+    df = LimitUpInfo.query_data(
+        start_timestamp=timestamp,
+        end_timestamp=timestamp,
+        columns=["code", "name", "reason"],
+    )
     df["reason"] = df["reason"].str.split("+")
     print(df)
-    email_informer.send_message(zvt_config["email_username"], f"{timestamp} 热门报告", f"{df}")
+    email_informer.send_message(
+        zvt_config["email_username"], f"{timestamp} 热门报告", f"{df}"
+    )
 
 
 def record_stock_data(data_provider="em", entity_provider="em", sleeping_time=0):
@@ -69,7 +79,12 @@ def record_stock_data(data_provider="em", entity_provider="em", sleeping_time=0)
     )
 
     # 板块(概念，行业)
-    run_data_recorder(domain=Block, entity_provider=entity_provider, data_provider=entity_provider, force_update=False)
+    run_data_recorder(
+        domain=Block,
+        entity_provider=entity_provider,
+        data_provider=entity_provider,
+        force_update=False,
+    )
     # ⚠️ SAST Risk (Low): Lack of error handling for inform_email function
     # 板块行情(概念，行业)
     run_data_recorder(
@@ -88,13 +103,17 @@ def record_stock_data(data_provider="em", entity_provider="em", sleeping_time=0)
         # 🧠 ML Signal: Function with default parameters indicating common usage patterns
         index="entity_id",
         limit=7,
-    # 🧠 ML Signal: Function call with specific domain indicating a pattern of data recording
+        # 🧠 ML Signal: Function call with specific domain indicating a pattern of data recording
     )
     # 🧠 ML Signal: Querying data with specific filters indicating a pattern of data access
     # 🧠 ML Signal: Function call with multiple parameters indicating a pattern of data processing
 
     inform_email(
-        entity_ids=df.index.tolist(), entity_type="block", target_date=current_date(), title="report 新概念", provider="em"
+        entity_ids=df.index.tolist(),
+        entity_type="block",
+        target_date=current_date(),
+        title="report 新概念",
+        provider="em",
     )
 
     # A股标的
@@ -102,7 +121,10 @@ def record_stock_data(data_provider="em", entity_provider="em", sleeping_time=0)
     # A股后复权行情
     normal_stock_ids = get_entity_ids_by_filter(
         # 🧠 ML Signal: Function calls that indicate a sequence of operations for data processing
-        provider="em", ignore_delist=True, ignore_st=False, ignore_new_stock=False
+        provider="em",
+        ignore_delist=True,
+        ignore_st=False,
+        ignore_new_stock=False,
     )
     # 🧠 ML Signal: Function calls that indicate a sequence of operations for data processing
 
@@ -149,12 +171,20 @@ def record_data_and_build_stock_pools():
     # 放入股票池
     build_system_stock_pools()
     for stock_pool_name in ["main_line", "vol_up", "大局"]:
-        build_stock_pool_tag_stats(stock_pool_name=stock_pool_name, force_rebuild_latest=True)
+        build_stock_pool_tag_stats(
+            stock_pool_name=stock_pool_name, force_rebuild_latest=True
+        )
 
 
 if __name__ == "__main__":
     init_log("sotck_pool_runner.log")
     record_data_and_build_stock_pools()
-    sched.add_job(func=record_data_and_build_stock_pools, trigger="cron", hour=16, minute=00, day_of_week="mon-fri")
+    sched.add_job(
+        func=record_data_and_build_stock_pools,
+        trigger="cron",
+        hour=16,
+        minute=00,
+        day_of_week="mon-fri",
+    )
     sched.start()
     sched._thread.join()

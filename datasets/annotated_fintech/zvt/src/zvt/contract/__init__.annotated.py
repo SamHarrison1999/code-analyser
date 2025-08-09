@@ -7,6 +7,7 @@ class IntervalLevel(Enum):
     """
     Repeated fixed time interval, e.g, 5m, 1d.
     """
+
     # 🧠 ML Signal: Use of string constants in an Enum can indicate categorical data
 
     #: level l2 quote
@@ -160,6 +161,7 @@ class IntervalLevel(Enum):
             # 🧠 ML Signal: Categorical values that can be used for classification tasks
             return self.to_ms() >= other.to_ms()
         return NotImplemented
+
     # 🧠 ML Signal: Categorical values that can be used for classification tasks
 
     def __gt__(self, other):
@@ -169,6 +171,7 @@ class IntervalLevel(Enum):
             # 🧠 ML Signal: Categorical values that can be used for classification tasks
             return self.to_ms() > other.to_ms()
         return NotImplemented
+
     # ✅ Best Practice: Use of Enum for defining a set of related constants improves code readability and maintainability
     # 🧠 ML Signal: Categorical values that can be used for classification tasks
 
@@ -327,7 +330,13 @@ tradable_type_map_exchanges = {
     TradableType.stockhk: [Exchange.hk],
     TradableType.stockus: [Exchange.nasdaq, Exchange.nyse],
     TradableType.indexus: [Exchange.us],
-    TradableType.future: [Exchange.shfe, Exchange.dce, Exchange.czce, Exchange.cffex, Exchange.ine],
+    TradableType.future: [
+        Exchange.shfe,
+        Exchange.dce,
+        Exchange.czce,
+        Exchange.cffex,
+        Exchange.ine,
+    ],
     TradableType.coin: [Exchange.binance, Exchange.huobipro],
     TradableType.currency: [Exchange.forex],
 }
@@ -344,7 +353,14 @@ zvt_context = zvt_context
 
 
 # the __all__ is generated
-__all__ = ["IntervalLevel", "AdjustType", "ActorType", "TradableType", "Exchange", "get_entity_exchanges"]
+__all__ = [
+    "IntervalLevel",
+    "AdjustType",
+    "ActorType",
+    "TradableType",
+    "Exchange",
+    "get_entity_exchanges",
+]
 
 # __init__.py structure:
 # common code of the package

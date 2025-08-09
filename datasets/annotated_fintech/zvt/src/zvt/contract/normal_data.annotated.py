@@ -2,15 +2,28 @@
 # -*- coding: utf-8 -*-
 # ✅ Best Practice: Use of new-style classes by inheriting from 'object' for compatibility and consistency
 
-from zvt.utils.pd_utils import pd_is_not_null, fill_with_same_index, normal_index_df, is_normal_df
+from zvt.utils.pd_utils import (
+    pd_is_not_null,
+    fill_with_same_index,
+    normal_index_df,
+    is_normal_df,
+)
+
 # ✅ Best Practice: Class variable initialized to None, indicating a placeholder or default value
 
 # ✅ Best Practice: Use of default values for parameters improves function usability and flexibility
 
+
 class NormalData(object):
     table_type_sample = None
 
-    def __init__(self, df, category_field="entity_id", time_field="timestamp", fill_index: bool = False) -> None:
+    def __init__(
+        self,
+        df,
+        category_field="entity_id",
+        time_field="timestamp",
+        fill_index: bool = False,
+    ) -> None:
         # ✅ Best Practice: Initializing lists and dictionaries in the constructor is a good practice for encapsulation
         self.data_df = df
         self.category_field = category_field
@@ -44,7 +57,9 @@ class NormalData(object):
                 # ✅ Best Practice: Use of __all__ to define public API of the module
                 # 🧠 ML Signal: Usage of custom function to fill indices
                 # 🧠 ML Signal: Usage of pandas utility function to check for null values
-                self.data_df = normal_index_df(self.data_df, self.category_field, self.time_field)
+                self.data_df = normal_index_df(
+                    self.data_df, self.category_field, self.time_field
+                )
 
             self.entity_ids = self.data_df.index.levels[0].to_list()
 

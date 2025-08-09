@@ -1,10 +1,13 @@
 import numpy as np
+
 # ✅ Best Practice: Importing specific classes or functions improves code readability and maintainability.
 
 from ...log import TimeInspector
+
 # ✅ Best Practice: Class docstring provides a description of the class and its purpose
 # ✅ Best Practice: Importing specific classes or functions improves code readability and maintainability.
 from ...data.dataset.processor import Processor, get_group_columns
+
 # ✅ Best Practice: Method docstring provides a description of the method and its purpose
 
 
@@ -12,6 +15,7 @@ class ConfigSectionProcessor(Processor):
     """
     This processor is designed for Alpha158. And will be replaced by simple processors in the future
     """
+
     # 🧠 ML Signal: Use of kwargs to configure object behavior
 
     def __init__(self, fields_group=None, **kwargs):
@@ -38,6 +42,7 @@ class ConfigSectionProcessor(Processor):
     # 🧠 ML Signal: Normalizing data by dividing by the standard deviation
     def __call__(self, df):
         return self._transform(df)
+
     # ⚠️ SAST Risk (Low): Potential for division by zero if x.std() is zero
 
     def _transform(self, df):
@@ -53,6 +58,7 @@ class ConfigSectionProcessor(Processor):
             if self.fillna_label:
                 x.fillna(0, inplace=True)
             return x
+
         # ⚠️ SAST Risk (Low): In-place modification of data can lead to unexpected side effects.
 
         def _feature_norm(x):
@@ -85,17 +91,27 @@ class ConfigSectionProcessor(Processor):
 
         # Label
         cols = df_focus.columns[df_focus.columns.str.contains("^LABEL")]
-        df_focus[cols] = df_focus[cols].groupby(level="datetime", group_keys=False).apply(_label_norm)
+        df_focus[cols] = (
+            df_focus[cols]
+            .groupby(level="datetime", group_keys=False)
+            .apply(_label_norm)
+        )
 
         # Features
         cols = df_focus.columns[df_focus.columns.str.contains("^KLEN|^KLOW|^KUP")]
         df_focus[cols] = (
-            df_focus[cols].apply(lambda x: x**0.25).groupby(level="datetime", group_keys=False).apply(_feature_norm)
+            df_focus[cols]
+            .apply(lambda x: x**0.25)
+            .groupby(level="datetime", group_keys=False)
+            .apply(_feature_norm)
         )
 
         cols = df_focus.columns[df_focus.columns.str.contains("^KLOW2|^KUP2")]
         df_focus[cols] = (
-            df_focus[cols].apply(lambda x: x**0.5).groupby(level="datetime", group_keys=False).apply(_feature_norm)
+            df_focus[cols]
+            .apply(lambda x: x**0.5)
+            .groupby(level="datetime", group_keys=False)
+            .apply(_feature_norm)
         )
 
         _cols = [
@@ -123,16 +139,35 @@ class ConfigSectionProcessor(Processor):
             "VSUMD",
         ]
         pat = "|".join(["^" + x for x in _cols])
-        cols = df_focus.columns[df_focus.columns.str.contains(pat) & (~df_focus.columns.isin(["HIGH0", "LOW0"]))]
-        df_focus[cols] = df_focus[cols].groupby(level="datetime", group_keys=False).apply(_feature_norm)
+        cols = df_focus.columns[
+            df_focus.columns.str.contains(pat)
+            & (~df_focus.columns.isin(["HIGH0", "LOW0"]))
+        ]
+        df_focus[cols] = (
+            df_focus[cols]
+            .groupby(level="datetime", group_keys=False)
+            .apply(_feature_norm)
+        )
         # 🧠 ML Signal: Handling missing values is a common preprocessing step in ML pipelines.
 
         # 🧠 ML Signal: Feature transformation using power functions is common in ML preprocessing.
-        cols = df_focus.columns[df_focus.columns.str.contains("^STD|^VOLUME|^VMA|^VSTD")]
-        df_focus[cols] = df_focus[cols].apply(np.log).groupby(level="datetime", group_keys=False).apply(_feature_norm)
+        cols = df_focus.columns[
+            df_focus.columns.str.contains("^STD|^VOLUME|^VMA|^VSTD")
+        ]
+        df_focus[cols] = (
+            df_focus[cols]
+            .apply(np.log)
+            .groupby(level="datetime", group_keys=False)
+            .apply(_feature_norm)
+        )
 
         cols = df_focus.columns[df_focus.columns.str.contains("^RSQR")]
-        df_focus[cols] = df_focus[cols].fillna(0).groupby(level="datetime", group_keys=False).apply(_feature_norm)
+        df_focus[cols] = (
+            df_focus[cols]
+            .fillna(0)
+            .groupby(level="datetime", group_keys=False)
+            .apply(_feature_norm)
+        )
         # ✅ Best Practice: Assigning processed values back to the original DataFrame.
         # 🧠 ML Signal: Feature transformation using power functions is common in ML preprocessing.
         # 🧠 ML Signal: Exponential transformation is a common technique in data preprocessing.
@@ -156,10 +191,20 @@ class ConfigSectionProcessor(Processor):
         )
 
         cols = df_focus.columns[df_focus.columns.str.contains("^CORR|^CORD")]
-        df_focus[cols] = df_focus[cols].apply(np.exp).groupby(level="datetime", group_keys=False).apply(_feature_norm)
+        df_focus[cols] = (
+            df_focus[cols]
+            .apply(np.exp)
+            .groupby(level="datetime", group_keys=False)
+            .apply(_feature_norm)
+        )
 
         cols = df_focus.columns[df_focus.columns.str.contains("^WVMA")]
-        df_focus[cols] = df_focus[cols].apply(np.log1p).groupby(level="datetime", group_keys=False).apply(_feature_norm)
+        df_focus[cols] = (
+            df_focus[cols]
+            .apply(np.log1p)
+            .groupby(level="datetime", group_keys=False)
+            .apply(_feature_norm)
+        )
 
         df[selected_cols] = df_focus.values
 

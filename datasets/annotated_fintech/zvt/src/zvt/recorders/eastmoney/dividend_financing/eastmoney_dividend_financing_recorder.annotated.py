@@ -2,11 +2,13 @@
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.domain.fundamental.dividend_financing import DividendFinancing
 from zvt.recorders.eastmoney.common import EastmoneyPageabeDataRecorder
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 # 🧠 ML Signal: Class definition with inheritance, useful for understanding class hierarchies and relationships
 from zvt.utils.utils import second_item_to_float
 
 # 🧠 ML Signal: Class attribute assignment, useful for understanding default configurations
+
 
 class DividendFinancingRecorder(EastmoneyPageabeDataRecorder):
     # 🧠 ML Signal: URL assignment, useful for understanding API endpoints used
@@ -59,12 +61,17 @@ class DividendFinancingRecorder(EastmoneyPageabeDataRecorder):
                     # ✅ Best Practice: Calling the superclass method to ensure proper cleanup
                     # 🧠 ML Signal: Instantiation and execution pattern of a recorder object
                     # ✅ Best Practice: Defining __all__ for module exports
-                    filters=[DividendFinancing.ipo_raising_fund.is_(None), DividendFinancing.ipo_issues != 0],
+                    filters=[
+                        DividendFinancing.ipo_raising_fund.is_(None),
+                        DividendFinancing.ipo_issues != 0,
+                    ],
                 )
 
                 for need_fill_item in need_fill_items:
                     if need_fill_item:
-                        need_fill_item.ipo_raising_fund = code_security[item.code].raising_fund
+                        need_fill_item.ipo_raising_fund = code_security[
+                            item.code
+                        ].raising_fund
                         self.session.commit()
         except Exception as e:
             self.logger.exception(e)

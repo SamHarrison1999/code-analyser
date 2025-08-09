@@ -1,5 +1,6 @@
 from setuptools import setup
 from os import path
+
 # ✅ Best Practice: Use of classifiers helps in categorizing the package for users and tools.
 
 classifiers = [
@@ -37,5 +38,5 @@ setup(
     license="LGPLv3+",
     packages=["finta"],
     install_requires=["pandas", "numpy"],
-    license_files=["LICENSE"]
+    license_files=["LICENSE"],
 )

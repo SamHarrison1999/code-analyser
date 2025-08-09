@@ -8,6 +8,7 @@ from qlib.constant import REG_CN
 # ⚠️ SAST Risk (Low): Potential path traversal if `provider_uri` is influenced by user input
 from qlib.utils import init_instance_by_config
 from qlib.tests.data import GetData
+
 # 🧠 ML Signal: Initialization of a data provider for ML model training
 from qlib.tests.config import CSI300_GBDT_TASK
 

@@ -1,10 +1,13 @@
 from datetime import datetime
+
 # ✅ Best Practice: Grouping standard library imports together improves readability.
 from enum import Enum
 from typing import Union
+
 # ✅ Best Practice: Grouping standard library imports together improves readability.
 
 import polars as pl
+
 # ✅ Best Practice: Grouping standard library imports together improves readability.
 
 
@@ -22,11 +25,12 @@ class DataProxy:
         self.name: str = df.columns[-1]
         # ✅ Best Practice: Type hinting for the variable improves code readability and maintainability
         self.df: pl.DataFrame = df.rename({self.name: "data"})
+
     # 🧠 ML Signal: Renaming a DataFrame column
 
     # 🧠 ML Signal: Usage of method chaining with 'with_columns' indicates a pattern of data transformation
     # ✅ Best Practice: Type hinting improves code readability and maintainability
-        # Note that for numerical expressions, variables should be placed before numbers. e.g. a * 2
+    # Note that for numerical expressions, variables should be placed before numbers. e.g. a * 2
 
     # 🧠 ML Signal: Returning a custom object 'DataProxy' could indicate a pattern of wrapping or encapsulating data
     def result(self, s: pl.Series) -> "DataProxy":
@@ -37,6 +41,7 @@ class DataProxy:
         result = result.with_columns(other=s)
 
         return DataProxy(result)
+
     # ✅ Best Practice: Include a docstring to describe the method's purpose
 
     # 🧠 ML Signal: Use of a method to process and return results
@@ -50,6 +55,7 @@ class DataProxy:
             s = self.df["data"] + other
         # 🧠 ML Signal: Handling different data types for arithmetic operations
         return self.result(s)
+
     # 🧠 ML Signal: Use of isinstance to check type, common pattern in dynamic typing
 
     # 🧠 ML Signal: Use of a method to process and return the result
@@ -64,6 +70,7 @@ class DataProxy:
         # ✅ Best Practice: Returning the result of an operation, maintains method chaining
         # ✅ Best Practice: Check for type of 'other' to ensure correct operation
         return self.result(s)
+
     # 🧠 ML Signal: Usage of multiplication operation with custom class
 
     def __mul__(self, other: Union["DataProxy", int, float]) -> "DataProxy":
@@ -89,6 +96,7 @@ class DataProxy:
             # 🧠 ML Signal: Accessing a specific column from a DataFrame
             s = self.df["data"] * other
         return self.result(s)
+
     # 🧠 ML Signal: Returning a processed result from a method
 
     # ✅ Best Practice: Check if 'other' is an instance of 'DataProxy' to handle different types appropriately
@@ -102,6 +110,7 @@ class DataProxy:
             # 🧠 ML Signal: Handling comparison with primitive data types
             s = self.df["data"] / other
         return self.result(s)
+
     # ✅ Best Practice: Return a consistent type ('DataProxy') for method chaining
 
     # 🧠 ML Signal: Use of isinstance to check type
@@ -110,6 +119,7 @@ class DataProxy:
         # 🧠 ML Signal: Use of Polars library for data manipulation
         s: pl.Series = self.df["data"].abs()
         return self.result(s)
+
     # ✅ Best Practice: Type hinting improves code readability and maintainability
 
     # 🧠 ML Signal: Handling different data types in comparison
@@ -123,6 +133,7 @@ class DataProxy:
         else:
             s = self.df["data"] > other
         return self.result(s)
+
     # 🧠 ML Signal: Handling different data types in operations
 
     # ✅ Best Practice: Check if 'other' is an instance of 'DataProxy' to handle different types appropriately.
@@ -137,6 +148,7 @@ class DataProxy:
             # ✅ Best Practice: Type hinting improves code readability and maintainability
             s = self.df["data"] >= other
         return self.result(s)
+
     # ✅ Best Practice: Return the result of the comparison wrapped in a 'DataProxy' object.
 
     # 🧠 ML Signal: Use of isinstance to check type
@@ -160,7 +172,7 @@ class DataProxy:
             s = self.df["data"] <= other
         return self.result(s)
 
-    def __eq__(self, other: Union["DataProxy", int, float]) -> "DataProxy":    # type: ignore
+    def __eq__(self, other: Union["DataProxy", int, float]) -> "DataProxy":  # type: ignore
         """Equal comparison"""
         if isinstance(other, DataProxy):
             s = self.df["data"] == other.df["data"]
@@ -173,37 +185,46 @@ def calculate_by_expression(df: pl.DataFrame, expression: str) -> pl.DataFrame:
     """Execute calculation based on expression"""
     # Import operators locally to avoid polluting global namespace
     # ✅ Best Practice: Using type hints for better code readability and maintainability.
-    from .ts_function import (              # noqa
+    from .ts_function import (  # noqa
         ts_delay,
-        ts_min, ts_max,
-        ts_argmax, ts_argmin,
-        ts_rank, ts_sum,
+        ts_min,
+        ts_max,
+        ts_argmax,
+        ts_argmin,
+        ts_rank,
+        ts_sum,
         # ✅ Best Practice: Using descriptive variable names for better readability.
-        ts_mean, ts_std,
-        ts_slope, ts_quantile,
+        ts_mean,
+        ts_std,
+        ts_slope,
+        ts_quantile,
         # 🧠 ML Signal: Dynamic creation of variables based on DataFrame columns.
         # ✅ Best Practice: Add type hints for function parameters and return type for better readability and maintainability
-        ts_rsquare, ts_resi,
+        ts_rsquare,
+        ts_resi,
         ts_corr,
         # 🧠 ML Signal: Use of Polars library for data manipulation
         # ⚠️ SAST Risk (High): Use of eval() can lead to code injection vulnerabilities if the input is not properly sanitized.
         # ✅ Best Practice: Returning the DataFrame directly for clarity.
         # ✅ Best Practice: Use of select method for efficient column selection in Polars
-        ts_less, ts_greater,
-        ts_log, ts_abs
+        ts_less,
+        ts_greater,
+        ts_log,
+        ts_abs,
     )
-    from .cs_function import (              # noqa
+    from .cs_function import (  # noqa
         cs_rank,
         # ✅ Best Practice: Include type hinting for function parameters and return type for better readability and maintainability.
         cs_mean,
         # ✅ Best Practice: Use of alias to rename the result of an expression for clarity
-        cs_std
+        cs_std,
     )
+
     # 🧠 ML Signal: Checking the type of a variable to determine processing logic.
-    from .ta_function import (              # noqa
+    from .ta_function import (  # noqa
         # 🧠 ML Signal: Conditional logic based on string content.
         ta_rsi,
-        ta_atr
+        ta_atr,
     )
 
     # Extract feature objects to local space
@@ -228,13 +249,11 @@ def calculate_by_expression(df: pl.DataFrame, expression: str) -> pl.DataFrame:
     return other.df
 
 
-def calculate_by_polars(df: pl.DataFrame, expression: pl.expr.expr.Expr) -> pl.DataFrame:
+def calculate_by_polars(
+    df: pl.DataFrame, expression: pl.expr.expr.Expr
+) -> pl.DataFrame:
     """Execute calculation based on Polars expression"""
-    return df.select([
-        "datetime",
-        "vt_symbol",
-        expression.alias("data")
-    ])
+    return df.select(["datetime", "vt_symbol", expression.alias("data")])
 
 
 def to_datetime(arg: datetime | str) -> datetime:

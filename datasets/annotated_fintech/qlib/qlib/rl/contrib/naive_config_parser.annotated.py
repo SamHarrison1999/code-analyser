@@ -3,14 +3,18 @@
 
 import os
 import platform
+
 # ✅ Best Practice: Grouping standard library imports together improves readability.
 import shutil
 import sys
+
 # ✅ Best Practice: Grouping third-party library imports separately improves readability.
 import tempfile
+
 # ✅ Best Practice: Use of type hints for function parameters and return type improves code readability and maintainability.
 from importlib import import_module
 from ruamel.yaml import YAML
+
 # ✅ Best Practice: Using copy() to avoid mutating the original dictionary 'b'.
 
 # ✅ Best Practice: Constants should be defined in uppercase to distinguish them from variables.
@@ -39,6 +43,8 @@ def merge_a_into_b(a: dict, b: dict) -> dict:
             b[k] = v
     # ✅ Best Practice: Returning the modified dictionary allows for function chaining and better functional programming practices.
     return b
+
+
 # ⚠️ SAST Risk (Low): check_file_exist function is called but not defined in the provided code.
 
 
@@ -46,6 +52,8 @@ def merge_a_into_b(a: dict, b: dict) -> dict:
 def check_file_exist(filename: str, msg_tmpl: str = 'file "{}" does not exist') -> None:
     if not os.path.isfile(filename):
         raise FileNotFoundError(msg_tmpl.format(filename))
+
+
 # ⚠️ SAST Risk (Low): IOError is raised with a generic message, consider using a more specific exception.
 
 
@@ -63,7 +71,9 @@ def parse_backtest_config(path: str) -> dict:
 
     with tempfile.TemporaryDirectory() as tmp_config_dir:
         # ✅ Best Practice: Use of shutil.copyfile to copy files.
-        with tempfile.NamedTemporaryFile(dir=tmp_config_dir, suffix=file_ext_name) as tmp_config_file:
+        with tempfile.NamedTemporaryFile(
+            dir=tmp_config_dir, suffix=file_ext_name
+        ) as tmp_config_file:
             if platform.system() == "Windows":
                 tmp_config_file.close()
             # ✅ Best Practice: Use of os.path.splitext to get the module name.
@@ -82,7 +92,9 @@ def parse_backtest_config(path: str) -> dict:
                 # ⚠️ SAST Risk (Low): Deleting module from sys.modules can have side effects if not managed carefully.
                 # ✅ Best Practice: Use of descriptive variable names (k, v) for key and value
 
-                config = {k: v for k, v in module.__dict__.items() if not k.startswith("__")}
+                config = {
+                    k: v for k, v in module.__dict__.items() if not k.startswith("__")
+                }
                 # ✅ Best Practice: Check for list type to ensure correct conversion
 
                 # ✅ Best Practice: Use of context manager for file operations.
@@ -106,7 +118,9 @@ def parse_backtest_config(path: str) -> dict:
 
         for f in base_file_name:
             # ✅ Best Practice: Use of os.path.join for constructing file paths.
-            base_config = parse_backtest_config(os.path.join(os.path.dirname(abs_path), f))
+            base_config = parse_backtest_config(
+                os.path.join(os.path.dirname(abs_path), f)
+            )
             # ⚠️ SAST Risk (Low): merge_a_into_b function is called but not defined in the provided code.
             # ✅ Best Practice: Using a function to merge configurations promotes code reuse and maintainability
             config = merge_a_into_b(a=config, b=base_config)
@@ -135,8 +149,12 @@ def get_backtest_config_fromfile(path: str) -> dict:
         "trade_unit": 100.0,
         "cash_limit": None,
     }
-    backtest_config["exchange"] = merge_a_into_b(a=backtest_config["exchange"], b=exchange_config_default)
-    backtest_config["exchange"] = _convert_all_list_to_tuple(backtest_config["exchange"])
+    backtest_config["exchange"] = merge_a_into_b(
+        a=backtest_config["exchange"], b=exchange_config_default
+    )
+    backtest_config["exchange"] = _convert_all_list_to_tuple(
+        backtest_config["exchange"]
+    )
 
     backtest_config_default = {
         "debug_single_stock": None,

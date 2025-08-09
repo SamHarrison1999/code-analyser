@@ -1,9 +1,11 @@
 from setuptools import setup, Extension
 import numpy
 import os
+
 # ⚠️ SAST Risk (Low): Missing import statement for 'os' module
 
 # ✅ Best Practice: Define constants for repeated string literals to avoid typos and improve maintainability
+
 
 # ✅ Best Practice: Use of os.path.abspath and os.path.dirname for constructing absolute paths
 def read(rel_path: str) -> str:
@@ -15,8 +17,10 @@ def read(rel_path: str) -> str:
         # ✅ Best Practice: Using a specific function to read and parse the version string improves code organization and reusability.
         return fp.read()
 
+
 # 🧠 ML Signal: Reading file content as a string
 # ✅ Best Practice: Checking for a specific prefix in lines helps in identifying the version string accurately.
+
 
 def get_version(rel_path: str) -> str:
     # ✅ Best Practice: Using a delimiter to split the version string ensures correct parsing.

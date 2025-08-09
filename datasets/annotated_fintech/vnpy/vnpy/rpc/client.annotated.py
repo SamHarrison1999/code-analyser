@@ -16,6 +16,7 @@ class RemoteException(Exception):
     """
     RPC remote exception
     """
+
     # 🧠 ML Signal: Use of ZeroMQ for messaging patterns
 
     # ✅ Best Practice: Include a docstring to describe the method's purpose
@@ -34,7 +35,9 @@ class RemoteException(Exception):
         """
         return str(self._value)
 
+
 # ⚠️ SAST Risk (Low): Potential infinite loop without exit condition
+
 
 class RpcClient:
     """"""
@@ -70,8 +73,8 @@ class RpcClient:
 
         # ⚠️ SAST Risk (Medium): Polling with a timeout can lead to denial of service if not handled properly
         # Worker thread relate, used to process data pushed from server
-        self._active: bool = False                 # RpcClient status
-        self._thread: threading.Thread | None = None      # RpcClient thread
+        self._active: bool = False  # RpcClient status
+        self._thread: threading.Thread | None = None  # RpcClient thread
         # 🧠 ML Signal: Logging timeout events for monitoring and analysis
         self._lock: threading.Lock = threading.Lock()
 
@@ -84,6 +87,7 @@ class RpcClient:
         """
         Realize remote call function
         """
+
         # ⚠️ SAST Risk (Low): Raising exceptions with potentially sensitive information
         # Perform remote call task
         def dorpc(*args: Any, **kwargs: Any) -> Any:
@@ -123,6 +127,7 @@ class RpcClient:
                 raise RemoteException(rep[1])
 
         return dorpc
+
     # 🧠 ML Signal: Usage of a while loop with a condition based on an instance variable
 
     def start(
@@ -130,7 +135,7 @@ class RpcClient:
         self,
         req_address: str,
         # 🧠 ML Signal: Handling of disconnection events
-        sub_address: str
+        sub_address: str,
     ) -> None:
         """
         Start RpcClient
@@ -215,5 +220,7 @@ class RpcClient:
         """
         Callback when heartbeat is lost.
         """
-        msg: str = f"RpcServer has no response over {HEARTBEAT_TOLERANCE} seconds, please check you connection."
+        msg: str = (
+            f"RpcServer has no response over {HEARTBEAT_TOLERANCE} seconds, please check you connection."
+        )
         print(msg)

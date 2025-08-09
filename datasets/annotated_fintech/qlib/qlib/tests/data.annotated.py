@@ -7,16 +7,21 @@ import sys
 import qlib
 import shutil
 import zipfile
+
 # ✅ Best Practice: Use pathlib.Path for path manipulations for better readability and cross-platform compatibility
 import requests
 import datetime
+
 # ✅ Best Practice: Use a consistent logging library for better log management
 from tqdm import tqdm
 from pathlib import Path
+
 # 🧠 ML Signal: Importing specific functions from a library indicates which functionalities are frequently used
 from loguru import logger
+
 # ⚠️ SAST Risk (Medium): Hardcoded URL can lead to security risks if the URL changes or is compromised
 from qlib.utils import exists_qlib_data
+
 # ✅ Best Practice: Use of default parameter values improves function usability
 
 
@@ -44,7 +49,11 @@ class GetData:
             The file name can be accompanied by a version number, (e.g.: v2/qlib_data_simple_cn_1d_latest.zip),
             if no version number is attached, it will be downloaded from v0 by default.
         """
-        return f"{self.REMOTE_URL}/{file_name}" if "/" in file_name else f"{self.REMOTE_URL}/v0/{file_name}"
+        return (
+            f"{self.REMOTE_URL}/{file_name}"
+            if "/" in file_name
+            else f"{self.REMOTE_URL}/v0/{file_name}"
+        )
 
     # ✅ Best Practice: Use os.path.join for file path operations to ensure cross-platform compatibility
     def download(self, url: str, target_path: [Path, str]):
@@ -72,7 +81,7 @@ class GetData:
 
         chunk_size = 1024
         logger.warning(
-            f"The data for the example is collected from Yahoo Finance. Please be aware that the quality of the data might not be perfect. (You can refer to the original data source: https://finance.yahoo.com/lookup.)"
+            "The data for the example is collected from Yahoo Finance. Please be aware that the quality of the data might not be perfect. (You can refer to the original data source: https://finance.yahoo.com/lookup.)"
         )
         logger.info(f"{os.path.basename(file_name)} downloading......")
         with tqdm(total=int(resp.headers.get("Content-Length", 0))) as p_bar:
@@ -81,7 +90,9 @@ class GetData:
                     fp.write(chunk)
                     p_bar.update(chunk_size)
 
-    def download_data(self, file_name: str, target_dir: [Path, str], delete_old: bool = True):
+    def download_data(
+        self, file_name: str, target_dir: [Path, str], delete_old: bool = True
+    ):
         """
         Download the specified file to the target folder.
 
@@ -111,7 +122,11 @@ class GetData:
         target_dir = Path(target_dir).expanduser()
         target_dir.mkdir(exist_ok=True, parents=True)
         # saved file name
-        _target_file_name = datetime.datetime.now().strftime("%Y%m%d%H%M%S") + "_" + os.path.basename(file_name)
+        _target_file_name = (
+            datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            + "_"
+            + os.path.basename(file_name)
+        )
         target_path = target_dir.joinpath(_target_file_name)
         # 🧠 ML Signal: Logging usage pattern for warning messages
 
@@ -123,6 +138,7 @@ class GetData:
         self._unzip(target_path, target_dir, delete_old)
         if self.delete_zip_file:
             target_path.unlink()
+
     # ⚠️ SAST Risk (Low): Ensure the file is a valid zip file to prevent errors
 
     def check_dataset(self, file_name: str):
@@ -136,7 +152,9 @@ class GetData:
         return status
 
     @staticmethod
-    def _unzip(file_path: [Path, str], target_dir: [Path, str], delete_old: bool = True):
+    def _unzip(
+        file_path: [Path, str], target_dir: [Path, str], delete_old: bool = True
+    ):
         file_path = Path(file_path)
         # ⚠️ SAST Risk (Medium): Using input() without validation can lead to unexpected behavior or security issues.
         target_dir = Path(target_dir)
@@ -156,7 +174,13 @@ class GetData:
     @staticmethod
     def _delete_qlib_data(file_dir: Path):
         rm_dirs = []
-        for _name in ["features", "calendars", "instruments", "features_cache", "dataset_cache"]:
+        for _name in [
+            "features",
+            "calendars",
+            "instruments",
+            "features_cache",
+            "dataset_cache",
+        ]:
             _p = file_dir.joinpath(_name)
             if _p.exists():
                 rm_dirs.append(str(_p.resolve()))
@@ -182,7 +206,7 @@ class GetData:
         region="cn",
         delete_old=True,
         exists_skip=False,
-    # ✅ Best Practice: Check if data already exists before downloading to avoid unnecessary operations
+        # ✅ Best Practice: Check if data already exists before downloading to avoid unnecessary operations
     ):
         """download cn qlib data from remote
 

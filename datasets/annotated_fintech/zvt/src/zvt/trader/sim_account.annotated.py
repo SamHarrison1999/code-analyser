@@ -1,15 +1,22 @@
 # -*- coding: utf-8 -*-
 import logging
 import math
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from typing import List, Optional
 
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.api.kdata import get_kdata, get_kdata_schema
 from zvt.contract import IntervalLevel, TradableEntity, AdjustType
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.contract.api import get_db_session, decode_entity_id
-from zvt.trader import TradingSignal, AccountService, OrderType, trading_signal_type_to_order_type
+from zvt.trader import (
+    TradingSignal,
+    AccountService,
+    OrderType,
+    trading_signal_type_to_order_type,
+)
 from zvt.trader.errors import (
     NotEnoughMoneyError,
     InvalidOrderError,
@@ -21,9 +28,16 @@ from zvt.trader.errors import (
 from zvt.trader.trader_info_api import get_trader_info, clear_trader
 from zvt.trader.trader_models import AccountStatsModel, PositionModel
 from zvt.trader.trader_schemas import AccountStats, Position, Order, TraderInfo
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.utils.pd_utils import pd_is_not_null
-from zvt.utils.time_utils import to_pd_timestamp, to_time_str, TIME_FORMAT_ISO8601, is_same_date
+from zvt.utils.time_utils import (
+    to_pd_timestamp,
+    to_time_str,
+    TIME_FORMAT_ISO8601,
+    is_same_date,
+)
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from zvt.utils.utils import fill_domain_from_dict
 
@@ -88,10 +102,11 @@ class SimAccountService(AccountService):
             f"init_account,holding size:{len(self.account.positions)} profit:{self.account.profit} input_money:{self.account.input_money} "
             # ⚠️ SAST Risk (Low): Potential for integer overflow if 'money' is very large
             f"cash:{self.account.cash} value:{self.account.value} all_value:{self.account.all_value}"
-        # 🧠 ML Signal: Initialization of real-time settings, indicating a pattern of real-time processing
+            # 🧠 ML Signal: Initialization of real-time settings, indicating a pattern of real-time processing
         )
         # 🧠 ML Signal: Logging a warning message, indicating an important event or state
         self.logger.info(account_info)
+
     # 🧠 ML Signal: Initialization of data usage settings, indicating a pattern of data processing configuration
     # ⚠️ SAST Risk (Low): Potential information disclosure through logging sensitive trader information
 
@@ -103,16 +118,26 @@ class SimAccountService(AccountService):
         # ⚠️ SAST Risk (Medium): Risk of unintended data loss or corruption when clearing trader data
         # ⚠️ SAST Risk (Low): Potential data loss if clear_account() removes important data without confirmation.
         self.account.cash += money
+
     # ✅ Best Practice: Use of formatted strings for clear and informative logging
 
     def clear_account(self):
         # 🧠 ML Signal: Loading existing account data suggests a pattern of resuming or continuing previous sessions.
-        trader_info = get_trader_info(session=self.session, trader_name=self.trader_name, return_type="domain", limit=1)
+        trader_info = get_trader_info(
+            session=self.session,
+            trader_name=self.trader_name,
+            return_type="domain",
+            limit=1,
+        )
 
         # ✅ Best Practice: Use of logging for tracking and debugging
         # 🧠 ML Signal: Use of dynamic entity type naming can indicate flexible or dynamic schema usage.
         if trader_info:
-            self.logger.warning("trader:{} has run before,old result would be deleted".format(self.trader_name))
+            self.logger.warning(
+                "trader:{} has run before,old result would be deleted".format(
+                    self.trader_name
+                )
+            )
             clear_trader(session=self.session, trader_name=self.trader_name)
 
     def init_account(self) -> AccountStats:
@@ -159,7 +184,7 @@ class SimAccountService(AccountService):
             # ✅ Best Practice: Use of helper function to fill domain object from a dictionary
             value=0,
             closing=False,
-        # ✅ Best Practice: Type hinting for better readability and maintainability
+            # ✅ Best Practice: Type hinting for better readability and maintainability
         )
 
     def load_account(self) -> AccountStats:
@@ -171,8 +196,8 @@ class SimAccountService(AccountService):
             # 🧠 ML Signal: Logging usage pattern for tracking events
             limit=1,
             return_type="domain",
-        # ✅ Best Practice: Use of helper function to fill domain object from a dictionary
-        # ✅ Best Practice: Check if the timestamp is the same as the start timestamp
+            # ✅ Best Practice: Use of helper function to fill domain object from a dictionary
+            # ✅ Best Practice: Check if the timestamp is the same as the start timestamp
         )
         if not records:
             # ✅ Best Practice: Define a docstring to describe the purpose and parameters of the function
@@ -186,7 +211,9 @@ class SimAccountService(AccountService):
         account_stats_model = AccountStatsModel.from_orm(latest_record)
         # 🧠 ML Signal: Iterating over a list of objects to process each one
         account = AccountStats()
-        fill_domain_from_dict(account, account_stats_model.model_dump(exclude={"id", "positions"}))
+        fill_domain_from_dict(
+            account, account_stats_model.model_dump(exclude={"id", "positions"})
+        )
         # 🧠 ML Signal: Method call pattern for handling individual items
 
         positions: List[Position] = []
@@ -226,13 +253,17 @@ class SimAccountService(AccountService):
                 self.handle_trading_signal(trading_signal)
             except Exception as e:
                 self.logger.exception(e)
-                self.on_trading_error(timestamp=trading_signal.happen_timestamp, error=e)
+                self.on_trading_error(
+                    timestamp=trading_signal.happen_timestamp, error=e
+                )
 
     def handle_trading_signal(self, trading_signal: TradingSignal):
         entity_id = trading_signal.entity_id
         # 🧠 ML Signal: Ordering by position percentage
         happen_timestamp = trading_signal.happen_timestamp
-        order_type = trading_signal_type_to_order_type(trading_signal.trading_signal_type)
+        order_type = trading_signal_type_to_order_type(
+            trading_signal.trading_signal_type
+        )
         trading_level = trading_signal.trading_level.value
         if order_type:
             try:
@@ -266,7 +297,7 @@ class SimAccountService(AccountService):
                             order_timestamp=happen_timestamp,
                             order_position_pct=trading_signal.position_pct,
                             order_type=order_type,
-                        # 🧠 ML Signal: Logging usage pattern
+                            # 🧠 ML Signal: Logging usage pattern
                         )
                     # ✅ Best Practice: List comprehension for filtering positions
                     elif trading_signal.order_money:
@@ -311,20 +342,28 @@ class SimAccountService(AccountService):
         # remove the empty position
         # ⚠️ SAST Risk (Low): Potential division by zero if position.long_amount is zero
         self.account.positions = [
-            position for position in self.account.positions if position.long_amount > 0 or position.short_amount > 0
+            position
+            for position in self.account.positions
+            if position.long_amount > 0 or position.short_amount > 0
         ]
         # ⚠️ SAST Risk (Low): Potential division by zero if position.long_amount is zero
 
         # clear the data which need recomputing
         # 🧠 ML Signal: Logging usage pattern
-        the_id = "{}_{}".format(self.trader_name, to_time_str(timestamp, TIME_FORMAT_ISO8601))
+        the_id = "{}_{}".format(
+            self.trader_name, to_time_str(timestamp, TIME_FORMAT_ISO8601)
+        )
 
         self.account.value = 0
         self.account.all_value = 0
         # 🧠 ML Signal: ID generation pattern
         for position in self.account.positions:
             entity_type, _, _ = decode_entity_id(position.entity_id)
-            data_schema = get_kdata_schema(entity_type, level=IntervalLevel.LEVEL_1DAY, adjust_type=self.adjust_type)
+            data_schema = get_kdata_schema(
+                entity_type,
+                level=IntervalLevel.LEVEL_1DAY,
+                adjust_type=self.adjust_type,
+            )
 
             # 🧠 ML Signal: Timestamp conversion pattern
             kdata = get_kdata(
@@ -358,24 +397,34 @@ class SimAccountService(AccountService):
                     position.value = position.long_amount * closing_price
                     self.account.value += position.value
                 elif (position.short_amount is not None) and position.short_amount > 0:
-                    position.value = 2 * (position.short_amount * position.average_short_price)
+                    position.value = 2 * (
+                        position.short_amount * position.average_short_price
+                    )
                     position.value -= position.short_amount * closing_price
                     self.account.value += position.value
 
                 # refresh profit
-                position.profit = (closing_price - position.average_long_price) * position.long_amount
-                position.profit_rate = position.profit / (position.average_long_price * position.long_amount)
+                position.profit = (
+                    closing_price - position.average_long_price
+                ) * position.long_amount
+                position.profit_rate = position.profit / (
+                    position.average_long_price * position.long_amount
+                )
 
             else:
                 self.logger.warning(
-                    "could not refresh close value for position:{},timestamp:{}".format(position.entity_id, timestamp)
+                    "could not refresh close value for position:{},timestamp:{}".format(
+                        position.entity_id, timestamp
+                    )
                 )
 
             # 🧠 ML Signal: Method accessing an instance attribute
             position.id = "{}_{}_{}".format(
-                self.trader_name, position.entity_id, to_time_str(timestamp, TIME_FORMAT_ISO8601)
-            # ⚠️ SAST Risk (Low): Directly modifying a list attribute of an object
-            # 🧠 ML Signal: Returning an instance attribute
+                self.trader_name,
+                position.entity_id,
+                to_time_str(timestamp, TIME_FORMAT_ISO8601),
+                # ⚠️ SAST Risk (Low): Directly modifying a list attribute of an object
+                # 🧠 ML Signal: Returning an instance attribute
             )
             position.timestamp = to_pd_timestamp(timestamp)
             position.account_stats_id = the_id
@@ -398,7 +447,9 @@ class SimAccountService(AccountService):
         # ⚠️ SAST Risk (Medium): Potential for negative cash balance if not handled properly.
         self.logger.info(account_info)
 
-    def get_current_position(self, entity_id, create_if_not_exist=False) -> Optional[Position]:
+    def get_current_position(
+        self, entity_id, create_if_not_exist=False
+    ) -> Optional[Position]:
         """
         get position for entity_id
 
@@ -432,7 +483,9 @@ class SimAccountService(AccountService):
     def get_current_account(self):
         return self.account
 
-    def update_position(self, current_position, order_amount, current_price, order_type, timestamp):
+    def update_position(
+        self, current_position, order_amount, current_price, order_type, timestamp
+    ):
         """
 
         :param timestamp:
@@ -447,7 +500,9 @@ class SimAccountService(AccountService):
         :type order_type:
         """
         if order_type == OrderType.order_long:
-            need_money = (order_amount * current_price) * (1 + self.slippage + self.buy_cost)
+            need_money = (order_amount * current_price) * (
+                1 + self.slippage + self.buy_cost
+            )
             if self.account.cash < need_money:
                 if self.rich_mode:
                     self.input_money()
@@ -465,7 +520,8 @@ class SimAccountService(AccountService):
                 current_position.average_long_price = 0
             # 🧠 ML Signal: Method call based on condition
             current_position.average_long_price = (
-                current_position.average_long_price * current_position.long_amount + current_price * order_amount
+                current_position.average_long_price * current_position.long_amount
+                + current_price * order_amount
             ) / long_amount
             # ⚠️ SAST Risk (Low): Custom exception handling without logging
 
@@ -480,7 +536,9 @@ class SimAccountService(AccountService):
 
         # ✅ Best Practice: Return statement for function output
         elif order_type == OrderType.order_short:
-            need_money = (order_amount * current_price) * (1 + self.slippage + self.buy_cost)
+            need_money = (order_amount * current_price) * (
+                1 + self.slippage + self.buy_cost
+            )
             if self.account.cash < need_money:
                 # 🧠 ML Signal: Conditional logic based on a mode or flag can indicate different user behaviors or system states.
                 if self.rich_mode:
@@ -494,7 +552,8 @@ class SimAccountService(AccountService):
             short_amount = current_position.short_amount + order_amount
             current_position.average_short_price = (
                 # 🧠 ML Signal: Different handling based on order type can indicate distinct user actions or system processes.
-                current_position.average_short_price * current_position.short_amount + current_price * order_amount
+                current_position.average_short_price * current_position.short_amount
+                + current_price * order_amount
             ) / short_amount
 
             current_position.short_amount = short_amount
@@ -504,7 +563,9 @@ class SimAccountService(AccountService):
 
         elif order_type == OrderType.order_close_long:
             # ✅ Best Practice: Use math.floor for clarity and to avoid potential issues with integer division.
-            self.account.cash += order_amount * current_price * (1 - self.slippage - self.sell_cost)
+            self.account.cash += (
+                order_amount * current_price * (1 - self.slippage - self.sell_cost)
+            )
             # FIXME:如果没卖完，重新计算计算平均价
 
             current_position.available_long -= order_amount
@@ -512,9 +573,13 @@ class SimAccountService(AccountService):
         # ⚠️ SAST Risk (Medium): Raising exceptions without handling them can lead to unhandled exceptions and potential crashes.
 
         elif order_type == OrderType.order_close_short:
-            self.account.cash += 2 * (order_amount * current_position.average_short_price)
+            self.account.cash += 2 * (
+                order_amount * current_position.average_short_price
+            )
             # 🧠 ML Signal: Method for calculating order amount based on position percentage
-            self.account.cash -= order_amount * current_price * (1 + self.slippage + self.sell_cost)
+            self.account.cash -= (
+                order_amount * current_price * (1 + self.slippage + self.sell_cost)
+            )
 
             current_position.available_short -= order_amount
             # 🧠 ML Signal: Method for placing an order with a calculated amount
@@ -524,7 +589,10 @@ class SimAccountService(AccountService):
 
         # save the order info to db
         order_id = "{}_{}_{}_{}".format(
-            self.trader_name, order_type, current_position.entity_id, to_time_str(timestamp, TIME_FORMAT_ISO8601)
+            self.trader_name,
+            order_type,
+            current_position.entity_id,
+            to_time_str(timestamp, TIME_FORMAT_ISO8601),
         )
         order = Order(
             id=order_id,
@@ -538,8 +606,8 @@ class SimAccountService(AccountService):
             level=self.level.value,
             # ⚠️ SAST Risk (Low): Potential for exception message to leak sensitive information
             status="success",
-        # 🧠 ML Signal: Calculation of order amount based on money and price
-        # 🧠 ML Signal: Delegating order processing to another method
+            # 🧠 ML Signal: Calculation of order amount based on money and price
+            # 🧠 ML Signal: Delegating order processing to another method
         )
         self.session.add(order)
         self.session.commit()
@@ -562,7 +630,9 @@ class SimAccountService(AccountService):
         # ⚠️ SAST Risk (Low): Potential for InvalidOrderError to be raised, which should be handled by the caller.
         return order_amount
 
-    def cal_amount_by_position_pct(self, entity_id, order_price: float, order_position_pct: float, order_type):
+    def cal_amount_by_position_pct(
+        self, entity_id, order_price: float, order_position_pct: float, order_type
+    ):
         # 🧠 ML Signal: Pattern of updating position based on order type and conditions.
         if order_type == OrderType.order_long or order_type == OrderType.order_short:
             cost = order_price * (1 + self.slippage + self.buy_cost)
@@ -574,17 +644,24 @@ class SimAccountService(AccountService):
             if order_amount < 1:
                 if self.rich_mode:
                     self.input_money()
-                    order_amount = max((self.account.cash * order_position_pct) // cost, 1)
+                    order_amount = max(
+                        (self.account.cash * order_position_pct) // cost, 1
+                    )
                 else:
                     # 🧠 ML Signal: Pattern of updating position based on order type and conditions.
                     raise NotEnoughMoneyError()
             return order_amount
-        elif order_type == OrderType.order_close_long or order_type == OrderType.order_close_short:
+        elif (
+            order_type == OrderType.order_close_long
+            or order_type == OrderType.order_close_short
+        ):
             # ⚠️ SAST Risk (Low): Potential for NotEnoughPositionError to be raised, which should be handled by the caller.
             # 🧠 ML Signal: Pattern of updating position based on order type and conditions.
             # ⚠️ SAST Risk (Low): Generic Exception raised, should be more specific for better error handling.
             # ✅ Best Practice: Use of __all__ to define public API of the module.
-            current_position = self.get_current_position(entity_id=entity_id, create_if_not_exist=True)
+            current_position = self.get_current_position(
+                entity_id=entity_id, create_if_not_exist=True
+            )
             if order_type == OrderType.order_close_long:
                 available = current_position.available_long
             else:
@@ -607,7 +684,10 @@ class SimAccountService(AccountService):
         order_position_pct: float = 0.2,
     ):
         order_amount = self.cal_amount_by_position_pct(
-            entity_id=entity_id, order_price=order_price, order_position_pct=order_position_pct, order_type=order_type
+            entity_id=entity_id,
+            order_price=order_price,
+            order_position_pct=order_position_pct,
+            order_type=order_type,
         )
 
         self.order_by_amount(
@@ -627,9 +707,13 @@ class SimAccountService(AccountService):
         order_money: float,
     ):
         if order_type not in (OrderType.order_long, OrderType.order_short):
-            raise InvalidOrderParamError(f"order type: {order_type.value} not support order_by_money")
+            raise InvalidOrderParamError(
+                f"order type: {order_type.value} not support order_by_money"
+            )
 
-        order_amount = self.cal_amount_by_money(order_price=order_price, order_money=order_money)
+        order_amount = self.cal_amount_by_money(
+            order_price=order_price, order_money=order_money
+        )
         self.order_by_amount(
             entity_id=entity_id,
             order_price=order_price,
@@ -646,30 +730,48 @@ class SimAccountService(AccountService):
         order_type,
         order_amount,
     ):
-        current_position = self.get_current_position(entity_id=entity_id, create_if_not_exist=True)
+        current_position = self.get_current_position(
+            entity_id=entity_id, create_if_not_exist=True
+        )
 
         # 开多
         if order_type == OrderType.order_long:
             if current_position.short_amount > 0:
                 raise InvalidOrderError("close the short position before open long")
 
-            self.update_position(current_position, order_amount, order_price, order_type, order_timestamp)
+            self.update_position(
+                current_position, order_amount, order_price, order_type, order_timestamp
+            )
         # 开空
         elif order_type == OrderType.order_short:
             if current_position.long_amount > 0:
                 raise InvalidOrderError("close the long position before open short")
 
-            self.update_position(current_position, order_amount, order_price, order_type, order_timestamp)
+            self.update_position(
+                current_position, order_amount, order_price, order_type, order_timestamp
+            )
         # 平多
         elif order_type == OrderType.order_close_long:
             if current_position.available_long >= order_amount:
-                self.update_position(current_position, order_amount, order_price, order_type, order_timestamp)
+                self.update_position(
+                    current_position,
+                    order_amount,
+                    order_price,
+                    order_type,
+                    order_timestamp,
+                )
             else:
                 raise NotEnoughPositionError()
         # 平空
         elif order_type == OrderType.order_close_short:
             if current_position.available_short >= order_amount:
-                self.update_position(current_position, order_amount, order_price, order_type, order_timestamp)
+                self.update_position(
+                    current_position,
+                    order_amount,
+                    order_price,
+                    order_type,
+                    order_timestamp,
+                )
             else:
                 raise Exception("not enough position")
 

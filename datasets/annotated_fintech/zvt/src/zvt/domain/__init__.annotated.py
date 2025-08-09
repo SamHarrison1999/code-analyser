@@ -4,6 +4,7 @@ import enum
 
 # ✅ Best Practice: Using descriptive names for enum members improves code readability.
 
+
 class BlockCategory(enum.Enum):
     # ✅ Best Practice: Use of enum.Enum for defining a set of named constants
     # ✅ Best Practice: Using descriptive names for enum members improves code readability.
@@ -167,7 +168,13 @@ def get_future_name(code):
 
 
 # the __all__ is generated
-__all__ = ["BlockCategory", "IndexCategory", "ReportPeriod", "CompanyType", "get_future_name"]
+__all__ = [
+    "BlockCategory",
+    "IndexCategory",
+    "ReportPeriod",
+    "CompanyType",
+    "get_future_name",
+]
 
 # __init__.py structure:
 # common code of the package

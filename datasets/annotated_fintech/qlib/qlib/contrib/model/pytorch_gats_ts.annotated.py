@@ -3,6 +3,7 @@
 
 
 from __future__ import division
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 from __future__ import print_function
 
@@ -14,22 +15,28 @@ from ...utils import get_or_create_path
 from ...log import get_module_logger
 import torch
 import torch.nn as nn
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import torch.optim as optim
 from torch.utils.data import DataLoader
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 from torch.utils.data import Sampler
+
 # ✅ Best Practice: Inheriting from a base class (Sampler) promotes code reuse and consistency.
 
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 from .pytorch_utils import count_parameters
+
 # 🧠 ML Signal: Initialization of class with data source, common pattern in data processing classes
 from ...model.base import Model
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 # ✅ Best Practice: Use of pandas for data manipulation, a standard library for such tasks
 from ...data.dataset.handler import DataHandlerLP
 from ...contrib.model.pytorch_lstm import LSTMModel
 from ...contrib.model.pytorch_gru import GRUModel
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 
 
@@ -45,9 +52,14 @@ class DailyBatchSampler(Sampler):
         self.daily_count = (
             # ✅ Best Practice: Class docstring provides a clear description of the class and its parameters
             # ✅ Best Practice: Using len() for objects that support it
-            pd.Series(index=self.data_source.get_index()).groupby("datetime", group_keys=False).size().values
+            pd.Series(index=self.data_source.get_index())
+            .groupby("datetime", group_keys=False)
+            .size()
+            .values
         )
-        self.daily_index = np.roll(np.cumsum(self.daily_count), 1)  # calculate begin index of each batch
+        self.daily_index = np.roll(
+            np.cumsum(self.daily_count), 1
+        )  # calculate begin index of each batch
         self.daily_index[0] = 0
 
     def __iter__(self):
@@ -115,7 +127,9 @@ class GATs(Model):
         self.loss = loss
         self.base_model = base_model
         self.model_path = model_path
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.n_jobs = n_jobs
         self.seed = seed
 
@@ -153,7 +167,7 @@ class GATs(Model):
                 GPU,
                 self.use_gpu,
                 seed,
-            # 🧠 ML Signal: Logging model size for resource management
+                # 🧠 ML Signal: Logging model size for resource management
             )
         )
         # ⚠️ SAST Risk (Low): Use of hardcoded strings for optimizer names
@@ -177,12 +191,14 @@ class GATs(Model):
             # 🧠 ML Signal: Handling missing values in labels
             dropout=self.dropout,
             base_model=self.base_model,
-        # 🧠 ML Signal: Conditional logic based on loss type
+            # 🧠 ML Signal: Conditional logic based on loss type
         )
         # ✅ Best Practice: Consider adding type hints for function parameters and return type for better readability and maintainability.
         self.logger.info("model:\n{:}".format(self.GAT_model))
         # 🧠 ML Signal: Use of mean squared error for loss calculation
-        self.logger.info("model size: {:.4f} MB".format(count_parameters(self.GAT_model)))
+        self.logger.info(
+            "model size: {:.4f} MB".format(count_parameters(self.GAT_model))
+        )
         # 🧠 ML Signal: Use of torch.isfinite to create a mask for valid (finite) values in the label tensor.
 
         # ⚠️ SAST Risk (Low): Potential for unhandled loss types leading to exceptions
@@ -196,7 +212,9 @@ class GATs(Model):
         else:
             # 🧠 ML Signal: Use of numpy operations for array manipulation
             # ⚠️ SAST Risk (Low): Use of string interpolation with user-controlled input in exception message.
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
 
         self.fitted = False
         # ✅ Best Practice: Conditional logic to handle optional shuffling
@@ -207,12 +225,14 @@ class GATs(Model):
     def use_gpu(self):
         # ⚠️ SAST Risk (Low): Use of np.random.shuffle, which may affect reproducibility if not controlled
         return self.device != torch.device("cpu")
+
     # 🧠 ML Signal: Iterating over data_loader indicates a training loop pattern
 
     def mse(self, pred, label):
         # ✅ Best Practice: Squeeze is used to remove dimensions of size 1, ensuring data consistency
         loss = (pred - label) ** 2
         return torch.mean(loss)
+
     # ✅ Best Practice: Explicitly selecting features and labels improves code readability
 
     def loss_fn(self, pred, label):
@@ -310,11 +330,17 @@ class GATs(Model):
         evals_result=dict(),
         save_path=None,
     ):
-        dl_train = dataset.prepare("train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
+        dl_train = dataset.prepare(
+            "train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
         # 🧠 ML Signal: Iterative training process over epochs.
-        dl_valid = dataset.prepare("valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
+        dl_valid = dataset.prepare(
+            "valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
         if dl_train.empty or dl_valid.empty:
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
 
         dl_train.config(fillna_type="ffill+bfill")  # process nan brought by dataloader
         dl_valid.config(fillna_type="ffill+bfill")  # process nan brought by dataloader
@@ -322,8 +348,12 @@ class GATs(Model):
         sampler_train = DailyBatchSampler(dl_train)
         sampler_valid = DailyBatchSampler(dl_valid)
 
-        train_loader = DataLoader(dl_train, sampler=sampler_train, num_workers=self.n_jobs, drop_last=True)
-        valid_loader = DataLoader(dl_valid, sampler=sampler_valid, num_workers=self.n_jobs, drop_last=True)
+        train_loader = DataLoader(
+            dl_train, sampler=sampler_train, num_workers=self.n_jobs, drop_last=True
+        )
+        valid_loader = DataLoader(
+            dl_valid, sampler=sampler_valid, num_workers=self.n_jobs, drop_last=True
+        )
         # 🧠 ML Signal: Use of deepcopy to save the best model parameters.
 
         save_path = get_or_create_path(save_path)
@@ -344,10 +374,18 @@ class GATs(Model):
         # ⚠️ SAST Risk (Low): Potential for resource exhaustion if n_jobs is set too high.
         if self.base_model == "LSTM":
             # ✅ Best Practice: Clearing GPU cache to free up memory.
-            pretrained_model = LSTMModel(d_feat=self.d_feat, hidden_size=self.hidden_size, num_layers=self.num_layers)
+            pretrained_model = LSTMModel(
+                d_feat=self.d_feat,
+                hidden_size=self.hidden_size,
+                num_layers=self.num_layers,
+            )
         # 🧠 ML Signal: Model evaluation mode set before prediction.
         elif self.base_model == "GRU":
-            pretrained_model = GRUModel(d_feat=self.d_feat, hidden_size=self.hidden_size, num_layers=self.num_layers)
+            pretrained_model = GRUModel(
+                d_feat=self.d_feat,
+                hidden_size=self.hidden_size,
+                num_layers=self.num_layers,
+            )
         else:
             raise ValueError("unknown base model name `%s`" % self.base_model)
         # 🧠 ML Signal: Custom neural network model class definition
@@ -357,13 +395,17 @@ class GATs(Model):
             # ⚠️ SAST Risk (Low): Assumes specific data structure for feature extraction.
             self.logger.info("Loading pretrained model...")
             # 🧠 ML Signal: Conditional logic to select model architecture
-            pretrained_model.load_state_dict(torch.load(self.model_path, map_location=self.device))
+            pretrained_model.load_state_dict(
+                torch.load(self.model_path, map_location=self.device)
+            )
         # 🧠 ML Signal: Use of GRU for sequence modeling
         # 🧠 ML Signal: Use of model prediction with no_grad for inference.
 
         model_dict = self.GAT_model.state_dict()
         pretrained_dict = {
-            k: v for k, v in pretrained_model.state_dict().items() if k in model_dict  # pylint: disable=E1135
+            k: v
+            for k, v in pretrained_model.state_dict().items()
+            if k in model_dict  # pylint: disable=E1135
         }
         model_dict.update(pretrained_dict)
         self.GAT_model.load_state_dict(model_dict)
@@ -417,6 +459,7 @@ class GATs(Model):
         # 🧠 ML Signal: Concatenating tensors for attention input
         if self.use_gpu:
             torch.cuda.empty_cache()
+
     # ⚠️ SAST Risk (Low): Potential misuse of transpose if self.a is not a 2D tensor
 
     # 🧠 ML Signal: Use of attention mechanism in neural network
@@ -431,7 +474,9 @@ class GATs(Model):
         # 🧠 ML Signal: Use of activation function in neural network
         # ✅ Best Practice: Explicit return of computed attention weights
         # 🧠 ML Signal: Use of fully connected layer in neural network
-        dl_test = dataset.prepare("test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I)
+        dl_test = dataset.prepare(
+            "test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I
+        )
         dl_test.config(fillna_type="ffill+bfill")
         sampler_test = DailyBatchSampler(dl_test)
         test_loader = DataLoader(dl_test, sampler=sampler_test, num_workers=self.n_jobs)
@@ -451,7 +496,9 @@ class GATs(Model):
 
 
 class GATModel(nn.Module):
-    def __init__(self, d_feat=6, hidden_size=64, num_layers=2, dropout=0.0, base_model="GRU"):
+    def __init__(
+        self, d_feat=6, hidden_size=64, num_layers=2, dropout=0.0, base_model="GRU"
+    ):
         super().__init__()
 
         if base_model == "GRU":

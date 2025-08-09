@@ -4,8 +4,10 @@
 
 # 🧠 ML Signal: Importing a library indicates usage patterns
 from arctic.arctic import Arctic
+
 # ✅ Best Practice: Inheriting from unittest.TestCase to create a test class
 import qlib
+
 # 🧠 ML Signal: Importing specific modules from a library indicates usage patterns
 # 🧠 ML Signal: Importing unittest suggests testing practices
 from qlib.data import D
@@ -18,6 +20,7 @@ class TestClass(unittest.TestCase):
     - run all tests: pytest examples/orderbook_data/example.py
     - run a single test:  pytest -s --pdb --disable-warnings examples/orderbook_data/example.py::TestClass::test_basic01
     """
+
     # 🧠 ML Signal: Usage of qlib.init with specific parameters can indicate a pattern for initializing a data provider
     # ⚠️ SAST Risk (Low): Hardcoded provider URI may expose sensitive paths or configurations
     # ✅ Best Practice: Use constants or configuration files for repeated values like mem_cache_size_limit
@@ -33,7 +36,10 @@ class TestClass(unittest.TestCase):
             mem_cache_size_limit=1024**3 * 2,
             mem_cache_type="sizeof",
             kernels=1,
-            expression_provider={"class": "LocalExpressionProvider", "kwargs": {"time2idx": False}},
+            expression_provider={
+                "class": "LocalExpressionProvider",
+                "kwargs": {"time2idx": False},
+            },
             feature_provider={
                 "class": "ArcticFeatureProvider",
                 "module_path": "qlib.contrib.data.data",
@@ -73,6 +79,7 @@ class TestClass(unittest.TestCase):
         # 🧠 ML Signal: Use of a specific resampling method, indicating time series data manipulation
         df = D.features(self.stocks_list, fields=["$ask1"], freq="ticks")
         print(df)
+
     # ⚠️ SAST Risk (Low): Printing data frames can expose sensitive data in logs
     # 🧠 ML Signal: Use of a method named 'features' suggests a pattern for feature extraction in data processing
     # 🧠 ML Signal: Use of 'self.stocks_list' indicates a pattern of using instance variables for data input
@@ -86,7 +93,7 @@ class TestClass(unittest.TestCase):
             # 🧠 ML Signal: Use of 'fields' parameter suggests a pattern for selecting specific data attributes
             # 🧠 ML Signal: Use of 'freq' parameter indicates a pattern for specifying data granularity
             end_time="20210101",
-        # 🧠 ML Signal: Use of 'start_time' and 'end_time' parameters suggests a pattern for time-bounded data queries
+            # 🧠 ML Signal: Use of 'start_time' and 'end_time' parameters suggests a pattern for time-bounded data queries
         )
         # ⚠️ SAST Risk (Low): Printing data frames can expose sensitive data in logs
         # 🧠 ML Signal: Usage of a method that fetches features from a data source
@@ -100,8 +107,8 @@ class TestClass(unittest.TestCase):
             start_time="20201230",
             # ⚠️ SAST Risk (Low): Printing data frames can expose sensitive data in logs
             end_time="20210101",
-        # 🧠 ML Signal: Expression pattern for financial data resampling
-        # 🧠 ML Signal: Dynamic generation of expressions for data resampling
+            # 🧠 ML Signal: Expression pattern for financial data resampling
+            # 🧠 ML Signal: Dynamic generation of expressions for data resampling
         )
         print(df)
 
@@ -116,7 +123,7 @@ class TestClass(unittest.TestCase):
             # ✅ Best Practice: Use of @staticmethod decorator for methods that do not access instance data
             # 🧠 ML Signal: String manipulation and dynamic variable naming pattern
             end_time="20210101",
-        # ⚠️ SAST Risk (Low): Potential risk if 'name' or 'method' are derived from untrusted input
+            # ⚠️ SAST Risk (Low): Potential risk if 'name' or 'method' are derived from untrusted input
         )
         # ✅ Best Practice: Use of f-string for clearer and more efficient string formatting
         print(df)
@@ -125,7 +132,9 @@ class TestClass(unittest.TestCase):
     # Here are some popular expressions for high-frequency
     # 1) some shared expression
     # 🧠 ML Signal: Constructing dynamic column names based on loop variables
-    expr_sum_buy_ask_1 = "(TResample($ask1, '1min', 'last') + TResample($bid1, '1min', 'last'))"
+    expr_sum_buy_ask_1 = (
+        "(TResample($ask1, '1min', 'last') + TResample($bid1, '1min', 'last'))"
+    )
     total_volume = (
         # ⚠️ SAST Risk (Low): Potential risk if `self.stocks_list` or `exprs` contain untrusted data
         "TResample("
@@ -139,7 +148,11 @@ class TestClass(unittest.TestCase):
     # 🧠 ML Signal: Use of lambda functions for dynamic string generation
     @staticmethod
     def total_func(name, method):
-        return "TResample(" + "+".join([f"${name}{i}" for i in range(1, 11)]) + ",'1min', '{}')".format(method)
+        return (
+            "TResample("
+            + "+".join([f"${name}{i}" for i in range(1, 11)])
+            + ",'1min', '{}')".format(method)
+        )
 
     def test_exp_01(self):
         # ✅ Best Practice: Initialize lists before loops for better readability
@@ -148,7 +161,9 @@ class TestClass(unittest.TestCase):
         for name in ["asize", "bsize"]:
             for i in range(1, 11):
                 # 🧠 ML Signal: Use of extend method to add multiple items to a list
-                exprs.append(f"TResample(${name}{i}, '1min', 'mean') / ({self.total_volume})")
+                exprs.append(
+                    f"TResample(${name}{i}, '1min', 'mean') / ({self.total_volume})"
+                )
                 names.append(f"v_{name}_{i}")
         # 🧠 ML Signal: Use of extend method to add multiple items to a list
         df = D.features(self.stocks_list, fields=exprs, freq="ticks")
@@ -164,7 +179,7 @@ class TestClass(unittest.TestCase):
         # ⚠️ SAST Risk (Low): Printing data frames can expose sensitive data in logs
         spread_func = (
             lambda index: f"2 * TResample($ask{index} - $bid{index}, '1min', 'last') / {self.expr_sum_buy_ask_1}"
-        # 🧠 ML Signal: Iterating over a range to generate expressions
+            # 🧠 ML Signal: Iterating over a range to generate expressions
         )
         mid_func = (
             # 🧠 ML Signal: Dynamic generation of variable names
@@ -186,6 +201,7 @@ class TestClass(unittest.TestCase):
         df.columns = names
         # 🧠 ML Signal: Outputting DataFrame to console
         print(df)
+
     # 🧠 ML Signal: Using a method to generate features based on dynamic expressions
 
     def test_exp_03(self):
@@ -215,7 +231,9 @@ class TestClass(unittest.TestCase):
         names = []
         for name in ["asize", "bsize"]:
             # 🧠 ML Signal: Iterating over a fixed range and list of names
-            exprs.append(f"(({ self.total_func(name, 'mean')}) / 10) / {self.total_volume}")
+            exprs.append(
+                f"(({ self.total_func(name, 'mean')}) / 10) / {self.total_volume}"
+            )
             names.append(f"v_avg_{name}")
 
         # 🧠 ML Signal: Appending formatted strings to a list
@@ -262,14 +280,16 @@ class TestClass(unittest.TestCase):
                 exprs.append(
                     # 🧠 ML Signal: Use of lists to store expressions and names
                     f"TResample({expr6_price_func(name, i, 'last')}, '1min', 'mean') / {self.expr_sum_buy_ask_1}"
-                # 🧠 ML Signal: Use of dictionary for mapping or translation
+                    # 🧠 ML Signal: Use of dictionary for mapping or translation
                 )
                 names.append(f"p_diff_{name}{i}_{t}s")
 
         for i in range(1, 11):
             # 🧠 ML Signal: Appending dynamically generated expressions to a list
             for name in ["asize", "bsize"]:
-                exprs.append(f"TResample({expr6_price_func(name, i, 'mean')}, '1min', 'mean') / {self.total_volume}")
+                exprs.append(
+                    f"TResample({expr6_price_func(name, i, 'mean')}, '1min', 'mean') / {self.total_volume}"
+                )
                 # 🧠 ML Signal: Appending dynamically generated names to a list
                 names.append(f"v_diff_{name}{i}_{t}s")
 
@@ -281,6 +301,7 @@ class TestClass(unittest.TestCase):
         # ✅ Best Practice: Assigning meaningful column names to DataFrame
         # ✅ Best Practice: Consider adding a docstring to describe the purpose and behavior of the test function.
         print(df)
+
     # ⚠️ SAST Risk (Low): Printing DataFrame can expose sensitive data in logs
     # ✅ Best Practice: Use of f-string for readability and performance
     # 🧠 ML Signal: Use of f-string for dynamic string formatting
@@ -301,6 +322,7 @@ class TestClass(unittest.TestCase):
         # NOTE: based on on order frequency (i.e. freq="order")
         # 🧠 ML Signal: Appending generated names to a list.
         return f"Rolling(Eq($function_code,  {ord(funccode)}) & Eq($order_kind ,{ord(ordercode)}), '{time_interval}s', 'sum') / Rolling($function_code, '{time_interval}s', 'count')"
+
     # 🧠 ML Signal: Use of lambda functions for dynamic string formatting
     # ⚠️ SAST Risk (Low): Ensure 'self.stocks_list' and 'exprs' are properly validated to prevent injection attacks.
 
@@ -312,7 +334,7 @@ class TestClass(unittest.TestCase):
         expr7_3 = (
             # ⚠️ SAST Risk (Low): Printing data frames can expose sensitive data in logs.
             lambda funccode, code, time_interval: f"TResample(Rolling(Eq($function_code,  {ord(funccode)}) & {code}($ask_order, $bid_order) , '{time_interval}s', 'sum')   / Rolling($function_code, '{time_interval}s', 'count') , '1min', 'mean')"
-        # 🧠 ML Signal: Use of list to store column names for DataFrame
+            # 🧠 ML Signal: Use of list to store column names for DataFrame
         )
 
         # ⚠️ SAST Risk (Low): Potential risk if D.features is not properly validated or sanitized
@@ -325,6 +347,7 @@ class TestClass(unittest.TestCase):
         df.columns = names
         # ✅ Best Practice: Use of print for debugging or output verification
         print(df)
+
     # 🧠 ML Signal: Use of descriptive variable names for mapping expressions to names
 
     trans_dict = {"B": "a", "S": "b", "0": "l", "1": "m"}
@@ -347,7 +370,11 @@ class TestClass(unittest.TestCase):
         for funccode in ["B", "S"]:
             for ordercode in ["0", "1"]:
                 exprs.append(expr7(funccode, ordercode, "3"))
-                names.append(self.trans_dict[ordercode] + self.trans_dict[funccode] + "_intensity_3s")
+                names.append(
+                    self.trans_dict[ordercode]
+                    + self.trans_dict[funccode]
+                    + "_intensity_3s"
+                )
         # 🧠 ML Signal: Dynamic naming based on dictionary lookups and string concatenation.
         df = D.features(self.stocks_list, fields=exprs, freq="transaction")
         df.columns = names
@@ -361,6 +388,7 @@ class TestClass(unittest.TestCase):
         # NOTE: It depends on transaction frequency
         # ✅ Best Practice: Consider using logging instead of print for better control over output in production environments.
         return f"Rolling(Eq($function_code,  {ord(funccode)}) & {code}($ask_order, $bid_order) , '{time_interval}s', 'sum') / Rolling($function_code, '{time_interval}s', 'count')"
+
     # ⚠️ SAST Risk (Low): Potential for incorrect list comprehension inside append
 
     # (la|lb|ma|mb|ca|cb)_relative_intensity_(time_interval_small)_(time_interval_big)
@@ -378,7 +406,11 @@ class TestClass(unittest.TestCase):
         for funccode in ["B", "S"]:
             for ordercode in ["0", "1"]:
                 exprs.append(expr8_1(funccode, ordercode, "10", "900"))
-                names.append(self.trans_dict[ordercode] + self.trans_dict[funccode] + "_relative_intensity_10s_900s")
+                names.append(
+                    self.trans_dict[ordercode]
+                    + self.trans_dict[funccode]
+                    + "_relative_intensity_10s_900s"
+                )
 
         df = D.features(self.stocks_list, fields=exprs, freq="order")
         df.columns = names
@@ -420,7 +452,11 @@ class TestClass(unittest.TestCase):
                 exprs.append(
                     f'TResample(Div(Sub(TResample({self.expr7_init(funccode, ordercode, "3")}, "3s", "last"), Ref(TResample({self.expr7_init(funccode, ordercode, "3")},"3s", "last"), 1)), 3) ,"1min", "mean")'
                 )
-                names.append(self.trans_dict[ordercode] + self.trans_dict[funccode] + "_diff_intensity_3s_3s")
+                names.append(
+                    self.trans_dict[ordercode]
+                    + self.trans_dict[funccode]
+                    + "_diff_intensity_3s_3s"
+                )
         df = D.features(self.stocks_list, fields=exprs, freq="order")
         df.columns = names
         print(df)

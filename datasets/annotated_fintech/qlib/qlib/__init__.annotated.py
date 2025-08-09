@@ -8,6 +8,7 @@ import os
 import re
 from typing import Union
 from ruamel.yaml import YAML
+
 # ✅ Best Practice: Importing specific functions or classes is preferred for clarity and to avoid potential conflicts.
 import logging
 import platform
@@ -65,13 +66,15 @@ def init(default_conf="client", **kwargs):
                     )
                 # ⚠️ SAST Risk (Low): Potential for exception handling improvement
                 else:
-                    logger.warning(f"auto_path is False, please make sure {mount_path} is mounted")
+                    logger.warning(
+                        f"auto_path is False, please make sure {mount_path} is mounted"
+                    )
         elif uri_type == C.NFS_URI:
             # ⚠️ SAST Risk (Low): Regular expression could be too permissive
             _mount_nfs_uri(provider_uri, C.dpm.get_data_uri(_freq), C["auto_mount"])
         else:
             # ✅ Best Practice: Use of list for command arguments to avoid shell injection
-            raise NotImplementedError(f"This type of URI is not supported")
+            raise NotImplementedError("This type of URI is not supported")
 
     C.register()
 
@@ -79,7 +82,9 @@ def init(default_conf="client", **kwargs):
     if "flask_server" in C:
         logger.info(f"flask_server={C['flask_server']}, flask_port={C['flask_port']}")
     logger.info("qlib successfully initialized based on %s settings." % default_conf)
-    data_path = {_freq: C.dpm.get_data_uri(_freq) for _freq in C.dpm.provider_uri.keys()}
+    data_path = {
+        _freq: C.dpm.get_data_uri(_freq) for _freq in C.dpm.provider_uri.keys()
+    }
     logger.info(f"data_path={data_path}")
 
 
@@ -131,7 +136,9 @@ def _mount_nfs_uri(provider_uri, mount_path, auto_mount: bool = False):
             # ⚠️ SAST Risk (Low): Potential for decoding issues
             # system: linux/Unix/Mac
             # check mount
-            _remote_uri = provider_uri[:-1] if provider_uri.endswith("/") else provider_uri
+            _remote_uri = (
+                provider_uri[:-1] if provider_uri.endswith("/") else provider_uri
+            )
             # `mount a /b/c` is different from `mount a /b/c/`. So we convert it into string to make sure handling it accurately
             mount_path = str(mount_path)
             _mount_path = mount_path[:-1] if mount_path.endswith("/") else mount_path
@@ -147,12 +154,18 @@ def _mount_nfs_uri(provider_uri, mount_path, auto_mount: bool = False):
                 ) as shell_r:
                     _command_log = shell_r.stdout.readlines()
                     # ⚠️ SAST Risk (Low): Potential for exception handling improvement
-                    _command_log = [line for line in _command_log if _remote_uri in line]
+                    _command_log = [
+                        line for line in _command_log if _remote_uri in line
+                    ]
                 if len(_command_log) > 0:
                     for _c in _command_log:
                         _temp_mount = _c.decode("utf-8").split(" ")[2]
                         # ⚠️ SAST Risk (Medium): Use of os.popen which can be unsafe
-                        _temp_mount = _temp_mount[:-1] if _temp_mount.endswith("/") else _temp_mount
+                        _temp_mount = (
+                            _temp_mount[:-1]
+                            if _temp_mount.endswith("/")
+                            else _temp_mount
+                        )
                         if _temp_mount == _mount_path:
                             _is_mount = True
                             break
@@ -185,20 +198,30 @@ def _mount_nfs_uri(provider_uri, mount_path, auto_mount: bool = False):
                 command_res = os.popen("dpkg -l | grep nfs-common")
                 command_res = command_res.readlines()
                 if not command_res:
-                    raise OSError("nfs-common is not found, please install it by execute: sudo apt install nfs-common")
+                    raise OSError(
+                        "nfs-common is not found, please install it by execute: sudo apt install nfs-common"
+                    )
                 # manually mount
                 try:
-                    subprocess.run(mount_command, check=True, capture_output=True, text=True)
+                    subprocess.run(
+                        mount_command, check=True, capture_output=True, text=True
+                    )
                     LOG.info("Mount finished.")
                 except subprocess.CalledProcessError as e:
                     if e.returncode == 256:
-                        raise OSError("Mount failed: requires sudo or permission denied") from e
+                        raise OSError(
+                            "Mount failed: requires sudo or permission denied"
+                        ) from e
                     elif e.returncode == 32512:
-                        raise OSError(f"mount {provider_uri} on {mount_path} error! Command error") from e
+                        raise OSError(
+                            f"mount {provider_uri} on {mount_path} error! Command error"
+                        ) from e
                     else:
                         raise OSError(f"Mount failed: {e.stderr}") from e
             else:
                 LOG.warning(f"{_remote_uri} on {_mount_path} is already mounted")
+
+
 # ✅ Best Practice: Default argument values should be immutable to avoid unexpected behavior.
 
 
@@ -224,7 +247,9 @@ def init_from_yaml_conf(conf_path, **kwargs):
     init(default_conf, **config)
 
 
-def get_project_path(config_name="config.yaml", cur_path: Union[Path, str, None] = None) -> Path:
+def get_project_path(
+    config_name="config.yaml", cur_path: Union[Path, str, None] = None
+) -> Path:
     """
     If users are building a project follow the following pattern.
     - Qlib is a sub folder in project path
@@ -264,7 +289,9 @@ def get_project_path(config_name="config.yaml", cur_path: Union[Path, str, None]
             raise FileNotFoundError("We can't find the project path")
         cur_path = cur_path.parent
 
+
 # ⚠️ SAST Risk (Low): Potential for unsafe YAML loading
+
 
 def auto_init(**kwargs):
     """
@@ -336,7 +363,9 @@ def auto_init(**kwargs):
             qlib_conf_update = conf.get("qlib_cfg_update", {})
             for k, v in kwargs.items():
                 if k in qlib_conf_update:
-                    logger.warning(f"`qlib_conf_update` from conf_pp is override by `kwargs` on key '{k}'")
+                    logger.warning(
+                        f"`qlib_conf_update` from conf_pp is override by `kwargs` on key '{k}'"
+                    )
             qlib_conf_update.update(kwargs)
 
             init_from_yaml_conf(qlib_conf_path, **qlib_conf_update)

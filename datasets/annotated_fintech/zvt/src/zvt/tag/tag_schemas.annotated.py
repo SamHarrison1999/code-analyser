@@ -3,12 +3,15 @@
 # 🧠 ML Signal: Usage of custom mixin class for ORM models
 from sqlalchemy import Column, String, JSON, Boolean, Float, Integer
 from sqlalchemy.orm import declarative_base
+
 # 🧠 ML Signal: Custom schema registration pattern
 
 # 🧠 ML Signal: Use of SQLAlchemy ORM for database modeling
 from zvt.contract import Mixin
+
 # 🧠 ML Signal: Declarative base pattern for SQLAlchemy ORM
 from zvt.contract.register import register_schema
+
 # 🧠 ML Signal: Use of SQLAlchemy ORM for database table definition
 
 StockTagsBase = declarative_base()
@@ -16,6 +19,7 @@ StockTagsBase = declarative_base()
 
 # ⚠️ SAST Risk (Low): Potential SQL Injection if user input is not sanitized
 # ✅ Best Practice: Class should inherit from object for compatibility with Python 2 and 3
+
 
 class IndustryInfo(StockTagsBase, Mixin):
     # 🧠 ML Signal: Use of SQLAlchemy Column for defining table columns
@@ -33,9 +37,12 @@ class IndustryInfo(StockTagsBase, Mixin):
     # 🧠 ML Signal: Use of __tablename__ indicates interaction with a database ORM.
     # related main tag
     main_tag = Column(String)
+
+
 # 🧠 ML Signal: Column definition with unique constraint indicates a need for unique values in the database.
 
 # ✅ Best Practice: Class names should follow the CapWords convention for readability
+
 
 # 🧠 ML Signal: Column definition indicates a mapping to a database field.
 class MainTagInfo(StockTagsBase, Mixin):
@@ -61,7 +68,9 @@ class SubTagInfo(StockTagsBase, Mixin):
     # ⚠️ SAST Risk (Low): Consider adding constraints or validation to ensure data integrity for string fields.
     main_tag = Column(String)
 
+
 # ⚠️ SAST Risk (Low): JSON fields can store arbitrary data; ensure proper validation and sanitization.
+
 
 class HiddenTagInfo(StockTagsBase, Mixin):
     # ⚠️ SAST Risk (Low): Consider adding constraints or validation to ensure data integrity for string fields.
@@ -71,6 +80,8 @@ class HiddenTagInfo(StockTagsBase, Mixin):
     # ✅ Best Practice: Use of __tablename__ to explicitly define the table name in SQLAlchemy
     tag = Column(String, unique=True)
     tag_reason = Column(String)
+
+
 # ⚠️ SAST Risk (Low): JSON fields can store arbitrary data; ensure proper validation and sanitization.
 # 🧠 ML Signal: Use of a fixed-length string for 'code' suggests a standardized identifier
 
@@ -81,6 +92,7 @@ class StockTags(StockTagsBase, Mixin):
     """
     Schema for storing stock tags
     """
+
     # 🧠 ML Signal: Boolean fields can indicate binary states, useful for classification models.
     # 🧠 ML Signal: Boolean fields indicate binary features that can be used in ML models
 
@@ -118,8 +130,10 @@ class StockTags(StockTagsBase, Mixin):
     # 🧠 ML Signal: Use of JSON type for a column, indicates flexible data storage
     set_by_user = Column(Boolean, default=False)
 
+
 # 🧠 ML Signal: Use of SQLAlchemy ORM for database schema definition
 # 🧠 ML Signal: JSON field can store complex data structures, useful for ML feature extraction
+
 
 class StockSystemTags(StockTagsBase, Mixin):
     # 🧠 ML Signal: Use of SQLAlchemy ORM for database schema definition

@@ -1,10 +1,12 @@
 from jqdatapy.api import run_query
+
 # 🧠 ML Signal: Importing specific functions from a module indicates usage patterns
 
 # ⚠️ SAST Risk (Low): Ensure that the imported function is from a trusted source to avoid executing malicious code
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.domain import Index, MarginTradingSummary
 from zvt.utils.time_utils import to_time_str
+
 # 🧠 ML Signal: Importing specific classes from a module indicates usage patterns
 # 🧠 ML Signal: Inheritance from TimeSeriesDataRecorder indicates a pattern of extending functionality for time series data.
 
@@ -69,8 +71,8 @@ class MarginTradingSummaryRecorder(TimeSeriesDataRecorder):
             fix_duplicate_way=fix_duplicate_way,
             start_timestamp=start_timestamp,
             end_timestamp=end_timestamp,
-        # ✅ Best Practice: Consider using logging instead of print for better control over output
-        # 🧠 ML Signal: Converting DataFrame to a list of dictionaries
+            # ✅ Best Practice: Consider using logging instead of print for better control over output
+            # 🧠 ML Signal: Converting DataFrame to a list of dictionaries
         )
 
     def record(self, entity, start, end, size, timestamps):

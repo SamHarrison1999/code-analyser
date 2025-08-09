@@ -3,6 +3,7 @@
 
 
 from __future__ import division
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 from __future__ import print_function
 
@@ -16,9 +17,11 @@ from ...log import get_module_logger
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 import torch
 import torch.nn as nn
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 # ✅ Best Practice: Class docstring provides a clear description of the class and its parameters
 import torch.optim as optim
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 from torch.utils.data import DataLoader
 
@@ -87,7 +90,9 @@ class LSTM(Model):
         self.early_stop = early_stop
         self.optimizer = optimizer.lower()
         self.loss = loss
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.n_jobs = n_jobs
         self.seed = seed
 
@@ -144,8 +149,8 @@ class LSTM(Model):
             # 🧠 ML Signal: Custom loss function implementation
             num_layers=self.num_layers,
             dropout=self.dropout,
-        # ⚠️ SAST Risk (Low): Ensure that 'torch' is imported and available in the scope to avoid runtime errors.
-        # 🧠 ML Signal: Handling missing values in labels
+            # ⚠️ SAST Risk (Low): Ensure that 'torch' is imported and available in the scope to avoid runtime errors.
+            # 🧠 ML Signal: Handling missing values in labels
         ).to(self.device)
         if optimizer.lower() == "adam":
             # ✅ Best Practice: Default weight handling
@@ -156,7 +161,9 @@ class LSTM(Model):
         # ✅ Best Practice: Consider adding type hints for function parameters and return type
         # 🧠 ML Signal: Conditional logic for different loss functions
         else:
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
         # 🧠 ML Signal: Using SGD optimizer for training
         # 🧠 ML Signal: Use of torch.isfinite to create a mask for valid label values
 
@@ -164,6 +171,7 @@ class LSTM(Model):
         self.fitted = False
         # 🧠 ML Signal: Conditional logic based on metric type
         self.LSTM_model.to(self.device)
+
     # ⚠️ SAST Risk (Low): Potential denial of service if unsupported optimizer is used
 
     # 🧠 ML Signal: Use of mask to filter predictions and labels
@@ -172,6 +180,7 @@ class LSTM(Model):
     # ⚠️ SAST Risk (Low): Potential for runtime error if pred and label shapes do not match
     def use_gpu(self):
         return self.device != torch.device("cpu")
+
     # ✅ Best Practice: Ensure model is on the correct device
     # ⚠️ SAST Risk (Low): Use of string interpolation in exception message
 
@@ -258,10 +267,16 @@ class LSTM(Model):
         save_path=None,
         reweighter=None,
     ):
-        dl_train = dataset.prepare("train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
-        dl_valid = dataset.prepare("valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
+        dl_train = dataset.prepare(
+            "train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
+        dl_valid = dataset.prepare(
+            "valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
         if dl_train.empty or dl_valid.empty:
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
 
         dl_train.config(fillna_type="ffill+bfill")  # process nan brought by dataloader
         dl_valid.config(fillna_type="ffill+bfill")  # process nan brought by dataloader
@@ -295,7 +310,7 @@ class LSTM(Model):
             num_workers=self.n_jobs,
             # 🧠 ML Signal: Loading best model parameters
             drop_last=True,
-        # 🧠 ML Signal: Configuration of data handling with fillna_type
+            # 🧠 ML Signal: Configuration of data handling with fillna_type
         )
         # ⚠️ SAST Risk (Low): Ensure save_path is secure and validated
 
@@ -359,9 +374,13 @@ class LSTM(Model):
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
 
-        dl_test = dataset.prepare("test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I)
+        dl_test = dataset.prepare(
+            "test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I
+        )
         dl_test.config(fillna_type="ffill+bfill")
-        test_loader = DataLoader(dl_test, batch_size=self.batch_size, num_workers=self.n_jobs)
+        test_loader = DataLoader(
+            dl_test, batch_size=self.batch_size, num_workers=self.n_jobs
+        )
         self.LSTM_model.eval()
         preds = []
 

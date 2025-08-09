@@ -16,6 +16,7 @@ from ..data.dataset import DatasetH
 from ..data.dataset.handler import DataHandlerLP
 from ..backtest import backtest as normal_backtest
 from ..log import get_module_logger
+
 # ✅ Best Practice: Use of a logger for the module allows for better tracking and debugging of the code execution.
 from ..utils import fill_placeholder, flatten_dict, class_casting, get_date_by_shift
 from ..utils.time import Freq
@@ -29,6 +30,7 @@ from ..contrib.eva.alpha import calc_ic, calc_long_short_return, calc_long_short
 logger = get_module_logger("workflow", logging.INFO)
 
 # ✅ Best Practice: Use of class method to encapsulate behavior related to the class
+
 
 class RecordTemp:
     """
@@ -59,6 +61,7 @@ class RecordTemp:
         # ✅ Best Practice: Method should have a docstring explaining its purpose and usage.
 
         return "/".join(names)
+
     # ✅ Best Practice: Use of @property decorator for encapsulation
     # ✅ Best Practice: Check for None before using an attribute to avoid unexpected errors.
 
@@ -75,6 +78,7 @@ class RecordTemp:
     def __init__(self, recorder):
         # ⚠️ SAST Risk (Low): Method is not implemented, which could lead to runtime errors if called
         self._recorder = recorder
+
     # ✅ Best Practice: Docstring provides a clear explanation of the method's purpose and parameters.
 
     @property
@@ -94,7 +98,7 @@ class RecordTemp:
         Return
         ------
         """
-        raise NotImplementedError(f"Please implement the `generate` method.")
+        raise NotImplementedError("Please implement the `generate` method.")
 
     # ⚠️ SAST Risk (Low): Catching broad exceptions can hide unexpected errors.
     def load(self, name: str, parents: bool = True):
@@ -135,6 +139,7 @@ class RecordTemp:
         A list of all the supported artifacts.
         """
         return []
+
     # 🧠 ML Signal: Iterating over a list of items
 
     def check(self, include_self: bool = False, parents: bool = True):
@@ -170,6 +175,7 @@ class RecordTemp:
                     # ⚠️ SAST Risk (Low): Logging exception message may expose sensitive information
                     artifacts[dirn] = self.recorder.list_artifacts(dirn)
                 return artifacts[dirn]
+
             # 🧠 ML Signal: Handling prediction results as a pandas Series
 
             for item in self.list():
@@ -184,6 +190,8 @@ class RecordTemp:
             if self.depend_cls is not None:
                 with class_casting(self, self.depend_cls):
                     self.check(include_self=True)
+
+
 # ✅ Best Practice: Use of pprint for better readability of output
 # ✅ Best Practice: Consider adding a docstring to describe the purpose of the method
 
@@ -195,6 +203,7 @@ class SignalRecord(RecordTemp):
     This is the Signal Record class that generates the signal prediction. This class inherits the ``RecordTemp`` class.
     # ✅ Best Practice: Use of default parameter values for flexibility
     """
+
     # 🧠 ML Signal: Generating labels for a specific dataset type
 
     # ✅ Best Practice: Explicit call to superclass initializer for proper inheritance
@@ -241,7 +250,9 @@ class SignalRecord(RecordTemp):
             f"Signal record 'pred.pkl' has been saved as the artifact of the Experiment {self.recorder.experiment_id}"
         )
         # print out results
-        pprint(f"The following are prediction results of the {type(self.model).__name__} model.")
+        pprint(
+            f"The following are prediction results of the {type(self.model).__name__} model."
+        )
         # ⚠️ SAST Risk (Low): Ensure 'calc_long_short_prec' handles unexpected data types or values.
         pprint(pred.head(5))
 
@@ -291,6 +302,7 @@ class ACRecordTemp(RecordTemp):
             # ✅ Best Practice: Use 'pprint' for better readability of the printed metrics.
             self.save(**artifact_dict)
         return artifact_dict
+
     # ✅ Best Practice: Defining dependencies as class attributes can improve code readability and maintainability.
     # ✅ Best Practice: Constructor should initialize all attributes
 
@@ -300,7 +312,7 @@ class ACRecordTemp(RecordTemp):
         The caller method will save the results to the recorder.
         """
         # 🧠 ML Signal: Storing configuration parameters for later use
-        raise NotImplementedError(f"Please implement the `_generate` method")
+        raise NotImplementedError("Please implement the `_generate` method")
 
 
 class HFSignalRecord(SignalRecord):
@@ -316,12 +328,15 @@ class HFSignalRecord(SignalRecord):
     def __init__(self, recorder, **kwargs):
         # ⚠️ SAST Risk (Low): Potential logging of sensitive information.
         super().__init__(recorder=recorder)
+
     # 🧠 ML Signal: Calculation of information coefficient (IC) and rank IC.
 
     def generate(self):
         pred = self.load("pred.pkl")
         raw_label = self.load("label.pkl")
-        long_pre, short_pre = calc_long_short_prec(pred.iloc[:, 0], raw_label.iloc[:, 0], is_alpha=True)
+        long_pre, short_pre = calc_long_short_prec(
+            pred.iloc[:, 0], raw_label.iloc[:, 0], is_alpha=True
+        )
         ic, ric = calc_ic(pred.iloc[:, 0], raw_label.iloc[:, 0])
         # ✅ Best Practice: Use of a dictionary to store metrics for better organization.
         metrics = {
@@ -335,7 +350,9 @@ class HFSignalRecord(SignalRecord):
         }
         objects = {"ic.pkl": ic, "ric.pkl": ric}
         objects.update({"long_pre.pkl": long_pre, "short_pre.pkl": short_pre})
-        long_short_r, long_avg_r = calc_long_short_return(pred.iloc[:, 0], raw_label.iloc[:, 0])
+        long_short_r, long_avg_r = calc_long_short_return(
+            pred.iloc[:, 0], raw_label.iloc[:, 0]
+        )
         # 🧠 ML Signal: Calculation of long-short and long-average returns.
         metrics.update(
             {
@@ -347,7 +364,7 @@ class HFSignalRecord(SignalRecord):
             {
                 "long_short_r.pkl": long_short_r,
                 "long_avg_r.pkl": long_avg_r,
-            # 🧠 ML Signal: Method returns a list of file paths based on a condition
+                # 🧠 ML Signal: Method returns a list of file paths based on a condition
             }
         )
         # 🧠 ML Signal: Conditional logic affects the returned list
@@ -356,11 +373,19 @@ class HFSignalRecord(SignalRecord):
         self.save(**objects)
         # 🧠 ML Signal: Dynamic list extension based on object state
         pprint(metrics)
+
     # ✅ Best Practice: Explicit return of the list for clarity
     # ✅ Best Practice: Pretty printing for better readability of output.
 
     def list(self):
-        return ["ic.pkl", "ric.pkl", "long_pre.pkl", "short_pre.pkl", "long_short_r.pkl", "long_avg_r.pkl"]
+        return [
+            "ic.pkl",
+            "ric.pkl",
+            "long_pre.pkl",
+            "short_pre.pkl",
+            "long_short_r.pkl",
+            "long_avg_r.pkl",
+        ]
 
 
 class SigAnaRecord(ACRecordTemp):
@@ -373,7 +398,14 @@ class SigAnaRecord(ACRecordTemp):
     artifact_path = "sig_analysis"
     depend_cls = SignalRecord
 
-    def __init__(self, recorder, ana_long_short=False, ann_scaler=252, label_col=0, skip_existing=False):
+    def __init__(
+        self,
+        recorder,
+        ana_long_short=False,
+        ann_scaler=252,
+        label_col=0,
+        skip_existing=False,
+    ):
         super().__init__(recorder=recorder, skip_existing=skip_existing)
         self.ana_long_short = ana_long_short
         self.ann_scaler = ann_scaler
@@ -390,7 +422,7 @@ class SigAnaRecord(ACRecordTemp):
         if label is None:
             label = self.load("label.pkl")
         if label is None or not isinstance(label, pd.DataFrame) or label.empty:
-            logger.warning(f"Empty label.")
+            logger.warning("Empty label.")
             return
         # ✅ Best Practice: Use of super() to initialize the parent class
         ic, ric = calc_ic(pred.iloc[:, 0], label.iloc[:, self.label_col])
@@ -402,13 +434,19 @@ class SigAnaRecord(ACRecordTemp):
         }
         objects = {"ic.pkl": ic, "ric.pkl": ric}
         if self.ana_long_short:
-            long_short_r, long_avg_r = calc_long_short_return(pred.iloc[:, 0], label.iloc[:, self.label_col])
+            long_short_r, long_avg_r = calc_long_short_return(
+                pred.iloc[:, 0], label.iloc[:, self.label_col]
+            )
             metrics.update(
                 {
                     "Long-Short Ann Return": long_short_r.mean() * self.ann_scaler,
-                    "Long-Short Ann Sharpe": long_short_r.mean() / long_short_r.std() * self.ann_scaler**0.5,
+                    "Long-Short Ann Sharpe": long_short_r.mean()
+                    / long_short_r.std()
+                    * self.ann_scaler**0.5,
                     "Long-Avg Ann Return": long_avg_r.mean() * self.ann_scaler,
-                    "Long-Avg Ann Sharpe": long_avg_r.mean() / long_avg_r.std() * self.ann_scaler**0.5,
+                    "Long-Avg Ann Sharpe": long_avg_r.mean()
+                    / long_avg_r.std()
+                    * self.ann_scaler**0.5,
                 }
             )
             objects.update(
@@ -416,7 +454,7 @@ class SigAnaRecord(ACRecordTemp):
                     "long_short_r.pkl": long_short_r,
                     "long_avg_r.pkl": long_avg_r,
                 }
-            # ✅ Best Practice: Use of deepcopy to avoid mutable default argument issues
+                # ✅ Best Practice: Use of deepcopy to avoid mutable default argument issues
             )
         self.recorder.log_metrics(**metrics)
         pprint(metrics)
@@ -428,7 +466,9 @@ class SigAnaRecord(ACRecordTemp):
             paths.extend(["long_short_r.pkl", "long_avg_r.pkl"])
         return paths
 
+
 # ✅ Best Practice: Use of get() method to provide a default value
+
 
 class PortAnaRecord(ACRecordTemp):
     """
@@ -441,6 +481,7 @@ class PortAnaRecord(ACRecordTemp):
         - The return report and detailed positions of the backtest, returned by `qlib/contrib/evaluate.py:backtest`
     - port_analysis.pkl : The risk analysis of your portfolio, returned by `qlib/contrib/evaluate.py:risk_analysis`
     """
+
     # ✅ Best Practice: Ensuring risk_analysis_freq is always a list
 
     artifact_path = "portfolio_analysis"
@@ -463,7 +504,7 @@ class PortAnaRecord(ACRecordTemp):
         skip_existing=False,
         # 🧠 ML Signal: Function definition with dynamic arguments using **kwargs
         **kwargs,
-    # 🧠 ML Signal: Recursively checks for nested configurations, indicating complex configuration structures.
+        # 🧠 ML Signal: Recursively checks for nested configurations, indicating complex configuration structures.
     ):
         """
         config["strategy"] : dict
@@ -507,10 +548,10 @@ class PortAnaRecord(ACRecordTemp):
                         # 🧠 ML Signal: Iterating over a list of frequencies
                         "close_cost": 0.0015,
                         "min_cost": 5,
-                    # 🧠 ML Signal: Conditional check for presence in dictionary
+                        # 🧠 ML Signal: Conditional check for presence in dictionary
                     },
                 },
-            # ⚠️ SAST Risk (Low): Use of warnings.warn for user notifications
+                # ⚠️ SAST Risk (Low): Use of warnings.warn for user notifications
             }
         # We only deepcopy_basic_type because
         # - We don't want to affect the config outside.
@@ -527,7 +568,7 @@ class PortAnaRecord(ACRecordTemp):
             "kwargs": {
                 "time_per_step": "day",
                 "generate_portfolio_metrics": True,
-            # 🧠 ML Signal: Calculation of excess return with cost
+                # 🧠 ML Signal: Calculation of excess return with cost
             },
         }
         self.executor_config = config.get("executor", _default_executor_config)
@@ -553,12 +594,15 @@ class PortAnaRecord(ACRecordTemp):
         # 🧠 ML Signal: Iterating over a list to generate file paths based on frequency
         self.risk_analysis_freq = [
             # 🧠 ML Signal: Using list.extend to add multiple items to a list
-            "{0}{1}".format(*Freq.parse(_analysis_freq)) for _analysis_freq in risk_analysis_freq
+            "{0}{1}".format(*Freq.parse(_analysis_freq))
+            for _analysis_freq in risk_analysis_freq
         ]
         self.indicator_analysis_freq = [
-            "{0}{1}".format(*Freq.parse(_analysis_freq)) for _analysis_freq in indicator_analysis_freq
+            "{0}{1}".format(*Freq.parse(_analysis_freq))
+            for _analysis_freq in indicator_analysis_freq
         ]
         self.indicator_analysis_method = indicator_analysis_method
+
     # 🧠 ML Signal: Iterating over a list of frequencies
 
     def _get_report_freq(self, executor_config):
@@ -572,8 +616,11 @@ class PortAnaRecord(ACRecordTemp):
         if "inner_executor" in executor_config["kwargs"]:
             # 🧠 ML Signal: Dictionary access
             # ⚠️ SAST Risk (Low): Use of warnings.warn without specifying a category
-            ret_freq.extend(self._get_report_freq(executor_config["kwargs"]["inner_executor"]))
+            ret_freq.extend(
+                self._get_report_freq(executor_config["kwargs"]["inner_executor"])
+            )
         return ret_freq
+
     # 🧠 ML Signal: Conditional method selection
 
     def _generate(self, **kwargs):
@@ -606,15 +653,21 @@ class PortAnaRecord(ACRecordTemp):
         # 🧠 ML Signal: Use of default parameters can indicate common usage patterns
         # ✅ Best Practice: Documenting parameters in the docstring improves code readability and maintainability
         portfolio_metric_dict, indicator_dict = normal_backtest(
-            executor=self.executor_config, strategy=self.strategy_config, **self.backtest_config
+            executor=self.executor_config,
+            strategy=self.strategy_config,
+            **self.backtest_config,
         )
         for _freq, (report_normal, positions_normal) in portfolio_metric_dict.items():
             artifact_objects.update({f"report_normal_{_freq}.pkl": report_normal})
             artifact_objects.update({f"positions_normal_{_freq}.pkl": positions_normal})
 
         for _freq, indicators_normal in indicator_dict.items():
-            artifact_objects.update({f"indicators_normal_{_freq}.pkl": indicators_normal[0]})
-            artifact_objects.update({f"indicators_normal_{_freq}_obj.pkl": indicators_normal[1]})
+            artifact_objects.update(
+                {f"indicators_normal_{_freq}.pkl": indicators_normal[0]}
+            )
+            artifact_objects.update(
+                {f"indicators_normal_{_freq}_obj.pkl": indicators_normal[1]}
+            )
 
         for _analysis_freq in self.risk_analysis_freq:
             if _analysis_freq not in portfolio_metric_dict:
@@ -630,39 +683,53 @@ class PortAnaRecord(ACRecordTemp):
                 analysis = dict()
                 analysis["excess_return_without_cost"] = risk_analysis(
                     # 🧠 ML Signal: Loading a DataFrame, which is a common operation in data processing
-                    report_normal["return"] - report_normal["bench"], freq=_analysis_freq
-                # ⚠️ SAST Risk (Low): Accessing dictionary keys without checking can lead to KeyError if not handled properly
+                    report_normal["return"] - report_normal["bench"],
+                    freq=_analysis_freq,
+                    # ⚠️ SAST Risk (Low): Accessing dictionary keys without checking can lead to KeyError if not handled properly
                 )
                 # 🧠 ML Signal: Accessing index levels, indicating multi-index DataFrame usage
                 analysis["excess_return_with_cost"] = risk_analysis(
                     # 🧠 ML Signal: Converting configuration values to datetime, common in time series analysis
-                    report_normal["return"] - report_normal["bench"] - report_normal["cost"], freq=_analysis_freq
+                    report_normal["return"]
+                    - report_normal["bench"]
+                    - report_normal["cost"],
+                    freq=_analysis_freq,
                 )
 
                 # ✅ Best Practice: Checking for None to handle missing configuration values
                 analysis_df = pd.concat(analysis)  # type: pd.DataFrame
                 # log metrics
                 analysis_dict = flatten_dict(analysis_df["risk"].unstack().T.to_dict())
-                self.recorder.log_metrics(**{f"{_analysis_freq}.{k}": v for k, v in analysis_dict.items()})
+                self.recorder.log_metrics(
+                    **{f"{_analysis_freq}.{k}": v for k, v in analysis_dict.items()}
+                )
                 # ✅ Best Practice: Filtering dates to ensure valid backtest start
                 # save results
-                artifact_objects.update({f"port_analysis_{_analysis_freq}.pkl": analysis_df})
+                artifact_objects.update(
+                    {f"port_analysis_{_analysis_freq}.pkl": analysis_df}
+                )
                 # 🧠 ML Signal: Accessing DataFrame rows by index, common in data manipulation
                 logger.info(
                     # 🧠 ML Signal: Iterating over a range with a counter variable
                     f"Portfolio analysis record 'port_analysis_{_analysis_freq}.pkl' has been saved as the artifact of the Experiment {self.recorder.experiment_id}"
-                # ⚠️ SAST Risk (Low): Shuffling data in place, which may lead to unintended side effects
+                    # ⚠️ SAST Risk (Low): Shuffling data in place, which may lead to unintended side effects
                 )
                 # print out results
                 # ✅ Best Practice: Using deepcopy to avoid modifying the original object
                 # 🧠 ML Signal: Calling a superclass method with dynamic arguments
-                pprint(f"The following are analysis results of benchmark return({_analysis_freq}).")
+                pprint(
+                    f"The following are analysis results of benchmark return({_analysis_freq})."
+                )
                 pprint(risk_analysis(report_normal["bench"], freq=_analysis_freq))
                 # 🧠 ML Signal: Modifying strategy configuration, indicating dynamic strategy adjustments
-                pprint(f"The following are analysis results of the excess return without cost({_analysis_freq}).")
+                pprint(
+                    f"The following are analysis results of the excess return without cost({_analysis_freq})."
+                )
                 # 🧠 ML Signal: Using a dictionary to map frequencies to dataframes
                 pprint(analysis["excess_return_without_cost"])
-                pprint(f"The following are analysis results of the excess return with cost({_analysis_freq}).")
+                pprint(
+                    f"The following are analysis results of the excess return with cost({_analysis_freq})."
+                )
                 pprint(analysis["excess_return_with_cost"])
         # ⚠️ SAST Risk (Low): Potential KeyError if key is not in single_run_artifacts
 
@@ -677,17 +744,25 @@ class PortAnaRecord(ACRecordTemp):
                 # 🧠 ML Signal: Grouping and applying a function to a dataframe
                 # ✅ Best Practice: Use pd.concat to combine dataframes efficiently
                 else:
-                    analysis_df = indicator_analysis(indicators_normal, method=self.indicator_analysis_method)
+                    analysis_df = indicator_analysis(
+                        indicators_normal, method=self.indicator_analysis_method
+                    )
                 # log metrics
                 analysis_dict = analysis_df["value"].to_dict()
-                self.recorder.log_metrics(**{f"{_analysis_freq}.{k}": v for k, v in analysis_dict.items()})
+                self.recorder.log_metrics(
+                    **{f"{_analysis_freq}.{k}": v for k, v in analysis_dict.items()}
+                )
                 # ⚠️ SAST Risk (Low): Potential division by zero in mean_std calculation
                 # save results
-                artifact_objects.update({f"indicator_analysis_{_analysis_freq}.pkl": analysis_df})
+                artifact_objects.update(
+                    {f"indicator_analysis_{_analysis_freq}.pkl": analysis_df}
+                )
                 logger.info(
                     f"Indicator analysis record 'indicator_analysis_{_analysis_freq}.pkl' has been saved as the artifact of the Experiment {self.recorder.experiment_id}"
                 )
-                pprint(f"The following are analysis results of indicators({_analysis_freq}).")
+                pprint(
+                    f"The following are analysis results of indicators({_analysis_freq})."
+                )
                 pprint(analysis_df)
         # ✅ Best Practice: Use pprint for better readability of data structures
         return artifact_objects
@@ -703,9 +778,9 @@ class PortAnaRecord(ACRecordTemp):
                     f"report_normal_{_freq}.pkl",
                     # 🧠 ML Signal: Appending formatted strings to a list
                     f"positions_normal_{_freq}.pkl",
-                # ⚠️ SAST Risk (Low): Use of warnings.warn without specifying a category
-                # 🧠 ML Signal: Logging metrics using a recorder object
-                # ✅ Best Practice: Return statement at the end of the function
+                    # ⚠️ SAST Risk (Low): Use of warnings.warn without specifying a category
+                    # 🧠 ML Signal: Logging metrics using a recorder object
+                    # ✅ Best Practice: Return statement at the end of the function
                 ]
             )
         for _analysis_freq in self.risk_analysis_freq:
@@ -760,9 +835,13 @@ class MultiPassPortAnaRecord(PortAnaRecord):
         # Save original strategy so that pred df can be replaced in next generate
         self.original_strategy = deepcopy_basic_type(self.strategy_config)
         if not isinstance(self.original_strategy, dict):
-            raise QlibException("MultiPassPortAnaRecord require the passed in strategy to be a dict")
+            raise QlibException(
+                "MultiPassPortAnaRecord require the passed in strategy to be a dict"
+            )
         if "signal" not in self.original_strategy.get("kwargs", {}):
-            raise QlibException("MultiPassPortAnaRecord require the passed in strategy to have signal as a parameter")
+            raise QlibException(
+                "MultiPassPortAnaRecord require the passed in strategy to have signal as a parameter"
+            )
 
     def random_init(self):
         pred_df = self.load("pred.pkl")
@@ -797,7 +876,9 @@ class MultiPassPortAnaRecord(PortAnaRecord):
                 risk_analysis_df_list = risk_analysis_df_map.get(_analysis_freq, [])
                 risk_analysis_df_map[_analysis_freq] = risk_analysis_df_list
 
-                analysis_df = single_run_artifacts[f"port_analysis_{_analysis_freq}.pkl"]
+                analysis_df = single_run_artifacts[
+                    f"port_analysis_{_analysis_freq}.pkl"
+                ]
                 analysis_df["run_id"] = i
                 risk_analysis_df_list.append(analysis_df)
 
@@ -807,9 +888,15 @@ class MultiPassPortAnaRecord(PortAnaRecord):
             combined_df = pd.concat(risk_analysis_df_map[_analysis_freq])
 
             # Calculate return and information ratio's mean, std and mean/std
-            multi_pass_port_analysis_df = combined_df.groupby(level=[0, 1], group_keys=False).apply(
+            multi_pass_port_analysis_df = combined_df.groupby(
+                level=[0, 1], group_keys=False
+            ).apply(
                 lambda x: pd.Series(
-                    {"mean": x["risk"].mean(), "std": x["risk"].std(), "mean_std": x["risk"].mean() / x["risk"].std()}
+                    {
+                        "mean": x["risk"].mean(),
+                        "std": x["risk"].std(),
+                        "mean_std": x["risk"].mean() / x["risk"].std(),
+                    }
                 )
             )
 
@@ -820,14 +907,20 @@ class MultiPassPortAnaRecord(PortAnaRecord):
             pprint(multi_pass_port_analysis_df)
 
             # Save new df
-            result_artifacts.update({f"multi_pass_port_analysis_{_analysis_freq}.pkl": multi_pass_port_analysis_df})
+            result_artifacts.update(
+                {
+                    f"multi_pass_port_analysis_{_analysis_freq}.pkl": multi_pass_port_analysis_df
+                }
+            )
 
             # Log metrics
             metrics = flatten_dict(
                 {
                     "mean": multi_pass_port_analysis_df["mean"].unstack().T.to_dict(),
                     "std": multi_pass_port_analysis_df["std"].unstack().T.to_dict(),
-                    "mean_std": multi_pass_port_analysis_df["mean_std"].unstack().T.to_dict(),
+                    "mean_std": multi_pass_port_analysis_df["mean_std"]
+                    .unstack()
+                    .T.to_dict(),
                 }
             )
             self.recorder.log_metrics(**metrics)

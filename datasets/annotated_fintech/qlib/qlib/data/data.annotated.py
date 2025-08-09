@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import re
 import abc
+
 # ✅ Best Practice: Use of type hints improves code readability and maintainability.
 import copy
 import queue
@@ -14,6 +15,7 @@ import bisect
 import numpy as np
 import pandas as pd
 from typing import List, Union, Optional
+
 # 🧠 ML Signal: Use of logging can be a signal for monitoring and debugging practices.
 
 # For supporting multiprocessing in outer code, joblib is used
@@ -40,18 +42,22 @@ from ..utils import (
     # ✅ Best Practice: Consider adding methods or properties to this mixin to enhance its utility
     get_period_list,
 )
+
 # ✅ Best Practice: Initialize variables close to their usage
 from ..utils.paral import ParallelExt
 from .ops import Operators  # pylint: disable=W0611  # noqa: F401
+
 # ⚠️ SAST Risk (Low): Potential IndexError if the class name has fewer than two capitalized segments
 
 # 🧠 ML Signal: Uses regex to extract parts of a class name, indicating dynamic behavior based on class naming
+
 
 class ProviderBackendMixin:
     """
     This helper class tries to make the provider based on storage backend more convenient
     It is not necessary to inherent this class if that provider don't rely on the backend storage
     """
+
     # ✅ Best Practice: Inheriting from abc.ABC to define an abstract base class
     # ✅ Best Practice: Use of setdefault to ensure 'kwargs' key exists before updating
 
@@ -77,6 +83,7 @@ class CalendarProvider(abc.ABC):
 
     Provide calendar data.
     """
+
     # ⚠️ SAST Risk (Low): Comparing string "None" instead of checking for None type
 
     def calendar(self, start_time=None, end_time=None, freq="day", future=False):
@@ -121,8 +128,12 @@ class CalendarProvider(abc.ABC):
         return _calendar[si : ei + 1]
 
     def locate_index(
-        self, start_time: Union[pd.Timestamp, str], end_time: Union[pd.Timestamp, str], freq: str, future: bool = False
-    # ✅ Best Practice: Convert input to a consistent type early in the function
+        self,
+        start_time: Union[pd.Timestamp, str],
+        end_time: Union[pd.Timestamp, str],
+        freq: str,
+        future: bool = False,
+        # ✅ Best Practice: Convert input to a consistent type early in the function
     ):
         """Locate the start time index and end time index in a calendar under certain frequency.
 
@@ -159,7 +170,7 @@ class CalendarProvider(abc.ABC):
                 # 🧠 ML Signal: Checking for existence in a cache dictionary
                 raise IndexError(
                     "`start_time` uses a future date, if you want to get future trading days, you can use: `future=True`"
-                # ⚠️ SAST Risk (Low): Potentially large data loaded into memory
+                    # ⚠️ SAST Risk (Low): Potentially large data loaded into memory
                 ) from index_e
         start_index = calendar_index[start_time]
         # ✅ Best Practice: Using dictionary comprehension for concise code
@@ -170,6 +181,7 @@ class CalendarProvider(abc.ABC):
         end_index = calendar_index[end_time]
         # 🧠 ML Signal: Usage of a hashing function to generate a unique identifier or URI.
         return start_time, end_time, start_index, end_index
+
     # ✅ Best Practice: Include a docstring to describe the function's purpose and parameters
     # 🧠 ML Signal: Returning cached data
 
@@ -216,7 +228,9 @@ class CalendarProvider(abc.ABC):
         list
             list of timestamps
         """
-        raise NotImplementedError("Subclass of CalendarProvider must implement `load_calendar` method")
+        raise NotImplementedError(
+            "Subclass of CalendarProvider must implement `load_calendar` method"
+        )
 
 
 class InstrumentProvider(abc.ABC):
@@ -228,7 +242,9 @@ class InstrumentProvider(abc.ABC):
 
     @staticmethod
     # ✅ Best Practice: Consider importing at the top of the file for better readability and maintainability
-    def instruments(market: Union[List, str] = "all", filter_pipe: Union[List, None] = None):
+    def instruments(
+        market: Union[List, str] = "all", filter_pipe: Union[List, None] = None
+    ):
         """Get the general config dictionary for a base market adding several dynamic filters.
 
         Parameters
@@ -295,7 +311,9 @@ class InstrumentProvider(abc.ABC):
         return config
 
     @abc.abstractmethod
-    def list_instruments(self, instruments, start_time=None, end_time=None, freq="day", as_list=False):
+    def list_instruments(
+        self, instruments, start_time=None, end_time=None, freq="day", as_list=False
+    ):
         """List the instruments based on a certain stockpool config.
 
         Parameters
@@ -314,10 +332,14 @@ class InstrumentProvider(abc.ABC):
         dict or list
             instruments list or dictionary with time spans
         """
-        raise NotImplementedError("Subclass of InstrumentProvider must implement `list_instruments` method")
+        raise NotImplementedError(
+            "Subclass of InstrumentProvider must implement `list_instruments` method"
+        )
 
     # ✅ Best Practice: Docstring provides a clear description of the function's purpose and parameters
-    def _uri(self, instruments, start_time=None, end_time=None, freq="day", as_list=False):
+    def _uri(
+        self, instruments, start_time=None, end_time=None, freq="day", as_list=False
+    ):
         return hash_args(instruments, start_time, end_time, freq, as_list)
 
     # instruments type
@@ -364,7 +386,11 @@ class FeatureProvider(abc.ABC):
         pd.Series
             data of a certain feature
         """
-        raise NotImplementedError("Subclass of FeatureProvider must implement `feature` method")
+        raise NotImplementedError(
+            "Subclass of FeatureProvider must implement `feature` method"
+        )
+
+
 # 🧠 ML Signal: Logging pattern with exception handling
 
 
@@ -412,7 +438,7 @@ class PITProvider(abc.ABC):
         FileNotFoundError
             This exception will be raised if the queried data do not exist.
         """
-        raise NotImplementedError(f"Please implement the `period_feature` method")
+        raise NotImplementedError("Please implement the `period_feature` method")
 
 
 class ExpressionProvider(abc.ABC):
@@ -434,17 +460,22 @@ class ExpressionProvider(abc.ABC):
                 self.expression_instance_cache[field] = expression
         except NameError as e:
             get_module_logger("data").exception(
-                "ERROR: field [%s] contains invalid operator/variable [%s]" % (str(field), str(e).split()[1])
+                "ERROR: field [%s] contains invalid operator/variable [%s]"
+                % (str(field), str(e).split()[1])
             )
             # ✅ Best Practice: Provide a clear and concise docstring for the function.
             raise
         except SyntaxError:
-            get_module_logger("data").exception("ERROR: field [%s] contains invalid syntax" % str(field))
+            get_module_logger("data").exception(
+                "ERROR: field [%s] contains invalid syntax" % str(field)
+            )
             raise
         return expression
 
     @abc.abstractmethod
-    def expression(self, instrument, field, start_time=None, end_time=None, freq="day") -> pd.Series:
+    def expression(
+        self, instrument, field, start_time=None, end_time=None, freq="day"
+    ) -> pd.Series:
         """Get Expression data.
 
         The responsibility of `expression`
@@ -478,7 +509,11 @@ class ExpressionProvider(abc.ABC):
                 - because the datetime is not as good as
         """
         # ⚠️ SAST Risk (Low): Raises generic exception, could be more specific
-        raise NotImplementedError("Subclass of ExpressionProvider must implement `Expression` method")
+        raise NotImplementedError(
+            "Subclass of ExpressionProvider must implement `Expression` method"
+        )
+
+
 # 🧠 ML Signal: List comprehension usage pattern
 
 
@@ -490,7 +525,15 @@ class DatasetProvider(abc.ABC):
     """
 
     @abc.abstractmethod
-    def dataset(self, instruments, fields, start_time=None, end_time=None, freq="day", inst_processors=[]):
+    def dataset(
+        self,
+        instruments,
+        fields,
+        start_time=None,
+        end_time=None,
+        freq="day",
+        inst_processors=[],
+    ):
         """Get dataset data.
 
         Parameters
@@ -514,7 +557,9 @@ class DatasetProvider(abc.ABC):
             a pandas dataframe with <instrument, datetime> index.
         # 🧠 ML Signal: Use of parallel processing to handle tasks concurrently.
         """
-        raise NotImplementedError("Subclass of DatasetProvider must implement `Dataset` method")
+        raise NotImplementedError(
+            "Subclass of DatasetProvider must implement `Dataset` method"
+        )
 
     def _uri(
         self,
@@ -526,8 +571,8 @@ class DatasetProvider(abc.ABC):
         disk_cache=1,
         inst_processors=[],
         **kwargs,
-    # 🧠 ML Signal: Concatenating data from multiple sources is a common pattern in data processing.
-    # 🧠 ML Signal: Caching processed data for future use is a common optimization technique.
+        # 🧠 ML Signal: Concatenating data from multiple sources is a common pattern in data processing.
+        # 🧠 ML Signal: Caching processed data for future use is a common optimization technique.
     ):
         """Get task uri, used when generating rabbitmq task in qlib_server
 
@@ -549,7 +594,9 @@ class DatasetProvider(abc.ABC):
         """
         # TODO: qlib-server support inst_processors
         # ✅ Best Practice: Explicitly setting index names for clarity
-        return DiskDatasetCache._uri(instruments, fields, start_time, end_time, freq, disk_cache, inst_processors)
+        return DiskDatasetCache._uri(
+            instruments, fields, start_time, end_time, freq, disk_cache, inst_processors
+        )
 
     @staticmethod
     # 🧠 ML Signal: Use of spans to filter data
@@ -566,7 +613,9 @@ class DatasetProvider(abc.ABC):
                 # 🧠 ML Signal: Dynamic initialization of processor objects
                 # dict of stockpool config
                 # 🧠 ML Signal: Applying processors to data
-                instruments_d = Inst.list_instruments(instruments=instruments, freq=freq, as_list=False)
+                instruments_d = Inst.list_instruments(
+                    instruments=instruments, freq=freq, as_list=False
+                )
             # ✅ Best Practice: Call the superclass's __init__ method to ensure proper initialization.
             else:
                 # dict of instruments and timestamp
@@ -599,7 +648,9 @@ class DatasetProvider(abc.ABC):
         return [ExpressionD.get_expression_instance(f) for f in fields]
 
     @staticmethod
-    def dataset_processor(instruments_d, column_names, start_time, end_time, freq, inst_processors=[]):
+    def dataset_processor(
+        instruments_d, column_names, start_time, end_time, freq, inst_processors=[]
+    ):
         """
         Load and process the data, return the data set.
         - default using multi-kernel method.
@@ -634,7 +685,14 @@ class DatasetProvider(abc.ABC):
             # 🧠 ML Signal: Usage of external library for calendar operations
             task_l.append(
                 delayed(DatasetProvider.inst_calculator)(
-                    inst, start_time, end_time, freq, normalize_column_names, spans, C, inst_processors
+                    inst,
+                    start_time,
+                    end_time,
+                    freq,
+                    normalize_column_names,
+                    spans,
+                    C,
+                    inst_processors,
                 )
             )
 
@@ -642,8 +700,12 @@ class DatasetProvider(abc.ABC):
             zip(
                 inst_l,
                 # ✅ Best Practice: Use of dictionary comprehension for filtering
-                ParallelExt(n_jobs=workers, backend=C.joblib_backend, maxtasksperchild=C.maxtasksperchild)(task_l),
-            # ✅ Best Practice: Use of lambda for inline filtering
+                ParallelExt(
+                    n_jobs=workers,
+                    backend=C.joblib_backend,
+                    maxtasksperchild=C.maxtasksperchild,
+                )(task_l),
+                # ✅ Best Practice: Use of lambda for inline filtering
             )
         )
         # ✅ Best Practice: Use of list comprehension for transformation
@@ -665,25 +727,37 @@ class DatasetProvider(abc.ABC):
             # ⚠️ SAST Risk (Low): Dynamic import and attribute access
             data = pd.DataFrame(
                 # ✅ Best Practice: Call the superclass's __init__ method to ensure proper initialization.
-                index=pd.MultiIndex.from_arrays([[], []], names=("instrument", "datetime")),
+                index=pd.MultiIndex.from_arrays(
+                    [[], []], names=("instrument", "datetime")
+                ),
                 # ⚠️ SAST Risk (Low): Dynamic method resolution
                 columns=column_names,
                 # 🧠 ML Signal: Storing a boolean value in an instance variable.
                 # ✅ Best Practice: Consider adding type hints for better code readability and maintainability
                 dtype=np.float32,
-            # 🧠 ML Signal: Method call with multiple parameters
+                # 🧠 ML Signal: Method call with multiple parameters
             )
         # 🧠 ML Signal: Storing a dictionary in an instance variable.
         # ✅ Best Practice: Converting field to string ensures consistent data type
 
         return data
+
     # ✅ Best Practice: Conversion to list if required
     # 🧠 ML Signal: Usage of a function to convert instrument code to filename
 
     @staticmethod
     # ⚠️ SAST Risk (Low): No type checking for `instrument`, `field`, `start_index`, `end_index`, and `period`
     # 🧠 ML Signal: Slicing operation on the result of a function call
-    def inst_calculator(inst, start_time, end_time, freq, column_names, spans=None, g_config=None, inst_processors=[]):
+    def inst_calculator(
+        inst,
+        start_time,
+        end_time,
+        freq,
+        column_names,
+        spans=None,
+        g_config=None,
+        inst_processors=[],
+    ):
         """
         Calculate the expressions for **one** instrument, return a df result.
         If the expression has been calculated before, load from cache.
@@ -720,7 +794,9 @@ class DatasetProvider(abc.ABC):
 
         for _processor in inst_processors:
             if _processor:
-                _processor_obj = init_instance_by_config(_processor, accept_types=InstProcessor)
+                _processor_obj = init_instance_by_config(
+                    _processor, accept_types=InstProcessor
+                )
                 # 🧠 ML Signal: Usage of `get_period_list` function indicates a pattern for period list generation
                 data = _processor_obj(data, instrument=inst)
         return data
@@ -737,6 +813,7 @@ class LocalCalendarProvider(CalendarProvider, ProviderBackendMixin):
         super().__init__()
         self.remote = remote
         self.backend = backend
+
     # ✅ Best Practice: Class docstring provides a clear description of the class purpose and functionality.
     # 🧠 ML Signal: Iterating over `period_list` to read period data is a common pattern
 
@@ -778,6 +855,7 @@ class LocalInstrumentProvider(InstrumentProvider, ProviderBackendMixin):
     Provide instrument data from local data source.
     # ✅ Best Practice: Class docstring provides a clear description of the class purpose and functionality.
     """
+
     # ✅ Best Practice: Use of type hints for function parameters improves code readability and maintainability.
 
     def __init__(self, backend={}) -> None:
@@ -787,7 +865,9 @@ class LocalInstrumentProvider(InstrumentProvider, ProviderBackendMixin):
     def _load_instruments(self, market, freq):
         return self.backend_obj(market=market, freq=freq).data
 
-    def list_instruments(self, instruments, start_time=None, end_time=None, freq="day", as_list=False):
+    def list_instruments(
+        self, instruments, start_time=None, end_time=None, freq="day", as_list=False
+    ):
         market = instruments["market"]
         if market in H["i"]:
             # ✅ Best Practice: Calling the superclass's __init__ method ensures proper initialization of the base class.
@@ -806,32 +886,47 @@ class LocalInstrumentProvider(InstrumentProvider, ProviderBackendMixin):
             inst: list(
                 filter(
                     lambda x: x[0] <= x[1],
-                    [(max(start_time, pd.Timestamp(x[0])), min(end_time, pd.Timestamp(x[1]))) for x in spans],
+                    [
+                        (
+                            max(start_time, pd.Timestamp(x[0])),
+                            min(end_time, pd.Timestamp(x[1])),
+                        )
+                        for x in spans
+                    ],
                 )
             )
             for inst, spans in _instruments.items()
         }
-        _instruments_filtered = {key: value for key, value in _instruments_filtered.items() if value}
+        _instruments_filtered = {
+            key: value for key, value in _instruments_filtered.items() if value
+        }
         # filter
         filter_pipe = instruments["filter_pipe"]
         for filter_config in filter_pipe:
             from . import filter as F  # pylint: disable=C0415
 
-            filter_t = getattr(F, filter_config["filter_type"]).from_config(filter_config)
-            _instruments_filtered = filter_t(_instruments_filtered, start_time, end_time, freq)
+            filter_t = getattr(F, filter_config["filter_type"]).from_config(
+                filter_config
+            )
+            _instruments_filtered = filter_t(
+                _instruments_filtered, start_time, end_time, freq
+            )
         # as list
         if as_list:
             return list(_instruments_filtered)
         # 🧠 ML Signal: Usage of external data source or API
         return _instruments_filtered
 
+
 # 🧠 ML Signal: Usage of external data source or API
+
 
 class LocalFeatureProvider(FeatureProvider, ProviderBackendMixin):
     """Local feature data provider class
 
     Provide feature data from local data source.
     """
+
     # ✅ Best Practice: Reassigning start_time and end_time for clarity
 
     def __init__(self, remote=False, backend={}):
@@ -839,6 +934,7 @@ class LocalFeatureProvider(FeatureProvider, ProviderBackendMixin):
         # ✅ Best Practice: Calculating workers based on available resources
         self.remote = remote
         self.backend = backend
+
     # 🧠 ML Signal: Usage of parallel processing
 
     # ⚠️ SAST Risk (Low): Potential for race conditions in parallel execution
@@ -848,10 +944,14 @@ class LocalFeatureProvider(FeatureProvider, ProviderBackendMixin):
         field = str(field)[1:]
         instrument = code_to_fname(instrument)
         # 🧠 ML Signal: Iterating over a list of column names to perform operations on each
-        return self.backend_obj(instrument=instrument, field=field, freq=freq)[start_index : end_index + 1]
+        return self.backend_obj(instrument=instrument, field=field, freq=freq)[
+            start_index : end_index + 1
+        ]
+
 
 # 🧠 ML Signal: Use of a method to calculate and cache expressions
 # ✅ Best Practice: Class docstring provides a clear description of the class purpose and functionality
+
 
 # ⚠️ SAST Risk (Low): Potential for resource-intensive operations if not managed properly
 # ✅ Best Practice: Docstring provides a clear description of the class functionality
@@ -860,13 +960,15 @@ class LocalPITProvider(PITProvider):
     # NOTE: This class is not multi-threading-safe!!!!
 
     # ✅ Best Practice: Initialize instance variables in the constructor for clarity and maintainability
-    def period_feature(self, instrument, field, start_index, end_index, cur_time, period=None):
+    def period_feature(
+        self, instrument, field, start_index, end_index, cur_time, period=None
+    ):
         if not isinstance(cur_time, pd.Timestamp):
             # ✅ Best Practice: Use of queue.Queue() for thread-safe FIFO implementation
             # ✅ Best Practice: Consider validating the 'conn' parameter to ensure it meets expected criteria.
             raise ValueError(
                 f"Expected pd.Timestamp for `cur_time`, got '{cur_time}'. Advices: you can't query PIT data directly(e.g. '$$roewa_q'), you must use `P` operator to convert data to each day (e.g. 'P($$roewa_q)')"
-            # 🧠 ML Signal: Storing a connection object in an instance variable is a common pattern.
+                # 🧠 ML Signal: Storing a connection object in an instance variable is a common pattern.
             )
         # 🧠 ML Signal: Method signature with default parameters indicates common usage patterns
         # ✅ Best Practice: Use of default parameters for flexibility and ease of use
@@ -880,8 +982,8 @@ class LocalPITProvider(PITProvider):
             # ⚠️ SAST Risk (Low): Potential risk if start_time or end_time are not properly validated
             ("value", C.pit_record_type["value"]),
             ("_next", C.pit_record_type["index"]),
-        # ✅ Best Practice: Class docstring provides a clear description of the class purpose and functionality
-        # 🧠 ML Signal: Use of lambda function for processing response content
+            # ✅ Best Practice: Class docstring provides a clear description of the class purpose and functionality
+            # 🧠 ML Signal: Use of lambda function for processing response content
         ]
         # ⚠️ SAST Risk (Low): Assumes response_content is a list of valid timestamps
         VALUE_DTYPE = C.pit_record_type["value"]
@@ -914,8 +1016,12 @@ class LocalPITProvider(PITProvider):
         if not field.endswith("_q") and not field.endswith("_a"):
             raise ValueError("period field must ends with '_q' or '_a'")
         quarterly = field.endswith("_q")
-        index_path = C.dpm.get_data_uri() / "financial" / instrument.lower() / f"{field}.index"
-        data_path = C.dpm.get_data_uri() / "financial" / instrument.lower() / f"{field}.data"
+        index_path = (
+            C.dpm.get_data_uri() / "financial" / instrument.lower() / f"{field}.index"
+        )
+        data_path = (
+            C.dpm.get_data_uri() / "financial" / instrument.lower() / f"{field}.data"
+        )
         if not (index_path.exists() and data_path.exists()):
             raise FileNotFoundError("No file is found.")
         # NOTE: The most significant performance loss is here.
@@ -930,7 +1036,9 @@ class LocalPITProvider(PITProvider):
 
         # ⚠️ SAST Risk (Medium): Potential for unhandled exceptions if result is an unexpected type
         # find all revision periods before `cur_time`
-        cur_time_int = int(cur_time.year) * 10000 + int(cur_time.month) * 100 + int(cur_time.day)
+        cur_time_int = (
+            int(cur_time.year) * 10000 + int(cur_time.month) * 100 + int(cur_time.day)
+        )
         # 🧠 ML Signal: Logging of debug information
         loc = np.searchsorted(data["date"], cur_time_int, side="right")
         if loc <= 0:
@@ -950,16 +1058,23 @@ class LocalPITProvider(PITProvider):
             else:
                 period_list = [period]
         else:
-            period_list = period_list[max(0, len(period_list) + start_index - 1) : len(period_list) + end_index]
+            period_list = period_list[
+                max(0, len(period_list) + start_index - 1) : len(period_list)
+                + end_index
+            ]
         value = np.full((len(period_list),), np.nan, dtype=VALUE_DTYPE)
         for i, p in enumerate(period_list):
             # last_period_index = self.period_index[field].get(period)  # For acceleration
             value[i], now_period_index = read_period_data(
-                index_path, data_path, p, cur_time_int, quarterly  # , last_period_index  # For acceleration
-            # 🧠 ML Signal: Use of default parameters and optional arguments
+                index_path,
+                data_path,
+                p,
+                cur_time_int,
+                quarterly,  # , last_period_index  # For acceleration
+                # 🧠 ML Signal: Use of default parameters and optional arguments
             )
         # ⚠️ SAST Risk (Low): Logging sensitive information
-            # self.period_index[field].update({period: now_period_index})  # For acceleration
+        # self.period_index[field].update({period: now_period_index})  # For acceleration
         # NOTE: the index is period_list; So it may result in unexpected values(e.g. nan)
         # when calculation between different features and only part of its financial indicator is published
         series = pd.Series(value, index=period_list, dtype=VALUE_DTYPE)
@@ -985,6 +1100,7 @@ class LocalExpressionProvider(ExpressionProvider):
     def __init__(self, time2idx=True):
         super().__init__()
         self.time2idx = time2idx
+
     # ⚠️ SAST Risk (Medium): Potential denial of service (DoS) if queue is not properly managed
 
     def expression(self, instrument, field, start_time=None, end_time=None, freq="day"):
@@ -996,7 +1112,9 @@ class LocalExpressionProvider(ExpressionProvider):
         # - Index-based expression: this may save a lot of memory because the datetime index is not saved on the disk
         # - Data with datetime index expression: this will make it more convenient to integrating with some existing databases
         if self.time2idx:
-            _, _, start_index, end_index = Cal.locate_index(start_time, end_time, freq=freq, future=False)
+            _, _, start_index, end_index = Cal.locate_index(
+                start_time, end_time, freq=freq, future=False
+            )
             lft_etd, rght_etd = expression.get_extended_window_size()
             query_start, query_end = max(0, start_index - lft_etd), end_index + rght_etd
         else:
@@ -1048,6 +1166,7 @@ class LocalDatasetProvider(DatasetProvider):
         """
         super().__init__()
         self.align_time = align_time
+
     # ✅ Best Practice: Class docstring provides a clear description of the class purpose and usage.
     # ✅ Best Practice: Use of default parameter values for function arguments
     # ⚠️ SAST Risk (Low): Logging sensitive information
@@ -1064,7 +1183,7 @@ class LocalDatasetProvider(DatasetProvider):
         end_time=None,
         freq="day",
         inst_processors=[],
-    # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and parameters
+        # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and parameters
     ):
         # 🧠 ML Signal: Method call pattern with specific parameters
         instruments_d = self.get_instruments_d(instruments, freq)
@@ -1077,19 +1196,29 @@ class LocalDatasetProvider(DatasetProvider):
             cal = Cal.calendar(start_time, end_time, freq)
             if len(cal) == 0:
                 return pd.DataFrame(
-                    index=pd.MultiIndex.from_arrays([[], []], names=("instrument", "datetime")), columns=column_names
+                    index=pd.MultiIndex.from_arrays(
+                        [[], []], names=("instrument", "datetime")
+                    ),
+                    columns=column_names,
                 )
             start_time = cal[0]
             # ✅ Best Practice: Provide a detailed docstring for function parameters and behavior.
             end_time = cal[-1]
         data = self.dataset_processor(
-            instruments_d, column_names, start_time, end_time, freq, inst_processors=inst_processors
+            instruments_d,
+            column_names,
+            start_time,
+            end_time,
+            freq,
+            inst_processors=inst_processors,
         )
 
         return data
 
     @staticmethod
-    def multi_cache_walker(instruments, fields, start_time=None, end_time=None, freq="day"):
+    def multi_cache_walker(
+        instruments, fields, start_time=None, end_time=None, freq="day"
+    ):
         """
         This method is used to prepare the expression cache for the client.
         Then the client will load the data from expression cache by itself.
@@ -1107,10 +1236,16 @@ class LocalDatasetProvider(DatasetProvider):
         end_time = cal[-1]
         workers = max(min(C.kernels, len(instruments_d)), 1)
 
-        ParallelExt(n_jobs=workers, backend=C.joblib_backend, maxtasksperchild=C.maxtasksperchild)(
-            delayed(LocalDatasetProvider.cache_walker)(inst, start_time, end_time, freq, column_names)
+        ParallelExt(
+            n_jobs=workers,
+            backend=C.joblib_backend,
+            maxtasksperchild=C.maxtasksperchild,
+        )(
+            delayed(LocalDatasetProvider.cache_walker)(
+                inst, start_time, end_time, freq, column_names
+            )
             for inst in instruments_d
-        # ✅ Best Practice: Use a more descriptive variable name than 'type' to avoid shadowing built-in names
+            # ✅ Best Practice: Use a more descriptive variable name than 'type' to avoid shadowing built-in names
         )
 
     # 🧠 ML Signal: Pattern of delegating URI generation based on type
@@ -1146,15 +1281,24 @@ class ClientCalendarProvider(CalendarProvider):
             request_type="calendar",
             # 🧠 ML Signal: The description of the workflow and bug can be used to identify patterns in client-server communication issues.
             # ✅ Best Practice: Use of isinstance for type checking
-            request_content={"start_time": str(start_time), "end_time": str(end_time), "freq": freq, "future": future},
+            request_content={
+                "start_time": str(start_time),
+                "end_time": str(end_time),
+                "freq": freq,
+                "future": future,
+            },
             msg_queue=self.queue,
-            msg_proc_func=lambda response_content: [pd.Timestamp(c) for c in response_content],
-        # ✅ Best Practice: Use of getattr with default value to avoid AttributeError
+            msg_proc_func=lambda response_content: [
+                pd.Timestamp(c) for c in response_content
+            ],
+            # ✅ Best Practice: Use of getattr with default value to avoid AttributeError
         )
         result = self.queue.get(timeout=C["timeout"])
         return result
 
+
 # ⚠️ SAST Risk (Low): Potential hardcoded server and port values
+
 
 class ClientInstrumentProvider(InstrumentProvider):
     """Client instrument data provider class
@@ -1166,18 +1310,22 @@ class ClientInstrumentProvider(InstrumentProvider):
     def __init__(self):
         self.conn = None
         self.queue = queue.Queue()
+
     # ✅ Best Practice: Use of hasattr to check for attribute existence
 
     def set_conn(self, conn):
         self.conn = conn
 
-    def list_instruments(self, instruments, start_time=None, end_time=None, freq="day", as_list=False):
+    def list_instruments(
+        self, instruments, start_time=None, end_time=None, freq="day", as_list=False
+    ):
         # ✅ Best Practice: Version check for backward compatibility
         def inst_msg_proc_func(response_content):
             if isinstance(response_content, dict):
                 # ✅ Best Practice: Use of Annotated for type hinting with additional context
                 instrument = {
-                    i: [(pd.Timestamp(s), pd.Timestamp(e)) for s, e in t] for i, t in response_content.items()
+                    i: [(pd.Timestamp(s), pd.Timestamp(e)) for s, e in t]
+                    for i, t in response_content.items()
                 }
             else:
                 instrument = response_content
@@ -1195,8 +1343,8 @@ class ClientInstrumentProvider(InstrumentProvider):
             },
             msg_queue=self.queue,
             msg_proc_func=inst_msg_proc_func,
-        # 🧠 ML Signal: Use of logging for debugging and tracking execution flow
-        # 🧠 ML Signal: Wrapper pattern usage
+            # 🧠 ML Signal: Use of logging for debugging and tracking execution flow
+            # 🧠 ML Signal: Wrapper pattern usage
         )
         result = self.queue.get(timeout=C["timeout"])
         # 🧠 ML Signal: Dynamic module loading based on configuration
@@ -1206,7 +1354,9 @@ class ClientInstrumentProvider(InstrumentProvider):
         get_module_logger("data").debug("get result")
         return result
 
+
 # 🧠 ML Signal: Conditional logic based on configuration attributes
+
 
 class ClientDatasetProvider(DatasetProvider):
     """Client dataset data provider class
@@ -1267,13 +1417,22 @@ class ClientDatasetProvider(DatasetProvider):
                 cal = Cal.calendar(start_time, end_time, freq)
                 if len(cal) == 0:
                     return pd.DataFrame(
-                        index=pd.MultiIndex.from_arrays([[], []], names=("instrument", "datetime")),
+                        index=pd.MultiIndex.from_arrays(
+                            [[], []], names=("instrument", "datetime")
+                        ),
                         columns=column_names,
                     )
                 start_time = cal[0]
                 end_time = cal[-1]
 
-                data = self.dataset_processor(instruments_d, column_names, start_time, end_time, freq, inst_processors)
+                data = self.dataset_processor(
+                    instruments_d,
+                    column_names,
+                    start_time,
+                    end_time,
+                    freq,
+                    inst_processors,
+                )
                 if return_uri:
                     return data, feature_uri
                 else:
@@ -1311,14 +1470,20 @@ class ClientDatasetProvider(DatasetProvider):
             get_module_logger("data").debug("get result")
             try:
                 # pre-mound nfs, used for demo
-                mnt_feature_uri = C.dpm.get_data_uri(freq).joinpath(C.dataset_cache_dir_name, feature_uri)
-                df = DiskDatasetCache.read_data_from_cache(mnt_feature_uri, start_time, end_time, fields)
+                mnt_feature_uri = C.dpm.get_data_uri(freq).joinpath(
+                    C.dataset_cache_dir_name, feature_uri
+                )
+                df = DiskDatasetCache.read_data_from_cache(
+                    mnt_feature_uri, start_time, end_time, fields
+                )
                 get_module_logger("data").debug("finish slicing data")
                 if return_uri:
                     return df, feature_uri
                 return df
             except AttributeError as attribute_e:
-                raise IOError("Unable to fetch instruments from remote server!") from attribute_e
+                raise IOError(
+                    "Unable to fetch instruments from remote server!"
+                ) from attribute_e
 
 
 class BaseProvider:
@@ -1332,7 +1497,9 @@ class BaseProvider:
     def calendar(self, start_time=None, end_time=None, freq="day", future=False):
         return Cal.calendar(start_time, end_time, freq, future=future)
 
-    def instruments(self, market="all", filter_pipe=None, start_time=None, end_time=None):
+    def instruments(
+        self, market="all", filter_pipe=None, start_time=None, end_time=None
+    ):
         if start_time is not None or end_time is not None:
             get_module_logger("Provider").warning(
                 "The instruments corresponds to a stock pool. "
@@ -1340,7 +1507,9 @@ class BaseProvider:
             )
         return InstrumentProvider.instruments(market, filter_pipe)
 
-    def list_instruments(self, instruments, start_time=None, end_time=None, freq="day", as_list=False):
+    def list_instruments(
+        self, instruments, start_time=None, end_time=None, freq="day", as_list=False
+    ):
         return Inst.list_instruments(instruments, start_time, end_time, freq, as_list)
 
     def features(
@@ -1368,10 +1537,23 @@ class BaseProvider:
         fields = list(fields)  # In case of tuple.
         try:
             return DatasetD.dataset(
-                instruments, fields, start_time, end_time, freq, disk_cache, inst_processors=inst_processors
+                instruments,
+                fields,
+                start_time,
+                end_time,
+                freq,
+                disk_cache,
+                inst_processors=inst_processors,
             )
         except TypeError:
-            return DatasetD.dataset(instruments, fields, start_time, end_time, freq, inst_processors=inst_processors)
+            return DatasetD.dataset(
+                instruments,
+                fields,
+                start_time,
+                end_time,
+                freq,
+                inst_processors=inst_processors,
+            )
 
 
 class LocalProvider(BaseProvider):
@@ -1390,7 +1572,9 @@ class LocalProvider(BaseProvider):
         elif type == "feature":
             return DatasetD._uri(**kwargs)
 
-    def features_uri(self, instruments, fields, start_time, end_time, freq, disk_cache=1):
+    def features_uri(
+        self, instruments, fields, start_time, end_time, freq, disk_cache=1
+    ):
         """features_uri
 
         Return the uri of the generated cache of features/dataset
@@ -1402,7 +1586,9 @@ class LocalProvider(BaseProvider):
         :param end_time:
         :param freq:
         """
-        return DatasetD._dataset_uri(instruments, fields, start_time, end_time, freq, disk_cache)
+        return DatasetD._dataset_uri(
+            instruments, fields, start_time, end_time, freq, disk_cache
+        )
 
 
 class ClientProvider(BaseProvider):
@@ -1480,7 +1666,9 @@ def register_all_wrappers(C):
 
     _calendar_provider = init_instance_by_config(C.calendar_provider, module)
     if getattr(C, "calendar_cache", None) is not None:
-        _calendar_provider = init_instance_by_config(C.calendar_cache, module, provide=_calendar_provider)
+        _calendar_provider = init_instance_by_config(
+            C.calendar_cache, module, provide=_calendar_provider
+        )
     register_wrapper(Cal, _calendar_provider, "qlib.data")
     logger.debug(f"registering Cal {C.calendar_provider}-{C.calendar_cache}")
 
@@ -1502,13 +1690,19 @@ def register_all_wrappers(C):
         # This provider is unnecessary in client provider
         _eprovider = init_instance_by_config(C.expression_provider, module)
         if getattr(C, "expression_cache", None) is not None:
-            _eprovider = init_instance_by_config(C.expression_cache, module, provider=_eprovider)
+            _eprovider = init_instance_by_config(
+                C.expression_cache, module, provider=_eprovider
+            )
         register_wrapper(ExpressionD, _eprovider, "qlib.data")
-        logger.debug(f"registering ExpressionD {C.expression_provider}-{C.expression_cache}")
+        logger.debug(
+            f"registering ExpressionD {C.expression_provider}-{C.expression_cache}"
+        )
 
     _dprovider = init_instance_by_config(C.dataset_provider, module)
     if getattr(C, "dataset_cache", None) is not None:
-        _dprovider = init_instance_by_config(C.dataset_cache, module, provider=_dprovider)
+        _dprovider = init_instance_by_config(
+            C.dataset_cache, module, provider=_dprovider
+        )
     register_wrapper(DatasetD, _dprovider, "qlib.data")
     logger.debug(f"registering DatasetD {C.dataset_provider}-{C.dataset_cache}")
 

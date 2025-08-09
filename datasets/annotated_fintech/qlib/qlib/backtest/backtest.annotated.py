@@ -12,6 +12,7 @@ import pandas as pd
 
 from qlib.backtest.decision import BaseTradeDecision
 from qlib.backtest.report import Indicator
+
 # ✅ Best Practice: Using TYPE_CHECKING to avoid circular imports and improve performance
 
 # ✅ Best Practice: Grouping third-party library imports together
@@ -37,7 +38,7 @@ def backtest_loop(
     # ✅ Best Practice: Initializing return_value as a dictionary to store results from the loop.
     trade_strategy: BaseStrategy,
     trade_executor: BaseExecutor,
-# 🧠 ML Signal: Iterating over a data collection loop, which may indicate a pattern of data processing.
+    # 🧠 ML Signal: Iterating over a data collection loop, which may indicate a pattern of data processing.
 ) -> Tuple[PORT_METRIC, INDICATOR_METRIC]:
     """backtest function for the interaction of the outermost strategy and executor in the nested decision execution
 
@@ -51,7 +52,9 @@ def backtest_loop(
         it computes the trading indicator
     """
     return_value: dict = {}
-    for _decision in collect_data_loop(start_time, end_time, trade_strategy, trade_executor, return_value):
+    for _decision in collect_data_loop(
+        start_time, end_time, trade_strategy, trade_executor, return_value
+    ):
         pass
 
     portfolio_dict = cast(PORT_METRIC, return_value.get("portfolio_dict"))
@@ -95,11 +98,17 @@ def collect_data_loop(
     trade_executor.reset(start_time=start_time, end_time=end_time)
     trade_strategy.reset(level_infra=trade_executor.get_level_infra())
 
-    with tqdm(total=trade_executor.trade_calendar.get_trade_len(), desc="backtest loop") as bar:
+    with tqdm(
+        total=trade_executor.trade_calendar.get_trade_len(), desc="backtest loop"
+    ) as bar:
         _execute_result = None
         while not trade_executor.finished():
-            _trade_decision: BaseTradeDecision = trade_strategy.generate_trade_decision(_execute_result)
-            _execute_result = yield from trade_executor.collect_data(_trade_decision, level=0)
+            _trade_decision: BaseTradeDecision = trade_strategy.generate_trade_decision(
+                _execute_result
+            )
+            _execute_result = yield from trade_executor.collect_data(
+                _trade_decision, level=0
+            )
             trade_strategy.post_exe_step(_execute_result)
             bar.update(1)
         trade_strategy.post_upper_level_exe_step()
@@ -115,8 +124,12 @@ def collect_data_loop(
             if executor.trade_account.is_port_metr_enabled():
                 portfolio_dict[key] = executor.trade_account.get_portfolio_metrics()
 
-            indicator_df = executor.trade_account.get_trade_indicator().generate_trade_indicators_dataframe()
+            indicator_df = (
+                executor.trade_account.get_trade_indicator().generate_trade_indicators_dataframe()
+            )
             indicator_obj = executor.trade_account.get_trade_indicator()
             indicator_dict[key] = (indicator_df, indicator_obj)
 
-        return_value.update({"portfolio_dict": portfolio_dict, "indicator_dict": indicator_dict})
+        return_value.update(
+            {"portfolio_dict": portfolio_dict, "indicator_dict": indicator_dict}
+        )

@@ -3,10 +3,12 @@ from vnpy.trader.engine import MainEngine
 from vnpy.trader.ui import MainWindow, create_qapp
 
 from vnpy_rpcservice import RpcGateway
+
 # 🧠 ML Signal: Importing specific modules and classes indicates usage patterns and dependencies
 from vnpy_ctastrategy import CtaStrategyApp
 
 # 🧠 ML Signal: Function call to create_qapp, indicating a pattern of initializing a Qt application
+
 
 def main():
     # 🧠 ML Signal: Instantiation of EventEngine, a common pattern in event-driven architectures

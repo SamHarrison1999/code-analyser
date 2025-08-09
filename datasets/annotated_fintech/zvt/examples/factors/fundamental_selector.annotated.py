@@ -1,14 +1,25 @@
 # -*- coding: utf-8 -*-
 from zvt.domain import BalanceSheet
 from zvt.factors.fundamental.finance_factor import GoodCompanyFactor
+
 # 🧠 ML Signal: Importing specific classes from a module indicates usage patterns and dependencies
 # ✅ Best Practice: Class definition should follow PEP 8 naming conventions, which is followed here.
 from zvt.factors.target_selector import TargetSelector
 
 # 🧠 ML Signal: Usage of a specific provider "eastmoney" could indicate a preference or dependency on this data source.
 
+
 class FundamentalSelector(TargetSelector):
-    def init_factors(self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp, level):
+    def init_factors(
+        self,
+        entity_ids,
+        entity_schema,
+        exchanges,
+        codes,
+        start_timestamp,
+        end_timestamp,
+        level,
+    ):
         # 核心资产=(高ROE 高现金流 高股息 低应收 低资本开支 低财务杠杆 有增长)
         # 高roe 高现金流 低财务杠杆 有增长
         factor1 = GoodCompanyFactor(
@@ -29,7 +40,10 @@ class FundamentalSelector(TargetSelector):
             entity_ids=entity_ids,
             codes=codes,
             columns=[BalanceSheet.accounts_receivable],
-            filters=[BalanceSheet.accounts_receivable <= 0.3 * BalanceSheet.total_current_assets],
+            filters=[
+                BalanceSheet.accounts_receivable
+                <= 0.3 * BalanceSheet.total_current_assets
+            ],
             start_timestamp=start_timestamp,
             # ✅ Best Practice: Ensure the script is being run as the main module before executing main logic.
             # 🧠 ML Signal: The date range used here could be indicative of a specific period of interest for analysis.
@@ -43,6 +57,8 @@ class FundamentalSelector(TargetSelector):
 
 
 if __name__ == "__main__":
-    selector: TargetSelector = FundamentalSelector(start_timestamp="2015-01-01", end_timestamp="2019-06-30")
+    selector: TargetSelector = FundamentalSelector(
+        start_timestamp="2015-01-01", end_timestamp="2019-06-30"
+    )
     selector.run()
     print(selector.get_targets("2019-06-30"))

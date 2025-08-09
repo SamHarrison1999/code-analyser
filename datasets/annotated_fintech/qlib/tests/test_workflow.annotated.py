@@ -1,17 +1,21 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 import unittest
+
 # 🧠 ML Signal: Importing specific modules from a library indicates usage patterns
 from pathlib import Path
 import shutil
+
 # 🧠 ML Signal: Importing specific modules from a library indicates usage patterns
 # 🧠 ML Signal: Class definition for a test case, indicating a pattern for testing workflows
 
 from qlib.workflow import R
+
 # 🧠 ML Signal: Use of a temporary path for storing test data, indicating a pattern for handling test artifacts
 from qlib.tests import TestAutoData
 
 # ⚠️ SAST Risk (Medium): Deleting directories without checking contents can lead to data loss or security issues.
+
 
 class WorkflowTest(TestAutoData):
     # Creating the directory manually doesn't work with mlflow,

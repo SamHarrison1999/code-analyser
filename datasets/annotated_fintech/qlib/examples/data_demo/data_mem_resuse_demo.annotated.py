@@ -14,6 +14,7 @@ import subprocess
 
 from qlib import init
 from qlib.data.dataset.handler import DataHandlerLP
+
 # ✅ Best Practice: Use of Path for file system paths improves cross-platform compatibility.
 from qlib.log import TimeInspector
 from qlib.model.trainer import task_train
@@ -32,13 +33,17 @@ if __name__ == "__main__":
     exp_name = "data_mem_reuse_demo"
     # ⚠️ SAST Risk (Low): Opening files without specifying encoding can lead to issues on different systems.
 
-    config_path = DIRNAME.parent / "benchmarks/LightGBM/workflow_config_lightgbm_Alpha158.yaml"
+    config_path = (
+        DIRNAME.parent / "benchmarks/LightGBM/workflow_config_lightgbm_Alpha158.yaml"
+    )
     yaml = YAML(typ="safe", pure=True)
     task_config = yaml.load(config_path.open())
     # 🧠 ML Signal: Training task execution, a key step in ML pipelines.
 
     # 1) without using processed data in memory
-    with TimeInspector.logt("The original time without reusing processed data in memory:"):
+    with TimeInspector.logt(
+        "The original time without reusing processed data in memory:"
+    ):
         # ✅ Best Practice: Use of pprint for better readability of complex data structures.
         for i in range(repeat):
             task_train(task_config["task"], experiment_name=exp_name)

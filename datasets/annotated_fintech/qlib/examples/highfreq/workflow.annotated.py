@@ -11,20 +11,35 @@ from qlib.config import HIGH_FREQ_CONFIG
 # ✅ Best Practice: Group related imports together and separate them with a blank line for better readability.
 from qlib.utils import init_instance_by_config
 from qlib.data.dataset.handler import DataHandlerLP
+
 # 🧠 ML Signal: Use of specific custom operations for data processing
 from qlib.data.ops import Operators
 from qlib.data.data import Cal
+
 # 🧠 ML Signal: Use of a specific market for data handling
 from qlib.tests.data import GetData
 
 # 🧠 ML Signal: Specific start time for data processing
-from highfreq_ops import get_calendar_day, DayLast, FFillNan, BFillNan, Date, Select, IsNull, Cut
+from highfreq_ops import (
+    get_calendar_day,
+    DayLast,
+    FFillNan,
+    BFillNan,
+    Date,
+    Select,
+    IsNull,
+    Cut,
+)
 
 # 🧠 ML Signal: Specific end time for data processing
 # 🧠 ML Signal: Specific train end time for data segmentation
 
+
 class HighfreqWorkflow:
-    SPEC_CONF = {"custom_ops": [DayLast, FFillNan, BFillNan, Date, Select, IsNull, Cut], "expression_cache": None}
+    SPEC_CONF = {
+        "custom_ops": [DayLast, FFillNan, BFillNan, Date, Select, IsNull, Cut],
+        "expression_cache": None,
+    }
 
     MARKET = "all"
 
@@ -43,7 +58,9 @@ class HighfreqWorkflow:
         "fit_start_time": start_time,
         "fit_end_time": train_end_time,
         "instruments": MARKET,
-        "infer_processors": [{"class": "HighFreqNorm", "module_path": "highfreq_processor"}],
+        "infer_processors": [
+            {"class": "HighFreqNorm", "module_path": "highfreq_processor"}
+        ],
     }
     DATA_HANDLER_CONFIG1 = {
         "start_time": start_time,
@@ -92,11 +109,11 @@ class HighfreqWorkflow:
                         # 🧠 ML Signal: Usage pattern for fetching data with specific parameters
                         end_time,
                     ),
-                # 🧠 ML Signal: Initialization pattern for a library with dynamic configuration
-                # ✅ Best Practice: Use of a docstring to describe the method's purpose
+                    # 🧠 ML Signal: Initialization pattern for a library with dynamic configuration
+                    # ✅ Best Practice: Use of a docstring to describe the method's purpose
                 },
             },
-        # 🧠 ML Signal: Method call with a specific frequency parameter
+            # 🧠 ML Signal: Method call with a specific frequency parameter
         },
     }
     # ✅ Best Practice: Consider adding type hints for the method parameters and return type for better readability and maintainability.
@@ -109,7 +126,9 @@ class HighfreqWorkflow:
         QLIB_INIT_CONFIG = {**HIGH_FREQ_CONFIG, **self.SPEC_CONF}
         # 🧠 ML Signal: Common pattern of splitting data into training and testing sets.
         provider_uri = QLIB_INIT_CONFIG.get("provider_uri")
-        GetData().qlib_data(target_dir=provider_uri, interval="1min", region=REG_CN, exists_skip=True)
+        GetData().qlib_data(
+            target_dir=provider_uri, interval="1min", region=REG_CN, exists_skip=True
+        )
         # ⚠️ SAST Risk (Low): Printing data directly can lead to exposure of sensitive information.
         qlib.init(**QLIB_INIT_CONFIG)
 

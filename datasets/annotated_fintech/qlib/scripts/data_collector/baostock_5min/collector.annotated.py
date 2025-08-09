@@ -11,18 +11,23 @@ import baostock as bs
 from tqdm import tqdm
 from pathlib import Path
 from loguru import logger
+
 # ⚠️ SAST Risk (Low): Modifying sys.path can lead to import conflicts or security issues if not handled carefully.
 from typing import Iterable, List
 
 import qlib
 from qlib.data import D
+
 # 🧠 ML Signal: Inheritance from a base class indicates a design pattern for code reuse and extension
 
 CUR_DIR = Path(__file__).resolve().parent
 sys.path.append(str(CUR_DIR.parent.parent))
 
 from data_collector.base import BaseCollector, BaseNormalize, BaseRun
-from data_collector.utils import generate_minutes_calendar_from_daily, calc_adjusted_price
+from data_collector.utils import (
+    generate_minutes_calendar_from_daily,
+    calc_adjusted_price,
+)
 
 
 class BaostockCollectorHS3005min(BaseCollector):
@@ -76,6 +81,7 @@ class BaostockCollectorHS3005min(BaseCollector):
             # ✅ Best Practice: Use 'and' instead of '&' for logical operations to improve readability and avoid confusion with bitwise operations.
             limit_nums=limit_nums,
         )
+
     # 🧠 ML Signal: Appending data to a list in a loop is a common pattern that can be used to identify data collection or aggregation behavior.
 
     def get_trade_calendar(self):
@@ -104,36 +110,65 @@ class BaostockCollectorHS3005min(BaseCollector):
     def process_interval(interval: str):
         if interval == "1d":
             # ✅ Best Practice: Converting string to datetime for proper time handling
-            return {"interval": "d", "fields": "date,code,open,high,low,close,volume,amount,adjustflag"}
+            return {
+                "interval": "d",
+                "fields": "date,code,open,high,low,close,volume,amount,adjustflag",
+            }
         if interval == "5min":
             # ✅ Best Practice: Formatting datetime for consistency
-            return {"interval": "5", "fields": "date,time,code,open,high,low,close,volume,amount,adjustflag"}
+            return {
+                "interval": "5",
+                "fields": "date,time,code,open,high,low,close,volume,amount,adjustflag",
+            }
+
     # ⚠️ SAST Risk (Low): Potential timezone issues when subtracting fixed time deltas
 
     def get_data(
         # ✅ Best Practice: Dropping unnecessary columns to save memory
-        self, symbol: str, interval: str, start_datetime: pd.Timestamp, end_datetime: pd.Timestamp
+        self,
+        symbol: str,
+        interval: str,
+        start_datetime: pd.Timestamp,
+        end_datetime: pd.Timestamp,
     ) -> pd.DataFrame:
         df = self.get_data_from_remote(
             # ✅ Best Practice: Normalizing symbol format for consistency
             # ✅ Best Practice: Initialize the DataFrame to ensure it is always defined, even if the query fails.
-            symbol=symbol, interval=interval, start_datetime=start_datetime, end_datetime=end_datetime
-        # 🧠 ML Signal: Usage of external API to fetch data, which can be a pattern for data retrieval tasks.
-        # 🧠 ML Signal: Dynamic field selection based on interval, indicating a pattern of flexible data requests.
+            symbol=symbol,
+            interval=interval,
+            start_datetime=start_datetime,
+            end_datetime=end_datetime,
+            # 🧠 ML Signal: Usage of external API to fetch data, which can be a pattern for data retrieval tasks.
+            # 🧠 ML Signal: Dynamic field selection based on interval, indicating a pattern of flexible data requests.
         )
-        df.columns = ["date", "time", "symbol", "open", "high", "low", "close", "volume", "amount", "adjustflag"]
+        df.columns = [
+            "date",
+            "time",
+            "symbol",
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
+            "amount",
+            "adjustflag",
+        ]
         df["time"] = pd.to_datetime(df["time"], format="%Y%m%d%H%M%S%f")
         df["date"] = df["time"].dt.strftime("%Y-%m-%d %H:%M:%S")
         df["date"] = df["date"].map(lambda x: pd.Timestamp(x) - pd.Timedelta(minutes=5))
         df.drop(["time"], axis=1, inplace=True)
         df["symbol"] = df["symbol"].map(lambda x: str(x).replace(".", "").upper())
         return df
+
     # ✅ Best Practice: Explicit conversion of datetime to string for API compatibility.
 
     @staticmethod
     # 🧠 ML Signal: Dynamic interval processing, indicating a pattern of flexible data requests.
     def get_data_from_remote(
-        symbol: str, interval: str, start_datetime: pd.Timestamp, end_datetime: pd.Timestamp
+        symbol: str,
+        interval: str,
+        start_datetime: pd.Timestamp,
+        end_datetime: pd.Timestamp,
     ) -> pd.DataFrame:
         df = pd.DataFrame()
         # ⚠️ SAST Risk (Low): No error handling for API call failures other than checking error_code.
@@ -145,10 +180,12 @@ class BaostockCollectorHS3005min(BaseCollector):
             # ✅ Best Practice: Construct DataFrame with specified columns for clarity and structure.
             end_date=str(end_datetime.strftime("%Y-%m-%d")),
             # ⚠️ SAST Risk (Low): Potential for large data retrieval without error handling for network issues
-            frequency=BaostockCollectorHS3005min.process_interval(interval=interval)["interval"],
+            frequency=BaostockCollectorHS3005min.process_interval(interval=interval)[
+                "interval"
+            ],
             # ✅ Best Practice: Return a DataFrame, ensuring consistent return type.
             adjustflag="3",
-        # ⚠️ SAST Risk (Low): Loop may become infinite if error_code is never "0"
+            # ⚠️ SAST Risk (Low): Loop may become infinite if error_code is never "0"
         )
         if rs.error_code == "0" and len(rs.data) > 0:
             # 🧠 ML Signal: Appending data to a list in a loop is a common pattern for data collection
@@ -159,6 +196,7 @@ class BaostockCollectorHS3005min(BaseCollector):
             # 🧠 ML Signal: Progress bar update in a loop indicates iterative processing
             df = pd.DataFrame(data_list, columns=columns)
         return df
+
     # 🧠 ML Signal: Method call pattern for retrieving data
     # ✅ Best Practice: Using a set comprehension to remove duplicates before sorting
 
@@ -205,7 +243,11 @@ class BaostockNormalizeHS3005min(BaseNormalize):
     def __init__(
         # ✅ Best Practice: Explicitly calling the superclass's __init__ method ensures proper initialization.
         # 🧠 ML Signal: Filling missing values with forward fill indicates time series data handling
-        self, qlib_data_1d_dir: [str, Path], date_field_name: str = "date", symbol_field_name: str = "symbol", **kwargs
+        self,
+        qlib_data_1d_dir: [str, Path],
+        date_field_name: str = "date",
+        symbol_field_name: str = "symbol",
+        **kwargs,
     ):
         """
 
@@ -223,8 +265,14 @@ class BaostockNormalizeHS3005min(BaseNormalize):
         bs.login()
         qlib.init(provider_uri=qlib_data_1d_dir)
         # ✅ Best Practice: Consider adding type hints for the function parameters and return type for better readability and maintainability.
-        self.all_1d_data = D.features(D.instruments("all"), ["$paused", "$volume", "$factor", "$close"], freq="day")
-        super(BaostockNormalizeHS3005min, self).__init__(date_field_name, symbol_field_name)
+        self.all_1d_data = D.features(
+            D.instruments("all"),
+            ["$paused", "$volume", "$factor", "$close"],
+            freq="day",
+        )
+        super(BaostockNormalizeHS3005min, self).__init__(
+            date_field_name, symbol_field_name
+        )
 
     @staticmethod
     def calc_change(df: pd.DataFrame, last_close: float) -> pd.Series:
@@ -241,6 +289,7 @@ class BaostockNormalizeHS3005min(BaseNormalize):
     # ⚠️ SAST Risk (Low): Deep copying can be resource-intensive; ensure it's necessary.
     def _get_calendar_list(self) -> Iterable[pd.Timestamp]:
         return self.generate_5min_from_daily(self.calendar_list_1d)
+
     # ✅ Best Practice: Copying the DataFrame before modifying it to avoid side effects on the original data.
 
     # ✅ Best Practice: Setting the index to a specific field improves data manipulation and access efficiency.
@@ -291,7 +340,12 @@ class BaostockNormalizeHS3005min(BaseNormalize):
                 # ✅ Best Practice: Use of type hinting for return type improves code readability and maintainability
                 pd.DataFrame(index=calendar_list)
                 # ✅ Best Practice: Resetting the index to return a DataFrame with a default integer index.
-                .loc[pd.Timestamp(df.index.min()).date() : pd.Timestamp(df.index.max()).date() + pd.Timedelta(days=1)]
+                .loc[
+                    pd.Timestamp(df.index.min())
+                    .date() : pd.Timestamp(df.index.max())
+                    .date()
+                    + pd.Timedelta(days=1)
+                ]
                 # 🧠 ML Signal: Specific frequency setting indicates time-series data processing
                 # ✅ Best Practice: Include type hints for method parameters and return type for better readability and maintainability
                 # ⚠️ SAST Risk (Low): Direct use of external library function without input validation or error handling
@@ -300,7 +354,10 @@ class BaostockNormalizeHS3005min(BaseNormalize):
         # 🧠 ML Signal: Usage of self attributes suggests object-oriented design patterns
         # 🧠 ML Signal: Method chaining pattern with DataFrame operations
         df.sort_index(inplace=True)
-        df.loc[(df["volume"] <= 0) | np.isnan(df["volume"]), list(set(df.columns) - {symbol_field_name})] = np.nan
+        df.loc[
+            (df["volume"] <= 0) | np.isnan(df["volume"]),
+            list(set(df.columns) - {symbol_field_name}),
+        ] = np.nan
         # 🧠 ML Signal: Method chaining pattern with DataFrame operations
 
         # ✅ Best Practice: Returning the DataFrame directly is clear and concise
@@ -318,14 +375,19 @@ class BaostockNormalizeHS3005min(BaseNormalize):
         # 🧠 ML Signal: Storing configuration or state information in instance variables
         # 🧠 ML Signal: Method that constructs a class name based on attributes
         return df.reset_index()
+
     # 🧠 ML Signal: Usage of f-string for dynamic string formatting
 
     def generate_5min_from_daily(self, calendars: Iterable) -> pd.Index:
         # 🧠 ML Signal: Method for generating class names based on attributes
         return generate_minutes_calendar_from_daily(
             # ✅ Best Practice: Use of f-string for string formatting
-            calendars, freq="5min", am_range=self.AM_RANGE, pm_range=self.PM_RANGE
+            calendars,
+            freq="5min",
+            am_range=self.AM_RANGE,
+            pm_range=self.PM_RANGE,
         )
+
     # ✅ Best Practice: Specify the return type as a Union of Path and str for clarity.
 
     def adjusted_price(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -345,15 +407,26 @@ class BaostockNormalizeHS3005min(BaseNormalize):
 
     def normalize(self, df: pd.DataFrame) -> pd.DataFrame:
         # normalize
-        df = self.normalize_baostock(df, self._calendar_list, self._date_field_name, self._symbol_field_name)
+        df = self.normalize_baostock(
+            df, self._calendar_list, self._date_field_name, self._symbol_field_name
+        )
         # adjusted price
         df = self.adjusted_price(df)
         return df
 
+
 # 🧠 ML Signal: Usage of `super()` indicates inheritance and method overriding, useful for understanding class hierarchies.
 
+
 class Run(BaseRun):
-    def __init__(self, source_dir=None, normalize_dir=None, max_workers=1, interval="5min", region="HS300"):
+    def __init__(
+        self,
+        source_dir=None,
+        normalize_dir=None,
+        max_workers=1,
+        interval="5min",
+        region="HS300",
+    ):
         """
         Changed the default value of: scripts.data_collector.base.BaseRun.
         """
@@ -397,7 +470,9 @@ class Run(BaseRun):
             # get hs300 5min data
             $ python collector.py download_data --source_dir ~/.qlib/stock_data/source/hs300_5min_original --start 2022-01-01 --end 2022-01-30 --interval 5min --region HS300
         """
-        super(Run, self).download_data(max_collector_count, delay, start, end, check_data_length, limit_nums)
+        super(Run, self).download_data(
+            max_collector_count, delay, start, end, check_data_length, limit_nums
+        )
 
     def normalize_data(
         self,
@@ -426,7 +501,10 @@ class Run(BaseRun):
                 "If normalize 5min, the qlib_data_1d_dir parameter must be set: --qlib_data_1d_dir <user qlib 1d data >, Reference: https://github.com/microsoft/qlib/tree/main/scripts/data_collector/yahoo#automatic-update-of-daily-frequency-datafrom-yahoo-finance"
             )
         super(Run, self).normalize_data(
-            date_field_name, symbol_field_name, end_date=end_date, qlib_data_1d_dir=qlib_data_1d_dir
+            date_field_name,
+            symbol_field_name,
+            end_date=end_date,
+            qlib_data_1d_dir=qlib_data_1d_dir,
         )
 
 

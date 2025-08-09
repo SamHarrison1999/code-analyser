@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from zvt.contract import IntervalLevel, AdjustType
 from zvt.recorders.em import em_api
+
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local sections improves readability
 
 # ✅ Best Practice: Use a session object for requests to improve performance and resource management
 import requests
+
 # 🧠 ML Signal: Repeated API calls with different parameters can indicate testing or data validation patterns
 
 

@@ -4,6 +4,7 @@ import math
 from enum import Enum
 from typing import List, Optional
 from typing import Union, Type
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 
 import pandas as pd
@@ -28,6 +29,7 @@ logger = logging.getLogger(__name__)
 # ✅ Best Practice: Use of @classmethod for alternative constructor or utility method
 
 # ✅ Best Practice: Consider adding type hints for the parameters and return type for better readability and maintainability.
+
 
 # ✅ Best Practice: Use of try-except for handling potential exceptions
 # 🧠 ML Signal: Usage of threshold value (0.4) could be a feature for ML models.
@@ -110,6 +112,7 @@ class Zhongshu(object):
             d = None
         # ✅ Best Practice: Initialize lists before loops for clarity and potential reuse
         return f"{self.zhongshu_range.value},{self.zhongshu_level.value},{d}"
+
     # ✅ Best Practice: Assigning constructor parameters to instance variables is a common pattern for initializing object state.
 
     # 🧠 ML Signal: Iterating over an enumeration or collection
@@ -124,11 +127,12 @@ class Zhongshu(object):
                 and self.zhongshu_level == o.zhongshu_level
                 # ✅ Best Practice: Use of isinstance to check if the object is of the same class
                 and self.zhongshu_distance == o.zhongshu_distance
-            # ✅ Best Practice: Use 'pass' to indicate intentional no-operation in loop
-            # ✅ Best Practice: Use of list comprehension for concise and readable code
+                # ✅ Best Practice: Use 'pass' to indicate intentional no-operation in loop
+                # ✅ Best Practice: Use of list comprehension for concise and readable code
             )
         # 🧠 ML Signal: Comparing attributes for equality
         return False
+
     # 🧠 ML Signal: Custom string representation of an object
 
     # ✅ Best Practice: Use of f-string for string formatting
@@ -199,6 +203,8 @@ class ZenState(Bean):
 
             # 🧠 ML Signal: Appending a ZenState object to 'zen_states' could be a pattern of interest.
             self.zhongshu_list.append(zhongshu)
+
+
 # 🧠 ML Signal: Function checks multiple conditions on a list of objects
 
 
@@ -222,7 +228,9 @@ def cal_distance(s):
         d_list.append(d)
     return pd.Series(index=s.index, data=d_list)
 
+
 # ✅ Best Practice: Use a set for membership testing for better performance
+
 
 def cal_zen_state(s):
     zen_states = []
@@ -283,7 +291,10 @@ def good_state(zen_state: ZenState):
                 zhongshu4.zhongshu_range,
             ):
                 # 最近一个窄幅震荡
-                if ZhongshuRange.small == zhongshu4.zhongshu_range and ZhongshuLevel.level1 != zhongshu4.zhongshu_level:
+                if (
+                    ZhongshuRange.small == zhongshu4.zhongshu_range
+                    and ZhongshuLevel.level1 != zhongshu4.zhongshu_level
+                ):
                     # ✅ Best Practice: Use of super() to call the parent class's __init__ method
                     # 🧠 ML Signal: Use of various parameters to initialize an object, indicating a complex configuration
                     return True
@@ -310,7 +321,10 @@ def trending_state(zen_state: ZenState):
                 zhongshu4.zhongshu_range,
             ):
                 # 最近一个窄幅震荡
-                if ZhongshuRange.small == zhongshu4.zhongshu_range and ZhongshuLevel.level1 == zhongshu4.zhongshu_level:
+                if (
+                    ZhongshuRange.small == zhongshu4.zhongshu_range
+                    and ZhongshuLevel.level1 == zhongshu4.zhongshu_level
+                ):
                     return True
 
     return False
@@ -426,10 +440,13 @@ class TrendingFactor(ZenFactor):
             s = self.factor_df["good_state"]
             # 🧠 ML Signal: Usage of dropna() indicates data cleaning process
             self.result_df = s.to_frame(name="filter_result")
+
+
 # 🧠 ML Signal: Use of keep_window parameter to define the window size for data retention.
 
 # 🧠 ML Signal: Usage of dropna() indicates data cleaning process
 # ✅ Best Practice: Type hinting improves code readability and maintainability
+
 
 # 🧠 ML Signal: Use of keep_all_timestamp parameter to decide whether to keep all timestamps.
 class ShakingFactor(ZenFactor):
@@ -540,12 +557,20 @@ class ShakingFactor(ZenFactor):
         s3 = self.factor_df["current_merge_zhongshu_interval"] >= 120
 
         # 中枢上缘
-        s4 = self.factor_df["close"] <= 1.1 * self.factor_df["current_merge_zhongshu_y1"]
-        s5 = self.factor_df["close"] >= 0.9 * self.factor_df["current_merge_zhongshu_y1"]
+        s4 = (
+            self.factor_df["close"] <= 1.1 * self.factor_df["current_merge_zhongshu_y1"]
+        )
+        s5 = (
+            self.factor_df["close"] >= 0.9 * self.factor_df["current_merge_zhongshu_y1"]
+        )
 
         # 中枢下缘
-        s6 = self.factor_df["close"] <= 1.1 * self.factor_df["current_merge_zhongshu_y0"]
-        s7 = self.factor_df["close"] >= 0.9 * self.factor_df["current_merge_zhongshu_y0"]
+        s6 = (
+            self.factor_df["close"] <= 1.1 * self.factor_df["current_merge_zhongshu_y0"]
+        )
+        s7 = (
+            self.factor_df["close"] >= 0.9 * self.factor_df["current_merge_zhongshu_y0"]
+        )
 
         s = s1 & s2 & s3 & ((s4 & s5) | (s6 & s7))
         # s = s.groupby(level=0).apply(drop_continue_duplicate)

@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import String, Column, Float, Integer, Boolean, JSON
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Naming convention for base classes should be consistent and descriptive.
 from zvt.domain.quotes import StockKdataCommon
 
@@ -12,6 +14,7 @@ from zvt.domain.quotes import StockKdataCommon
 StockQuoteBase = declarative_base()
 
 # 🧠 ML Signal: 'time' as an integer suggests a timestamp, which is often used in time series analysis.
+
 
 class StockTick(StockQuoteBase, Mixin):
     # 🧠 ML Signal: 'lastPrice' as a float is a continuous variable, useful for regression models.
@@ -52,9 +55,12 @@ class StockTick(StockQuoteBase, Mixin):
     bidPrice = Column(JSON)
     # 🧠 ML Signal: Integer type for time suggests it might be a timestamp.
     bidVol = Column(JSON)
+
+
 # 🧠 ML Signal: Financial data related to stock trading
 
 # 🧠 ML Signal: Float type for price indicates it is a continuous value.
+
 
 # 🧠 ML Signal: Financial metrics for stock valuation
 class StockQuote(StockQuoteBase, StockKdataCommon):
@@ -150,7 +156,12 @@ class Stock1mQuote(StockQuoteBase, Mixin):
     is_limit_down = Column(Boolean)
 
 
-register_schema(providers=["qmt"], db_name="stock_quote", schema_base=StockQuoteBase, entity_type="stock")
+register_schema(
+    providers=["qmt"],
+    db_name="stock_quote",
+    schema_base=StockQuoteBase,
+    entity_type="stock",
+)
 
 
 # the __all__ is generated

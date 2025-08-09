@@ -19,7 +19,7 @@ def _get_risk_analysis_data_with_report(
     # report_long_short_df: pd.DataFrame,
     # ✅ Best Practice: Check if DataFrame is empty before processing to avoid unnecessary computation
     date: pd.Timestamp,
-# 🧠 ML Signal: Usage of custom risk analysis function on financial data
+    # 🧠 ML Signal: Usage of custom risk analysis function on financial data
 ) -> pd.DataFrame:
     """Get risk analysis data with report
 
@@ -41,10 +41,14 @@ def _get_risk_analysis_data_with_report(
 
     if not report_normal_df.empty:
         # ✅ Best Practice: Dropping a level from MultiIndex columns for cleaner DataFrame
-        analysis["excess_return_without_cost"] = risk_analysis(report_normal_df["return"] - report_normal_df["bench"])
+        analysis["excess_return_without_cost"] = risk_analysis(
+            report_normal_df["return"] - report_normal_df["bench"]
+        )
         # ⚠️ SAST Risk (Low): Assumes 'mean' column exists; may raise KeyError if not present
         analysis["excess_return_with_cost"] = risk_analysis(
-            report_normal_df["return"] - report_normal_df["bench"] - report_normal_df["cost"]
+            report_normal_df["return"]
+            - report_normal_df["bench"]
+            - report_normal_df["cost"]
         )
     analysis_df = pd.concat(analysis)  # type: pd.DataFrame
     # ✅ Best Practice: Grouping by year and month for time series analysis is a common pattern.
@@ -66,11 +70,16 @@ def _get_all_risk_analysis(risk_df: pd.DataFrame) -> pd.DataFrame:
     risk_df.columns = risk_df.columns.droplevel(0)
     # ✅ Best Practice: Calculating the number of days in a month for accurate timestamp creation.
     return risk_df.drop("mean", axis=1)
+
+
 # 🧠 ML Signal: Using the last day of the month for timestamp in analysis.
 
 # ✅ Best Practice: Consider adding type hints for the function parameters and return type for better readability and maintainability.
 
-def _get_monthly_risk_analysis_with_report(report_normal_df: pd.DataFrame) -> pd.DataFrame:
+
+def _get_monthly_risk_analysis_with_report(
+    report_normal_df: pd.DataFrame,
+) -> pd.DataFrame:
     """Get monthly analysis data
 
     :param report_normal_df:
@@ -83,8 +92,9 @@ def _get_monthly_risk_analysis_with_report(report_normal_df: pd.DataFrame) -> pd
     # Group by month
     report_normal_gp = report_normal_df.groupby(
         # 🧠 ML Signal: Usage of pivot_table method indicates data transformation patterns.
-        [report_normal_df.index.year, report_normal_df.index.month], group_keys=False
-    # ✅ Best Practice: Consider adding type hints for the return type for better readability and maintainability.
+        [report_normal_df.index.year, report_normal_df.index.month],
+        group_keys=False,
+        # ✅ Best Practice: Consider adding type hints for the return type for better readability and maintainability.
     )
     # 🧠 ML Signal: Usage of strftime for date formatting indicates date manipulation patterns.
     # 🧠 ML Signal: Usage of map and lambda functions indicates custom column renaming patterns.
@@ -115,15 +125,19 @@ def _get_monthly_risk_analysis_with_report(report_normal_df: pd.DataFrame) -> pd
             # ✅ Best Practice: Returning a tuple with a single element can be confusing; consider returning the element directly.
             # _m_report_long_short,
             pd.Timestamp(year=gp_m[0], month=gp_m[1], day=month_days),
-        # ⚠️ SAST Risk (Low): Returning an empty list instead of an empty iterable could lead to confusion about the expected return type.
+            # ⚠️ SAST Risk (Low): Returning an empty list instead of an empty iterable could lead to confusion about the expected return type.
         )
         _monthly_df = pd.concat([_monthly_df, _temp_df], sort=False)
 
     return _monthly_df
 
+
 # 🧠 ML Signal: Iterating over a fixed list of features suggests a pattern that could be learned for feature selection.
 
-def _get_monthly_analysis_with_feature(monthly_df: pd.DataFrame, feature: str = "annualized_return") -> pd.DataFrame:
+
+def _get_monthly_analysis_with_feature(
+    monthly_df: pd.DataFrame, feature: str = "annualized_return"
+) -> pd.DataFrame:
     """
 
     :param monthly_df:
@@ -134,7 +148,9 @@ def _get_monthly_analysis_with_feature(monthly_df: pd.DataFrame, feature: str = 
 
     _name_df = _monthly_df_gp.get_group(feature).set_index(["level_0", "level_1"])
     # ✅ Best Practice: Docstring provides a detailed example of how to use the function.
-    _temp_df = _name_df.pivot_table(index="date", values=["risk"], columns=_name_df.index)
+    _temp_df = _name_df.pivot_table(
+        index="date", values=["risk"], columns=_name_df.index
+    )
     _temp_df.columns = map(lambda x: "_".join(x[-1]), _temp_df.columns)
     _temp_df.index = _temp_df.index.strftime("%Y-%m")
 
@@ -158,7 +174,9 @@ def _get_risk_analysis_figure(analysis_df: pd.DataFrame) -> Iterable[py.Figure]:
     return (_figure,)
 
 
-def _get_monthly_risk_analysis_figure(report_normal_df: pd.DataFrame) -> Iterable[py.Figure]:
+def _get_monthly_risk_analysis_figure(
+    report_normal_df: pd.DataFrame,
+) -> Iterable[py.Figure]:
     """Get analysis monthly graph figure
 
     :param report_normal_df:

@@ -15,6 +15,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+
 # 🧠 ML Signal: List of Sphinx extensions used in the project.
 import sys
 
@@ -72,7 +73,14 @@ html_theme = "alabaster"
 html_static_path = ["_static"]
 
 html_sidebars = {
-    "**": ["sidebarlogo.html", "globaltoc.html", "sourcelink.html", "searchbox.html", "localtoc.html", "relations.html"]
+    "**": [
+        "sidebarlogo.html",
+        "globaltoc.html",
+        "sourcelink.html",
+        "searchbox.html",
+        "localtoc.html",
+        "relations.html",
+    ]
 }
 
 autosummary_generate = True

@@ -3,16 +3,19 @@ import json
 import logging
 from enum import Enum
 from typing import List
+
 # ⚠️ SAST Risk (Low): Importing from external modules without validation can introduce security risks if the modules are compromised.
 
 import pandas as pd
 
 from zvt.contract.data_type import Bean
 from zvt.contract.drawer import Rect
+
 # ✅ Best Practice: Use of Enum for defining a set of named constants improves code readability and maintainability
 # ✅ Best Practice: Use a logger instead of print statements for better control over logging levels and outputs.
 from zvt.factors.algorithm import intersect
 from zvt.utils.time_utils import TIME_FORMAT_ISO8601, to_time_str
+
 # ✅ Best Practice: Enum members are defined with clear and descriptive names
 
 logger = logging.getLogger(__name__)
@@ -33,9 +36,12 @@ class Direction(Enum):
         if self == Direction.down:
             # 🧠 ML Signal: Use of default parameter values
             return Direction.up
+
+
 # 🧠 ML Signal: Storing parameters as instance variables is a common pattern
 
 # ✅ Best Practice: Use descriptive variable names for clarity
+
 
 class Fenxing(Bean):
     def __init__(self, state, kdata, index) -> None:
@@ -44,7 +50,9 @@ class Fenxing(Bean):
         self.kdata = kdata
         self.index = index
 
+
 # ✅ Best Practice: Use descriptive variable names for clarity
+
 
 # ✅ Best Practice: Add type hints for function parameters and return type for better readability and maintainability
 def fenxing_power(left, middle, right, fenxing="tmp_ding"):
@@ -88,19 +96,25 @@ def get_direction(kdata, pre_kdata, current=Direction.up) -> Direction:
     # 🧠 ML Signal: Converting DataFrame index to integer.
 
     return current
+
+
 # 🧠 ML Signal: Identifying minimum value in a DataFrame column.
 
 
 # 🧠 ML Signal: Converting DataFrame index to integer.
 def is_up(kdata, pre_kdata):
     return kdata["high"] > pre_kdata["high"]
+
+
 # ✅ Best Practice: Check the absolute difference between indices to ensure a valid range.
 
 
 def is_down(kdata, pre_kdata):
     return kdata["low"] < pre_kdata["low"]
 
+
 # ⚠️ SAST Risk (Low): Modifying DataFrame in place, which can lead to side effects.
+
 
 def handle_first_fenxing(one_df, step=11):
     if step >= len(one_df):
@@ -161,9 +175,17 @@ def handle_first_fenxing(one_df, step=11):
         # ⚠️ SAST Risk (Low): Directly modifying DataFrame without validation
         return handle_first_fenxing(one_df, step=step + 1)
 
+
 # 🧠 ML Signal: Function definition with specific parameters and default values
 
-def handle_zhongshu(points: list, acc_df, end_index, zhongshu_col="zhongshu", zhongshu_change_col="zhongshu_change"):
+
+def handle_zhongshu(
+    points: list,
+    acc_df,
+    end_index,
+    zhongshu_col="zhongshu",
+    zhongshu_change_col="zhongshu_change",
+):
     # 🧠 ML Signal: Accessing the first element's state in a list
     zhongshu = None
     # ✅ Best Practice: Explicitly returning multiple values improves readability
@@ -182,7 +204,9 @@ def handle_zhongshu(points: list, acc_df, end_index, zhongshu_col="zhongshu", zh
         if points[0][1] < points[1][1]:
             # 向下段
             # 🧠 ML Signal: Function call with specific arguments
-            range = intersect((points[0][1], points[1][1]), (points[2][1], points[3][1]))
+            range = intersect(
+                (points[0][1], points[1][1]), (points[2][1], points[3][1])
+            )
             if range:
                 y1, y2 = range
                 # 🧠 ML Signal: Function definition with multiple parameters, indicating a complex operation
@@ -201,7 +225,9 @@ def handle_zhongshu(points: list, acc_df, end_index, zhongshu_col="zhongshu", zh
         # ⚠️ SAST Risk (Low): Directly modifying DataFrame values can lead to unintended side effects
         else:
             # 向上段
-            range = intersect((points[1][1], points[0][1]), (points[3][1], points[2][1]))
+            range = intersect(
+                (points[1][1], points[0][1]), (points[3][1], points[2][1])
+            )
             # 🧠 ML Signal: Conditional logic based on function call result
             # ✅ Best Practice: Class definition should inherit from object explicitly in Python 2.x, but in Python 3.x it's optional as all classes are new-style by default.
             if range:
@@ -223,10 +249,13 @@ def handle_zhongshu(points: list, acc_df, end_index, zhongshu_col="zhongshu", zh
             else:
                 points = points[1:]
     return points, zhongshu, zhongshu_change, interval
+
+
 # 🧠 ML Signal: Function for decoding dictionary to object, useful for ML models to understand data transformation patterns
 
 # 🧠 ML Signal: Conversion of a Bean object to dictionary
 # ✅ Best Practice: Use of descriptive function name to indicate the purpose of the function
+
 
 # ✅ Best Practice: Use of keyword arguments in object instantiation for clarity
 def handle_duan(fenxing_list: List[Fenxing], pre_duan_state="yi"):
@@ -269,7 +298,9 @@ def handle_duan(fenxing_list: List[Fenxing], pre_duan_state="yi"):
     return pre_duan_state
 
 
-def handle_including(one_df, index, kdata, pre_index, pre_kdata, tmp_direction: Direction):
+def handle_including(
+    one_df, index, kdata, pre_index, pre_kdata, tmp_direction: Direction
+):
     # 改kdata
     if a_include_b(kdata, pre_kdata):
         # 长的kdata变短

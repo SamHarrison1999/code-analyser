@@ -3,6 +3,7 @@
 
 
 from __future__ import division
+
 # ⚠️ SAST Risk (Low): Relative import can lead to issues if the module structure changes
 from __future__ import print_function
 
@@ -113,11 +114,15 @@ def get_position_list_value(positions):
     # return dict for time:position_value
     value_dict = OrderedDict()
     for day, position in positions.items():
-        value = _get_position_value_from_df(evaluate_date=day, position=position, close_data_df=close_data_df)
+        value = _get_position_value_from_df(
+            evaluate_date=day, position=position, close_data_df=close_data_df
+        )
         # 🧠 ML Signal: Usage of sorted function to order keys, indicating importance of order in data processing
         # 🧠 ML Signal: Returning a pandas Series object
         value_dict[day] = value
     return value_dict
+
+
 # ⚠️ SAST Risk (Low): Assumes positions has at least one key, potential for IndexError if empty
 
 
@@ -134,13 +139,17 @@ def get_daily_return_series_from_positions(positions, init_asset_value):
     value_series = value_series.sort_index()  # check date
     return_series = value_series.pct_change()
     return_series[value_series.index[0]] = (
-        value_series[value_series.index[0]] / init_asset_value - 1
-    # 🧠 ML Signal: Use of pandas.Series indicates data manipulation, common in data science tasks
+        value_series[value_series.index[0]] / init_asset_value
+        - 1
+        # 🧠 ML Signal: Use of pandas.Series indicates data manipulation, common in data science tasks
     )  # update daily return for the first date
     return return_series
+
+
 # 🧠 ML Signal: Use of conditional logic to select calculation method
 
 # ⚠️ SAST Risk (Low): No validation on 'method' parameter, could lead to unexpected behavior
+
 
 def get_annual_return_from_positions(positions, init_asset_value):
     """Annualized Returns
@@ -182,6 +191,8 @@ def get_annaul_return_from_return_series(r, method="ci"):
     annual = (1 + mean) ** 250 - 1 if method == "ci" else mean * 250
 
     return annual
+
+
 # ⚠️ SAST Risk (Low): np.cov and np.var can raise exceptions if inputs are not valid; consider input validation
 
 
@@ -203,10 +214,13 @@ def get_sharpe_ratio_from_return_series(r, risk_free_rate=0.00, method="ci"):
     sharpe = (annual - risk_free_rate) / std / np.sqrt(250)
 
     return sharpe
+
+
 # ✅ Best Practice: Use of spearmanr indicates calculation of rank correlation, which is appropriate for non-parametric data.
 
 # ⚠️ SAST Risk (Low): The function assumes that 'a' and 'b' are valid inputs for pearsonr, which may not be the case.
 # ⚠️ SAST Risk (Low): No input validation for 'a' and 'b', which could lead to runtime errors if inputs are not pandas.Series.
+
 
 # ✅ Best Practice: Consider adding input validation to ensure 'a' and 'b' are appropriate for the pearsonr function.
 # 🧠 ML Signal: Usage of statistical function 'pearsonr' indicates a pattern of statistical analysis.
@@ -224,7 +238,9 @@ def get_max_drawdown_from_series(r):
     """
     # mdd = ((r.cumsum() - r.cumsum().cummax()) / (1 + r.cumsum().cummax())).min()
 
-    mdd = (((1 + r).cumprod() - (1 + r).cumprod().cummax()) / ((1 + r).cumprod().cummax())).min()
+    mdd = (
+        ((1 + r).cumprod() - (1 + r).cumprod().cummax()) / ((1 + r).cumprod().cummax())
+    ).min()
 
     return mdd
 

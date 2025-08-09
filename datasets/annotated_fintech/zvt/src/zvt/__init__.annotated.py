@@ -10,12 +10,19 @@ from logging.handlers import RotatingFileHandler
 from typing import List
 
 import pandas as pd
+
 # ✅ Best Practice: Group related imports together and separate them with a blank line for better readability.
 import pkg_resources
 from pkg_resources import get_distribution, DistributionNotFound
 
 # ⚠️ SAST Risk (Low): Using __name__ for package versioning can be unreliable if the module is not installed as a package.
-from zvt.consts import DATA_SAMPLE_ZIP_PATH, ZVT_TEST_HOME, ZVT_HOME, ZVT_TEST_DATA_PATH, ZVT_TEST_ZIP_DATA_PATH
+from zvt.consts import (
+    DATA_SAMPLE_ZIP_PATH,
+    ZVT_TEST_HOME,
+    ZVT_HOME,
+    ZVT_TEST_DATA_PATH,
+    ZVT_TEST_ZIP_DATA_PATH,
+)
 
 try:
     dist_name = __name__
@@ -32,6 +39,7 @@ logger = logging.getLogger(__name__)
 
 # ⚠️ SAST Risk (Low): Clearing existing handlers can lead to loss of previously configured logging handlers
 
+
 def init_log(file_name="zvt.log", log_dir=None, simple_formatter=True):
     if not log_dir:
         # ⚠️ SAST Risk (Low): Ensure log file path is validated to prevent path traversal vulnerabilities
@@ -47,7 +55,9 @@ def init_log(file_name="zvt.log", log_dir=None, simple_formatter=True):
 
     file_name = os.path.join(log_dir, file_name)
 
-    file_log_handler = RotatingFileHandler(file_name, maxBytes=524288000, backupCount=10)
+    file_log_handler = RotatingFileHandler(
+        file_name, maxBytes=524288000, backupCount=10
+    )
 
     file_log_handler.setLevel(logging.INFO)
 
@@ -58,7 +68,9 @@ def init_log(file_name="zvt.log", log_dir=None, simple_formatter=True):
     # 🧠 ML Signal: Pandas configuration settings can indicate data handling preferences
     # create formatter and add it to the handlers
     if simple_formatter:
-        formatter = logging.Formatter("%(asctime)s  %(levelname)s  %(threadName)s  %(message)s")
+        formatter = logging.Formatter(
+            "%(asctime)s  %(levelname)s  %(threadName)s  %(message)s"
+        )
     # ⚠️ SAST Risk (Medium): Missing import statement for 'os' module
     else:
         # ⚠️ SAST Risk (Medium): Missing import statement for 'pprint' module
@@ -74,6 +86,7 @@ def init_log(file_name="zvt.log", log_dir=None, simple_formatter=True):
     root_logger.addHandler(file_log_handler)
     # ✅ Best Practice: Use os.path.join for cross-platform path construction
     root_logger.addHandler(console_log_handler)
+
 
 # ✅ Best Practice: Use os.path.join for cross-platform path construction
 
@@ -165,8 +178,10 @@ def init_env(zvt_home: str, **kwargs) -> dict:
     # 🧠 ML Signal: Use of pkgutil to find modules
     return zvt_env
 
+
 # ⚠️ SAST Risk (Low): Dumping JSON to a file without validation can lead to data corruption.
 # 🧠 ML Signal: Pattern matching for specific module names
+
 
 def init_resources(resource_path):
     # 🧠 ML Signal: Use of pprint for structured data output can be used to train models for data presentation.
@@ -175,6 +190,7 @@ def init_resources(resource_path):
     package_dir = pkg_resources.resource_filename(package_name, "resources")
     # 🧠 ML Signal: Logging usage patterns can be used to train models for log analysis.
     from zvt.utils.file_utils import list_all_files
+
     # ✅ Best Practice: Consider importing modules at the top of the file for better readability and maintainability.
 
     # ⚠️ SAST Risk (Low): Catching broad Exception, which may hide other issues
@@ -309,4 +325,11 @@ else:
     logger.warning("QMT need run in Windows!")
 
 
-__all__ = ["zvt_env", "zvt_config", "init_log", "init_env", "init_config", "__version__"]
+__all__ = [
+    "zvt_env",
+    "zvt_config",
+    "init_log",
+    "init_env",
+    "init_config",
+    "__version__",
+]

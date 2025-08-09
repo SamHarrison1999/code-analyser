@@ -6,12 +6,15 @@ from zvt.contract import Exchange
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder
 from zvt.domain import Stock
+
 # 🧠 ML Signal: Inheritance from a base class, indicating a pattern of extending functionality
 from zvt.recorders.em import em_api
 from zvt.utils.pd_utils import pd_is_not_null
+
 # 🧠 ML Signal: Class attribute indicating a constant or configuration setting
 
 # 🧠 ML Signal: Iterating over a list of exchanges indicates a pattern of processing multiple data sources.
+
 
 # 🧠 ML Signal: Class attribute indicating a schema or data structure being used
 class EMStockRecorder(Recorder):
@@ -42,7 +45,12 @@ class EMStockRecorder(Recorder):
                     self.session.execute(sql)
                     self.session.commit()
             self.logger.info(df)
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(
+                df=df,
+                data_schema=self.data_schema,
+                provider=self.provider,
+                force_update=self.force_update,
+            )
 
 
 if __name__ == "__main__":

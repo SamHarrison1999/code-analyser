@@ -1,21 +1,31 @@
 # -*- coding: utf-8 -*-
 import logging
 import time
+
 # ✅ Best Practice: Grouping imports by their source (standard library, third-party, local) improves readability.
 from typing import Type
 
-from examples.tag_utils import group_stocks_by_tag, get_main_line_tags, get_main_line_hidden_tags
+from examples.tag_utils import (
+    group_stocks_by_tag,
+    get_main_line_tags,
+    get_main_line_hidden_tags,
+)
 from examples.utils import msg_group_stocks_by_topic
 from zvt import zvt_config
 from zvt.api.kdata import get_latest_kdata_date, get_kdata_schema, default_adjust_type
 from zvt.api.selector import get_limit_up_stocks
-from zvt.api.stats import get_top_performance_entities_by_periods, get_top_volume_entities, TopType
+from zvt.api.stats import (
+    get_top_performance_entities_by_periods,
+    get_top_volume_entities,
+    TopType,
+)
 from zvt.contract import IntervalLevel
 from zvt.contract.api import get_entities, get_entity_schema
 from zvt.contract.factor import Factor, TargetType
 from zvt.domain import StockNews
 from zvt.informer import EmailInformer
 from zvt.informer.inform_utils import add_to_eastmoney
+
 # ✅ Best Practice: Using a logger instead of print statements for logging is a best practice.
 from zvt.utils.time_utils import date_time_by_interval
 
@@ -41,7 +51,10 @@ def inform(
     # ✅ Best Practice: Use list comprehension for filtering entities
     if entity_ids:
         entities = get_entities(
-            provider=entity_provider, entity_type=entity_type, entity_ids=entity_ids, return_type="domain"
+            provider=entity_provider,
+            entity_type=entity_type,
+            entity_ids=entity_ids,
+            return_type="domain",
         )
         # ⚠️ SAST Risk (Low): Assertion could be disabled in production, leading to unexpected behavior
         # 🧠 ML Signal: Recording stock data could be used for predictive modeling
@@ -63,13 +76,16 @@ def inform(
             msg = msg_group_stocks_by_topic(entities=entities, threshold=1, days_ago=60)
             # ⚠️ SAST Risk (Low): Email sending could be abused for spam if not properly secured
             logger.info(msg)
-            action.send_message(zvt_config["email_username"], f"{target_date} {title}", msg)
+            action.send_message(
+                zvt_config["email_username"], f"{target_date} {title}", msg
+            )
         # 🧠 ML Signal: Grouping stocks by tag could be used for classification tasks
 
         if group_by_tag and (entity_type == "stock"):
             main_line_hidden_tags = get_main_line_hidden_tags()
             sorted_entities = group_stocks_by_tag(
-                entities=entities, hidden_tags=main_line_hidden_tags + [special_hidden_tag]
+                entities=entities,
+                hidden_tags=main_line_hidden_tags + [special_hidden_tag],
             )
             msg = ""
             main_line = []
@@ -78,7 +94,11 @@ def inform(
             main_line_tags = get_main_line_tags()
             for index, (tag, stocks) in enumerate(sorted_entities):
                 msg = msg + f"^^^^^^ {tag}[{len(stocks)}/{len(entities)}] ^^^^^^\n"
-                msg = msg + "\n".join([f"{stock.name}({stock.code})" for stock in stocks]) + "\n"
+                msg = (
+                    msg
+                    + "\n".join([f"{stock.name}({stock.code})" for stock in stocks])
+                    + "\n"
+                )
                 if tag == special_hidden_tag:
                     special = special + stocks
                 elif (not main_line_tags) and (tag != "未知") and (index < 3):
@@ -94,19 +114,32 @@ def inform(
             # 主线
             if main_line:
                 codes = [entity.code for entity in main_line]
-                add_to_eastmoney(codes=codes, entity_type=entity_type, group="主线", over_write=em_group_over_write_tag)
+                add_to_eastmoney(
+                    codes=codes,
+                    entity_type=entity_type,
+                    group="主线",
+                    over_write=em_group_over_write_tag,
+                )
 
             # 其他
             if others:
                 codes = [entity.code for entity in others]
                 if not em_group:
                     em_group = "其他"
-                add_to_eastmoney(codes=codes, entity_type=entity_type, group=em_group, over_write=em_group_over_write)
+                add_to_eastmoney(
+                    codes=codes,
+                    entity_type=entity_type,
+                    group=em_group,
+                    over_write=em_group_over_write,
+                )
             # 特别处理
             if special:
                 codes = [entity.code for entity in special]
                 add_to_eastmoney(
-                    codes=codes, entity_type=entity_type, group=special_hidden_tag, over_write=em_group_over_write_tag
+                    codes=codes,
+                    entity_type=entity_type,
+                    group=special_hidden_tag,
+                    over_write=em_group_over_write_tag,
                 )
         else:
             if em_group:
@@ -114,14 +147,17 @@ def inform(
                     # ⚠️ SAST Risk (Low): Catching broad exceptions can hide specific errors
                     codes = [entity.code for entity in entities]
                     add_to_eastmoney(
-                        codes=codes, entity_type=entity_type, group=em_group, over_write=em_group_over_write
+                        codes=codes,
+                        entity_type=entity_type,
+                        group=em_group,
+                        over_write=em_group_over_write,
                     )
                 except Exception as e:
                     action.send_message(
                         zvt_config["email_username"],
                         f"{target_date} {title} error",
                         f"{target_date} {title} error: {e}",
-                    # ⚠️ SAST Risk (Low): Email sending could be abused for spam if not properly secured
+                        # ⚠️ SAST Risk (Low): Email sending could be abused for spam if not properly secured
                     )
 
             infos = [f"{entity.name}({entity.code})" for entity in entities]
@@ -129,6 +165,8 @@ def inform(
 
     logger.info(msg)
     action.send_message(zvt_config["email_username"], f"{target_date} {title}", msg)
+
+
 # 🧠 ML Signal: Logging usage pattern
 
 
@@ -178,27 +216,43 @@ def report_targets(
                     data_provider=data_provider,
                 )
                 current_entity_pool = vol_df.index.tolist()
-                logger.info(f"current_entity_pool({len(current_entity_pool)}): {current_entity_pool}")
+                logger.info(
+                    f"current_entity_pool({len(current_entity_pool)}): {current_entity_pool}"
+                )
 
-            kdata_schema = get_kdata_schema(entity_type, level=IntervalLevel.LEVEL_1DAY, adjust_type=adjust_type)
+            kdata_schema = get_kdata_schema(
+                entity_type, level=IntervalLevel.LEVEL_1DAY, adjust_type=adjust_type
+            )
             filters = []
             if "turnover_threshold" in factor_kv:
-                filters = filters + [kdata_schema.turnover >= factor_kv.get("turnover_threshold")]
+                filters = filters + [
+                    kdata_schema.turnover >= factor_kv.get("turnover_threshold")
+                ]
             if "turnover_rate_threshold" in factor_kv:
-                filters = filters + [kdata_schema.turnover_rate >= factor_kv.get("turnover_rate_threshold")]
+                filters = filters + [
+                    kdata_schema.turnover_rate
+                    >= factor_kv.get("turnover_rate_threshold")
+                ]
             if filters:
                 filters = filters + [kdata_schema.timestamp == target_date]
                 kdata_df = kdata_schema.query_data(
-                    provider=data_provider, filters=filters, columns=["entity_id", "timestamp"], index="entity_id"
+                    provider=data_provider,
+                    filters=filters,
+                    columns=["entity_id", "timestamp"],
+                    index="entity_id",
                 )
                 if current_entity_pool:
-                    current_entity_pool = set(current_entity_pool) & set(kdata_df.index.tolist())
+                    current_entity_pool = set(current_entity_pool) & set(
+                        kdata_df.index.tolist()
+                    )
                 else:
                     current_entity_pool = kdata_df.index.tolist()
 
             if "entity_ids" in factor_kv:
                 if current_entity_pool:
-                    current_entity_pool = set(current_entity_pool) & set(factor_kv.pop("entity_ids"))
+                    current_entity_pool = set(current_entity_pool) & set(
+                        factor_kv.pop("entity_ids")
+                    )
                 else:
                     current_entity_pool = set(factor_kv.pop("entity_ids"))
 
@@ -218,7 +272,9 @@ def report_targets(
                 **factor_kv,
             )
 
-            long_stocks = tech_factor.get_targets(timestamp=target_date, target_type=TargetType.positive)
+            long_stocks = tech_factor.get_targets(
+                timestamp=target_date, target_type=TargetType.positive
+            )
 
             inform(
                 informer,
@@ -273,8 +329,10 @@ def report_top_entities(
     while error_count <= 10:
         try:
             target_date = get_latest_kdata_date(
-                provider=data_provider, entity_type=entity_type, adjust_type=adjust_type
-            # ⚠️ SAST Risk (Low): Catching broad exceptions can hide specific errors and make debugging difficult.
+                provider=data_provider,
+                entity_type=entity_type,
+                adjust_type=adjust_type,
+                # ⚠️ SAST Risk (Low): Catching broad exceptions can hide specific errors and make debugging difficult.
             )
 
             # ⚠️ SAST Risk (Low): Using time.sleep in exception handling can delay error resolution.

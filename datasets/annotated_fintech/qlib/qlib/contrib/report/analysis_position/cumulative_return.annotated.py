@@ -2,6 +2,7 @@
 # Licensed under the MIT License.
 
 import copy
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 from typing import Iterable
 
@@ -41,7 +42,9 @@ def _get_cum_return_data_with_position(
         end_date=end_date,
     ).copy()
 
-    _cumulative_return_df["label"] = _cumulative_return_df["label"] - _cumulative_return_df["bench"]
+    _cumulative_return_df["label"] = (
+        _cumulative_return_df["label"] - _cumulative_return_df["bench"]
+    )
     _cumulative_return_df = _cumulative_return_df.dropna()
     df_gp = _cumulative_return_df.groupby(level="datetime", group_keys=False)
     # 🧠 ML Signal: Filtering data based on a specific column value
@@ -85,7 +88,7 @@ def _get_cum_return_data_with_position(
                 buy_minus_sell_mean=buy_mean - sell_mean,
                 buy_plus_sell_weight=buy_weight + sell_weight,
                 date=date,
-            # ✅ Best Practice: Use of .cumsum() for cumulative calculations
+                # ✅ Best Practice: Use of .cumsum() for cumulative calculations
             )
         )
 
@@ -116,7 +119,9 @@ def _get_figure_with_position(
     :return:
     """
 
-    cum_return_df = _get_cum_return_data_with_position(position, report_normal, label_data, start_date, end_date)
+    cum_return_df = _get_cum_return_data_with_position(
+        position, report_normal, label_data, start_date, end_date
+    )
     cum_return_df = cum_return_df.set_index("date")
     # FIXME: support HIGH-FREQ
     cum_return_df.index = cum_return_df.index.strftime("%Y-%m-%d")
@@ -126,10 +131,14 @@ def _get_figure_with_position(
         sub_graph_data = [
             (
                 "cum_{}".format(_t_name),
-                dict(row=1, col=1, graph_kwargs={"mode": "lines+markers", "xaxis": "x3"}),
+                dict(
+                    row=1, col=1, graph_kwargs={"mode": "lines+markers", "xaxis": "x3"}
+                ),
             ),
             (
-                "{}_weight".format(_t_name.replace("minus", "plus") if "minus" in _t_name else _t_name),
+                "{}_weight".format(
+                    _t_name.replace("minus", "plus") if "minus" in _t_name else _t_name
+                ),
                 dict(row=2, col=1),
             ),
             (
@@ -281,7 +290,9 @@ def cumulative_return_graph(
     position = copy.deepcopy(position)
     report_normal = report_normal.copy()
     label_data.columns = ["label"]
-    _figures = _get_figure_with_position(position, report_normal, label_data, start_date, end_date)
+    _figures = _get_figure_with_position(
+        position, report_normal, label_data, start_date, end_date
+    )
     if show_notebook:
         BaseGraph.show_graph_in_notebook(_figures)
     else:

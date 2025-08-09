@@ -16,6 +16,7 @@ FutureMetaBase = declarative_base()
 # 🧠 ML Signal: Decorator usage indicates a pattern of registering entities
 # ✅ Best Practice: Explicitly specifying providers and database name for schema registration
 
+
 @register_entity(entity_type="future")
 class Future(FutureMetaBase, TradableEntity):
     __tablename__ = "future"

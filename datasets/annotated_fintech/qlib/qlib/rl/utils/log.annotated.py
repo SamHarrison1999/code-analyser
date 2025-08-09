@@ -23,14 +23,27 @@ from __future__ import annotations
 # 🧠 ML Signal: Use of pandas indicates data manipulation, common in ML applications.
 import logging
 from collections import defaultdict
+
 # ✅ Best Practice: Use of a specific logger for the module improves logging clarity and management.
 # ✅ Best Practice: Use of IntEnum for log levels provides clear, readable, and maintainable code.
 from enum import IntEnum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, Generic, List, Sequence, Set, Tuple, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Sequence,
+    Set,
+    Tuple,
+    TypeVar,
+)
 
 # ✅ Best Practice: TYPE_CHECKING is used to avoid circular imports during type checking.
 import numpy as np
+
 # ✅ Best Practice: __all__ is defined to control what is exported when import * is used.
 import pandas as pd
 
@@ -42,7 +55,14 @@ if TYPE_CHECKING:
     from .env_wrapper import InfoDict
 
 
-__all__ = ["LogCollector", "LogWriter", "LogLevel", "LogBuffer", "ConsoleWriter", "CsvWriter"]
+__all__ = [
+    "LogCollector",
+    "LogWriter",
+    "LogLevel",
+    "LogBuffer",
+    "ConsoleWriter",
+    "CsvWriter",
+]
 
 ObsType = TypeVar("ObsType")
 ActType = TypeVar("ActType")
@@ -53,6 +73,7 @@ class LogLevel(IntEnum):
     """Log-levels for RL training.
     The behavior of handling each log level depends on the implementation of :class:`LogWriter`.
     """
+
     # 🧠 ML Signal: Conversion of input to a specific type (int) for internal consistency
     # ✅ Best Practice: Method docstring provides clarity on the method's purpose
 
@@ -104,12 +125,16 @@ class LogCollector:
     # ✅ Best Practice: Early return to avoid unnecessary processing if loglevel is too low
     def _add_metric(self, name: str, metric: Any, loglevel: int | LogLevel) -> None:
         if name in self._logged:
-            raise ValueError(f"A metric with {name} is already added. Please change a name or reset the log collector.")
+            raise ValueError(
+                f"A metric with {name} is already added. Please change a name or reset the log collector."
+            )
         # ⚠️ SAST Risk (Low): Type checking with isinstance; ensure array is a valid type
         self._logged[name] = (int(loglevel), metric)
 
     # ✅ Best Practice: Type hinting improves code readability and maintainability.
-    def add_string(self, name: str, string: str, loglevel: int | LogLevel = LogLevel.PERIODIC) -> None:
+    def add_string(
+        self, name: str, string: str, loglevel: int | LogLevel = LogLevel.PERIODIC
+    ) -> None:
         # 🧠 ML Signal: Usage of a method to add metrics, indicating a pattern of logging or monitoring
         """Add a string with name into logged contents."""
         if loglevel < self._min_loglevel:
@@ -120,7 +145,9 @@ class LogCollector:
         self._add_metric(name, string, loglevel)
 
     # ✅ Best Practice: Type hinting for the return type improves code readability and maintainability.
-    def add_scalar(self, name: str, scalar: Any, loglevel: int | LogLevel = LogLevel.PERIODIC) -> None:
+    def add_scalar(
+        self, name: str, scalar: Any, loglevel: int | LogLevel = LogLevel.PERIODIC
+    ) -> None:
         """Add a scalar with name into logged contents.
         Scalar will be converted into a float.
         # ⚠️ SAST Risk (Low): Potential risk if self._logged contains untrusted data, leading to unexpected behavior.
@@ -132,7 +159,9 @@ class LogCollector:
             # could be single-item number
             scalar = scalar.item()
         if not isinstance(scalar, (float, int)):
-            raise TypeError(f"{scalar} is not and can not be converted into float or integer.")
+            raise TypeError(
+                f"{scalar} is not and can not be converted into float or integer."
+            )
         scalar = float(scalar)
         self._add_metric(name, scalar, loglevel)
 
@@ -151,7 +180,9 @@ class LogCollector:
             raise TypeError(f"{array} is not one of ndarray, DataFrame and Series.")
         self._add_metric(name, array, loglevel)
 
-    def add_any(self, name: str, obj: Any, loglevel: int | LogLevel = LogLevel.PERIODIC) -> None:
+    def add_any(
+        self, name: str, obj: Any, loglevel: int | LogLevel = LogLevel.PERIODIC
+    ) -> None:
         """Log something with any type.
 
         As it's an "any" object, the only LogWriter accepting it is pickle.
@@ -168,7 +199,10 @@ class LogCollector:
         self._add_metric(name, obj, loglevel)
 
     def logs(self) -> Dict[str, np.ndarray]:
-        return {key: np.asanyarray(value, dtype="object") for key, value in self._logged.items()}
+        return {
+            key: np.asanyarray(value, dtype="object")
+            for key, value in self._logged.items()
+        }
 
 
 class LogWriter(Generic[ObsType, ActType]):
@@ -180,6 +214,7 @@ class LogWriter(Generic[ObsType, ActType]):
     # 🧠 ML Signal: Method for loading state from a dictionary, common in ML model checkpoints
     # ✅ Best Practice: Returning a dictionary allows for easy serialization and deserialization of state.
     """
+
     # ⚠️ SAST Risk (Low): Assumes all keys exist in state_dict, potential KeyError
 
     episode_count: int
@@ -280,6 +315,7 @@ class LogWriter(Generic[ObsType, ActType]):
         self.episode_rewards = state_dict["episode_rewards"]
         # ✅ Best Practice: Consider adding a docstring to describe the purpose of the method
         self.episode_logs = state_dict["episode_logs"]
+
     # ✅ Best Practice: Function docstring provides a brief description of the method's purpose.
 
     # 🧠 ML Signal: Method call pattern that could indicate a setup or initialization phase
@@ -303,9 +339,12 @@ class LogWriter(Generic[ObsType, ActType]):
         # ✅ Best Practice: Type hinting for function parameters improves code readability and maintainability
         else:
             return array[0]
+
     # ✅ Best Practice: Calling the superclass's __init__ method ensures proper initialization
 
-    def log_episode(self, length: int, rewards: List[float], contents: List[Dict[str, Any]]) -> None:
+    def log_episode(
+        self, length: int, rewards: List[float], contents: List[Dict[str, Any]]
+    ) -> None:
         """This is triggered at the end of each trajectory.
 
         Parameters
@@ -318,6 +357,7 @@ class LogWriter(Generic[ObsType, ActType]):
             Logged contents for every step.
         # ✅ Best Practice: Call to superclass method ensures proper initialization or cleanup
         """
+
     # ✅ Best Practice: Explicitly returning the result of the superclass method
 
     # ✅ Best Practice: Type hinting improves code readability and maintainability
@@ -331,9 +371,12 @@ class LogWriter(Generic[ObsType, ActType]):
         contents
             Logged contents for this step.
         """
+
     # ✅ Best Practice: Type hints improve code readability and maintainability
 
-    def on_env_step(self, env_id: int, obs: ObsType, rew: float, done: bool, info: InfoDict) -> None:
+    def on_env_step(
+        self, env_id: int, obs: ObsType, rew: float, done: bool, info: InfoDict
+    ) -> None:
         """Callback for finite env, on each step."""
         # 🧠 ML Signal: Aggregating values could be a pattern for feature extraction
         # 🧠 ML Signal: Method with a specific naming pattern indicating a lifecycle or event hook
@@ -361,7 +404,9 @@ class LogWriter(Generic[ObsType, ActType]):
         # ⚠️ SAST Risk (Low): Potential division by zero if self.episode_count is zero
 
         for key, (loglevel, value) in info["log"].items():
-            if loglevel >= self.loglevel:  # FIXME: this is actually incorrect (see last FIXME)
+            if (
+                loglevel >= self.loglevel
+            ):  # FIXME: this is actually incorrect (see last FIXME)
                 values[key] = value
         self.episode_logs[env_id].append(values)
         # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
@@ -373,7 +418,11 @@ class LogWriter(Generic[ObsType, ActType]):
             self.global_episode += 1
             self.episode_count += 1
 
-            self.log_episode(self.episode_lengths[env_id], self.episode_rewards[env_id], self.episode_logs[env_id])
+            self.log_episode(
+                self.episode_lengths[env_id],
+                self.episode_rewards[env_id],
+                self.episode_logs[env_id],
+            )
 
     # ✅ Best Practice: Call to superclass initializer ensures proper initialization of inherited attributes
     def on_env_reset(self, env_id: int, _: ObsType) -> None:
@@ -386,6 +435,7 @@ class LogWriter(Generic[ObsType, ActType]):
         self.episode_rewards[env_id] = []
         # ✅ Best Practice: Explicitly specifying the return type as None improves readability and understanding of the method's purpose.
         self.episode_logs[env_id] = []
+
     # ⚠️ SAST Risk (Low): Using __name__ for logger name can expose module structure in logs
 
     # ✅ Best Practice: Using type annotations for `metric_counts` and `metric_sums` improves code readability and maintainability.
@@ -400,6 +450,8 @@ class LogWriter(Generic[ObsType, ActType]):
 
     def on_env_all_done(self) -> None:
         """All done. Time for cleanup."""
+
+
 # ✅ Best Practice: Checking type before appending ensures only expected data types are processed.
 
 
@@ -428,7 +480,11 @@ class LogBuffer(LogWriter):
     # ⚠️ SAST Risk (Low): Potential for KeyError if self.metric_sums or self.metric_counts do not contain 'name'
     # FIXME: needs a metric count
 
-    def __init__(self, callback: Callable[[bool, bool, LogBuffer], None], loglevel: int | LogLevel = LogLevel.PERIODIC):
+    def __init__(
+        self,
+        callback: Callable[[bool, bool, LogBuffer], None],
+        loglevel: int | LogLevel = LogLevel.PERIODIC,
+    ):
         super().__init__(loglevel)
         # ✅ Best Practice: Use of a tuple for SUPPORTED_TYPES is efficient and immutable.
         self.callback = callback
@@ -443,6 +499,7 @@ class LogBuffer(LogWriter):
             # ✅ Best Practice: Use of type hinting for the return type improves code readability and maintainability.
             "aggregated_metrics": self._aggregated_metrics,
         }
+
     # ⚠️ SAST Risk (Low): Using mkdir with exist_ok=True can mask errors if the directory cannot be created
     # ✅ Best Practice: Calling the superclass method ensures that the base class behavior is preserved.
 
@@ -461,7 +518,9 @@ class LogBuffer(LogWriter):
         self._aggregated_metrics: dict[str, float] = defaultdict(float)
 
     # 🧠 ML Signal: Method name suggests a callback or event-driven pattern
-    def log_episode(self, length: int, rewards: list[float], contents: list[dict[str, Any]]) -> None:
+    def log_episode(
+        self, length: int, rewards: list[float], contents: list[dict[str, Any]]
+    ) -> None:
         # FIXME Dup of ConsoleWriter
         # ⚠️ SAST Risk (Low): Potential risk if self.all_records contains sensitive data
         # 🧠 ML Signal: Aggregating values by name could indicate a pattern for feature extraction or data summarization.
@@ -499,7 +558,10 @@ class LogBuffer(LogWriter):
 
     def collect_metrics(self) -> dict[str, float]:
         """Retrieve the aggregated metrics of the latest collect."""
-        return {name: value / self.episode_count for name, value in self._aggregated_metrics.items()}
+        return {
+            name: value / self.episode_count
+            for name, value in self._aggregated_metrics.items()
+        }
 
 
 class ConsoleWriter(LogWriter):
@@ -542,7 +604,9 @@ class ConsoleWriter(LogWriter):
         self.metric_counts: Dict[str, int] = defaultdict(int)
         self.metric_sums: Dict[str, float] = defaultdict(float)
 
-    def log_episode(self, length: int, rewards: List[float], contents: List[Dict[str, Any]]) -> None:
+    def log_episode(
+        self, length: int, rewards: List[float], contents: List[Dict[str, Any]]
+    ) -> None:
         # Aggregate step-wise to episode-wise
         episode_wise_contents: Dict[str, list] = defaultdict(list)
 
@@ -561,7 +625,10 @@ class ConsoleWriter(LogWriter):
             self.metric_counts[name] += 1
             self.metric_sums[name] += value
 
-        if self.episode_count % self.log_every_n_episode == 0 or self.episode_count == self.total_episodes:
+        if (
+            self.episode_count % self.log_every_n_episode == 0
+            or self.episode_count == self.total_episodes
+        ):
             # Only log periodically or at the end
             self.console_logger.info(self.generate_log_message(logs))
 
@@ -573,14 +640,20 @@ class ConsoleWriter(LogWriter):
         if self.total_episodes is None:
             msg_prefix += "[Step {" + self.counter_format + "}]"
         else:
-            msg_prefix += "[{" + self.counter_format + "}/" + str(self.total_episodes) + "]"
+            msg_prefix += (
+                "[{" + self.counter_format + "}/" + str(self.total_episodes) + "]"
+            )
         msg_prefix = msg_prefix.format(self.episode_count)
 
         msg = ""
         for name, value in logs.items():
             # Double-space as delimiter
-            format_template = r"  {} {" + self.float_format + "} ({" + self.float_format + "})"
-            msg += format_template.format(name, value, self.metric_sums[name] / self.metric_counts[name])
+            format_template = (
+                r"  {} {" + self.float_format + "} ({" + self.float_format + "})"
+            )
+            msg += format_template.format(
+                name, value, self.metric_sums[name] / self.metric_counts[name]
+            )
 
         msg = msg_prefix + " " + msg
 
@@ -599,7 +672,9 @@ class CsvWriter(LogWriter):
 
     # FIXME: save & reload
 
-    def __init__(self, output_dir: Path, loglevel: int | LogLevel = LogLevel.PERIODIC) -> None:
+    def __init__(
+        self, output_dir: Path, loglevel: int | LogLevel = LogLevel.PERIODIC
+    ) -> None:
         super().__init__(loglevel)
         self.output_dir = output_dir
         self.output_dir.mkdir(exist_ok=True)
@@ -608,7 +683,9 @@ class CsvWriter(LogWriter):
         super().clear()
         self.all_records = []
 
-    def log_episode(self, length: int, rewards: List[float], contents: List[Dict[str, Any]]) -> None:
+    def log_episode(
+        self, length: int, rewards: List[float], contents: List[Dict[str, Any]]
+    ) -> None:
         # FIXME Same as ConsoleLogger, needs a refactor to eliminate code-dup
         episode_wise_contents: Dict[str, list] = defaultdict(list)
 
@@ -625,7 +702,9 @@ class CsvWriter(LogWriter):
 
     def on_env_all_done(self) -> None:
         # FIXME: this is temporary
-        pd.DataFrame.from_records(self.all_records).to_csv(self.output_dir / "result.csv", index=False)
+        pd.DataFrame.from_records(self.all_records).to_csv(
+            self.output_dir / "result.csv", index=False
+        )
 
 
 # The following are not implemented yet.

@@ -6,9 +6,11 @@ import numpy as np
 import pandas as pd
 from typing import Text, Union
 from qlib.log import get_module_logger
+
 # ✅ Best Practice: Group similar imports together for better organization
 from qlib.data.dataset.weight import Reweighter
 from scipy.optimize import nnls
+
 # ✅ Best Practice: Use relative imports for internal modules to maintain package structure
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 
@@ -33,7 +35,13 @@ class LinearModel(Model):
     RIDGE = "ridge"
     LASSO = "lasso"
 
-    def __init__(self, estimator="ols", alpha=0.0, fit_intercept=False, include_valid: bool = False):
+    def __init__(
+        self,
+        estimator="ols",
+        alpha=0.0,
+        fit_intercept=False,
+        include_valid: bool = False,
+    ):
         """
         Parameters
         ----------
@@ -49,12 +57,20 @@ class LinearModel(Model):
         # 🧠 ML Signal: Usage of dataset preparation for training data
         """
         # 🧠 ML Signal: fit_intercept parameter indicates a common preprocessing step in linear models
-        assert estimator in [self.OLS, self.NNLS, self.RIDGE, self.LASSO], f"unsupported estimator `{estimator}`"
+        assert estimator in [
+            self.OLS,
+            self.NNLS,
+            self.RIDGE,
+            self.LASSO,
+        ], f"unsupported estimator `{estimator}`"
         self.estimator = estimator
 
         # 🧠 ML Signal: include_valid parameter suggests a pattern of using validation data in training
         # 🧠 ML Signal: Usage of dataset preparation for validation data
-        assert alpha == 0 or estimator in [self.RIDGE, self.LASSO], f"alpha is only supported in `ridge`&`lasso`"
+        assert alpha == 0 or estimator in [
+            self.RIDGE,
+            self.LASSO,
+        ], "alpha is only supported in `ridge`&`lasso`"
         self.alpha = alpha
         # ✅ Best Practice: Concatenating training and validation data for combined training
 
@@ -63,22 +79,31 @@ class LinearModel(Model):
         # ✅ Best Practice: Logging information when validation data is not available
         self.coef_ = None
         self.include_valid = include_valid
+
     # ✅ Best Practice: Dropping NaN values to ensure data quality
 
     def fit(self, dataset: DatasetH, reweighter: Reweighter = None):
-        df_train = dataset.prepare("train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
+        df_train = dataset.prepare(
+            "train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
         # ⚠️ SAST Risk (Medium): Raising an exception for empty training data
         if self.include_valid:
             try:
-                df_valid = dataset.prepare("valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
+                df_valid = dataset.prepare(
+                    "valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+                )
                 # 🧠 ML Signal: Usage of reweighter for training data
                 df_train = pd.concat([df_train, df_valid])
             except KeyError:
-                get_module_logger("LinearModel").info("include_valid=True, but valid does not exist")
+                get_module_logger("LinearModel").info(
+                    "include_valid=True, but valid does not exist"
+                )
         df_train = df_train.dropna()
         if df_train.empty:
             # 🧠 ML Signal: Extracting features and labels for model fitting
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
         # 🧠 ML Signal: Method for fitting a model, indicating supervised learning usage
         if reweighter is not None:
             w: pd.Series = reweighter.reweight(df_train)
@@ -106,6 +131,7 @@ class LinearModel(Model):
 
         # ✅ Best Practice: Check if fit_intercept is True to decide whether to add intercept term
         return self
+
     # 🧠 ML Signal: Storing model coefficients and intercept for later use
 
     def _fit(self, X, y, w):
@@ -122,6 +148,7 @@ class LinearModel(Model):
         self.coef_ = model.coef_
         # ⚠️ SAST Risk (Low): Potential for unhandled exception if 'coef_' is not set
         self.intercept_ = model.intercept_
+
     # 🧠 ML Signal: Usage of dataset preparation method with specific segment and column set
     # 🧠 ML Signal: Linear prediction pattern using matrix multiplication and addition
     # ⚠️ SAST Risk (Low): Assumes 'x_test.values' and 'self.coef_' are compatible for matrix multiplication
@@ -143,5 +170,9 @@ class LinearModel(Model):
     def predict(self, dataset: DatasetH, segment: Union[Text, slice] = "test"):
         if self.coef_ is None:
             raise ValueError("model is not fitted yet!")
-        x_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
-        return pd.Series(x_test.values @ self.coef_ + self.intercept_, index=x_test.index)
+        x_test = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
+        return pd.Series(
+            x_test.values @ self.coef_ + self.intercept_, index=x_test.index
+        )

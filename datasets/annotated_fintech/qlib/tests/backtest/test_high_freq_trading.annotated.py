@@ -9,7 +9,10 @@ import pandas as pd
 
 # ✅ Best Practice: Use of @classmethod decorator to define a method that operates on the class itself rather than instances.
 
-@unittest.skip("This test takes a lot of time due to the large size of high-frequency data")
+
+@unittest.skip(
+    "This test takes a lot of time due to the large size of high-frequency data"
+)
 class TestHFBacktest(TestAutoData):
     # ✅ Best Practice: setUpClass is a standard method name in unittest for setting up class-level fixtures.
     # ✅ Best Practice: Use of class method setup for initializing class-level fixtures
@@ -34,7 +37,7 @@ class TestHFBacktest(TestAutoData):
         # ✅ Best Practice: Assertion to check a specific attribute of the result, ensuring the test verifies expected behavior.
         orders = [
             [date, inst, pos, "sell"],
-        # 🧠 ML Signal: Returns a DataFrame, indicating usage of pandas for data manipulation
+            # 🧠 ML Signal: Returns a DataFrame, indicating usage of pandas for data manipulation
         ]
         return pd.DataFrame(orders, columns=headers)
 
@@ -135,7 +138,12 @@ class TestHFBacktest(TestAutoData):
 
         ret_val = {}
         decisions = list(
-            collect_data(executor=executor_config, strategy=strategy_config, **backtest_config, return_value=ret_val)
+            collect_data(
+                executor=executor_config,
+                strategy=strategy_config,
+                **backtest_config,
+                return_value=ret_val,
+            )
         )
         report, indicator = ret_val["report"], ret_val["indicator"]
         # NOTE: please refer to the docs of format_decisions

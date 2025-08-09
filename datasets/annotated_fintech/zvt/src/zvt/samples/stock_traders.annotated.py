@@ -2,8 +2,10 @@
 from zvt.contract import IntervalLevel
 from zvt.factors.ma.ma_factor import CrossMaFactor
 from zvt.factors.macd.macd_factor import BullFactor
+
 # 🧠 ML Signal: Importing specific classes from a module indicates usage patterns and dependencies
 from zvt.trader.trader import StockTrader
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability
 # ✅ Best Practice: Class definition should follow PEP 8 naming conventions, which is CamelCase.
 
@@ -12,7 +14,14 @@ class MyMaTrader(StockTrader):
     # ✅ Best Practice: Use of a list comprehension for creating a list with a single element
     # 🧠 ML Signal: Instantiation of CrossMaFactor with specific parameters
     def init_factors(
-        self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp, adjust_type=None
+        self,
+        entity_ids,
+        entity_schema,
+        exchanges,
+        codes,
+        start_timestamp,
+        end_timestamp,
+        adjust_type=None,
     ):
         return [
             CrossMaFactor(
@@ -27,15 +36,24 @@ class MyMaTrader(StockTrader):
                 # 🧠 ML Signal: Setting need_persist to False indicates non-persistence of factors
                 need_persist=False,
                 adjust_type=adjust_type,
-            # ✅ Best Practice: Class definition should follow PEP 8 naming conventions, which is followed here.
+                # ✅ Best Practice: Class definition should follow PEP 8 naming conventions, which is followed here.
             )
         ]
 
+
 # ✅ Best Practice: Use of a list comprehension for creating a list of BullFactor objects
+
 
 class MyBullTrader(StockTrader):
     def init_factors(
-        self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp, adjust_type=None
+        self,
+        entity_ids,
+        entity_schema,
+        exchanges,
+        codes,
+        start_timestamp,
+        end_timestamp,
+        adjust_type=None,
     ):
         return [
             BullFactor(

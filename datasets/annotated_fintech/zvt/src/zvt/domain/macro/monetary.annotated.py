@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, Float
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Naming convention for SQLAlchemy base class is clear and descriptive.
 # 🧠 ML Signal: Inheritance from MonetaryBase and Mixin indicates a pattern of using mixins for shared functionality.
 

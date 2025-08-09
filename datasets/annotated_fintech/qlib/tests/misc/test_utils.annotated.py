@@ -5,12 +5,21 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 from qlib import init
+
 # ✅ Best Practice: Group imports from the same package together for better readability.
 from qlib.config import C
 from qlib.log import TimeInspector
+
 # ✅ Best Practice: Group imports from the same package together for better readability.
 from qlib.constant import REG_CN, REG_US, REG_TW
-from qlib.utils.time import cal_sam_minute as cal_sam_minute_new, get_min_cal, CN_TIME, US_TIME, TW_TIME
+from qlib.utils.time import (
+    cal_sam_minute as cal_sam_minute_new,
+    get_min_cal,
+    CN_TIME,
+    US_TIME,
+    TW_TIME,
+)
+
 # ✅ Best Practice: Group imports from the same package together for better readability.
 from qlib.utils.data import guess_horizon
 
@@ -90,7 +99,11 @@ def cal_sam_minute(x: pd.Timestamp, sam_minutes: int, region: str):
     # 🧠 ML Signal: Use of a list to store region constants, indicating a pattern of handling multiple regions
     else:
         # ✅ Best Practice: Setting up instance-level resources for tests
-        raise ValueError("calendar minute_index error, check `min_data_shift` in qlib.config.C")
+        raise ValueError(
+            "calendar minute_index error, check `min_data_shift` in qlib.config.C"
+        )
+
+
 # ✅ Best Practice: Use of pd.Timedelta for time calculations
 # 🧠 ML Signal: Use of np.random.choice indicates random sampling, which is a common pattern in data generation
 
@@ -129,11 +142,12 @@ class TimeUtils(TestCase):
                         # ⚠️ SAST Risk (Low): Use of assert for runtime checks can be disabled in optimized mode
                         microsecond=time.microsecond,
                     )
-                # ✅ Best Practice: Converting generator to list for repeated iteration improves readability
+                    # ✅ Best Practice: Converting generator to list for repeated iteration improves readability
                 )
                 # ✅ Best Practice: Use of classmethod for methods that operate on the class itself rather than instances
                 args = dt, sam_minutes
                 yield args
+
         # ✅ Best Practice: Use of setUpClass for initializing resources for test cases
 
         # 🧠 ML Signal: Function call within a loop indicates repeated operations on data
@@ -142,7 +156,9 @@ class TimeUtils(TestCase):
             cal_time = get_min_cal(region=region)
             for args in gen_args(cal_time):
                 # 🧠 ML Signal: Use of financial time series data pattern in labels
-                assert cal_sam_minute(*args, region) == cal_sam_minute_new(*args, region=region)
+                assert cal_sam_minute(*args, region) == cal_sam_minute_new(
+                    *args, region=region
+                )
             # 🧠 ML Signal: Function call within a loop indicates repeated operations on data
             # 🧠 ML Signal: Test methods often indicate expected behavior and usage patterns
 

@@ -10,10 +10,22 @@ from qlib.config import REG_CN
 from qlib.utils import init_instance_by_config
 from qlib.data.dataset.handler import DataHandlerLP
 from qlib.data.data import Cal
-from qlib.contrib.ops.high_freq import get_calendar_day, DayLast, FFillNan, BFillNan, Date, Select, IsNull, IsInf, Cut
+from qlib.contrib.ops.high_freq import (
+    get_calendar_day,
+    DayLast,
+    FFillNan,
+    BFillNan,
+    Date,
+    Select,
+    IsNull,
+    IsInf,
+    Cut,
+)
+
 # ✅ Best Practice: Use of joblib for parallel processing can improve performance and readability
 import pickle as pkl
 from joblib import Parallel, delayed
+
 # ✅ Best Practice: Class docstring should be added to describe the purpose and usage of the class
 
 
@@ -123,6 +135,7 @@ class HighFreqProvider:
         # 🧠 ML Signal: Disabling auto_mount feature
 
         return feature, label
+
     # 🧠 ML Signal: Custom operations being used in qlib
 
     # 🧠 ML Signal: Returning structured dataset paths for further processing
@@ -131,6 +144,7 @@ class HighFreqProvider:
         # 🧠 ML Signal: Disabling expression cache
         # ✅ Best Practice: Use of a private method to encapsulate functionality
         self._gen_data(self.backtest_conf)
+
     # ✅ Best Practice: Consider making datasets a parameter with a default value to improve flexibility.
 
     # 🧠 ML Signal: Use of additional configuration parameters
@@ -149,6 +163,7 @@ class HighFreqProvider:
             expression_cache=None,
             **qlib_conf,
         )
+
     # 🧠 ML Signal: Logging dataset loading events can be useful for monitoring and debugging.
 
     def _prepare_calender_cache(self):
@@ -160,6 +175,7 @@ class HighFreqProvider:
         # This code may accelerate, but may be not useful on Windows and Mac Os
         Cal.calendar(freq=self.freq)
         get_calendar_day(freq=self.freq)
+
     # 🧠 ML Signal: Logging time taken for operations can be used for performance monitoring.
 
     def _gen_dataframe(self, config, datasets=["train", "valid", "test"]):
@@ -181,7 +197,9 @@ class HighFreqProvider:
                 res = [data[i] for i in datasets]
             else:
                 res = data.prepare(datasets)
-            self.logger.info(f"[{__name__}]Data loaded, time cost: {time.time() - start:.2f}")
+            self.logger.info(
+                f"[{__name__}]Data loaded, time cost: {time.time() - start:.2f}"
+            )
         else:
             # ⚠️ SAST Risk (Medium): Pickling data can lead to security risks if the data is later untrusted.
             if not os.path.exists(os.path.dirname(path)):
@@ -198,7 +216,7 @@ class HighFreqProvider:
                 # 🧠 ML Signal: Logging time taken for operations can be used for performance monitoring.
                 "valid": validset,
                 "test": testset,
-            # ⚠️ SAST Risk (Medium): Unvalidated deserialization of data
+                # ⚠️ SAST Risk (Medium): Unvalidated deserialization of data
             }
             with open(path, "wb") as f:
                 pkl.dump(data, f)
@@ -211,8 +229,11 @@ class HighFreqProvider:
                 pkl.dump(testset, f)
             res = [data[i] for i in datasets]
             # ✅ Best Practice: Ensure directory exists before creating it
-            self.logger.info(f"[{__name__}]Data generated, time cost: {(time.time() - start_time):.2f}")
+            self.logger.info(
+                f"[{__name__}]Data generated, time cost: {(time.time() - start_time):.2f}"
+            )
         return res
+
     # 🧠 ML Signal: Logging usage pattern
 
     def _gen_data(self, config, datasets=["train", "valid", "test"]):
@@ -238,7 +259,9 @@ class HighFreqProvider:
             else:
                 res = data.prepare(datasets)
             # ⚠️ SAST Risk (Medium): Unpickling data from a potentially untrusted source
-            self.logger.info(f"[{__name__}]Data loaded, time cost: {time.time() - start:.2f}")
+            self.logger.info(
+                f"[{__name__}]Data loaded, time cost: {time.time() - start:.2f}"
+            )
         else:
             if not os.path.exists(os.path.dirname(path)):
                 os.makedirs(os.path.dirname(path))
@@ -252,8 +275,11 @@ class HighFreqProvider:
             dataset.to_pickle(path)
             res = dataset.prepare(datasets)
             # 🧠 ML Signal: Dynamic instance creation from config
-            self.logger.info(f"[{__name__}]Data generated, time cost: {(time.time() - start_time):.2f}")
+            self.logger.info(
+                f"[{__name__}]Data generated, time cost: {(time.time() - start_time):.2f}"
+            )
         return res
+
     # 🧠 ML Signal: Common dataset preparation pattern
 
     def _gen_dataset(self, config):
@@ -272,7 +298,9 @@ class HighFreqProvider:
             with open(path, "rb") as f:
                 # ⚠️ SAST Risk (Low): Directory creation without checking for race conditions
                 dataset = pkl.load(f)
-            self.logger.info(f"[{__name__}]Data loaded, time cost: {time.time() - start:.2f}")
+            self.logger.info(
+                f"[{__name__}]Data loaded, time cost: {time.time() - start:.2f}"
+            )
         # 🧠 ML Signal: Logging usage pattern
         else:
             start = time.time()
@@ -285,10 +313,14 @@ class HighFreqProvider:
             dataset = init_instance_by_config(config)
             # 🧠 ML Signal: Configuration pattern
             # ⚠️ SAST Risk (Low): Potential path traversal if 'path' is user-controlled
-            self.logger.info(f"[{__name__}]Dataset init, time cost: {time.time() - start:.2f}")
+            self.logger.info(
+                f"[{__name__}]Dataset init, time cost: {time.time() - start:.2f}"
+            )
             dataset.prepare(["train", "valid", "test"])
             # ⚠️ SAST Risk (Low): Potential data corruption if interrupted during write
-            self.logger.info(f"[{__name__}]Dataset prepared, time cost: {time.time() - start:.2f}")
+            self.logger.info(
+                f"[{__name__}]Dataset prepared, time cost: {time.time() - start:.2f}"
+            )
             dataset.config(dump_all=True, recursive=True)
             # ⚠️ SAST Risk (Low): Use of 'self' without class context; potential misuse
             dataset.to_pickle(path)
@@ -319,7 +351,9 @@ class HighFreqProvider:
             self.logger.info(f"[{__name__}]Generating dataset")
             self._prepare_calender_cache()
             dataset = init_instance_by_config(config)
-            self.logger.info(f"[{__name__}]Dataset init, time cost: {time.time() - start:.2f}")
+            self.logger.info(
+                f"[{__name__}]Dataset init, time cost: {time.time() - start:.2f}"
+            )
             dataset.config(dump_all=False, recursive=True)
             dataset.to_pickle(path + "tmp_dataset.pkl")
         # ⚠️ SAST Risk (Low): Potential race condition in directory creation
@@ -328,7 +362,9 @@ class HighFreqProvider:
             # 🧠 ML Signal: Logging information about dataset generation
             new_dataset = pkl.load(f)
 
-        time_list = D.calendar(start_time=self.start_time, end_time=self.end_time, freq=self.freq)[::240]
+        time_list = D.calendar(
+            start_time=self.start_time, end_time=self.end_time, freq=self.freq
+        )[::240]
         # 🧠 ML Signal: Using a configuration to initialize an instance
 
         def generate_dataset(times):
@@ -355,6 +391,7 @@ class HighFreqProvider:
             new_dataset.to_pickle(path + times.strftime("%Y-%m-%d") + ".pkl")
 
         Parallel(n_jobs=8)(delayed(generate_dataset)(times) for times in time_list)
+
     # 🧠 ML Signal: Conditional logic based on configuration type
 
     def _gen_stock_dataset(self, config, conf_type):
@@ -376,7 +413,9 @@ class HighFreqProvider:
             self.logger.info(f"[{__name__}]Generating dataset")
             self._prepare_calender_cache()
             dataset = init_instance_by_config(config)
-            self.logger.info(f"[{__name__}]Dataset init, time cost: {time.time() - start:.2f}")
+            self.logger.info(
+                f"[{__name__}]Dataset init, time cost: {time.time() - start:.2f}"
+            )
             dataset.config(dump_all=False, recursive=True)
             dataset.to_pickle(path + "tmp_dataset.pkl")
 
@@ -385,7 +424,11 @@ class HighFreqProvider:
 
         instruments = D.instruments(market="all")
         stock_list = D.list_instruments(
-            instruments=instruments, start_time=self.start_time, end_time=self.end_time, freq=self.freq, as_list=True
+            instruments=instruments,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            freq=self.freq,
+            as_list=True,
         )
 
         def generate_dataset(stock):

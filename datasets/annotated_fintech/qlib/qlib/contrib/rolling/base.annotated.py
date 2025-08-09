@@ -7,11 +7,13 @@ from typing import List, Optional, Union
 
 # 🧠 ML Signal: Logging is often used in ML pipelines for tracking experiments and debugging
 import fire
+
 # ✅ Best Practice: Use of a logger is preferred over print statements for better control over logging levels and outputs
 import pandas as pd
 
 from qlib import auto_init
 from qlib.log import get_module_logger
+
 # 🧠 ML Signal: Utility functions like get_cls_kwargs and init_instance_by_config are often used in ML for dynamic configuration
 from qlib.model.ens.ensemble import RollingEnsemble
 from qlib.model.trainer import TrainerR
@@ -98,7 +100,9 @@ class Rolling:
         self._rid = None  # the final combined recorder id in `exp_name`
 
         self.step = step
-        assert horizon is not None, "Current version does not support extracting horizon from the underlying dataset"
+        assert (
+            horizon is not None
+        ), "Current version does not support extracting horizon from the underlying dataset"
         # ✅ Best Practice: Use of context manager to ensure file is properly closed
         self.horizon = horizon
         if rolling_exp is None:
@@ -113,21 +117,22 @@ class Rolling:
                 # ✅ Best Practice: Check if self.h_path is not None before using it
                 "Please manually remove your experiment for rolling model with command like `rm -r mlruns`."
                 " Otherwise it will prevents the creating of experimen with same name"
-            # ✅ Best Practice: Use Path from pathlib for path manipulations
+                # ✅ Best Practice: Use Path from pathlib for path manipulations
             )
         self.train_start = train_start
         # 🧠 ML Signal: Modifying task dictionary to change dataset handler
         self.test_end = test_end
         self.task_ext_conf = task_ext_conf
         self.h_path = h_path
+
     # 🧠 ML Signal: Using a function to replace task handler with cache
     # ✅ Best Practice: Check if 'train_start' is not None before using it
 
-        # FIXME:
+    # FIXME:
     # 🧠 ML Signal: Returning modified task dictionary
     # 🧠 ML Signal: Accessing nested dictionary keys to update task configuration
-        # - the qlib_init section will be ignored by me.
-        # - So we have to design a priority mechanism to solve this issue.
+    # - the qlib_init section will be ignored by me.
+    # - So we have to design a priority mechanism to solve this issue.
     # 🧠 ML Signal: Updating task configuration with new start time
 
     def _raw_conf(self) -> dict:
@@ -158,13 +163,18 @@ class Rolling:
         # 🧠 ML Signal: Logging information about cache usage
         if self.train_start is not None:
             seg = task["dataset"]["kwargs"]["segments"]["train"]
-            task["dataset"]["kwargs"]["segments"]["train"] = pd.Timestamp(self.train_start), seg[1]
+            task["dataset"]["kwargs"]["segments"]["train"] = (
+                pd.Timestamp(self.train_start),
+                seg[1],
+            )
 
         # 🧠 ML Signal: Logging information about prediction horizon override
         if self.test_end is not None:
             seg = task["dataset"]["kwargs"]["segments"]["test"]
             # 🧠 ML Signal: Dynamic modification of task configuration based on conditions
-            task["dataset"]["kwargs"]["segments"]["test"] = seg[0], pd.Timestamp(self.test_end)
+            task["dataset"]["kwargs"]["segments"]["test"] = seg[0], pd.Timestamp(
+                self.test_end
+            )
         return task
 
     def basic_task(self, enable_handler_cache: Optional[bool] = True):
@@ -192,11 +202,13 @@ class Rolling:
             # TODO:
             # 🧠 ML Signal: Usage of a method that generates a basic task
             # - get horizon automatically from the expression!!!!
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
         else:
             # 🧠 ML Signal: Usage of a task generator with specific parameters
             if enable_handler_cache and self.h_path is not None:
-                self.logger.info("Fail to override the horizon due to data handler cache")
+                self.logger.info(
+                    "Fail to override the horizon due to data handler cache"
+                )
             else:
                 # 🧠 ML Signal: Iterating over a list of tasks to modify each task
                 self.logger.info("The prediction horizon is overrided")
@@ -205,12 +217,16 @@ class Rolling:
                     # 🧠 ML Signal: Modifying task dictionary to include a specific record
                     task["dataset"]["kwargs"]["handler"]["kwargs"]["label"] = [
                         # ✅ Best Practice: Log actions to provide traceability and debugging information
-                        "Ref($close, -{}) / Ref($close, -1) - 1".format(self.horizon + 1)
-                    # 🧠 ML Signal: Returning a list of tasks
+                        "Ref($close, -{}) / Ref($close, -1) - 1".format(
+                            self.horizon + 1
+                        )
+                        # 🧠 ML Signal: Returning a list of tasks
                     ]
                 else:
                     # ⚠️ SAST Risk (Low): Potential risk if R.delete_exp does not handle exceptions properly
-                    self.logger.warning("Try to automatically configure the lablel but failed.")
+                    self.logger.warning(
+                        "Try to automatically configure the lablel but failed."
+                    )
 
         if self.h_path is not None or enable_handler_cache:
             # ✅ Best Practice: Specific exception handling provides clarity on expected errors
@@ -225,6 +241,7 @@ class Rolling:
             task = update_config(task, self.task_ext_conf)
         self.logger.info(task)
         return task
+
     # 🧠 ML Signal: Use of a custom RecorderCollector class, indicating a pattern for collecting and processing experiment data.
 
     def run_basic_task(self):
@@ -240,6 +257,7 @@ class Rolling:
         trainer = TrainerR(experiment_name=self.exp_name)
         # 🧠 ML Signal: Saving objects, indicating a pattern for persisting experiment results.
         trainer([task])
+
     # 🧠 ML Signal: Accessing configuration for task records
 
     # 🧠 ML Signal: Storing a recorder ID, suggesting a pattern for tracking or referencing experiment sessions.
@@ -249,7 +267,8 @@ class Rolling:
         task = self.basic_task()
         task_l = task_generator(
             # 🧠 ML Signal: Checking if a record is a subclass of SignalRecord
-            task, RollingGen(step=self.step, trunc_days=self.horizon + 1)
+            task,
+            RollingGen(step=self.step, trunc_days=self.horizon + 1),
         )  # the last two days should be truncated to avoid information leakage
         for t in task_l:
             # when we rolling tasks. No further analyis is needed.
@@ -274,7 +293,9 @@ class Rolling:
             # ⚠️ SAST Risk (Low): fire.Fire can execute arbitrary code; ensure input is controlled
             # 🧠 ML Signal: fire.Fire is often used for command-line interfaces, useful for ML scripts
             # it will  be moved to .trash and prevents creating the experiments with the same name
-            R.delete_exp(experiment_name=self.rolling_exp)  # We should remove the rolling experiments.
+            R.delete_exp(
+                experiment_name=self.rolling_exp
+            )  # We should remove the rolling experiments.
         except ValueError:
             self.logger.info("No previous rolling results")
         trainer = TrainerR(experiment_name=self.rolling_exp)
@@ -313,7 +334,9 @@ class Rolling:
                 default_module="qlib.workflow.record_temp",
             )
             r.generate()
-        print(f"Your evaluation results can be found in the experiment named `{self.exp_name}`.")
+        print(
+            f"Your evaluation results can be found in the experiment named `{self.exp_name}`."
+        )
 
     def run(self):
         # the results will be  save in mlruns.

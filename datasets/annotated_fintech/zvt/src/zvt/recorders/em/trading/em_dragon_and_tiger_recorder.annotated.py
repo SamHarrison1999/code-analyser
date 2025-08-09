@@ -5,10 +5,16 @@ import pandas as pd
 
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
+
 # 🧠 ML Signal: JSON-like data structure could be used to train models for pattern recognition in trading data.
 from zvt.domain import Stock, DragonAndTiger
 from zvt.recorders.em import em_api
-from zvt.utils.time_utils import to_pd_timestamp, to_time_str, TIME_FORMAT_DAY, date_time_by_interval
+from zvt.utils.time_utils import (
+    to_pd_timestamp,
+    to_time_str,
+    TIME_FORMAT_DAY,
+    date_time_by_interval,
+)
 
 {
     "TRADE_ID": "3066028",
@@ -139,7 +145,7 @@ from zvt.utils.time_utils import to_pd_timestamp, to_time_str, TIME_FORMAT_DAY, 
             # ✅ Best Practice: Consistent naming for provider attributes improves readability
             "SELL_RATIO": 0.003208336653,
             "NET": 7629059,
-        # 🧠 ML Signal: Usage of a specific schema indicates a pattern for data structure
+            # 🧠 ML Signal: Usage of a specific schema indicates a pattern for data structure
         },
     ],
 }
@@ -164,7 +170,11 @@ class EMDragonAndTigerRecorder(FixedCycleDataRecorder):
             for data in datas:
                 timestamp = to_pd_timestamp(data["TRADE_DATE"])
                 record = {
-                    "id": "{}_{}_{}".format(entity.id, data["TRADE_ID"], to_time_str(timestamp, fmt=TIME_FORMAT_DAY)),
+                    "id": "{}_{}_{}".format(
+                        entity.id,
+                        data["TRADE_ID"],
+                        to_time_str(timestamp, fmt=TIME_FORMAT_DAY),
+                    ),
                     "entity_id": entity.id,
                     "timestamp": timestamp,
                     "code": entity.code,
@@ -199,7 +209,12 @@ class EMDragonAndTigerRecorder(FixedCycleDataRecorder):
 
                 records.append(record)
             df = pd.DataFrame.from_records(records)
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(
+                df=df,
+                data_schema=self.data_schema,
+                provider=self.provider,
+                force_update=self.force_update,
+            )
         else:
             self.logger.info(f"no data for {entity.id}")
 

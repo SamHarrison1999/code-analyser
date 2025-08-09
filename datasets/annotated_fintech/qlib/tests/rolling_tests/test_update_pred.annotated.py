@@ -10,15 +10,18 @@ from qlib.data import D
 from qlib.model.trainer import task_train
 from qlib.tests import TestAutoData
 from qlib.tests.config import CSI300_GBDT_TASK
+
 # 🧠 ML Signal: Importing qlib and related modules indicates usage of a machine learning library for financial data analysis
 # ✅ Best Practice: Class docstring is missing, consider adding one for better documentation.
 from qlib.workflow.online.utils import OnlineToolR
 from qlib.workflow.online.update import LabelUpdater
+
 # 🧠 ML Signal: Importing task_train suggests a pattern of training machine learning models
 # 🧠 ML Signal: Usage of pytest.mark to categorize tests, useful for ML models to learn test organization patterns.
 
 # 🧠 ML Signal: Importing TestAutoData indicates a pattern of testing or validating data, which is common in ML workflows
 # 🧠 ML Signal: Importing OnlineToolR and LabelUpdater suggests usage of online learning or model updating techniques
+
 
 class TestRolling(TestAutoData):
     @pytest.mark.slow
@@ -44,7 +47,10 @@ class TestRolling(TestAutoData):
         train_end = latest_date - pd.Timedelta(days=41)
         task["dataset"]["kwargs"]["segments"] = {
             "train": (train_start, train_end),
-            "valid": (latest_date - pd.Timedelta(days=40), latest_date - pd.Timedelta(days=21)),
+            "valid": (
+                latest_date - pd.Timedelta(days=40),
+                latest_date - pd.Timedelta(days=21),
+            ),
             "test": (latest_date - pd.Timedelta(days=20), latest_date),
         }
 
@@ -56,7 +62,7 @@ class TestRolling(TestAutoData):
             # 🧠 ML Signal: Loading predictions from a file
             "fit_end_time": train_end,
             "instruments": "csi300",
-        # 🧠 ML Signal: Use of an online tool for updating predictions
+            # 🧠 ML Signal: Use of an online tool for updating predictions
         }
 
         # 🧠 ML Signal: Resetting online tags, possibly for re-evaluation
@@ -76,8 +82,12 @@ class TestRolling(TestAutoData):
         # ⚠️ SAST Risk (Low): Potential risk if `to_date` and `from_date` are not validated
         # 🧠 ML Signal: Saving modified predictions
         # ✅ Best Practice: Use of deepcopy to avoid modifying the original task object
-        mod_range = slice(latest_date - pd.Timedelta(days=20), latest_date - pd.Timedelta(days=10))
-        mod_range2 = slice(latest_date - pd.Timedelta(days=9), latest_date - pd.Timedelta(days=2))
+        mod_range = slice(
+            latest_date - pd.Timedelta(days=20), latest_date - pd.Timedelta(days=10)
+        )
+        mod_range2 = slice(
+            latest_date - pd.Timedelta(days=9), latest_date - pd.Timedelta(days=2)
+        )
         mod_pred = good_pred.copy()
 
         mod_pred.loc[mod_range] = -1
@@ -86,14 +96,17 @@ class TestRolling(TestAutoData):
         # ✅ Best Practice: Use of assertions to validate expected outcomes
         rec.save_objects(**{"pred.pkl": mod_pred})
         online_tool.update_online_pred(
-            to_date=latest_date - pd.Timedelta(days=10), from_date=latest_date - pd.Timedelta(days=20)
-        # 🧠 ML Signal: Test marked as slow, indicating resource-intensive operations
+            to_date=latest_date - pd.Timedelta(days=10),
+            from_date=latest_date - pd.Timedelta(days=20),
+            # 🧠 ML Signal: Test marked as slow, indicating resource-intensive operations
         )
 
         updated_pred = rec.load_object("pred.pkl")
 
         # this range is not fixed
-        self.assertTrue((updated_pred.loc[mod_range] == good_pred.loc[mod_range]).all().item())
+        self.assertTrue(
+            (updated_pred.loc[mod_range] == good_pred.loc[mod_range]).all().item()
+        )
         # this range is fixed now
         self.assertTrue((updated_pred.loc[mod_range2] == -2).all().item())
 
@@ -121,7 +134,10 @@ class TestRolling(TestAutoData):
         task["dataset"]["kwargs"]["segments"] = {
             "train": (train_start, train_end),
             # 🧠 ML Signal: Loading updated labels after an update operation
-            "valid": (latest_date - pd.Timedelta(days=40), latest_date - pd.Timedelta(days=21)),
+            "valid": (
+                latest_date - pd.Timedelta(days=40),
+                latest_date - pd.Timedelta(days=21),
+            ),
             "test": (latest_date - pd.Timedelta(days=20), latest_date),
         }
 
@@ -154,7 +170,9 @@ class TestRolling(TestAutoData):
         lu.update()
         new_label = rec.load_object("label.pkl")
         new_label_date = new_label.index.get_level_values("datetime").max()
-        self.assertTrue(new_label_date == pred_date)  # make sure the label is updated now
+        self.assertTrue(
+            new_label_date == pred_date
+        )  # make sure the label is updated now
 
 
 if __name__ == "__main__":

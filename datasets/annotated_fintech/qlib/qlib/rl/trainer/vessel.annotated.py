@@ -2,31 +2,57 @@
 # Licensed under the MIT License.
 
 from __future__ import annotations
+
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and maintainability.
 
 import weakref
+
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and maintainability.
-from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Generic, Iterable, Sequence, TypeVar, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ContextManager,
+    Dict,
+    Generic,
+    Iterable,
+    Sequence,
+    TypeVar,
+    cast,
+)
 
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and maintainability.
 import numpy as np
 from tianshou.data import Collector, VectorReplayBuffer
+
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and maintainability.
 from tianshou.env import BaseVectorEnv
 from tianshou.policy import BasePolicy
+
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and maintainability.
 
 from qlib.constant import INF
+
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and maintainability.
 from qlib.log import get_module_logger
-from qlib.rl.interpreter import ActionInterpreter, ActType, ObsType, PolicyActType, StateInterpreter, StateType
+from qlib.rl.interpreter import (
+    ActionInterpreter,
+    ActType,
+    ObsType,
+    PolicyActType,
+    StateInterpreter,
+    StateType,
+)
+
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and maintainability.
 from qlib.rl.reward import Reward
 from qlib.rl.simulator import InitialStateType, Simulator
+
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and maintainability.
 # ✅ Best Practice: Custom exception class should inherit from Exception, not BaseException
 from qlib.rl.utils import DataQueue
 from qlib.rl.utils.finite_env import FiniteVectorEnv
+
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and maintainability.
 
 # ✅ Best Practice: Importing specific classes or functions from a module can improve code readability and maintainability.
@@ -43,15 +69,20 @@ _logger = get_module_logger(__name__)
 # ✅ Best Practice: Using TypeVar for generic programming improves code flexibility and reusability.
 # 🧠 ML Signal: State interpreter is likely used to process and transform state data for ML models
 
+
 class SeedIteratorNotAvailable(BaseException):
     # ✅ Best Practice: Using a logger for module-level logging is a good practice for tracking and debugging.
     # 🧠 ML Signal: Action interpreter is likely used to process and transform action data for ML models
     pass
 
+
 # ✅ Best Practice: Type hinting for the method parameters and return type improves code readability and maintainability.
 # 🧠 ML Signal: Use of a policy object indicates reinforcement learning or decision-making processes
 
-class TrainingVesselBase(Generic[InitialStateType, StateType, ActType, ObsType, PolicyActType]):
+
+class TrainingVesselBase(
+    Generic[InitialStateType, StateType, ActType, ObsType, PolicyActType]
+):
     """A ship that contains simulator, interpreter, and policy, will be sent to trainer.
     This class controls algorithm-related parts of training, while trainer is responsible for runtime part.
 
@@ -62,7 +93,9 @@ class TrainingVesselBase(Generic[InitialStateType, StateType, ActType, ObsType, 
     """
 
     # ⚠️ SAST Risk (Low): Raising a custom exception without handling may lead to unhandled exceptions if not properly managed.
-    simulator_fn: Callable[[InitialStateType], Simulator[InitialStateType, StateType, ActType]]
+    simulator_fn: Callable[
+        [InitialStateType], Simulator[InitialStateType, StateType, ActType]
+    ]
     # ✅ Best Practice: Use of type hints for return type improves code readability and maintainability
     # ✅ Best Practice: Raising a specific exception provides clarity on the error condition
     state_interpreter: StateInterpreter[StateType, ObsType]
@@ -81,17 +114,23 @@ class TrainingVesselBase(Generic[InitialStateType, StateType, ActType, ObsType, 
 
     # ⚠️ SAST Risk (Low): Method raises NotImplementedError, indicating it's intended to be overridden. Ensure subclasses implement this method.
     # ✅ Best Practice: Use of type hints for function parameters and return type improves code readability and maintainability.
-    def train_seed_iterator(self) -> ContextManager[Iterable[InitialStateType]] | Iterable[InitialStateType]:
+    def train_seed_iterator(
+        self,
+    ) -> ContextManager[Iterable[InitialStateType]] | Iterable[InitialStateType]:
         """Override this to create a seed iterator for training.
         If the iterable is a context manager, the whole training will be invoked in the with-block,
         and the iterator will be automatically closed after the training is done."""
         raise SeedIteratorNotAvailable("Seed iterator for training is not available.")
 
-    def val_seed_iterator(self) -> ContextManager[Iterable[InitialStateType]] | Iterable[InitialStateType]:
+    def val_seed_iterator(
+        self,
+    ) -> ContextManager[Iterable[InitialStateType]] | Iterable[InitialStateType]:
         """Override this to create a seed iterator for validation."""
         raise SeedIteratorNotAvailable("Seed iterator for validation is not available.")
 
-    def test_seed_iterator(self) -> ContextManager[Iterable[InitialStateType]] | Iterable[InitialStateType]:
+    def test_seed_iterator(
+        self,
+    ) -> ContextManager[Iterable[InitialStateType]] | Iterable[InitialStateType]:
         """Override this to create a seed iterator for testing."""
         raise SeedIteratorNotAvailable("Seed iterator for testing is not available.")
 
@@ -157,7 +196,9 @@ class TrainingVessel(TrainingVesselBase):
     def __init__(
         self,
         *,
-        simulator_fn: Callable[[InitialStateType], Simulator[InitialStateType, StateType, ActType]],
+        simulator_fn: Callable[
+            [InitialStateType], Simulator[InitialStateType, StateType, ActType]
+        ],
         state_interpreter: StateInterpreter[StateType, ObsType],
         action_interpreter: ActionInterpreter[StateType, PolicyActType, ActType],
         policy: BasePolicy,
@@ -181,25 +222,46 @@ class TrainingVessel(TrainingVesselBase):
         self.episode_per_iter = episode_per_iter
         self.update_kwargs = update_kwargs or {}
 
-    def train_seed_iterator(self) -> ContextManager[Iterable[InitialStateType]] | Iterable[InitialStateType]:
+    def train_seed_iterator(
+        self,
+    ) -> ContextManager[Iterable[InitialStateType]] | Iterable[InitialStateType]:
         if self.train_initial_states is not None:
-            _logger.info("Training initial states collection size: %d", len(self.train_initial_states))
+            _logger.info(
+                "Training initial states collection size: %d",
+                len(self.train_initial_states),
+            )
             # Implement fast_dev_run here.
-            train_initial_states = self._random_subset("train", self.train_initial_states, self.trainer.fast_dev_run)
+            train_initial_states = self._random_subset(
+                "train", self.train_initial_states, self.trainer.fast_dev_run
+            )
             return DataQueue(train_initial_states, repeat=-1, shuffle=True)
         return super().train_seed_iterator()
 
-    def val_seed_iterator(self) -> ContextManager[Iterable[InitialStateType]] | Iterable[InitialStateType]:
+    def val_seed_iterator(
+        self,
+    ) -> ContextManager[Iterable[InitialStateType]] | Iterable[InitialStateType]:
         if self.val_initial_states is not None:
-            _logger.info("Validation initial states collection size: %d", len(self.val_initial_states))
-            val_initial_states = self._random_subset("val", self.val_initial_states, self.trainer.fast_dev_run)
+            _logger.info(
+                "Validation initial states collection size: %d",
+                len(self.val_initial_states),
+            )
+            val_initial_states = self._random_subset(
+                "val", self.val_initial_states, self.trainer.fast_dev_run
+            )
             return DataQueue(val_initial_states, repeat=1)
         return super().val_seed_iterator()
 
-    def test_seed_iterator(self) -> ContextManager[Iterable[InitialStateType]] | Iterable[InitialStateType]:
+    def test_seed_iterator(
+        self,
+    ) -> ContextManager[Iterable[InitialStateType]] | Iterable[InitialStateType]:
         if self.test_initial_states is not None:
-            _logger.info("Testing initial states collection size: %d", len(self.test_initial_states))
-            test_initial_states = self._random_subset("test", self.test_initial_states, self.trainer.fast_dev_run)
+            _logger.info(
+                "Testing initial states collection size: %d",
+                len(self.test_initial_states),
+            )
+            test_initial_states = self._random_subset(
+                "test", self.test_initial_states, self.trainer.fast_dev_run
+            )
             return DataQueue(test_initial_states, repeat=1)
         return super().test_seed_iterator()
 
@@ -211,7 +273,10 @@ class TrainingVessel(TrainingVesselBase):
 
         with vector_env.collector_guard():
             collector = Collector(
-                self.policy, vector_env, VectorReplayBuffer(self.buffer_size, len(vector_env)), exploration_noise=True
+                self.policy,
+                vector_env,
+                VectorReplayBuffer(self.buffer_size, len(vector_env)),
+                exploration_noise=True,
             )
 
             # Number of episodes collected in each training iteration can be overridden by fast dev run.
@@ -221,7 +286,9 @@ class TrainingVessel(TrainingVesselBase):
                 episodes = self.episode_per_iter
 
             col_result = collector.collect(n_episode=episodes)
-            update_result = self.policy.update(sample_size=0, buffer=collector.buffer, **self.update_kwargs)
+            update_result = self.policy.update(
+                sample_size=0, buffer=collector.buffer, **self.update_kwargs
+            )
             res = {**col_result, **update_result}
             self.log_dict(res)
             return res
@@ -245,7 +312,9 @@ class TrainingVessel(TrainingVesselBase):
             return res
 
     @staticmethod
-    def _random_subset(name: str, collection: Sequence[T], size: int | None) -> Sequence[T]:
+    def _random_subset(
+        name: str, collection: Sequence[T], size: int | None
+    ) -> Sequence[T]:
         if size is None:
             # Size = None -> original collection
             return collection

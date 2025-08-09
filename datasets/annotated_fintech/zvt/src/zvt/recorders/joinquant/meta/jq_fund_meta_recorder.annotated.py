@@ -2,24 +2,36 @@
 # 🧠 ML Signal: Importing specific functions from a module indicates selective usage patterns
 import pandas as pd
 from jqdatapy.api import run_query
+
 # 🧠 ML Signal: Importing specific functions from a module indicates selective usage patterns
 
 from zvt.api.portfolio import portfolio_relate_stock
+
 # 🧠 ML Signal: Importing specific functions from a module indicates selective usage patterns
 from zvt.api.utils import china_stock_code_to_id
 from zvt.contract.api import df_to_db
+
 # 🧠 ML Signal: Importing specific functions from a module indicates selective usage patterns
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
 from zvt.domain.meta.fund_meta import Fund, FundStock
+
 # 🧠 ML Signal: Importing specific classes from a module indicates selective usage patterns
 from zvt.recorders.joinquant.common import to_entity_id, jq_to_report_period
 from zvt.utils.pd_utils import pd_is_not_null
+
 # 🧠 ML Signal: Importing specific classes from a module indicates selective usage patterns
 # 🧠 ML Signal: Inheritance from a base class, indicating a common pattern for extending functionality
-from zvt.utils.time_utils import to_time_str, date_time_by_interval, now_pd_timestamp, is_same_date
+from zvt.utils.time_utils import (
+    to_time_str,
+    date_time_by_interval,
+    now_pd_timestamp,
+    is_same_date,
+)
+
 # ✅ Best Practice: Class-level attributes provide clear and consistent configuration for instances
 
 # 🧠 ML Signal: Importing specific functions from a module indicates selective usage patterns
+
 
 # 🧠 ML Signal: Use of a data schema, indicating structured data handling
 class JqChinaFundRecorder(Recorder):
@@ -52,7 +64,10 @@ class JqChinaFundRecorder(Recorder):
                 if latest:
                     start_timestamp = latest[0].timestamp
 
-                end_timestamp = min(date_time_by_interval(start_timestamp, 365 * year_count), now_pd_timestamp())
+                end_timestamp = min(
+                    date_time_by_interval(start_timestamp, 365 * year_count),
+                    now_pd_timestamp(),
+                )
 
                 df = run_query(
                     # 🧠 ML Signal: Usage of lambda function for data transformation
@@ -61,7 +76,9 @@ class JqChinaFundRecorder(Recorder):
                     parse_dates=["start_date", "end_date"],
                     dtype={"main_code": str},
                 )
-                if not pd_is_not_null(df) or (df["start_date"].max().year < end_timestamp.year):
+                if not pd_is_not_null(df) or (
+                    df["start_date"].max().year < end_timestamp.year
+                ):
                     # 🧠 ML Signal: Data persistence pattern to a database
                     year_count = year_count + 1
 
@@ -80,21 +97,30 @@ class JqChinaFundRecorder(Recorder):
                     # ✅ Best Practice: Using class method 'query_data' suggests a well-structured data access pattern.
                     # 🧠 ML Signal: Usage of 'query_data' method indicates a pattern for data retrieval.
                     df["code"] = df["main_code"]
-                    df["entity_id"] = df["code"].apply(lambda x: to_entity_id(entity_type="fund", jq_code=x))
+                    df["entity_id"] = df["code"].apply(
+                        lambda x: to_entity_id(entity_type="fund", jq_code=x)
+                    )
                     df["id"] = df["entity_id"]
                     df["entity_type"] = "fund"
                     # 🧠 ML Signal: Use of 'entity_ids' and 'codes' suggests a pattern for filtering or identifying specific data.
                     df["exchange"] = "sz"
-                    df_to_db(df, data_schema=Fund, provider=self.provider, force_update=self.force_update)
+                    df_to_db(
+                        df,
+                        data_schema=Fund,
+                        provider=self.provider,
+                        force_update=self.force_update,
+                    )
                     self.logger.info(
                         # ✅ Best Practice: Use of named parameters improves readability and maintainability.
                         f"persist fund {operate_mode_id} list success {start_timestamp} to {end_timestamp}"
-                    # ⚠️ SAST Risk (Low): Potential for SQL injection if `entity.code` is not properly sanitized
+                        # ⚠️ SAST Risk (Low): Potential for SQL injection if `entity.code` is not properly sanitized
                     )
 
                 # ⚠️ SAST Risk (Low): Potential risk if 'filters' are user-controlled, leading to injection attacks.
                 if is_same_date(end_timestamp, now_pd_timestamp()):
                     break
+
+
 # 🧠 ML Signal: Usage of a query function with dynamic conditions
 
 
@@ -116,8 +142,11 @@ class JqChinaFundStockRecorder(TimeSeriesDataRecorder):
             # 🧠 ML Signal: Function call to relate stock data to portfolio
             provider=self.entity_provider,
             # 🧠 ML Signal: Applying a transformation function to a DataFrame column
-            filters=[Fund.underlying_asset_type.in_(("股票型", "混合型")), Fund.end_date.is_(None)],
-        # 🧠 ML Signal: Creating a unique identifier by combining multiple fields
+            filters=[
+                Fund.underlying_asset_type.in_(("股票型", "混合型")),
+                Fund.end_date.is_(None),
+            ],
+            # 🧠 ML Signal: Creating a unique identifier by combining multiple fields
         )
 
     def record(self, entity, start, end, size, timestamps):
@@ -147,20 +176,29 @@ class JqChinaFundStockRecorder(TimeSeriesDataRecorder):
                 # 3   8640572  159919   2018-07-01  2018-09-30  2018-10-26          403003        第三季度     4  601166  兴业银行  22862332.0  3.646542e+08        1.90
                 df["timestamp"] = pd.to_datetime(df["pub_date"])
 
-                df.rename(columns={"symbol": "stock_code", "name": "stock_name"}, inplace=True)
+                df.rename(
+                    columns={"symbol": "stock_code", "name": "stock_name"}, inplace=True
+                )
                 df["proportion"] = df["proportion"] * 0.01
 
                 df = portfolio_relate_stock(df, entity)
 
-                df["stock_id"] = df["stock_code"].apply(lambda x: china_stock_code_to_id(x))
+                df["stock_id"] = df["stock_code"].apply(
+                    lambda x: china_stock_code_to_id(x)
+                )
                 df["id"] = df[["entity_id", "stock_id", "pub_date", "id"]].apply(
                     lambda x: "_".join(x.astype(str)), axis=1
                 )
                 df["report_date"] = pd.to_datetime(df["period_end"])
-                df["report_period"] = df["report_type"].apply(lambda x: jq_to_report_period(x))
+                df["report_period"] = df["report_type"].apply(
+                    lambda x: jq_to_report_period(x)
+                )
 
                 saved = df_to_db(
-                    df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update
+                    df=df,
+                    data_schema=self.data_schema,
+                    provider=self.provider,
+                    force_update=self.force_update,
                 )
 
                 # 取不到非重复的数据

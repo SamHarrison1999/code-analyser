@@ -4,22 +4,28 @@
 
 from __future__ import division
 from __future__ import print_function
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 
 import numpy as np
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import pandas as pd
 from typing import Text, Union
 import copy
 from ...utils import get_or_create_path
 from ...log import get_module_logger
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 
 import torch
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import torch.nn as nn
+
 # 🧠 ML Signal: Definition of a class that inherits from Model, indicating a custom model implementation
 import torch.optim as optim
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 
 from .pytorch_utils import count_parameters
@@ -86,7 +92,9 @@ class TCN(Model):
         self.early_stop = early_stop
         self.optimizer = optimizer.lower()
         self.loss = loss
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.seed = seed
 
         self.logger.info(
@@ -142,12 +150,14 @@ class TCN(Model):
             kernel_size=self.kernel_size,
             # ✅ Best Practice: Use of descriptive variable names for clarity
             dropout=self.dropout,
-        # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported optimizers
+            # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported optimizers
         )
         # ✅ Best Practice: Use of torch.isnan to handle NaN values in tensors
         # ⚠️ SAST Risk (Low): Assumes pred and label are tensors; no input validation
         self.logger.info("model:\n{:}".format(self.tcn_model))
-        self.logger.info("model size: {:.4f} MB".format(count_parameters(self.tcn_model)))
+        self.logger.info(
+            "model size: {:.4f} MB".format(count_parameters(self.tcn_model))
+        )
         # 🧠 ML Signal: Conditional logic based on loss type
         # 🧠 ML Signal: Moving model to device (CPU/GPU) is a common pattern in ML
 
@@ -161,11 +171,14 @@ class TCN(Model):
             self.train_optimizer = optim.SGD(self.tcn_model.parameters(), lr=self.lr)
         else:
             # 🧠 ML Signal: Conditional logic based on metric type suggests dynamic behavior in ML evaluation
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
 
         # 🧠 ML Signal: Use of loss function indicates model evaluation or training process
         self.fitted = False
         self.tcn_model.to(self.device)
+
     # ⚠️ SAST Risk (Low): Potential for unhandled exception if metric is unknown
 
     @property
@@ -217,10 +230,18 @@ class TCN(Model):
                 break
             # 🧠 ML Signal: Using a metric function to evaluate model predictions is a standard ML practice.
 
-            feature = torch.from_numpy(x_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            feature = (
+                torch.from_numpy(x_train_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
             # ✅ Best Practice: Returning the mean of losses and scores provides a summary metric for the epoch.
             # ✅ Best Practice: Consider using a more explicit data structure for evals_result to avoid shared state issues.
-            label = torch.from_numpy(y_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            label = (
+                torch.from_numpy(y_train_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
 
             pred = self.tcn_model(feature)
             loss = self.loss_fn(pred, label)
@@ -245,8 +266,16 @@ class TCN(Model):
             if len(indices) - i < self.batch_size:
                 break
 
-            feature = torch.from_numpy(x_values[indices[i : i + self.batch_size]]).float().to(self.device)
-            label = torch.from_numpy(y_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            feature = (
+                torch.from_numpy(x_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
+            label = (
+                torch.from_numpy(y_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
 
             with torch.no_grad():
                 pred = self.tcn_model(feature)
@@ -265,14 +294,14 @@ class TCN(Model):
         evals_result=dict(),
         # ⚠️ SAST Risk (Low): Potential exception if 'self.fitted' is not a boolean
         save_path=None,
-    # ⚠️ SAST Risk (Low): Ensure that GPU resources are properly managed to prevent memory leaks.
+        # ⚠️ SAST Risk (Low): Ensure that GPU resources are properly managed to prevent memory leaks.
     ):
         df_train, df_valid, df_test = dataset.prepare(
             # 🧠 ML Signal: Usage of dataset preparation for prediction
             ["train", "valid", "test"],
             col_set=["feature", "label"],
             data_key=DataHandlerLP.DK_L,
-        # 🧠 ML Signal: Model evaluation mode set before prediction
+            # 🧠 ML Signal: Model evaluation mode set before prediction
         )
 
         x_train, y_train = df_train["feature"], df_train["label"]
@@ -337,7 +366,9 @@ class TCN(Model):
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
 
-        x_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        x_test = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
         index = x_test.index
         self.tcn_model.eval()
         x_values = x_test.values
@@ -364,7 +395,9 @@ class TCNModel(nn.Module):
     def __init__(self, num_input, output_size, num_channels, kernel_size, dropout):
         super().__init__()
         self.num_input = num_input
-        self.tcn = TemporalConvNet(num_input, num_channels, kernel_size, dropout=dropout)
+        self.tcn = TemporalConvNet(
+            num_input, num_channels, kernel_size, dropout=dropout
+        )
         self.linear = nn.Linear(num_channels[-1], output_size)
 
     def forward(self, x):

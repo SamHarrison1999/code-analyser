@@ -3,8 +3,10 @@
 from sqlalchemy.ext.declarative import declarative_base
 
 from zvt.contract.register import register_schema
+
 # 🧠 ML Signal: Usage of SQLAlchemy's declarative_base indicates ORM pattern.
 from zvt.factors.zen.domain.common import ZenFactorCommon
+
 # 🧠 ML Signal: Inheritance from multiple base classes, indicating a pattern of using mixins or shared functionality.
 
 Stock1dZenFactorBase = declarative_base()
@@ -17,7 +19,12 @@ class Stock1dZenFactor(Stock1dZenFactorBase, ZenFactorCommon):
     __tablename__ = "stock_1d_zen_factor"
 
 
-register_schema(providers=["zvt"], db_name="stock_1d_zen_factor", schema_base=Stock1dZenFactorBase, entity_type="stock")
+register_schema(
+    providers=["zvt"],
+    db_name="stock_1d_zen_factor",
+    schema_base=Stock1dZenFactorBase,
+    entity_type="stock",
+)
 
 
 # the __all__ is generated

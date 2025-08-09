@@ -4,12 +4,15 @@
 import abc
 import pickle
 from pathlib import Path
+
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 import warnings
 import pandas as pd
+
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 
 from typing import Tuple, Union, List, Dict
+
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 # ✅ Best Practice: Class docstring provides a clear description of the class purpose
 
@@ -18,10 +21,12 @@ from qlib.data import D
 from qlib.utils import load_dataset, init_instance_by_config, time_to_slc_point
 from qlib.log import get_module_logger
 from qlib.utils.serial import Serializable
+
 # ✅ Best Practice: Use of abstract method to enforce implementation in subclasses
 
 # ✅ Best Practice: Docstring provides a clear description of the method's purpose and usage.
 # ✅ Best Practice: Clearly specifies the expected types for the 'instruments' parameter.
+
 
 class DataLoader(abc.ABC):
     """
@@ -97,7 +102,10 @@ class DLWParser(DataLoader):
         self.is_group = isinstance(config, dict)
 
         if self.is_group:
-            self.fields = {grp: self._parse_fields_info(fields_info) for grp, fields_info in config.items()}
+            self.fields = {
+                grp: self._parse_fields_info(fields_info)
+                for grp, fields_info in config.items()
+            }
         # ✅ Best Practice: Use of type hints for function parameters and return type improves code readability and maintainability.
         else:
             self.fields = self._parse_fields_info(config)
@@ -114,9 +122,10 @@ class DLWParser(DataLoader):
         elif isinstance(fields_info[0], (list, tuple)):
             exprs, names = fields_info
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
         # ✅ Best Practice: Check if the object is a group to decide the loading strategy
         return exprs, names
+
     # ✅ Best Practice: Use of pd.concat for combining dataframes is efficient
     # 🧠 ML Signal: Iterating over dictionary items to process data
 
@@ -152,7 +161,9 @@ class DLWParser(DataLoader):
         if self.is_group:
             df = pd.concat(
                 {
-                    grp: self.load_group_df(instruments, exprs, names, start_time, end_time, grp)
+                    grp: self.load_group_df(
+                        instruments, exprs, names, start_time, end_time, grp
+                    )
                     for grp, (exprs, names) in self.fields.items()
                 },
                 axis=1,
@@ -206,8 +217,9 @@ class QlibDataLoader(DLWParser):
         # ✅ Best Practice: Handling different types of `inst_processors` to ensure correct processing.
         self.inst_processors = inst_processors if inst_processors is not None else {}
         assert isinstance(
-            self.inst_processors, (dict, list)
-        # 🧠 ML Signal: Usage of external function `D.features` with multiple parameters.
+            self.inst_processors,
+            (dict, list),
+            # 🧠 ML Signal: Usage of external function `D.features` with multiple parameters.
         ), f"inst_processors(={self.inst_processors}) must be dict or list"
 
         super().__init__(config)
@@ -250,7 +262,9 @@ class QlibDataLoader(DLWParser):
             instruments = D.instruments(instruments, filter_pipe=self.filter_pipe)
         # ✅ Best Practice: Convert time inputs to a standard format
         elif self.filter_pipe is not None:
-            warnings.warn("`filter_pipe` is not None, but it will not be used with `instruments` as list")
+            warnings.warn(
+                "`filter_pipe` is not None, but it will not be used with `instruments` as list"
+            )
         # ✅ Best Practice: Convert time inputs to a standard format
 
         freq = self.freq[gp_name] if isinstance(self.freq, dict) else self.freq
@@ -258,13 +272,26 @@ class QlibDataLoader(DLWParser):
         inst_processors = (
             # 🧠 ML Signal: Usage of pd.concat to combine datasets
             # 🧠 ML Signal: Dictionary comprehension to load datasets
-            self.inst_processors if isinstance(self.inst_processors, list) else self.inst_processors.get(gp_name, [])
+            self.inst_processors
+            if isinstance(self.inst_processors, list)
+            else self.inst_processors.get(gp_name, [])
         )
-        df = D.features(instruments, exprs, start_time, end_time, freq=freq, inst_processors=inst_processors)
+        df = D.features(
+            instruments,
+            exprs,
+            start_time,
+            end_time,
+            freq=freq,
+            inst_processors=inst_processors,
+        )
         df.columns = names
         if self.swap_level:
-            df = df.swaplevel().sort_index()  # NOTE: if swaplevel, return <datetime, instrument>
+            df = (
+                df.swaplevel().sort_index()
+            )  # NOTE: if swaplevel, return <datetime, instrument>
         return df
+
+
 # ✅ Best Practice: Sorting index for consistent data ordering
 
 
@@ -323,7 +350,10 @@ class StaticDataLoader(DataLoader, Serializable):
         # ⚠️ SAST Risk (Low): Catching broad exceptions like KeyError without specific handling can hide bugs.
         if isinstance(self._config, dict):
             self._data = pd.concat(
-                {fields_group: load_dataset(path_or_obj) for fields_group, path_or_obj in self._config.items()},
+                {
+                    fields_group: load_dataset(path_or_obj)
+                    for fields_group, path_or_obj in self._config.items()
+                },
                 axis=1,
                 # ✅ Best Practice: Provide a fallback mechanism when an exception occurs.
                 join=self.join,
@@ -378,11 +408,13 @@ class NestedDataLoader(DataLoader):
         # 🧠 ML Signal: Use of dictionary comprehension to initialize handlers based on configuration.
         super().__init__()
         self.data_loader_l = [
-            (dl if isinstance(dl, DataLoader) else init_instance_by_config(dl)) for dl in dataloader_l
-        # 🧠 ML Signal: Conditional logic to handle different initialization paths for handlers.
-        # ✅ Best Practice: Log a warning when a parameter is ignored to inform the user.
+            (dl if isinstance(dl, DataLoader) else init_instance_by_config(dl))
+            for dl in dataloader_l
+            # 🧠 ML Signal: Conditional logic to handle different initialization paths for handlers.
+            # ✅ Best Practice: Log a warning when a parameter is ignored to inform the user.
         ]
         self.join = join
+
     # 🧠 ML Signal: Storing configuration state in instance variables for later use.
 
     # ✅ Best Practice: Initializing fetch_kwargs with a default value before updating.
@@ -400,15 +432,25 @@ class NestedDataLoader(DataLoader):
                 )
                 # 🧠 ML Signal: Direct fetch method call on a handler object.
                 # ✅ Best Practice: Explicitly returning a DataFrame for clarity and type consistency.
-                df_current = dl.load(instruments=None, start_time=start_time, end_time=end_time)
+                df_current = dl.load(
+                    instruments=None, start_time=start_time, end_time=end_time
+                )
             if df_full is None:
                 df_full = df_current
             else:
                 current_columns = df_current.columns.tolist()
                 full_columns = df_full.columns.tolist()
-                columns_to_drop = [col for col in current_columns if col in full_columns]
+                columns_to_drop = [
+                    col for col in current_columns if col in full_columns
+                ]
                 df_full.drop(columns=columns_to_drop, inplace=True)
-                df_full = pd.merge(df_full, df_current, left_index=True, right_index=True, how=self.join)
+                df_full = pd.merge(
+                    df_full,
+                    df_current,
+                    left_index=True,
+                    right_index=True,
+                    how=self.join,
+                )
         return df_full.sort_index(axis=1)
 
 
@@ -453,10 +495,13 @@ class DataLoaderDH(DataLoader):
 
         if is_group:
             self.handlers = {
-                grp: init_instance_by_config(config, accept_types=DataHandler) for grp, config in handler_config.items()
+                grp: init_instance_by_config(config, accept_types=DataHandler)
+                for grp, config in handler_config.items()
             }
         else:
-            self.handlers = init_instance_by_config(handler_config, accept_types=DataHandler)
+            self.handlers = init_instance_by_config(
+                handler_config, accept_types=DataHandler
+            )
 
         self.is_group = is_group
         self.fetch_kwargs = {"col_set": DataHandler.CS_RAW}
@@ -464,16 +509,26 @@ class DataLoaderDH(DataLoader):
 
     def load(self, instruments=None, start_time=None, end_time=None) -> pd.DataFrame:
         if instruments is not None:
-            get_module_logger(self.__class__.__name__).warning(f"instruments[{instruments}] is ignored")
+            get_module_logger(self.__class__.__name__).warning(
+                f"instruments[{instruments}] is ignored"
+            )
 
         if self.is_group:
             df = pd.concat(
                 {
-                    grp: dh.fetch(selector=slice(start_time, end_time), level="datetime", **self.fetch_kwargs)
+                    grp: dh.fetch(
+                        selector=slice(start_time, end_time),
+                        level="datetime",
+                        **self.fetch_kwargs,
+                    )
                     for grp, dh in self.handlers.items()
                 },
                 axis=1,
             )
         else:
-            df = self.handlers.fetch(selector=slice(start_time, end_time), level="datetime", **self.fetch_kwargs)
+            df = self.handlers.fetch(
+                selector=slice(start_time, end_time),
+                level="datetime",
+                **self.fetch_kwargs,
+            )
         return df

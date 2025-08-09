@@ -4,15 +4,23 @@ import pandas as pd
 from zvt.api.kdata import get_kdata_schema
 from zvt.broker.qmt import qmt_quote
 from zvt.consts import IMPORTANT_INDEX
+
 # ✅ Best Practice: Grouping imports by their source (standard library, third-party, local) improves readability.
 from zvt.contract import IntervalLevel
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.contract.utils import evaluate_size_from_timestamp
 from zvt.domain import Index, IndexKdataCommon
+
 # ✅ Best Practice: Class definition should follow PEP 8 naming conventions, using CamelCase.
 from zvt.utils.pd_utils import pd_is_not_null
-from zvt.utils.time_utils import TIME_FORMAT_DAY, TIME_FORMAT_MINUTE, current_date, to_time_str
+from zvt.utils.time_utils import (
+    TIME_FORMAT_DAY,
+    TIME_FORMAT_MINUTE,
+    current_date,
+    to_time_str,
+)
+
 # ✅ Best Practice: Class attributes should be documented for clarity and maintainability.
 
 
@@ -57,7 +65,9 @@ class QmtIndexRecorder(FixedCycleDataRecorder):
         self.entity_type = "index"
         self.download_history_data = download_history_data
 
-        self.data_schema = get_kdata_schema(entity_type=self.entity_type, level=level, adjust_type=None)
+        self.data_schema = get_kdata_schema(
+            entity_type=self.entity_type, level=level, adjust_type=None
+        )
 
         super().__init__(
             force_update,
@@ -111,15 +121,20 @@ class QmtIndexRecorder(FixedCycleDataRecorder):
             download_history=self.download_history_data,
         )
         # 🧠 ML Signal: Creation of unique identifiers for rows
-        time_str_fmt = TIME_FORMAT_DAY if self.level == IntervalLevel.LEVEL_1DAY else TIME_FORMAT_MINUTE
+        time_str_fmt = (
+            TIME_FORMAT_DAY
+            if self.level == IntervalLevel.LEVEL_1DAY
+            else TIME_FORMAT_MINUTE
+        )
         if pd_is_not_null(df):
             df["entity_id"] = entity.id
             df["timestamp"] = pd.to_datetime(df.index)
             df["id"] = df.apply(
                 # ✅ Best Practice: Check if all required conditions are met before proceeding with the logic.
-                lambda row: f"{row['entity_id']}_{to_time_str(row['timestamp'], fmt=time_str_fmt)}", axis=1
-            # ✅ Best Practice: Rename columns for clarity
-            # 🧠 ML Signal: Evaluating size based on timestamps can indicate data completeness.
+                lambda row: f"{row['entity_id']}_{to_time_str(row['timestamp'], fmt=time_str_fmt)}",
+                axis=1,
+                # ✅ Best Practice: Rename columns for clarity
+                # 🧠 ML Signal: Evaluating size based on timestamps can indicate data completeness.
             )
             df["provider"] = "qmt"
             df["level"] = self.level.value
@@ -131,7 +146,12 @@ class QmtIndexRecorder(FixedCycleDataRecorder):
             # ✅ Best Practice: Log information when no data is found
             # 🧠 ML Signal: Querying a database to count records within a timestamp range.
             df["change_pct"] = (df["close"] - df["preClose"]) / df["preClose"]
-            df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+            df_to_db(
+                df=df,
+                data_schema=self.data_schema,
+                provider=self.provider,
+                force_update=self.force_update,
+            )
 
         else:
             self.logger.info(f"no kdata for {entity.id}")
@@ -145,14 +165,13 @@ class QmtIndexRecorder(FixedCycleDataRecorder):
                 # ✅ Best Practice: Compare expected and recorded sizes to ensure data integrity.
                 level=self.level,
                 one_day_trading_minutes=self.one_day_trading_minutes,
-            # ✅ Best Practice: Use of super() to call a method from the parent class.
+                # ✅ Best Practice: Use of super() to call a method from the parent class.
             )
 
             # ✅ Best Practice: Check if end_timestamp is not None before comparing.
             # ✅ Best Practice: Ensure start_timestamp is less than end_timestamp.
             recorded_size = (
-                self.session.query(self.data_schema)
-                .filter(
+                self.session.query(self.data_schema).filter(
                     self.data_schema.entity_id == entity.id,
                     self.data_schema.timestamp >= self.start_timestamp,
                     self.data_schema.timestamp <= self.end_timestamp,
@@ -165,7 +184,9 @@ class QmtIndexRecorder(FixedCycleDataRecorder):
                 # print(f"expected_size: {expected_size}, recorded_size: {recorded_size}")
                 return self.start_timestamp, self.end_timestamp, self.default_size, None
 
-        start_timestamp, end_timestamp, size, timestamps = super().evaluate_start_end_size_timestamps(entity)
+        start_timestamp, end_timestamp, size, timestamps = (
+            super().evaluate_start_end_size_timestamps(entity)
+        )
         # start_timestamp is the last updated timestamp
         if self.end_timestamp is not None:
             if start_timestamp >= self.end_timestamp:

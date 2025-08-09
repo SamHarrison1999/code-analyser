@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local application sections improves readability.
 from typing import Type
 
@@ -9,6 +10,7 @@ from zvt.contract.api import get_db_session
 from zvt.contract.base_service import OneStateService
 from zvt.contract.zvt_info import TaggerState
 from zvt.domain import Stock
+
 # ✅ Best Practice: Class should inherit from a base class to ensure consistent behavior and structure
 # ✅ Best Practice: Using a logger with __name__ ensures that the log messages are correctly associated with the module name.
 from zvt.tag.tag_schemas import StockTags
@@ -17,6 +19,7 @@ from zvt.tag.tag_schemas import StockTags
 logger = logging.getLogger(__name__)
 
 # ✅ Best Practice: Type hinting for entity_schema to improve code readability and maintainability
+
 
 class Tagger(OneStateService):
     # ✅ Best Practice: Type hinting for data_schema to improve code readability and maintainability
@@ -47,7 +50,7 @@ class Tagger(OneStateService):
         # ✅ Best Practice: Method should be defined within a class
         if self.state and not self.force:
             # ✅ Best Practice: Class attributes should be defined at the top of the class for better readability
-            logger.info(f"get start_timestamp from state")
+            logger.info("get start_timestamp from state")
             # ✅ Best Practice: __all__ is used to define the public interface of the module
             # ✅ Best Practice: Raising NotImplementedError is a common pattern for abstract methods
             self.start_timestamp = self.state["current_timestamp"]

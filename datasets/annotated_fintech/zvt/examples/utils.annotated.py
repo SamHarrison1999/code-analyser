@@ -8,8 +8,10 @@ import pandas as pd
 # ✅ Best Practice: Use of __name__ in getLogger for module-specific logging
 # ⚠️ SAST Risk (Medium): Potential file path traversal vulnerability if the file path is influenced by user input
 from zvt.domain import StockNews, Stock, LimitUpInfo
+
 # ✅ Best Practice: Use 'with' statement for file operations to ensure proper resource management
 from zvt.utils.time_utils import date_time_by_interval, today
+
 # 🧠 ML Signal: Usage of os.path to construct file paths
 
 # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and parameters.
@@ -19,10 +21,13 @@ logger = logging.getLogger(__name__)
 # 🧠 ML Signal: Usage of json.load to parse JSON files
 # ✅ Best Practice: Use consistent casing for text processing to avoid case sensitivity issues.
 
+
 def get_hot_words_config():
     # ⚠️ SAST Risk (Low): Ensure get_hot_words_config() is defined and returns expected data structure.
     with open(os.path.join(os.path.dirname(__file__), "hot.json")) as f:
         return json.load(f)
+
+
 # ✅ Best Practice: Initialize dictionaries before use to ensure they are empty.
 
 
@@ -53,7 +58,12 @@ def hot_stats(data: pd.Series):
 
 
 def group_stocks_by_topic(
-    keyword=None, entities=None, hot_words_config=None, start_timestamp=None, days_ago=60, threshold=3
+    keyword=None,
+    entities=None,
+    hot_words_config=None,
+    start_timestamp=None,
+    days_ago=60,
+    threshold=3,
 ):
     """
 
@@ -82,7 +92,9 @@ def group_stocks_by_topic(
     filters = None
     if keyword:
         filters = [StockNews.news_title.contains(keyword)]
-    df = StockNews.query_data(start_timestamp=start_timestamp, entity_ids=entity_ids, filters=filters)
+    df = StockNews.query_data(
+        start_timestamp=start_timestamp, entity_ids=entity_ids, filters=filters
+    )
     df = df.groupby("entity_id")["news_title"].apply(",".join).reset_index()
 
     if not hot_words_config:
@@ -109,13 +121,18 @@ def group_stocks_by_topic(
                     topic_count[topic] = topic_count[topic] + 1
                     hot_stocks_map[words].append(
                         # 🧠 ML Signal: Function signature with multiple optional parameters
-                        (f"{stock_map[entity_id]['code']}({stock_map[entity_id]['name']})", count)
+                        (
+                            f"{stock_map[entity_id]['code']}({stock_map[entity_id]['name']})",
+                            count,
+                        )
                     )
                     is_hot = True
         # 🧠 ML Signal: Function call with keyword arguments
         if not is_hot:
             hot_stocks_map.setdefault("其他", [])
-            hot_stocks_map["其他"].append((f"{stock_map[entity_id]['code']}({stock_map[entity_id]['name']})", 0))
+            hot_stocks_map["其他"].append(
+                (f"{stock_map[entity_id]['code']}({stock_map[entity_id]['name']})", 0)
+            )
 
     sorted_topics = sorted(topic_count.items(), key=lambda item: item[1], reverse=True)
     sorted_words = sorted(word_count.items(), key=lambda item: item[1], reverse=True)
@@ -124,7 +141,10 @@ def group_stocks_by_topic(
     for topic, count in sorted_topics:
         topic_words = hot_words_config[topic]
         topic_words_stocks = [
-            (f"{words}({count})", sorted(hot_stocks_map[words], key=lambda item: item[1], reverse=True))
+            (
+                f"{words}({count})",
+                sorted(hot_stocks_map[words], key=lambda item: item[1], reverse=True),
+            )
             for (words, count) in sorted_words
             # ✅ Best Practice: Use of f-string for string formatting
             if words in topic_words
@@ -137,14 +157,21 @@ def group_stocks_by_topic(
     # ✅ Best Practice: Use of default parameters for function flexibility
 
     return result
+
+
 # ✅ Best Practice: Use of join for efficient string concatenation
 # ✅ Best Practice: Handling default value for start_timestamp
 
 
 # 🧠 ML Signal: Querying data based on a timestamp, which could be used for time-series analysis
 def msg_group_stocks_by_topic(
-    keyword=None, entities=None, hot_words_config=None, start_timestamp=None, days_ago=60, threshold=3
-# 🧠 ML Signal: Splitting strings into lists, indicating text processing
+    keyword=None,
+    entities=None,
+    hot_words_config=None,
+    start_timestamp=None,
+    days_ago=60,
+    threshold=3,
+    # 🧠 ML Signal: Splitting strings into lists, indicating text processing
 ):
     group_info = group_stocks_by_topic(
         # 🧠 ML Signal: Converting lists to a flat list, useful for frequency analysis
@@ -166,7 +193,9 @@ def msg_group_stocks_by_topic(
         msg = msg + f"^^^^^^ {topic} ^^^^^^\n"
         for topic_word, stocks_count in group[1]:
             msg = msg + f"{topic_word}\n"
-            stocks = [f"{stock_count[0]} {stock_count[1]}" for stock_count in stocks_count]
+            stocks = [
+                f"{stock_count[0]} {stock_count[1]}" for stock_count in stocks_count
+            ]
             msg = msg + "\n".join(stocks) + "\n"
     return msg
 

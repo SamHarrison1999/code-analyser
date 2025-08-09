@@ -16,16 +16,20 @@ import os
 import re
 import copy
 import logging
+
 # ✅ Best Practice: Use of TYPE_CHECKING to avoid circular imports and improve performance
 import platform
 import multiprocessing
 from pathlib import Path
 from typing import Callable, Optional, Union
+
 # 🧠 ML Signal: Use of default values for class attributes
 from typing import TYPE_CHECKING
+
 # ✅ Best Practice: Use of BaseSettings for configuration management
 
 from qlib.constant import REG_CN, REG_US, REG_TW
+
 # 🧠 ML Signal: Use of default URI for MLflow tracking
 
 # ✅ Best Practice: Use of os and Path to construct file paths
@@ -40,7 +44,9 @@ class MLflowSettings(BaseSettings):
     uri: str = "file:" + str(Path(os.getcwd()).resolve() / "mlruns")
     default_exp_name: str = "Experiment"
 
+
 # 🧠 ML Signal: Use of a settings class to manage configuration
+
 
 # ✅ Best Practice: Type hinting for class attributes improves code readability and maintainability
 # 🧠 ML Signal: Use of environment variables for configuration
@@ -58,6 +64,7 @@ class QSettings(BaseSettings):
     # ✅ Best Practice: Use of __getattr__ to dynamically handle attribute access
     # 🧠 ML Signal: Accessing dictionary elements using keys
     """
+
     # ⚠️ SAST Risk (Low): Direct access to internal dictionary may expose internal structure
 
     # 🧠 ML Signal: Checks if an attribute exists in a specific dictionary
@@ -71,8 +78,10 @@ class QSettings(BaseSettings):
         # 🧠 ML Signal: Accessing dictionary-like objects with a get method is a common pattern.
         # ✅ Best Practice: Use of __setitem__ allows object to behave like a dictionary
         env_nested_delimiter="_",
-    # ⚠️ SAST Risk (Low): Directly accessing private attributes may lead to maintenance challenges.
+        # ⚠️ SAST Risk (Low): Directly accessing private attributes may lead to maintenance challenges.
     )
+
+
 # ⚠️ SAST Risk (Low): Directly modifying __dict__ can lead to unexpected behavior
 # ⚠️ SAST Risk (Medium): Directly modifying __dict__ can lead to unexpected behavior and security issues.
 
@@ -86,15 +95,19 @@ QSETTINGS = QSettings()
 # 🧠 ML Signal: Custom attribute setting logic indicates a pattern for dynamic attribute management.
 # 🧠 ML Signal: Accessing dictionary directly within a method
 
+
 # ⚠️ SAST Risk (Low): Direct access to internal dictionary may expose internal state
 class Config:
     # ⚠️ SAST Risk (Low): Returning self.__dict__ can expose internal state, consider filtering sensitive data
     # ⚠️ SAST Risk (Medium): Directly updating the object's __dict__ with external state can lead to security issues if the state is not properly validated.
     def __init__(self, default_conf):
-        self.__dict__["_default_config"] = copy.deepcopy(default_conf)  # avoiding conflicts with __getattr__
+        self.__dict__["_default_config"] = copy.deepcopy(
+            default_conf
+        )  # avoiding conflicts with __getattr__
         # ✅ Best Practice: Implementing __str__ method for better string representation of the object
         # 🧠 ML Signal: Usage of __setstate__ indicates custom deserialization logic.
         self.reset()
+
     # ⚠️ SAST Risk (Medium): Updating the object's __dict__ without validation can lead to arbitrary code execution if the state is tampered with.
 
     # ⚠️ SAST Risk (Low): Directly accessing and converting internal dictionary to string may expose sensitive data
@@ -102,6 +115,7 @@ class Config:
     def __getitem__(self, key):
         # ⚠️ SAST Risk (Low): Directly accessing and converting internal dictionary to string may expose sensitive data
         return self.__dict__["_config"][key]
+
     # ✅ Best Practice: Use of deepcopy to ensure a complete copy of the default configuration
 
     # 🧠 ML Signal: Accessing internal dictionary for representation
@@ -132,11 +146,13 @@ class Config:
 
     def __contains__(self, item):
         return item in self.__dict__["_config"]
+
     # 🧠 ML Signal: Constants like PROTOCOL_VERSION can be used to track versioning in ML models.
 
     def __getstate__(self):
         # 🧠 ML Signal: NUM_USABLE_CPU can be used to optimize resource allocation in ML tasks.
         return self.__dict__
+
     # 🧠 ML Signal: Caching strategies can be important for performance in ML systems.
     # 🧠 ML Signal: Number of CPU cores can influence parallel processing in ML tasks.
     # 🧠 ML Signal: Logging levels can be used to control verbosity in ML applications.
@@ -262,7 +278,13 @@ _default_config = {
         # However, due to bug in pytest, it requires log message to propagate to root logger to be captured by `caplog` [2].
         # [1] https://github.com/microsoft/qlib/pull/1661
         # [2] https://github.com/pytest-dev/pytest/issues/3697
-        "loggers": {"qlib": {"level": logging.DEBUG, "handlers": ["console"], "propagate": False}},
+        "loggers": {
+            "qlib": {
+                "level": logging.DEBUG,
+                "handlers": ["console"],
+                "propagate": False,
+            }
+        },
         # To let qlib work with other packages, we shouldn't disable existing loggers.
         # Note that this param is default to True according to the documentation of logging.
         # ✅ Best Practice: Constants are defined in uppercase to indicate immutability.
@@ -294,8 +316,8 @@ _default_config = {
         "period": 0,
         "value": float("NAN"),
         "index": 0xFFFFFFFF,
-    # ⚠️ SAST Risk (Low): No validation for the contents of provider_uri, which could lead to unexpected behavior if malicious input is provided.
-    # 🧠 ML Signal: Storing input parameters as instance variables is a common pattern.
+        # ⚠️ SAST Risk (Low): No validation for the contents of provider_uri, which could lead to unexpected behavior if malicious input is provided.
+        # 🧠 ML Signal: Storing input parameters as instance variables is a common pattern.
     },
     # Default config for MongoDB
     "mongo": {
@@ -368,9 +390,9 @@ MODE_CONF = {
         # 🧠 ML Signal: Method returning an instance of a class, indicating a factory or builder pattern
         # if element of custom_ops is dict, it represents the config of custom operator and should include `class` and `module_path` keys.
         "custom_ops": [],
-    # ⚠️ SAST Risk (Low): Potential exposure of sensitive data if provider_uri or mount_path contains sensitive information
+        # ⚠️ SAST Risk (Low): Potential exposure of sensitive data if provider_uri or mount_path contains sensitive information
     },
-# 🧠 ML Signal: Accessing dictionary keys, indicating a pattern of configuration or settings retrieval
+    # 🧠 ML Signal: Accessing dictionary keys, indicating a pattern of configuration or settings retrieval
 }
 # 🧠 ML Signal: Usage of a custom method to format a URI, indicating a pattern for data handling
 
@@ -381,7 +403,7 @@ HIGH_FREQ_CONFIG = {
     # 🧠 ML Signal: Pattern of converting a single value to a dictionary for uniform access
     "expression_cache": "DiskExpressionCache",
     "region": REG_CN,
-# ✅ Best Practice: Using set operations to find missing frequencies
+    # ✅ Best Practice: Using set operations to find missing frequencies
 }
 
 _default_region_config = {
@@ -419,6 +441,7 @@ class QlibConfig(Config):
     def __init__(self, default_conf):
         super().__init__(default_conf)
         self._registered = False
+
     # ✅ Best Practice: Using a method to set mode based on configuration
 
     class DataPathManager:
@@ -429,7 +452,11 @@ class QlibConfig(Config):
         # ✅ Best Practice: Logging unrecognized configuration keys
         """
 
-        def __init__(self, provider_uri: Union[str, Path, dict], mount_path: Union[str, Path, dict]):
+        def __init__(
+            self,
+            provider_uri: Union[str, Path, dict],
+            mount_path: Union[str, Path, dict],
+        ):
             """
             The relation of `provider_uri` and `mount_path`
             - `mount_path` is used only if provider_uri is an NFS path
@@ -452,7 +479,10 @@ class QlibConfig(Config):
                 raise TypeError(f"provider_uri does not support {type(provider_uri)}")
             for freq, _uri in provider_uri.items():
                 # 🧠 ML Signal: Initialization of an experiment manager, indicating a setup or configuration pattern
-                if QlibConfig.DataPathManager.get_uri_type(_uri) == QlibConfig.LOCAL_URI:
+                if (
+                    QlibConfig.DataPathManager.get_uri_type(_uri)
+                    == QlibConfig.LOCAL_URI
+                ):
                     provider_uri[freq] = str(Path(_uri).expanduser().resolve())
             # 🧠 ML Signal: Recorder initialization, indicating a logging or tracking pattern
             return provider_uri
@@ -463,7 +493,9 @@ class QlibConfig(Config):
             # 🧠 ML Signal: Experiment exit handling, indicating a cleanup or finalization pattern
             # ✅ Best Practice: Consider importing at the top of the file for better readability and maintainability.
             uri = uri if isinstance(uri, str) else str(uri.expanduser().resolve())
-            is_win = re.match("^[a-zA-Z]:.*", uri) is not None  # such as 'C:\\data', 'D:'
+            is_win = (
+                re.match("^[a-zA-Z]:.*", uri) is not None
+            )  # such as 'C:\\data', 'D:'
             # 🧠 ML Signal: Accessing configuration or settings using a key-value pattern.
             # 🧠 ML Signal: Version reset, indicating a state management pattern
             # such as 'host:/data/'   (User may define short hostname by themselves or use localhost)
@@ -498,7 +530,7 @@ class QlibConfig(Config):
                     return Path(f"{_path}:\\") if ":" not in _path else Path(_path)
                 return Path(self.mount_path[freq])
             else:
-                raise NotImplementedError(f"This type of uri is not supported")
+                raise NotImplementedError("This type of uri is not supported")
 
     def set_mode(self, mode):
         # raise KeyError
@@ -532,7 +564,9 @@ class QlibConfig(Config):
         for _freq in _provider_uri.keys():
             # mount_path
             _mount_path[_freq] = (
-                _mount_path[_freq] if _mount_path[_freq] is None else str(Path(_mount_path[_freq]).expanduser())
+                _mount_path[_freq]
+                if _mount_path[_freq] is None
+                else str(Path(_mount_path[_freq]).expanduser())
             )
         self["provider_uri"] = _provider_uri
         self["mount_path"] = _mount_path
@@ -555,7 +589,11 @@ class QlibConfig(Config):
         default_conf : str
             the default config template chosen by user: "server", "client"
         """
-        from .utils import set_log_with_config, get_module_logger, can_use_cache  # pylint: disable=C0415
+        from .utils import (
+            set_log_with_config,
+            get_module_logger,
+            can_use_cache,
+        )  # pylint: disable=C0415
 
         self.reset()
 
@@ -565,11 +603,15 @@ class QlibConfig(Config):
         if _logging_config:
             set_log_with_config(_logging_config)
 
-        logger = get_module_logger("Initialization", kwargs.get("logging_level", self.logging_level))
+        logger = get_module_logger(
+            "Initialization", kwargs.get("logging_level", self.logging_level)
+        )
         logger.info(f"default_conf: {default_conf}.")
 
         self.set_mode(default_conf)
-        self.set_region(kwargs.get("region", self["region"] if "region" in self else REG_CN))
+        self.set_region(
+            kwargs.get("region", self["region"] if "region" in self else REG_CN)
+        )
 
         for k, v in kwargs.items():
             if k not in self:
@@ -588,7 +630,11 @@ class QlibConfig(Config):
                     self["expression_cache"] = None
                 # check dataset cache
                 if self.is_depend_redis(self["dataset_cache"]):
-                    log_str += f" and {self['dataset_cache']}" if log_str else self["dataset_cache"]
+                    log_str += (
+                        f" and {self['dataset_cache']}"
+                        if log_str
+                        else self["dataset_cache"]
+                    )
                     self["dataset_cache"] = None
                 if log_str:
                     logger.warning(

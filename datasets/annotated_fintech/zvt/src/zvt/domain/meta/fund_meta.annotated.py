@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, Integer
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Portfolio, PortfolioStockHistory
 from zvt.contract.register import register_entity, register_schema
 from zvt.utils.time_utils import now_pd_timestamp
+
 # ✅ Best Practice: Naming convention for base classes should be clear and descriptive.
 
 FundMetaBase = declarative_base()
 
 # 🧠 ML Signal: Use of decorators to register entities can indicate a pattern for dynamic behavior or plugin systems.
+
 
 #: 个股
 @register_entity(entity_type="fund")
@@ -54,10 +57,19 @@ class Fund(FundMetaBase, Portfolio):
     underlying_asset_type = Column(String(length=32))
 
     @classmethod
-    def get_stocks(cls, code=None, codes=None, ids=None, timestamp=now_pd_timestamp(), provider=None):
+    def get_stocks(
+        cls,
+        code=None,
+        codes=None,
+        ids=None,
+        timestamp=now_pd_timestamp(),
+        provider=None,
+    ):
         from zvt.api.portfolio import get_fund_stocks
 
-        return get_fund_stocks(code=code, codes=codes, ids=ids, timestamp=timestamp, provider=provider)
+        return get_fund_stocks(
+            code=code, codes=codes, ids=ids, timestamp=timestamp, provider=provider
+        )
 
 
 class FundStock(FundMetaBase, PortfolioStockHistory):

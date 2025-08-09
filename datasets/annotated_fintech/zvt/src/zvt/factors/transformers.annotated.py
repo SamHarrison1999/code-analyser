@@ -1,14 +1,21 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 import pandas as pd
 
 from zvt.contract.factor import Transformer
 from zvt.factors.algorithm import MaTransformer
 from zvt.factors.technical_factor import TechnicalFactor
+
 # ✅ Best Practice: Function name should be descriptive and use lowercase with words separated by underscores
-from zvt.utils.pd_utils import group_by_entity_id, normalize_group_compute_result, merge_filter_result
+from zvt.utils.pd_utils import (
+    group_by_entity_id,
+    normalize_group_compute_result,
+    merge_filter_result,
+)
 from zvt.utils.time_utils import to_pd_timestamp
+
 # ✅ Best Practice: Use of assert to validate input assumptions
 
 
@@ -35,14 +42,17 @@ def _cal_state(s, df, pre, interval, col):
     # ✅ Best Practice: Type hinting for input and output improves code readability and maintainability
     return np.nan
 
+
 # 🧠 ML Signal: Conditional logic based on computed results
 # 🧠 ML Signal: Use of super() indicates inheritance, which is common in ML pipelines for data transformation
+
 
 class CrossMaTransformer(MaTransformer):
     # 🧠 ML Signal: Dynamic column naming based on a list of windows suggests a pattern for feature engineering
     def __init__(self, windows=None, cal_change_pct=False) -> None:
         # 🧠 ML Signal: Returning NaN for specific conditions
         super().__init__(windows, cal_change_pct)
+
     # 🧠 ML Signal: Use of boolean indexing for filtering is a common pattern in data preprocessing
 
     def transform(self, input_df: pd.DataFrame) -> pd.DataFrame:
@@ -62,6 +72,8 @@ class CrossMaTransformer(MaTransformer):
         # ✅ Best Practice: Use parentheses for method calls to avoid confusion with indexing
         input_df["filter_result"] = s
         return input_df
+
+
 # ⚠️ SAST Risk (Low): Direct comparison with False can lead to unexpected results if s contains non-boolean values
 
 
@@ -98,7 +110,9 @@ class FallBelowTransformer(Transformer):
         if col not in input_df.columns:
             # 🧠 ML Signal: Use of lambda function for custom rolling window operations
             group_result = (
-                group_by_entity_id(input_df["close"]).rolling(window=self.window, min_periods=self.window).mean()
+                group_by_entity_id(input_df["close"])
+                .rolling(window=self.window, min_periods=self.window)
+                .mean()
             )
             # 🧠 ML Signal: Use of normalization function on computed results
             group_result = normalize_group_compute_result(group_result=group_result)

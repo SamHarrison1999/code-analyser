@@ -17,16 +17,20 @@ from zvt.recorders.eastmoney.common import (
     get_from_path_fields,
 )
 from zvt.recorders.joinquant.common import to_jq_entity_id
+
 # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and parameters.
 from zvt.utils.pd_utils import index_df
+
 # 🧠 ML Signal: Importing multiple specific functions and classes indicates usage patterns
 from zvt.utils.pd_utils import pd_is_not_null
+
 # ⚠️ SAST Risk (Low): Ensure the imported functions and classes are from a trusted source
 # ✅ Best Practice: Consider adding error handling for the to_pd_timestamp function.
 from zvt.utils.time_utils import to_time_str, to_pd_timestamp
 
 # 🧠 ML Signal: Importing specific functions from a module indicates usage patterns
 # ✅ Best Practice: Consider adding error handling for the to_report_period_type function.
+
 
 def to_jq_report_period(timestamp):
     # ✅ Best Practice: Use elif for mutually exclusive conditions to improve readability.
@@ -51,6 +55,8 @@ def to_jq_report_period(timestamp):
     # 🧠 ML Signal: Class attribute indicating a specific data type
 
     assert False
+
+
 # ⚠️ SAST Risk (Low): Using assert for control flow can be risky in production code as it may be disabled with optimization.
 # 🧠 ML Signal: URL pattern for fetching timestamps, useful for identifying data sources
 # 🧠 ML Signal: Path fields for extracting timestamp list, indicating data structure
@@ -60,7 +66,9 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
     finance_report_type = None
     data_type = 1
 
-    timestamps_fetching_url = "https://emh5.eastmoney.com/api/CaiWuFenXi/GetCompanyReportDateList"
+    timestamps_fetching_url = (
+        "https://emh5.eastmoney.com/api/CaiWuFenXi/GetCompanyReportDateList"
+    )
     timestamp_list_path_fields = ["CompanyReportDateList"]
     timestamp_path_fields = ["ReportDate"]
 
@@ -110,6 +118,7 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
             self.logger.warning(
                 f"joinquant account not ok,the timestamp(publish date) for finance would be not correct. {e}"
             )
+
     # 🧠 ML Signal: Conditional logic based on the length of a list
     # ⚠️ SAST Risk (Low): Potential KeyError if 'self.timestamp_path_fields' is not set.
 
@@ -119,16 +128,24 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
     def init_timestamps(self, entity):
         param = {"color": "w", "fc": get_fc(entity), "DataType": self.data_type}
 
-        if self.finance_report_type == "LiRunBiaoList" or self.finance_report_type == "XianJinLiuLiangBiaoList":
+        if (
+            self.finance_report_type == "LiRunBiaoList"
+            or self.finance_report_type == "XianJinLiuLiangBiaoList"
+        ):
             param["ReportType"] = 1
 
         timestamp_json_list = call_eastmoney_api(
-            url=self.timestamps_fetching_url, path_fields=self.timestamp_list_path_fields, param=param
+            url=self.timestamps_fetching_url,
+            path_fields=self.timestamp_list_path_fields,
+            param=param,
         )
         # 🧠 ML Signal: Function call with a specific parameter
 
         if self.timestamp_path_fields:
-            timestamps = [get_from_path_fields(data, self.timestamp_path_fields) for data in timestamp_json_list]
+            timestamps = [
+                get_from_path_fields(data, self.timestamp_path_fields)
+                for data in timestamp_json_list
+            ]
 
         return [to_pd_timestamp(t) for t in timestamps]
 
@@ -164,12 +181,15 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
                 # 🧠 ML Signal: Logging request parameters for debugging or monitoring
                 "endDate": to_time_str(timestamps[10]),
                 "latestCount": 10,
-            # ✅ Best Practice: Using format for string formatting improves readability
+                # ✅ Best Practice: Using format for string formatting improves readability
             }
         # ⚠️ SAST Risk (Low): Potential information exposure in logs if sensitive data is included in param
         # ✅ Best Practice: Method name is descriptive and follows naming conventions
 
-        if self.finance_report_type == "LiRunBiaoList" or self.finance_report_type == "XianJinLiuLiangBiaoList":
+        if (
+            self.finance_report_type == "LiRunBiaoList"
+            or self.finance_report_type == "XianJinLiuLiangBiaoList"
+        ):
             # 🧠 ML Signal: Usage of a URL and method for making API requests
             # ✅ Best Practice: Returning a hardcoded string is simple and efficient for constant values
             param["reportType"] = 1
@@ -199,8 +219,11 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
         # ⚠️ SAST Risk (Low): Committing to a session without exception handling for database errors
 
         return self.api_wrapper.request(
-            url=self.url, param=param, method=self.request_method, path_fields=self.generate_path_fields(entity)
-        # ✅ Best Practice: Using logging for error tracking
+            url=self.url,
+            param=param,
+            method=self.request_method,
+            path_fields=self.generate_path_fields(entity),
+            # ✅ Best Practice: Using logging for error tracking
         )
 
     def get_original_time_field(self):
@@ -217,18 +240,23 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
                 # 🧠 ML Signal: Checking if a list is not empty before processing
                 count=None,
                 parse_dates=["pubDate"],
-            # 🧠 ML Signal: Conditional logic based on data schema type
+                # 🧠 ML Signal: Conditional logic based on data schema type
             )
             if pd_is_not_null(df):
                 the_data.timestamp = to_pd_timestamp(df["pubDate"][0])
                 self.logger.info(
                     "jq fill {} {} timestamp:{} for report_date:{}".format(
-                        self.data_schema, security_item.id, the_data.timestamp, the_data.report_date
+                        self.data_schema,
+                        security_item.id,
+                        the_data.timestamp,
+                        the_data.report_date,
                     )
                 )
                 self.session.commit()
         except Exception as e:
-            self.logger.error(f"Failed to fill timestamp(publish date) for finance data from joinquant {e}")
+            self.logger.error(
+                f"Failed to fill timestamp(publish date) for finance data from joinquant {e}"
+            )
 
     def on_finish_entity(self, entity):
         super().on_finish_entity(entity)
@@ -261,7 +289,11 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
             else:
                 df = FinanceFactor.query_data(
                     entity_id=entity.id,
-                    columns=[FinanceFactor.timestamp, FinanceFactor.report_date, FinanceFactor.id],
+                    columns=[
+                        FinanceFactor.timestamp,
+                        FinanceFactor.report_date,
+                        FinanceFactor.id,
+                    ],
                     filters=[
                         FinanceFactor.timestamp != FinanceFactor.report_date,
                         FinanceFactor.timestamp >= to_pd_timestamp("2005-01-01"),
@@ -274,11 +306,18 @@ class BaseChinaStockFinanceRecorder(EastmoneyTimestampsDataRecorder):
                     index_df(df, index="report_date", time_field="report_date")
 
                 for the_data in the_data_list:
-                    if (df is not None) and (not df.empty) and the_data.report_date in df.index:
+                    if (
+                        (df is not None)
+                        and (not df.empty)
+                        and the_data.report_date in df.index
+                    ):
                         the_data.timestamp = df.at[the_data.report_date, "timestamp"]
                         self.logger.info(
                             "db fill {} {} timestamp:{} for report_date:{}".format(
-                                self.data_schema, entity.id, the_data.timestamp, the_data.report_date
+                                self.data_schema,
+                                entity.id,
+                                the_data.timestamp,
+                                the_data.report_date,
                             )
                         )
                         self.session.commit()

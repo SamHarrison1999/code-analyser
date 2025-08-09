@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, DateTime, Float, Integer
+
 # 🧠 ML Signal: Usage of custom mixin class for ORM models
 from sqlalchemy.orm import declarative_base
 
 # 🧠 ML Signal: Custom schema registration pattern
 from zvt.contract import Mixin
+
 # ✅ Best Practice: Use of @classmethod to define a method that operates on the class itself rather than an instance
 # 🧠 ML Signal: Usage of declarative base for ORM models
 from zvt.contract.register import register_schema
@@ -840,7 +842,12 @@ class IncomeStatement(FinanceBase, Mixin):
 class CashFlowStatement(FinanceBase, Mixin):
     @classmethod
     def important_cols(cls):
-        return ["net_op_cash_flows", "net_investing_cash_flows", "net_financing_cash_flows", "cash"]
+        return [
+            "net_op_cash_flows",
+            "net_investing_cash_flows",
+            "net_financing_cash_flows",
+            "cash",
+        ]
 
     __tablename__ = "cash_flow_statement"
 
@@ -1194,7 +1201,12 @@ class FinanceFactor(FinanceBase, Mixin):
     broker_self_operated_fixed_income_securities_net_capital_ratio = Column(Float)
 
 
-register_schema(providers=["eastmoney"], db_name="finance", schema_base=FinanceBase, entity_type="stock")
+register_schema(
+    providers=["eastmoney"],
+    db_name="finance",
+    schema_base=FinanceBase,
+    entity_type="stock",
+)
 
 
 # the __all__ is generated

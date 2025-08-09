@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, DateTime, Boolean, Float, Integer, ForeignKey
 from sqlalchemy.orm import declarative_base
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from sqlalchemy.orm import relationship
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Naming convention for base classes should be consistent and descriptive.
 from zvt.utils.decorator import to_string
 
 TraderBase = declarative_base()
 
 # ✅ Best Practice: Use of a class variable to define the table name for ORM mapping
+
 
 class TraderInfo(TraderBase, Mixin):
     """
@@ -39,9 +42,12 @@ class TraderInfo(TraderBase, Mixin):
     kdata_use_begin_time = Column(Boolean)
     # 🧠 ML Signal: Usage of financial attributes for account statistics
     kdata_adjust_type = Column(String(length=32))
+
+
 # ✅ Best Practice: Use of Column with String type and length for database schema definition
 
 # 🧠 ML Signal: Usage of trader name as a string attribute
+
 
 # 🧠 ML Signal: Use of decorator pattern to enhance or modify class behavior
 @to_string
@@ -50,6 +56,7 @@ class AccountStats(TraderBase, Mixin):
     """
     account stats of every day
     """
+
     # 🧠 ML Signal: Usage of value as a financial attribute
     # 🧠 ML Signal: Inheritance from TraderBase and Mixin indicates a pattern of using mixins for shared functionality
 
@@ -95,11 +102,13 @@ class AccountStats(TraderBase, Mixin):
     # ✅ Best Practice: Use of Column with Float type for order_amount ensures proper database schema definition
     closing = Column(Boolean)
 
+
 # ✅ Best Practice: Use of __all__ to define public API of the module
 # 🧠 ML Signal: Use of Float for financial data suggests a pattern of handling monetary values
 # 🧠 ML Signal: Use of Integer for timestamps suggests a pattern of handling time-related data
 # ✅ Best Practice: Use of Column with String type for order_type ensures proper database schema definition
 # 🧠 ML Signal: register_schema function call indicates a pattern for setting up database schemas
+
 
 #: the position for specific entity of every day
 class Position(TraderBase, Mixin):

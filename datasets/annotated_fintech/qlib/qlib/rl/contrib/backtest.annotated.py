@@ -19,9 +19,11 @@ from joblib import Parallel, delayed
 # ✅ Best Practice: Importing specific functions or classes from a module can improve code readability and maintainability.
 from qlib.backtest import INDICATOR_METRIC, collect_data_loop, get_strategy_executor
 from qlib.backtest.decision import BaseTradeDecision, Order, OrderDir, TradeRangeByTime
+
 # ✅ Best Practice: Importing specific functions or classes from a module can improve code readability and maintainability.
 from qlib.backtest.executor import SimulatorExecutor
 from qlib.backtest.high_performance_ds import BaseOrderIndicator
+
 # ✅ Best Practice: Importing specific functions or classes from a module can improve code readability and maintainability.
 from qlib.rl.contrib.naive_config_parser import get_backtest_config_fromfile
 from qlib.rl.contrib.utils import read_order_file
@@ -30,6 +32,7 @@ from qlib.rl.order_execution.simulator_qlib import SingleAssetOrderExecution
 from qlib.typehint import Literal
 
 # ✅ Best Practice: Use of type hints for function parameters and return type improves code readability and maintainability.
+
 
 def _get_multi_level_executor_config(
     strategy_config: dict,
@@ -44,7 +47,11 @@ def _get_multi_level_executor_config(
             # ⚠️ SAST Risk (Low): Potential misuse of SimulatorExecutor attributes if not properly validated.
             "time_per_step": data_granularity,
             "verbose": False,
-            "trade_type": SimulatorExecutor.TT_PARAL if cash_limit is not None else SimulatorExecutor.TT_SERIAL,
+            "trade_type": (
+                SimulatorExecutor.TT_PARAL
+                if cash_limit is not None
+                else SimulatorExecutor.TT_SERIAL
+            ),
             # 🧠 ML Signal: Sorting strategy configuration keys indicates a pattern of prioritizing certain frequencies.
             "generate_report": generate_report,
             "track_data": True,
@@ -65,7 +72,7 @@ def _get_multi_level_executor_config(
                 # 🧠 ML Signal: Checking the type of value_dict can indicate dynamic type handling patterns.
                 "track_data": True,
             },
-        # 🧠 ML Signal: Usage of method chaining with to_series() can indicate common data transformation patterns.
+            # 🧠 ML Signal: Usage of method chaining with to_series() can indicate common data transformation patterns.
         }
 
     # ⚠️ SAST Risk (Low): Deep copying can be resource-intensive; ensure it's necessary.
@@ -96,11 +103,15 @@ def _convert_indicator_to_dataframe(indicator: dict) -> Optional[pd.DataFrame]:
     if not record_list:
         return None
 
-    records: pd.DataFrame = pd.concat(record_list, 0).reset_index().rename(columns={"index": "instrument"})
+    records: pd.DataFrame = (
+        pd.concat(record_list, 0).reset_index().rename(columns={"index": "instrument"})
+    )
     records = records.set_index(["instrument", "datetime"])
     return records
 
+
 # ✅ Best Practice: Use type hints for local variables for better code readability.
+
 
 def _generate_report(
     decisions: List[BaseTradeDecision],
@@ -129,11 +140,17 @@ def _generate_report(
             indicator_his[key].append(indicator_obj.order_indicator_his)
 
     report = {}
-    decision_details = pd.concat([getattr(d, "details") for d in decisions if hasattr(d, "details")])
+    decision_details = pd.concat(
+        [getattr(d, "details") for d in decisions if hasattr(d, "details")]
+    )
     for key in indicator_dict:
         cur_dict = pd.concat(indicator_dict[key])
-        cur_his = pd.concat([_convert_indicator_to_dataframe(his) for his in indicator_his[key]])
-        cur_details = decision_details[decision_details.freq == key].set_index(["instrument", "datetime"])
+        cur_his = pd.concat(
+            [_convert_indicator_to_dataframe(his) for his in indicator_his[key]]
+        )
+        cur_details = decision_details[decision_details.freq == key].set_index(
+            ["instrument", "datetime"]
+        )
         if len(cur_details) > 0:
             cur_details.pop("freq")
             cur_his = cur_his.join(cur_details, how="outer")
@@ -185,8 +202,12 @@ def single_with_simulator(
     decisions = []
     for _, row in orders.iterrows():
         date = pd.Timestamp(row["datetime"])
-        start_time = pd.Timestamp(backtest_config["start_time"]).replace(year=date.year, month=date.month, day=date.day)
-        end_time = pd.Timestamp(backtest_config["end_time"]).replace(year=date.year, month=date.month, day=date.day)
+        start_time = pd.Timestamp(backtest_config["start_time"]).replace(
+            year=date.year, month=date.month, day=date.day
+        )
+        end_time = pd.Timestamp(backtest_config["end_time"]).replace(
+            year=date.year, month=date.month, day=date.day
+        )
         order = Order(
             # ✅ Best Practice: Clear instantiation of objects with relevant configurations.
             stock_id=row["instrument"],
@@ -203,7 +224,7 @@ def single_with_simulator(
             generate_report=generate_report,
             # 🧠 ML Signal: List comprehension for extracting specific data from a list of dictionaries.
             data_granularity=backtest_config["data_granularity"],
-        # 🧠 ML Signal: Dictionary comprehension for data transformation.
+            # 🧠 ML Signal: Dictionary comprehension for data transformation.
         )
 
         exchange_config = copy.deepcopy(backtest_config["exchange"])
@@ -214,7 +235,7 @@ def single_with_simulator(
                 "codes": stocks,
                 "freq": backtest_config["data_granularity"],
             }
-        # ✅ Best Practice: Encapsulation of report generation logic in a separate function.
+            # ✅ Best Practice: Encapsulation of report generation logic in a separate function.
         )
 
         # 🧠 ML Signal: Accessing DataFrame elements using iloc.
@@ -231,12 +252,16 @@ def single_with_simulator(
         decisions += simulator.decisions
 
     indicator_1day_objs = [report["indicator_dict"]["1day"][1] for report in reports]
-    indicator_info = {k: v for obj in indicator_1day_objs for k, v in obj.order_indicator_his.items()}
+    indicator_info = {
+        k: v for obj in indicator_1day_objs for k, v in obj.order_indicator_his.items()
+    }
     records = _convert_indicator_to_dataframe(indicator_info)
     assert records is None or not np.isnan(records["ffr"]).any()
 
     if generate_report:
-        _report = _generate_report(decisions, [report["indicator"] for report in reports])
+        _report = _generate_report(
+            decisions, [report["indicator"] for report in reports]
+        )
 
         if split == "stock":
             stock_id = orders.iloc[0].instrument
@@ -301,11 +326,11 @@ def single_with_collect_data_loop(
             "trade_range": TradeRangeByTime(
                 pd.Timestamp(backtest_config["start_time"]).time(),
                 pd.Timestamp(backtest_config["end_time"]).time(),
-            # ⚠️ SAST Risk (Low): Potential KeyError if "order_file" is not in backtest_config
+                # ⚠️ SAST Risk (Low): Potential KeyError if "order_file" is not in backtest_config
             ),
-        # 🧠 ML Signal: Using the first order's datetime to generate a report, indicating a focus on specific time periods.
+            # 🧠 ML Signal: Using the first order's datetime to generate a report, indicating a focus on specific time periods.
         },
-    # ⚠️ SAST Risk (Low): Potential KeyError if "exchange" or "cash_limit" is not in backtest_config
+        # ⚠️ SAST Risk (Low): Potential KeyError if "exchange" or "cash_limit" is not in backtest_config
     }
 
     # ⚠️ SAST Risk (Low): Potential KeyError if "generate_report" is not in backtest_config
@@ -341,11 +366,17 @@ def single_with_collect_data_loop(
 
     report_dict: dict = {}
     # ⚠️ SAST Risk (Low): Pickle can be unsafe if loading untrusted data
-    decisions = list(collect_data_loop(trade_start_time, trade_end_time, strategy, executor, report_dict))
+    decisions = list(
+        collect_data_loop(
+            trade_start_time, trade_end_time, strategy, executor, report_dict
+        )
+    )
 
     # ✅ Best Practice: Using pd.concat with axis specified for clarity
     indicator_dict = cast(INDICATOR_METRIC, report_dict.get("indicator_dict"))
-    records = _convert_indicator_to_dataframe(indicator_dict["1day"][1].order_indicator_his)
+    records = _convert_indicator_to_dataframe(
+        indicator_dict["1day"][1].order_indicator_his
+    )
     assert records is None or not np.isnan(records["ffr"]).any()
 
     # ⚠️ SAST Risk (Low): Potential race condition if multiple processes try to create the directory
@@ -375,7 +406,11 @@ def backtest(backtest_config: dict, with_simulator: bool = False) -> pd.DataFram
     stock_pool.sort()
 
     single = single_with_simulator if with_simulator else single_with_collect_data_loop
-    mp_config = {"n_jobs": backtest_config["concurrency"], "verbose": 10, "backend": "multiprocessing"}
+    mp_config = {
+        "n_jobs": backtest_config["concurrency"],
+        "verbose": 10,
+        "backend": "multiprocessing",
+    }
     torch.set_num_threads(1)  # https://github.com/pytorch/pytorch/issues/17199
     res = Parallel(**mp_config)(
         delayed(single)(
@@ -415,8 +450,14 @@ if __name__ == "__main__":
     warnings.filterwarnings("ignore", category=RuntimeWarning)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config_path", type=str, required=True, help="Path to the config file")
-    parser.add_argument("--use_simulator", action="store_true", help="Whether to use simulator as the backend")
+    parser.add_argument(
+        "--config_path", type=str, required=True, help="Path to the config file"
+    )
+    parser.add_argument(
+        "--use_simulator",
+        action="store_true",
+        help="Whether to use simulator as the backend",
+    )
     parser.add_argument(
         "--n_jobs",
         type=int,

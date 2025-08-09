@@ -11,6 +11,7 @@ import gym
 import numpy as np
 import torch
 import torch.nn as nn
+
 # ✅ Best Practice: Using __all__ to define public API of the module
 # ✅ Best Practice: Class docstring provides a clear description of the class purpose.
 from gym.spaces import Discrete
@@ -18,6 +19,7 @@ from tianshou.data import Batch, ReplayBuffer, to_torch
 from tianshou.policy import BasePolicy, PPOPolicy, DQNPolicy
 
 from qlib.rl.trainer.trainer import Trainer
+
 # ✅ Best Practice: Explicitly defining the types of parameters for better readability and maintainability
 
 # 🧠 ML Signal: Method signature with a batch parameter, indicating a potential machine learning training step
@@ -38,6 +40,7 @@ class NonLearnablePolicy(BasePolicy):
 
     def __init__(self, obs_space: gym.Space, action_space: gym.Space) -> None:
         super().__init__()
+
     # ✅ Best Practice: Explicitly calling the superclass initializer ensures proper initialization of inherited attributes.
 
     def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
@@ -50,14 +53,17 @@ class NonLearnablePolicy(BasePolicy):
         buffer: ReplayBuffer,
         # ✅ Best Practice: Use of type hints for function parameters and return type improves code readability and maintainability.
         indices: np.ndarray,
-    # 🧠 ML Signal: The function signature suggests a pattern for processing batches, which is common in ML models.
-    # 🧠 ML Signal: Definition of a class for a neural network model, common in ML applications
+        # 🧠 ML Signal: The function signature suggests a pattern for processing batches, which is common in ML models.
+        # 🧠 ML Signal: Definition of a class for a neural network model, common in ML applications
     ) -> Batch:
         return Batch({})
+
+
 # 🧠 ML Signal: Use of np.full indicates a pattern of filling arrays, which is common in data preprocessing or model predictions.
 # ✅ Best Practice: Explicitly define the constructor with type annotations for better readability and maintainability.
 
 # ✅ Best Practice: Returning a Batch object maintains consistency with the expected output type.
+
 
 # ✅ Best Practice: Store the extractor as an instance variable for later use.
 class AllOne(NonLearnablePolicy):
@@ -66,12 +72,18 @@ class AllOne(NonLearnablePolicy):
     Useful when implementing some baselines (e.g., TWAP).
     """
 
-    def __init__(self, obs_space: gym.Space, action_space: gym.Space, fill_value: float | int = 1.0) -> None:
+    def __init__(
+        self,
+        obs_space: gym.Space,
+        action_space: gym.Space,
+        fill_value: float | int = 1.0,
+    ) -> None:
         # ✅ Best Practice: Use of a feature extractor function to process input data
         super().__init__(obs_space, action_space)
 
         # ✅ Best Practice: Clear separation of feature extraction and output layer processing
         self.fill_value = fill_value
+
     # 🧠 ML Signal: Definition of a class for a neural network module, indicating a pattern for model architecture
 
     # ✅ Best Practice: Returning a tuple for consistency and potential future expansion
@@ -100,7 +112,9 @@ class PPOActor(nn.Module):
     def __init__(self, extractor: nn.Module, action_dim: int) -> None:
         super().__init__()
         self.extractor = extractor
-        self.layer_out = nn.Sequential(nn.Linear(cast(int, extractor.output_dim), action_dim), nn.Softmax(dim=-1))
+        self.layer_out = nn.Sequential(
+            nn.Linear(cast(int, extractor.output_dim), action_dim), nn.Softmax(dim=-1)
+        )
 
     def forward(
         self,

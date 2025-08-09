@@ -1,6 +1,7 @@
 import demjson3
 import pandas as pd
 import requests
+
 # ✅ Best Practice: Group imports into standard library, third-party, and local imports for better readability
 
 from zvt.contract.recorder import TimestampsDataRecorder
@@ -9,6 +10,7 @@ from zvt.domain.misc import StockSummary
 from zvt.recorders.consts import DEFAULT_SH_SUMMARY_HEADER
 from zvt.utils.time_utils import to_time_str
 from zvt.utils.utils import to_float
+
 # 🧠 ML Signal: Inheritance from TimestampsDataRecorder indicates a pattern of extending functionality
 
 
@@ -69,14 +71,18 @@ class ExchangeStockSummaryRecorder(TimestampsDataRecorder):
             start_timestamp,
             # 🧠 ML Signal: Iterating over timestamps to fetch and process data
             end_timestamp,
-        # 🧠 ML Signal: Use of default parameters in function signature
+            # 🧠 ML Signal: Use of default parameters in function signature
         )
+
     # 🧠 ML Signal: URL formatting with dynamic timestamp
 
     # 🧠 ML Signal: Use of default parameters in function signature
     def init_timestamps(self, entity):
         # ⚠️ SAST Risk (Medium): No error handling for network request
-        return pd.date_range(start=entity.timestamp, end=pd.Timestamp.now(), freq="B").tolist()
+        return pd.date_range(
+            start=entity.timestamp, end=pd.Timestamp.now(), freq="B"
+        ).tolist()
+
     # 🧠 ML Signal: Use of default parameters in function signature
 
     # ⚠️ SAST Risk (Medium): No error handling for JSON decoding
@@ -90,7 +96,9 @@ class ExchangeStockSummaryRecorder(TimestampsDataRecorder):
             url = self.url.format(timestamp_str)
             response = requests.get(url=url, headers=DEFAULT_SH_SUMMARY_HEADER)
 
-            results = demjson3.decode(response.text[response.text.index("(") + 1 : response.text.index(")")])["result"]
+            results = demjson3.decode(
+                response.text[response.text.index("(") + 1 : response.text.index(")")]
+            )["result"]
             result = [result for result in results if result["productType"] == "1"]
             if result and len(result) == 1:
                 result_json = result[0]
@@ -102,9 +110,13 @@ class ExchangeStockSummaryRecorder(TimestampsDataRecorder):
                         "timestamp": timestamp,
                         "name": "上证指数",
                         "pe": to_float(result_json["profitRate"], 0.0),
-                        "total_value": to_float(result_json["marketValue1"] + "亿", 0.0),
+                        "total_value": to_float(
+                            result_json["marketValue1"] + "亿", 0.0
+                        ),
                         # ✅ Best Practice: Use of __name__ == "__main__" to allow or prevent parts of code from being run when the modules are imported.
-                        "total_tradable_vaule": to_float(result_json["negotiableValue1"] + "亿", 0.0),
+                        "total_tradable_vaule": to_float(
+                            result_json["negotiableValue1"] + "亿", 0.0
+                        ),
                         "volume": to_float(result_json["trdVol1"] + "万", 0.0),
                         # ✅ Best Practice: Early return to avoid unnecessary processing
                         # ⚠️ SAST Risk (High): Potential use of an undefined class 'ExchangeStockSummaryRecorder', which could lead to runtime errors.

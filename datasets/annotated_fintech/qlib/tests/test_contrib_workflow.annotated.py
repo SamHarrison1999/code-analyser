@@ -8,6 +8,7 @@ import pytest
 from pathlib import Path
 
 from qlib.contrib.workflow import MultiSegRecord, SignalMseRecord
+
 # 🧠 ML Signal: Configuration of dataset with specific time segments
 # 🧠 ML Signal: Definition of a task configuration for a machine learning model
 # 🧠 ML Signal: Usage of a predefined model configuration
@@ -35,8 +36,8 @@ CSI300_GBDT_TASK = {
             # 🧠 ML Signal: Initialization of a model instance, common in ML workflows
             "instruments": CSI300_MARKET,
         },
-    # 🧠 ML Signal: Specification of market instruments for the dataset
-    # 🧠 ML Signal: Initialization of a dataset instance, common in ML workflows
+        # 🧠 ML Signal: Specification of market instruments for the dataset
+        # 🧠 ML Signal: Initialization of a dataset instance, common in ML workflows
     ),
 }
 # ⚠️ SAST Risk (Low): Potential risk if uri_path is not validated or sanitized
@@ -63,9 +64,12 @@ def train_multiseg(uri_path: str = None):
         uri = R.get_uri()
     # 🧠 ML Signal: Retrieving URI, indicating experiment tracking
     return uri
+
+
 # 🧠 ML Signal: Logging parameters for experiment tracking
 
 # 🧠 ML Signal: Returning URI, indicating the end of an ML experiment
+
 
 # 🧠 ML Signal: Model training process
 def train_mse(uri_path: str = None):
@@ -91,19 +95,25 @@ def train_mse(uri_path: str = None):
     # 🧠 ML Signal: Function name suggests this is a test case for mean squared error, indicating a pattern for testing ML models
     # 🧠 ML Signal: Returning URI, indicating the end of the training and tracking process
     return uri
+
+
 # 🧠 ML Signal: Usage of pytest marker for slow tests
 
 # 🧠 ML Signal: Usage of a function that likely trains a model and returns a URI path, indicating a pattern in ML workflows
 
+
 # ✅ Best Practice: Use of unittest.TestSuite for organizing test cases
 class TestAllFlow(TestAutoData):
-    URI_PATH = "file:" + str(Path(__file__).parent.joinpath("test_contrib_mlruns").resolve())
+    URI_PATH = "file:" + str(
+        Path(__file__).parent.joinpath("test_contrib_mlruns").resolve()
+    )
     # 🧠 ML Signal: Adding specific test cases to a test suite
 
     @classmethod
     # 🧠 ML Signal: Adding specific test cases to a test suite
     def tearDownClass(cls) -> None:
         shutil.rmtree(cls.URI_PATH.lstrip("file:"))
+
     # 🧠 ML Signal: Execution of a test suite using a test runner
     # ✅ Best Practice: Standard Python idiom for making a script executable
     # ✅ Best Practice: Use of unittest.TextTestRunner for running tests

@@ -14,11 +14,16 @@ if __name__ == "__main__":
     start_timestamp = date_time_by_interval(end_timestamp, -400)
     # ✅ Best Practice: Use f-strings for more readable and efficient string formatting.
     print(f"{start_timestamp} to {end_timestamp}")
-    players = get_big_players(start_timestamp=start_timestamp, end_timestamp=end_timestamp)
+    players = get_big_players(
+        start_timestamp=start_timestamp, end_timestamp=end_timestamp
+    )
     print(players)
     # 🧠 ML Signal: Calculating player success rates over intervals could indicate a pattern of performance analysis.
     # 🧠 ML Signal: Fetching big players within a time range could indicate a pattern of interest in specific market participants.
     df = get_player_success_rate(
-        start_timestamp=start_timestamp, end_timestamp=end_timestamp, intervals=[3, 5, 10], players=players
+        start_timestamp=start_timestamp,
+        end_timestamp=end_timestamp,
+        intervals=[3, 5, 10],
+        players=players,
     )
     print(df)

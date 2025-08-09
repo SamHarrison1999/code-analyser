@@ -25,6 +25,7 @@ from zvt.utils.time_utils import (
     # 🧠 ML Signal: Function to transform entity_id into a specific code format
     now_timestamp,
 )
+
 # 🧠 ML Signal: Usage of decode_entity_id function to extract components
 
 # 🧠 ML Signal: Function for converting qmt_code to a specific entity ID format
@@ -36,6 +37,7 @@ logger = logging.getLogger(__name__)
 
 # 🧠 ML Signal: Converting string to lowercase for normalization
 # ✅ Best Practice: Use of descriptive function name for clarity
+
 
 def _to_qmt_code(entity_id):
     # 🧠 ML Signal: String formatting to create a standardized entity ID
@@ -50,7 +52,9 @@ def _to_zvt_entity_id(qmt_code):
     # 🧠 ML Signal: Extracting and transforming data from a dictionary
     return f"stock_{exchange}_{code}"
 
+
 # 🧠 ML Signal: Extracting and transforming data from a dictionary
+
 
 def _to_qmt_dividend_type(adjust_type: AdjustType):
     # 🧠 ML Signal: Extracting and transforming data from a dictionary
@@ -62,7 +66,9 @@ def _to_qmt_dividend_type(adjust_type: AdjustType):
     else:
         return "none"
 
+
 # 🧠 ML Signal: Extracting and transforming data from a dictionary
+
 
 def _qmt_instrument_detail_to_stock(stock_detail):
     # 🧠 ML Signal: Extracting and transforming data from a dictionary
@@ -105,7 +111,7 @@ def _qmt_instrument_detail_to_stock(stock_detail):
         "limit_down_price": limit_down_price,
         "float_volume": float_volume,
         "total_volume": total_volume,
-    # ✅ Best Practice: Use f-string for consistent and readable string formatting
+        # ✅ Best Practice: Use f-string for consistent and readable string formatting
     }
 
 
@@ -133,7 +139,9 @@ def get_entity_list():
             # ⚠️ SAST Risk (Low): Ensure 'circulating_capital' and 'total_capital' keys exist in latest_data
             entity_id = f"stock_{exchange}_{code}"
             # get from provider em
-            datas = Stock.query_data(provider="em", entity_id=entity_id, return_type="dict")
+            datas = Stock.query_data(
+                provider="em", entity_id=entity_id, return_type="dict"
+            )
             if datas:
                 # ⚠️ SAST Risk (Low): Ensure tick[stock] is not None before accessing its elements
                 entity = datas[0]
@@ -155,7 +163,7 @@ def get_entity_list():
                 [stock],
                 table_list=["Capital"],
                 report_type="report_time",
-            # 🧠 ML Signal: Conversion of list of entities to DataFrame, useful for ML model training
+                # 🧠 ML Signal: Conversion of list of entities to DataFrame, useful for ML model training
             )
             df = capital_datas[stock]["Capital"]
             if pd_is_not_null(df):
@@ -214,10 +222,12 @@ def get_kdata(
         print(f"download from {start_time} to {end_time}")
         xtdata.download_history_data(
             # ✅ Best Practice: Check if key exists in dictionary to avoid KeyError
-            stock_code=code, period=period,
+            stock_code=code,
+            period=period,
             # 🧠 ML Signal: Handling of None return for specific conditions
             # ⚠️ SAST Risk (Low): Potential KeyError if 'price' or 'askVol' keys are missing
-            start_time=start_time, end_time=end_time
+            start_time=start_time,
+            end_time=end_time,
         )
     # ⚠️ SAST Risk (Low): Potential IndexError if 'askVol' list is empty
     records = xtdata.get_market_data(
@@ -242,7 +252,15 @@ def get_kdata(
 def tick_to_quote():
     entity_list = get_entity_list()
     entity_df = entity_list[
-        ["entity_id", "code", "name", "limit_up_price", "limit_down_price", "float_volume", "total_volume"]
+        [
+            "entity_id",
+            "code",
+            "name",
+            "limit_up_price",
+            "limit_down_price",
+            "float_volume",
+            "total_volume",
+        ]
     ]
     entity_df = entity_df.set_index("entity_id", drop=False)
 
@@ -269,10 +287,14 @@ def tick_to_quote():
                 break
             else:
                 # ⚠️ SAST Risk (Low): Potential SQL injection risk if df_to_db does not sanitize inputs
-                logger.warning(f"delay {delay} minutes, may need to restart this script or qmt client")
+                logger.warning(
+                    f"delay {delay} minutes, may need to restart this script or qmt client"
+                )
                 break
 
-        tick_df = pd.DataFrame.from_records(data=[datas[code] for code in datas], index=list(datas.keys()))
+        tick_df = pd.DataFrame.from_records(
+            data=[datas[code] for code in datas], index=list(datas.keys())
+        )
         # ⚠️ SAST Risk (Low): Potential SQL injection risk if df_to_db does not sanitize inputs
 
         # 过滤无效tick,一般是退市的
@@ -285,10 +307,10 @@ def tick_to_quote():
                 # 🧠 ML Signal: Function definition with a specific task name, useful for understanding code intent
                 stock_df.loc[tick_df.index,],
                 tick_df,
-            # 🧠 ML Signal: Variable assignment capturing the result of a function call
+                # 🧠 ML Signal: Variable assignment capturing the result of a function call
             ],
             axis=1,
-        # ⚠️ SAST Risk (Low): Use of a lambda function with print, could lead to excessive logging in production
+            # ⚠️ SAST Risk (Low): Use of a lambda function with print, could lead to excessive logging in production
         )
         # 🧠 ML Signal: Function definition with a specific task name, indicating a pattern of clearing historical data
         # ✅ Best Practice: Consider using a more descriptive callback function instead of a lambda for better readability
@@ -303,9 +325,10 @@ def tick_to_quote():
 
         # 🧠 ML Signal: Calculation of a date interval, indicating a pattern of time-based data management
         df["id"] = df[["entity_id", "timestamp"]].apply(
-            lambda se: "{}_{}".format(se["entity_id"], to_time_str(se["timestamp"])), axis=1
-        # ⚠️ SAST Risk (Medium): Directly deleting records without backup or logging could lead to data loss
-        # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and behavior.
+            lambda se: "{}_{}".format(se["entity_id"], to_time_str(se["timestamp"])),
+            axis=1,
+            # ⚠️ SAST Risk (Medium): Directly deleting records without backup or logging could lead to data loss
+            # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and behavior.
         )
 
         # ⚠️ SAST Risk (Medium): Directly deleting records without backup or logging could lead to data loss
@@ -322,23 +345,35 @@ def tick_to_quote():
         # ⚠️ SAST Risk (Medium): Potential risk if `tick_to_quote()` is not a function, as it should be passed as a callback.
         # 盘口卖单金额
         df["ask_amount"] = df.apply(
-            lambda row: np.sum(np.array(row["askPrice"]) * (np.array(row["askVol"]) * 100)), axis=1
+            lambda row: np.sum(
+                np.array(row["askPrice"]) * (np.array(row["askVol"]) * 100)
+            ),
+            axis=1,
         )
         # ✅ Best Practice: Import statements should be at the top of the file.
         # 盘口买单金额
         df["bid_amount"] = df.apply(
-            lambda row: np.sum(np.array(row["bidPrice"]) * (np.array(row["bidVol"]) * 100)), axis=1
-        # 🧠 ML Signal: Regular sleep intervals in a loop, indicating periodic checks or updates.
+            lambda row: np.sum(
+                np.array(row["bidPrice"]) * (np.array(row["bidVol"]) * 100)
+            ),
+            axis=1,
+            # 🧠 ML Signal: Regular sleep intervals in a loop, indicating periodic checks or updates.
         )
         # 涨停
         # ⚠️ SAST Risk (Low): Exception handling could be more specific to handle different disconnection scenarios.
         df["is_limit_up"] = (df["price"] != 0) & (df["price"] >= df["limit_up_price"])
-        df["limit_up_amount"] = df.apply(lambda row: calculate_limit_up_amount(row), axis=1)
+        df["limit_up_amount"] = df.apply(
+            lambda row: calculate_limit_up_amount(row), axis=1
+        )
 
         # 🧠 ML Signal: Use of current timestamp to control loop execution, indicating time-based logic.
         # 跌停
-        df["is_limit_down"] = (df["price"] != 0) & (df["price"] <= df["limit_down_price"])
-        df["limit_down_amount"] = df.apply(lambda row: calculate_limit_down_amount(row), axis=1)
+        df["is_limit_down"] = (df["price"] != 0) & (
+            df["price"] <= df["limit_down_price"]
+        )
+        df["limit_down_amount"] = df.apply(
+            lambda row: calculate_limit_down_amount(row), axis=1
+        )
         # 🧠 ML Signal: Logging the completion time, useful for tracking execution duration.
 
         # 🧠 ML Signal: Immediate execution of `record_tick`, indicating a startup routine.
@@ -352,20 +387,50 @@ def tick_to_quote():
 
         df["provider"] = "qmt"
         # 实时行情统计，只保留最新
-        df_to_db(df, data_schema=StockQuote, provider="qmt", force_update=True, drop_duplicates=False)
+        df_to_db(
+            df,
+            data_schema=StockQuote,
+            provider="qmt",
+            force_update=True,
+            drop_duplicates=False,
+        )
         df["level"] = "1d"
-        df_to_db(df, data_schema=Stock1dKdata, provider="qmt", force_update=True, drop_duplicates=False)
+        df_to_db(
+            df,
+            data_schema=Stock1dKdata,
+            provider="qmt",
+            force_update=True,
+            drop_duplicates=False,
+        )
 
         # 1分钟分时
         df["id"] = df[["entity_id", "timestamp"]].apply(
-            lambda se: "{}_{}".format(se["entity_id"], to_time_str(se["timestamp"], TIME_FORMAT_MINUTE)), axis=1
+            lambda se: "{}_{}".format(
+                se["entity_id"], to_time_str(se["timestamp"], TIME_FORMAT_MINUTE)
+            ),
+            axis=1,
         )
-        df_to_db(df, data_schema=Stock1mQuote, provider="qmt", force_update=True, drop_duplicates=False)
+        df_to_db(
+            df,
+            data_schema=Stock1mQuote,
+            provider="qmt",
+            force_update=True,
+            drop_duplicates=False,
+        )
         # 历史记录
         df["id"] = df[["entity_id", "timestamp"]].apply(
-            lambda se: "{}_{}".format(se["entity_id"], to_time_str(se["timestamp"], TIME_FORMAT_MINUTE2)), axis=1
+            lambda se: "{}_{}".format(
+                se["entity_id"], to_time_str(se["timestamp"], TIME_FORMAT_MINUTE2)
+            ),
+            axis=1,
         )
-        df_to_db(df, data_schema=StockQuoteLog, provider="qmt", force_update=True, drop_duplicates=False)
+        df_to_db(
+            df,
+            data_schema=StockQuoteLog,
+            provider="qmt",
+            force_update=True,
+            drop_duplicates=False,
+        )
 
         cost_time = time.time() - start_time
         logger.info(f"Quotes cost_time:{cost_time} for {len(datas.keys())} stocks")
@@ -376,7 +441,11 @@ def tick_to_quote():
 def download_capital_data():
     stocks = get_qmt_stocks()
     xtdata.download_financial_data2(
-        stock_list=stocks, table_list=["Capital"], start_time="", end_time="", callback=lambda x: print(x)
+        stock_list=stocks,
+        table_list=["Capital"],
+        start_time="",
+        end_time="",
+        callback=lambda x: print(x),
     )
 
 
@@ -416,7 +485,9 @@ if __name__ == "__main__":
 
     sched = BackgroundScheduler()
     record_tick()
-    sched.add_job(func=record_tick, trigger="cron", hour=9, minute=18, day_of_week="mon-fri")
+    sched.add_job(
+        func=record_tick, trigger="cron", hour=9, minute=18, day_of_week="mon-fri"
+    )
     sched.start()
     sched._thread.join()
 

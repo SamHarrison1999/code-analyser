@@ -15,10 +15,13 @@ from zvt.tag.common import InsertMode
 from zvt.tag.tag_models import CreateStockPoolsModel
 from zvt.tag.tag_schemas import TagStats, StockTags, StockPools
 from zvt.tag.tag_service import build_stock_pool
+
 # 🧠 ML Signal: Usage of logging for tracking and debugging.
 from zvt.utils.pd_utils import pd_is_not_null
+
 # 🧠 ML Signal: Iterating over a predefined list of stock pool names
 from zvt.utils.time_utils import to_pd_timestamp, date_time_by_interval, current_date
+
 # ⚠️ SAST Risk (Low): Potential SQL injection if StockPools.query_data is not properly sanitized
 
 logger = logging.getLogger(__name__)
@@ -40,7 +43,11 @@ def build_system_stock_pools():
             start = date_time_by_interval(datas[0].timestamp)
 
         # 🧠 ML Signal: Logging information about missing data
-        df = TopStocks.query_data(start_timestamp=start, columns=[TopStocks.timestamp], order=TopStocks.timestamp.asc())
+        df = TopStocks.query_data(
+            start_timestamp=start,
+            columns=[TopStocks.timestamp],
+            order=TopStocks.timestamp.asc(),
+        )
         if not pd_is_not_null(df):
             logger.info(f"no data for top_stocks {start}")
             # ✅ Best Practice: Converting DataFrame column to list for iteration
@@ -50,14 +57,22 @@ def build_system_stock_pools():
             # 🧠 ML Signal: Logging the process of building stock pools
             logger.info(f"build_system_stock_pools {stock_pool_name} to {target_date}")
             if stock_pool_name == "main_line":
-                short_stocks = get_top_stocks(target_date=target_date, return_type="short")
+                short_stocks = get_top_stocks(
+                    target_date=target_date, return_type="short"
+                )
                 # 🧠 ML Signal: Different stock selection strategies based on pool name
-                long_stocks = get_top_stocks(target_date=target_date, return_type="long")
+                long_stocks = get_top_stocks(
+                    target_date=target_date, return_type="long"
+                )
                 entity_ids = list(set(short_stocks + long_stocks))
             elif stock_pool_name == "vol_up":
                 # ✅ Best Practice: Using set to remove duplicates
-                small_stocks = get_top_stocks(target_date=target_date, return_type="small_vol_up")
-                big_stocks = get_top_stocks(target_date=target_date, return_type="big_vol_up")
+                small_stocks = get_top_stocks(
+                    target_date=target_date, return_type="small_vol_up"
+                )
+                big_stocks = get_top_stocks(
+                    target_date=target_date, return_type="big_vol_up"
+                )
                 entity_ids = list(set(small_stocks + big_stocks))
             elif stock_pool_name == "大局":
                 entity_ids = get_top_stocks(target_date=target_date, return_type="all")
@@ -82,11 +97,17 @@ def build_system_stock_pools():
             )
             build_stock_pool(create_stock_pools_model, target_date=target_date)
 
+
 # ✅ Best Practice: Type hinting for better code readability and maintenance
 # ✅ Best Practice: Converting DataFrame column to list for further processing
 
+
 def build_stock_pool_tag_stats(
-    stock_pool_name, force_rebuild_latest=False, target_date=None, adjust_type=AdjustType.hfq, provider="em"
+    stock_pool_name,
+    force_rebuild_latest=False,
+    target_date=None,
+    adjust_type=AdjustType.hfq,
+    provider="em",
 ):
     # 🧠 ML Signal: Building stock pool with a specific model and target date
     datas = TagStats.query_data(
@@ -102,15 +123,20 @@ def build_stock_pool_tag_stats(
     if datas:
         if force_rebuild_latest:
             session = get_db_session("zvt", data_schema=TagStats)
-            session.query(TagStats).filter(TagStats.stock_pool_name == stock_pool_name).filter(
-                TagStats.timestamp == datas[0].timestamp
-            ).delete()
+            session.query(TagStats).filter(
+                TagStats.stock_pool_name == stock_pool_name
+            ).filter(TagStats.timestamp == datas[0].timestamp).delete()
             session.commit()
-            return build_stock_pool_tag_stats(stock_pool_name=stock_pool_name, force_rebuild_latest=False)
+            return build_stock_pool_tag_stats(
+                stock_pool_name=stock_pool_name, force_rebuild_latest=False
+            )
 
         latest_tag_stats_timestamp = datas[0].timestamp
         current_df = TagStats.query_data(
-            filters=[TagStats.stock_pool_name == stock_pool_name, TagStats.timestamp == latest_tag_stats_timestamp]
+            filters=[
+                TagStats.stock_pool_name == stock_pool_name,
+                TagStats.timestamp == latest_tag_stats_timestamp,
+            ]
         )
         start = date_time_by_interval(latest_tag_stats_timestamp)
 
@@ -129,7 +155,9 @@ def build_stock_pool_tag_stats(
         logger.info(f"build_stock_pool_tag_stats for {stock_pool_name} {target_date}")
 
         entity_ids = stock_pool.entity_ids
-        tags_df = StockTags.query_data(entity_ids=entity_ids, return_type="df", index="entity_id")
+        tags_df = StockTags.query_data(
+            entity_ids=entity_ids, return_type="df", index="entity_id"
+        )
         kdata_schema: KdataCommon = get_kdata_schema(
             entity_type="stock", level=IntervalLevel.LEVEL_1DAY, adjust_type=adjust_type
         )
@@ -152,11 +180,15 @@ def build_stock_pool_tag_stats(
             )
             .reset_index()
         )
-        sorted_df = grouped_df.sort_values(by=["turnover", "entity_count"], ascending=[False, False])
+        sorted_df = grouped_df.sort_values(
+            by=["turnover", "entity_count"], ascending=[False, False]
+        )
         sorted_df = sorted_df.reset_index(drop=True)
         sorted_df["position"] = sorted_df.index
         sorted_df["is_main_line"] = sorted_df.index < 5
-        sorted_df["main_line_continuous_days"] = sorted_df["is_main_line"].apply(lambda x: 1 if x else 0)
+        sorted_df["main_line_continuous_days"] = sorted_df["is_main_line"].apply(
+            lambda x: 1 if x else 0
+        )
         # logger.info(f"current_df\n: {current_df}")
         if pd_is_not_null(current_df):
             # ⚠️ SAST Risk (Low): Potential data integrity risk if df_to_db fails
@@ -169,14 +201,18 @@ def build_stock_pool_tag_stats(
             if pd_is_not_null(pre_selected):
                 pre_selected = pre_selected.reindex(sorted_df.index, fill_value=0)
                 sorted_df["main_line_continuous_days"] = (
-                    sorted_df["main_line_continuous_days"] + pre_selected["main_line_continuous_days"]
+                    sorted_df["main_line_continuous_days"]
+                    + pre_selected["main_line_continuous_days"]
                 )
         sorted_df["entity_id"] = "admin"
         sorted_df["timestamp"] = target_date
         sorted_df["stock_pool_name"] = stock_pool_name
-        sorted_df["id"] = sorted_df[["entity_id", "timestamp", "stock_pool_name", "main_tag"]].apply(
-            lambda x: "_".join(x.astype(str)), axis=1
-        # ✅ Best Practice: Type hinting for create_stock_pools_model improves code readability and maintainability
+        sorted_df["id"] = sorted_df[
+            ["entity_id", "timestamp", "stock_pool_name", "main_tag"]
+        ].apply(
+            lambda x: "_".join(x.astype(str)),
+            axis=1,
+            # ✅ Best Practice: Type hinting for create_stock_pools_model improves code readability and maintainability
         )
         df_to_db(
             provider="zvt",
@@ -222,4 +258,8 @@ if __name__ == "__main__":
 
 
 # the __all__ is generated
-__all__ = ["build_system_stock_pools", "build_stock_pool_tag_stats", "build_stock_pool_and_tag_stats"]
+__all__ = [
+    "build_system_stock_pools",
+    "build_stock_pool_tag_stats",
+    "build_stock_pool_and_tag_stats",
+]

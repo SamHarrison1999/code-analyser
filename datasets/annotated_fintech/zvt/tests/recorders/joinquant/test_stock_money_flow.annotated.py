@@ -5,13 +5,17 @@ from zvt.domain import StockMoneyFlow, Stock
 
 # 🧠 ML Signal: Recording stock money flow data with specific parameters
 
+
 def test_stock_money_flow():
     provider = "joinquant"
     # ⚠️ SAST Risk (Low): Hardcoded provider and timestamps could lead to inflexibility
     # 🧠 ML Signal: Sample data for testing correctness of stock money flow
     # Stock.record_data(provider=provider)
     StockMoneyFlow.record_data(
-        codes=["300999", "688981"], provider=provider, start_timestamp="2020-12-14", compute_index_money_flow=False
+        codes=["300999", "688981"],
+        provider=provider,
+        start_timestamp="2020-12-14",
+        compute_index_money_flow=False,
     )
 
     data_samples = [

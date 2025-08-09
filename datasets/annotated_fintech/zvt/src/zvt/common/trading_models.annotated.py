@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from enum import Enum
 from typing import List, Optional
+
 # ✅ Best Practice: Use of Enum for defining a set of named values
 
 from pydantic import BaseModel, Field
+
 # ✅ Best Practice: Clear and descriptive naming for enum members
 
 # ✅ Best Practice: Inheriting from BaseModel provides data validation and serialization.
+
 
 # ✅ Best Practice: Clear and descriptive naming for enum members
 class PositionType(Enum):
@@ -20,6 +23,8 @@ class PositionType(Enum):
     # ✅ Best Practice: Inheriting from BaseModel provides data validation and serialization features.
     # 按现金算
     cash = "cash"
+
+
 # 🧠 ML Signal: Optional fields with default None can indicate optional parameters in usage.
 # 🧠 ML Signal: Usage of List[str] indicates a pattern of handling multiple string identifiers.
 

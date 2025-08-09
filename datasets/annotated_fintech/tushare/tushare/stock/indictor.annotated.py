@@ -14,7 +14,7 @@ Created on 2018/05/26
 def ma(data, n=10, val_name="close"):
     import numpy as np
 
-    '''
+    """
     移动平均线 Moving Average
     Parameters
     ------
@@ -30,7 +30,7 @@ def ma(data, n=10, val_name="close"):
       list
           移动平均线
     # 🧠 ML Signal: Appending to a list is a common pattern for accumulating results
-    '''
+    """
 
     values = []
     # 🧠 ML Signal: Using a fixed-size list to maintain a moving window
@@ -52,7 +52,7 @@ def ma(data, n=10, val_name="close"):
 def md(data, n=10, val_name="close"):
     import numpy as np
 
-    '''
+    """
     移动标准差
     Parameters
     ------
@@ -68,7 +68,7 @@ def md(data, n=10, val_name="close"):
       list
           移动平均线
     # 🧠 ML Signal: Iterating over financial data to compute indicators
-    '''
+    """
 
     # 🧠 ML Signal: Exponential moving average calculation pattern
     values = []
@@ -91,14 +91,15 @@ def _get_day_ema(prices, n):
     day_ema = 0
     for index, price in enumerate(reversed(prices)):
         # ✅ Best Practice: Initialize variables before use
-        day_ema += a ** index * price
+        day_ema += a**index * price
 
     return day_ema
 
 
 def ema(data, n=12, val_name="close"):
     import numpy as np
-    '''
+
+    """
         指数平均数指标 Exponential Moving Average
         Parameters
         ------
@@ -113,7 +114,7 @@ def ema(data, n=12, val_name="close"):
         -------
           EMA:numpy.ndarray<numpy.float64>
               指数平均数指标
-    '''
+    """
 
     prices = []
 
@@ -138,7 +139,8 @@ def ema(data, n=12, val_name="close"):
 def macd(data, quick_n=12, slow_n=26, dem_n=9, val_name="close"):
     # ✅ Best Practice: Use of docstring to describe function parameters and return values
     import numpy as np
-    '''
+
+    """
         指数平滑异同平均线(MACD: Moving Average Convergence Divergence)
         Parameters
         ------
@@ -161,7 +163,7 @@ def macd(data, quick_n=12, slow_n=26, dem_n=9, val_name="close"):
               差离值
           DEM:numpy.ndarray<numpy.float64>
               讯号线
-    '''
+    """
     # 🧠 ML Signal: Accessing specific columns in a DataFrame
 
     ema_quick = np.asarray(ema(data, quick_n, val_name))
@@ -173,6 +175,8 @@ def macd(data, quick_n=12, slow_n=26, dem_n=9, val_name="close"):
     DEM = ema(data, dem_n, "diff")
     OSC = DIFF - DEM
     return OSC, DIFF, DEM
+
+
 # ✅ Best Practice: Append computed values to lists
 # ✅ Best Practice: Update last_k and last_d for next iteration
 # ✅ Best Practice: Convert lists to numpy arrays before returning
@@ -181,7 +185,8 @@ def macd(data, quick_n=12, slow_n=26, dem_n=9, val_name="close"):
 
 def kdj(data):
     import numpy as np
-    '''
+
+    """
         随机指标KDJ
         Parameters
         ------
@@ -195,7 +200,7 @@ def kdj(data):
               D线
           J:numpy.ndarray<numpy.float64>
               J线
-    '''
+    """
 
     K, D, J = [], [], []
     last_k, last_d = None, None
@@ -224,7 +229,7 @@ def kdj(data):
 def rsi(data, n=6, val_name="close"):
     import numpy as np
 
-    '''
+    """
         相对强弱指标RSI
         Parameters
         ------
@@ -236,10 +241,10 @@ def rsi(data, n=6, val_name="close"):
         -------
           RSI:numpy.ndarray<numpy.float64>
               RSI线
-        
+
     # ✅ Best Practice: Use of descriptive variable names for readability
     # ✅ Best Practice: Returning multiple values as a tuple for clarity
-    '''
+    """
 
     RSI = []
     UP = []
@@ -275,27 +280,29 @@ def rsi(data, n=6, val_name="close"):
     # ✅ Best Practice: Use built-in functions like max() and min() for clarity and efficiency
     return np.asarray(RSI)
 
+
 # ✅ Best Practice: Use lowercase variable names for lists to follow PEP 8 naming conventions
+
 
 # 🧠 ML Signal: Calculation of financial indicators is a common pattern in financial data analysis
 def boll(data, n=10, val_name="close", k=2):
-    '''
-        布林线指标BOLL
-        Parameters
-        ------
-          data:pandas.DataFrame
-                      通过 get_h_data 取得的股票数据
-          n:int
-                统计时长，时间单位根据data决定
-        return
-        -------
-          BOLL:numpy.ndarray<numpy.float64>
-              中轨线
-          UPPER:numpy.ndarray<numpy.float64>
-              D线
-          J:numpy.ndarray<numpy.float64>
-              J线
-    '''
+    """
+    布林线指标BOLL
+    Parameters
+    ------
+      data:pandas.DataFrame
+                  通过 get_h_data 取得的股票数据
+      n:int
+            统计时长，时间单位根据data决定
+    return
+    -------
+      BOLL:numpy.ndarray<numpy.float64>
+          中轨线
+      UPPER:numpy.ndarray<numpy.float64>
+          D线
+      J:numpy.ndarray<numpy.float64>
+          J线
+    """
 
     BOLL = ma(data, n, val_name)
 
@@ -309,19 +316,19 @@ def boll(data, n=10, val_name="close", k=2):
 
 
 def wnr(data, n=14):
-    '''
-        威廉指标 w&r
-        Parameters
-        ------
-          data:pandas.DataFrame
-                      通过 get_h_data 取得的股票数据
-          n:int
-                统计时长，时间单位根据data决定
-        return
-        -------
-          WNR:numpy.ndarray<numpy.float64>
-              威廉指标
-    '''
+    """
+    威廉指标 w&r
+    Parameters
+    ------
+      data:pandas.DataFrame
+                  通过 get_h_data 取得的股票数据
+      n:int
+            统计时长，时间单位根据data决定
+    return
+    -------
+      WNR:numpy.ndarray<numpy.float64>
+          威廉指标
+    """
 
     high_prices = []
     low_prices = []
@@ -346,6 +353,7 @@ def wnr(data, n=14):
 
 def _get_any_ma(arr, n):
     import numpy as np
+
     MA = []
     values = []
     for val in arr:
@@ -359,7 +367,7 @@ def _get_any_ma(arr, n):
 def dmi(data, n=14, m=14, k=6):
     import numpy as np
 
-    '''
+    """
         动向指标或趋向指标 DMI
         Parameters
         ------
@@ -369,7 +377,7 @@ def dmi(data, n=14, m=14, k=6):
               +-DI(n): DI统计时长，默认14
           m:int
               ADX(m): ADX统计时常参数，默认14
-              
+
           k:int
               ADXR(k): ADXR统计k个周期前数据，默认6
         return
@@ -385,20 +393,20 @@ def dmi(data, n=14, m=14, k=6):
         ref.
         -------
         https://www.mk-mode.com/octopress/2012/03/03/03002038/
-    '''
+    """
 
     # 上升动向（+DM）
-    P_DM = [0.]
+    P_DM = [0.0]
     # 下降动向（-DM）
-    M_DM = [0.]
+    M_DM = [0.0]
     # 真实波幅TR
-    TR = [0.]
+    TR = [0.0]
     # 动向
-    DX = [0.]
+    DX = [0.0]
 
-    P_DI = [0.]
+    P_DI = [0.0]
     # 🧠 ML Signal: Iterating over DataFrame rows, common pattern in data processing
-    M_DI = [0.]
+    M_DI = [0.0]
 
     for index, row in data.iterrows():
         if index == 0:
@@ -420,7 +428,11 @@ def dmi(data, n=14, m=14, k=6):
             M_DM.append(m_dm)
 
             # ✅ Best Practice: Use of np.isclose for floating-point comparison
-            tr = max(row["high"] - past_row["low"], row["high"] - past_row["close"], past_row["close"] - row["low"])
+            tr = max(
+                row["high"] - past_row["low"],
+                row["high"] - past_row["close"],
+                past_row["close"] - row["low"],
+            )
             TR.append(tr)
 
             if len(P_DM) == n:
@@ -470,12 +482,15 @@ def dmi(data, n=14, m=14, k=6):
             ADXR.append(0)
 
     return P_DI, M_DI, ADX, ADXR
+
+
 # ✅ Best Practice: Use docstrings to describe the function's purpose and parameters
 
 
 def bias(data, n=5):
     import numpy as np
-    '''
+
+    """
         乖离率 bias
         Parameters
         ------
@@ -488,18 +503,21 @@ def bias(data, n=5):
           BIAS:numpy.ndarray<numpy.float64>
               乖离率指标
 
-    '''
+    """
 
     MA = ma(data, n)
     CLOSES = data["close"]
     BIAS = (np.true_divide((CLOSES - MA), MA)) * (100 / 100)
     return BIAS
 
+
 # ✅ Best Practice: Use numpy for efficient array operations
+
 
 def asi(data, n=5):
     import numpy as np
-    '''
+
+    """
         振动升降指标 ASI
         Parameters
         ------
@@ -513,7 +531,7 @@ def asi(data, n=5):
               振动升降指标
 
     # ⚠️ SAST Risk (Low): Potential division by zero if O equals L
-    '''
+    """
 
     SI = []
     # ⚠️ SAST Risk (Low): Potential division by zero if PC equals L
@@ -522,7 +540,7 @@ def asi(data, n=5):
         # ✅ Best Practice: Return values as numpy arrays for consistency
         if index == 0:
             last_row = row
-            SI.append(0.)
+            SI.append(0.0)
         else:
 
             a = abs(row["close"] - last_row["close"])
@@ -564,7 +582,8 @@ def asi(data, n=5):
 
 def vr(data, n=26):
     import numpy as np
-    '''
+
+    """
         Volatility Volume Ratio 成交量变异率
         Parameters
         ------
@@ -577,7 +596,7 @@ def vr(data, n=26):
           VR:numpy.ndarray<numpy.float64>
               成交量变异率
 
-    '''
+    """
     VR = []
 
     AV_volumes, BV_volumes, CV_volumes = [], [], []
@@ -621,7 +640,7 @@ def vr(data, n=26):
 def arbr(data, n=26):
     import numpy as np
 
-    '''
+    """
         AR 指标 BR指标
         Parameters
         ------
@@ -636,7 +655,7 @@ def arbr(data, n=26):
           BR:numpy.ndarray<numpy.float64>
               BR指标
 
-    '''
+    """
 
     # ✅ Best Practice: Use a docstring to describe the function's purpose and parameters
     H, L, O, PC = np.array([0]), np.array([0]), np.array([0]), np.array([0])
@@ -673,9 +692,15 @@ def arbr(data, n=26):
             if len(PC) == n:
                 PC = np.delete(PC, 0)
 
-            ar = (np.sum(np.asarray(H) - np.asarray(O)) / sum(np.asarray(O) - np.asarray(L))) * 100
+            ar = (
+                np.sum(np.asarray(H) - np.asarray(O))
+                / sum(np.asarray(O) - np.asarray(L))
+            ) * 100
             AR = np.append(AR, [ar])
-            br = (np.sum(np.asarray(H) - np.asarray(PC)) / sum(np.asarray(PC) - np.asarray(L))) * 100
+            br = (
+                np.sum(np.asarray(H) - np.asarray(PC))
+                / sum(np.asarray(PC) - np.asarray(L))
+            ) * 100
             BR = np.append(BR, [br])
             # 🧠 ML Signal: Calculating moving average, a common feature in time series analysis
 
@@ -685,24 +710,24 @@ def arbr(data, n=26):
 
 
 def dpo(data, n=20, m=6):
-    '''
-        区间震荡线指标 DPO
-        Parameters
-        ------
-          data:pandas.DataFrame
-                      通过 get_h_data 取得的股票数据
-          n:int
-              统计时长，默认20
-          m:int
-              MADPO的参数M，默认6
-        return
-        -------
-          DPO:numpy.ndarray<numpy.float64>
-              DPO指标
-          MADPO:numpy.ndarray<numpy.float64>
-              MADPO指标
+    """
+    区间震荡线指标 DPO
+    Parameters
+    ------
+      data:pandas.DataFrame
+                  通过 get_h_data 取得的股票数据
+      n:int
+          统计时长，默认20
+      m:int
+          MADPO的参数M，默认6
+    return
+    -------
+      DPO:numpy.ndarray<numpy.float64>
+          DPO指标
+      MADPO:numpy.ndarray<numpy.float64>
+          MADPO指标
 
-    '''
+    """
 
     CLOSES = data["close"]
     DPO = CLOSES - ma(data, int(n / 2 + 1))
@@ -714,7 +739,7 @@ def dpo(data, n=20, m=6):
 def trix(data, n=12, m=20):
     import numpy as np
 
-    '''
+    """
         三重指数平滑平均线 TRIX
         Parameters
         ------
@@ -731,7 +756,7 @@ def trix(data, n=12, m=20):
           TRMA:numpy.ndarray<numpy.float64>
               BR指标
 
-    '''
+    """
 
     CLOSES = []
 
@@ -756,13 +781,15 @@ def trix(data, n=12, m=20):
     TRMA = _get_any_ma(TRIX, m)
 
     return TRIX, TRMA
+
+
 # 🧠 ML Signal: Calculating Williams %R, a momentum indicator
 
 
 def bbi(data):
     import numpy as np
 
-    '''
+    """
         Bull And Bearlndex 多空指标
         Parameters
         ------
@@ -773,7 +800,7 @@ def bbi(data):
           BBI:numpy.ndarray<numpy.float64>
               BBI指标
 
-    '''
+    """
 
     CS = []
     BBI = []
@@ -784,16 +811,26 @@ def bbi(data):
         if len(CS) < 24:
             BBI.append(row["close"])
         else:
-            bbi = np.average([np.average(CS[-3:]), np.average(CS[-6:]), np.average(CS[-12:]), np.average(CS[-24:])])
+            bbi = np.average(
+                [
+                    np.average(CS[-3:]),
+                    np.average(CS[-6:]),
+                    np.average(CS[-12:]),
+                    np.average(CS[-24:]),
+                ]
+            )
             BBI.append(bbi)
 
     return np.asarray(BBI)
+
+
 # 🧠 ML Signal: Calculating ASI, an accumulation swing index
 
 
 def mtm(data, n=6):
     import numpy as np
-    '''
+
+    """
         Momentum Index 动量指标
         Parameters
         ------
@@ -806,14 +843,14 @@ def mtm(data, n=6):
           MTM:numpy.ndarray<numpy.float64>
               MTM动量指标
 
-    '''
+    """
     # 🧠 ML Signal: Calculating ARBR, an arbitrage indicator
 
     MTM = []
     CN = []
     for index, row in data.iterrows():
         if index < n - 1:
-            MTM.append(0.)
+            MTM.append(0.0)
         else:
             mtm = row["close"] - CN[index - n]
             MTM.append(mtm)
@@ -825,7 +862,7 @@ def mtm(data, n=6):
 def obv(data):
     import numpy as np
 
-    '''
+    """
         On Balance Volume 能量潮指标
         Parameters
         ------
@@ -836,9 +873,12 @@ def obv(data):
           OBV:numpy.ndarray<numpy.float64>
               OBV能量潮指标
 
-    '''
+    """
 
-    tmp = np.true_divide(((data["close"] - data["low"]) - (data["high"] - data["close"])), (data["high"] - data["low"]))
+    tmp = np.true_divide(
+        ((data["close"] - data["low"]) - (data["high"] - data["close"])),
+        (data["high"] - data["low"]),
+    )
     # 🧠 ML Signal: Calculating BBI, a bull bear index
     OBV = tmp * data["volume"]
     return OBV
@@ -851,19 +891,21 @@ def sar(data, n=4):
 def plot_all(data, is_show=True, output=None):
     # 🧠 ML Signal: Calculating MTM, a momentum indicator
     import matplotlib.pyplot as plt
+
     # ✅ Best Practice: Use tight_layout to prevent overlap of subplots
     # 🧠 ML Signal: Calculating OBV, an on-balance volume indicator
     # ⚠️ SAST Risk (Low): Ensure the output path is validated to prevent path traversal
     from pylab import rcParams
     import numpy as np
-    rcParams['figure.figsize'] = 18, 50
+
+    rcParams["figure.figsize"] = 18, 50
 
     plt.figure()
     # 收盘价
     plt.subplot(20, 1, 1)
     plt.plot(data["date"], data["close"], label="close")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -873,8 +915,8 @@ def plot_all(data, is_show=True, output=None):
     plt.plot(data["date"], MA, label="MA(n=10)")
     plt.plot(data["date"], data["close"], label="CLOSE PRICE")
     plt.title("MA")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -884,8 +926,8 @@ def plot_all(data, is_show=True, output=None):
     MD = md(data, n)
     plt.plot(data["date"], MD, label="MD(n=10)")
     plt.title("MD")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -894,8 +936,8 @@ def plot_all(data, is_show=True, output=None):
     EMA = ema(data, n)
     plt.plot(data["date"], EMA, label="EMA(n=12)")
     plt.title("EMA")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -906,8 +948,8 @@ def plot_all(data, is_show=True, output=None):
     plt.plot(data["date"], DIFF, label="DIFF")
     plt.plot(data["date"], DEM, label="DEM")
     plt.title("MACD")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -918,8 +960,8 @@ def plot_all(data, is_show=True, output=None):
     plt.plot(data["date"], D, label="D")
     plt.plot(data["date"], J, label="J")
     plt.title("KDJ")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -932,8 +974,8 @@ def plot_all(data, is_show=True, output=None):
     plt.plot(data["date"], RSI12, label="RSI(n=12)")
     plt.plot(data["date"], RSI24, label="RSI(n=24)")
     plt.title("RSI")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -945,8 +987,8 @@ def plot_all(data, is_show=True, output=None):
     plt.plot(data["date"], LOWER, label="LOWER(n=10)")
     plt.plot(data["date"], data["close"], label="CLOSE PRICE")
     plt.title("BOLL")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -955,8 +997,8 @@ def plot_all(data, is_show=True, output=None):
     WNR = wnr(data, n=14)
     plt.plot(data["date"], WNR, label="WNR(n=14)")
     plt.title("WNR")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -968,8 +1010,8 @@ def plot_all(data, is_show=True, output=None):
     plt.plot(data["date"], ADX, label="ADX(m=14)")
     plt.plot(data["date"], ADXR, label="ADXR(k=6)")
     plt.title("DMI")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -978,8 +1020,8 @@ def plot_all(data, is_show=True, output=None):
     BIAS = bias(data, n=5)
     plt.plot(data["date"], BIAS, label="BIAS(n=5)")
     plt.title("BIAS")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -988,8 +1030,8 @@ def plot_all(data, is_show=True, output=None):
     ASI = asi(data, n=5)
     plt.plot(data["date"], ASI, label="ASI(n=5)")
     plt.title("ASI")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -998,8 +1040,8 @@ def plot_all(data, is_show=True, output=None):
     VR = vr(data, n=26)
     plt.plot(data["date"], VR, label="VR(n=26)")
     plt.title("VR")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -1009,8 +1051,8 @@ def plot_all(data, is_show=True, output=None):
     plt.plot(data["date"], AR, label="AR(n=26)")
     plt.plot(data["date"], BR, label="BR(n=26)")
     plt.title("ARBR")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -1020,8 +1062,8 @@ def plot_all(data, is_show=True, output=None):
     plt.plot(data["date"], DPO, label="DPO(n=20)")
     plt.plot(data["date"], MADPO, label="MADPO(m=6)")
     plt.title("DPO")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -1031,8 +1073,8 @@ def plot_all(data, is_show=True, output=None):
     plt.plot(data["date"], TRIX, label="DPO(n=12)")
     plt.plot(data["date"], TRMA, label="MADPO(m=20)")
     plt.title("TRIX")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -1041,8 +1083,8 @@ def plot_all(data, is_show=True, output=None):
     BBI = bbi(data)
     plt.plot(data["date"], BBI, label="BBI(3,6,12,24)")
     plt.title("BBI")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -1051,8 +1093,8 @@ def plot_all(data, is_show=True, output=None):
     MTM = mtm(data, n=6)
     plt.plot(data["date"], MTM, label="MTM(n=6)")
     plt.title("MTM")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 
@@ -1061,8 +1103,8 @@ def plot_all(data, is_show=True, output=None):
     OBV = obv(data)
     plt.plot(data["date"], OBV, label="OBV")
     plt.title("OBV")
-    plt.xlabel('date')
-    plt.ylabel('value')
+    plt.xlabel("date")
+    plt.ylabel("value")
     plt.legend()
     plt.xticks(rotation=90)
 

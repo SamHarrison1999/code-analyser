@@ -5,7 +5,15 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def sub_fig_generator(sub_figsize=(3, 3), col_n=10, row_n=1, wspace=None, hspace=None, sharex=False, sharey=False):
+def sub_fig_generator(
+    sub_figsize=(3, 3),
+    col_n=10,
+    row_n=1,
+    wspace=None,
+    hspace=None,
+    sharex=False,
+    sharey=False,
+):
     """sub_fig_generator.
     it will return a generator, each row contains <col_n> sub graph
 
@@ -34,7 +42,11 @@ def sub_fig_generator(sub_figsize=(3, 3), col_n=10, row_n=1, wspace=None, hspace
 
     while True:
         fig, axes = plt.subplots(
-            row_n, col_n, figsize=(sub_figsize[0] * col_n, sub_figsize[1] * row_n), sharex=sharex, sharey=sharey
+            row_n,
+            col_n,
+            figsize=(sub_figsize[0] * col_n, sub_figsize[1] * row_n),
+            sharex=sharex,
+            sharey=sharey,
         )
         plt.subplots_adjust(wspace=wspace, hspace=hspace)
         # 🧠 ML Signal: Use of generator pattern, which can be a signal for learning code behavior.
@@ -73,4 +85,7 @@ def guess_plotly_rangebreaks(dt_index: pd.DatetimeIndex):
     for gap, d in zip(gaps, dt_idx[:-1]):
         if gap > min_gap:
             gaps_to_break.setdefault(gap - min_gap, []).append(d + min_gap)
-    return [dict(values=v, dvalue=int(k.total_seconds() * 1000)) for k, v in gaps_to_break.items()]
+    return [
+        dict(values=v, dvalue=int(k.total_seconds() * 1000))
+        for k, v in gaps_to_break.items()
+    ]

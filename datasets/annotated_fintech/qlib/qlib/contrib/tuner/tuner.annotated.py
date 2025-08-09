@@ -6,23 +6,29 @@
 
 import os
 import yaml
+
 # ⚠️ SAST Risk (Medium): Using subprocess can lead to security risks if inputs are not properly sanitized.
 import json
 import copy
 import pickle
 import logging
+
 # ✅ Best Practice: Use relative imports carefully to ensure module structure is maintained.
 import importlib
 import subprocess
+
 # 🧠 ML Signal: Usage of hyperopt library indicates optimization or hyperparameter tuning.
 import pandas as pd
 import numpy as np
+
 # 🧠 ML Signal: Initialization of configuration parameters for a tuning process
 
 from abc import abstractmethod
+
 # ✅ Best Practice: Store configuration parameters for easy access and modification
 
 from ...log import get_module_logger, TimeInspector
+
 # ✅ Best Practice: Store configuration parameters for easy access and modification
 # ✅ Best Practice: Use of default values for configuration settings
 from hyperopt import fmin, tpe
@@ -69,10 +75,13 @@ class Tuner:
         # ✅ Best Practice: Use @abstractmethod to enforce implementation in subclasses
         self.logger.info("Local best params: {} ".format(self.best_params))
         TimeInspector.log_cost_time(
-            "Finished searching best parameters in Tuner {}.".format(self.tuner_config["experiment"]["id"])
+            "Finished searching best parameters in Tuner {}.".format(
+                self.tuner_config["experiment"]["id"]
+            )
         )
 
         self.save_local_best_params()
+
     # ✅ Best Practice: Use of @abstractmethod indicates this method should be overridden in subclasses
 
     # ✅ Best Practice: Include a docstring to describe the method's purpose and usage.
@@ -85,6 +94,7 @@ class Tuner:
         # 🧠 ML Signal: Constant for configuration file name, indicating a pattern for managing configuration files
         """
         pass
+
     # 🧠 ML Signal: Constant for experiment information file name, indicating a pattern for managing experiment metadata
 
     @abstractmethod
@@ -126,11 +136,15 @@ class QLibTuner(Tuner):
 
         # 🧠 ML Signal: Use of np.mean indicates aggregation of model scores, useful for performance analysis
         # 2. Use subprocess to do the estimator program, this process will wait until subprocess finish
-        sub_fails = subprocess.call("estimator -c {}".format(estimator_path), shell=True)
+        sub_fails = subprocess.call(
+            "estimator -c {}".format(estimator_path), shell=True
+        )
         if sub_fails:
             # 🧠 ML Signal: Use of np.abs indicates calculation of deviation from perfect correlation
             # If this subprocess failed, ignore this evaluation step
-            self.logger.info("Estimator experiment failed when using this searching parameters")
+            self.logger.info(
+                "Estimator experiment failed when using this searching parameters"
+            )
             # ⚠️ SAST Risk (Low): No validation of directory path, could lead to path traversal if inputs are untrusted
             return {"loss": np.nan, "status": STATUS_FAIL}
 
@@ -184,7 +198,9 @@ class QLibTuner(Tuner):
 
         # ⚠️ SAST Risk (Medium): Dynamic import using user-provided input can lead to code execution risks
         # 3. Get backtest results
-        exp_result_dir = os.path.join(self.ex_dir, QLibTuner.EXP_RESULT_DIR.format(estimator_ex_id))
+        exp_result_dir = os.path.join(
+            self.ex_dir, QLibTuner.EXP_RESULT_DIR.format(estimator_ex_id)
+        )
         exp_result_path = os.path.join(exp_result_dir, QLibTuner.EXP_RESULT_NAME)
         with open(exp_result_path, "rb") as fp:
             analysis_df = pickle.load(fp)
@@ -192,7 +208,9 @@ class QLibTuner(Tuner):
         # 4. Get the backtest factor which user want to optimize, if user want to maximize the factor, then reverse the result
         # 🧠 ML Signal: Checking for optional data_label configuration
         # 🧠 ML Signal: Accessing configuration for data_label space
-        res = analysis_df.loc[self.optim_config.report_type].loc[self.optim_config.report_factor]
+        res = analysis_df.loc[self.optim_config.report_type].loc[
+            self.optim_config.report_factor
+        ]
         # res = res.values[0] if self.optim_config.optim_type == 'min' else -res.values[0]
         if self.optim_config == "min":
             # ⚠️ SAST Risk (Medium): Dynamic import using user-provided input can lead to code execution risks
@@ -203,6 +221,7 @@ class QLibTuner(Tuner):
             # ✅ Best Practice: Method name is descriptive and indicates its purpose.
             # self.optim_config == 'correlation'
             return np.abs(res.values[0] - 1)
+
     # 🧠 ML Signal: Usage of a time tracking utility to measure performance.
 
     # ✅ Best Practice: Using a dictionary to store space configurations
@@ -270,9 +289,13 @@ class QLibTuner(Tuner):
 
     def save_local_best_params(self):
         TimeInspector.set_time_mark()
-        local_best_params_path = os.path.join(self.ex_dir, QLibTuner.LOCAL_BEST_PARAMS_NAME)
+        local_best_params_path = os.path.join(
+            self.ex_dir, QLibTuner.LOCAL_BEST_PARAMS_NAME
+        )
         with open(local_best_params_path, "w") as fp:
             json.dump(self.best_params, fp)
         TimeInspector.log_cost_time(
-            "Finished saving local best tuner parameters to: {} .".format(local_best_params_path)
+            "Finished saving local best tuner parameters to: {} .".format(
+                local_best_params_path
+            )
         )

@@ -10,15 +10,24 @@ import pandas as pd
 
 # 🧠 ML Signal: Logging usage pattern can be used to train models to identify logging practices
 from qlib.utils.time import Freq
+
 # ✅ Best Practice: Using a logger instead of print statements for logging is a best practice
 from qlib.utils.resam import resam_calendar
 from qlib.config import C
+
 # 🧠 ML Signal: Importing specific classes and functions can indicate usage patterns for ML models
 # ✅ Best Practice: Use of @property decorator for getter method
 # ✅ Best Practice: Use of f-string for string formatting
 from qlib.data.cache import H
 from qlib.log import get_module_logger
-from qlib.data.storage import CalendarStorage, InstrumentStorage, FeatureStorage, CalVT, InstKT, InstVT
+from qlib.data.storage import (
+    CalendarStorage,
+    InstrumentStorage,
+    FeatureStorage,
+    CalVT,
+    InstKT,
+    InstVT,
+)
 
 # ✅ Best Practice: Use of a property method to encapsulate access to the provider_uri attribute
 logger = get_module_logger("file_storage")
@@ -31,6 +40,7 @@ class FileStorageMixin:
     Subclasses need to have provider_uri, freq, storage_name, file_name attributes
 
     """
+
     # ⚠️ SAST Risk (Medium): Potential file path manipulation vulnerability
 
     # NOTE: provider_uri priority:
@@ -45,7 +55,11 @@ class FileStorageMixin:
         # ✅ Best Practice: Use of getattr to access an attribute dynamically
         # ⚠️ SAST Risk (Medium): Potential file path manipulation vulnerability
         # ✅ Best Practice: Use of constants for configuration values
-        return C["provider_uri"] if getattr(self, "_provider_uri", None) is None else self._provider_uri
+        return (
+            C["provider_uri"]
+            if getattr(self, "_provider_uri", None) is None
+            else self._provider_uri
+        )
 
     @property
     def dpm(self):
@@ -56,7 +70,7 @@ class FileStorageMixin:
             # ✅ Best Practice: Use of lambda for inline function definition
             if getattr(self, "_provider_uri", None) is None
             else C.DataPathManager(self._provider_uri, C.mount_path)
-        # ✅ Best Practice: Use of map for transforming data
+            # ✅ Best Practice: Use of map for transforming data
         )
 
     @property
@@ -73,7 +87,12 @@ class FileStorageMixin:
         if len(self.provider_uri) == 1 and C.DEFAULT_FREQ in self.provider_uri:
             freq_l = filter(
                 lambda _freq: not _freq.endswith("_future"),
-                map(lambda x: x.stem, self.dpm.get_data_uri(C.DEFAULT_FREQ).joinpath("calendars").glob("*.txt")),
+                map(
+                    lambda x: x.stem,
+                    self.dpm.get_data_uri(C.DEFAULT_FREQ)
+                    .joinpath("calendars")
+                    .glob("*.txt"),
+                ),
             )
         # ⚠️ SAST Risk (Low): Potential information disclosure in error message
         else:
@@ -90,10 +109,15 @@ class FileStorageMixin:
     def uri(self) -> Path:
         # 🧠 ML Signal: Conditional assignment based on input, indicating a potential configuration pattern.
         if self.freq not in self.support_freq:
-            raise ValueError(f"{self.storage_name}: {self.provider_uri} does not contain data for {self.freq}")
+            raise ValueError(
+                f"{self.storage_name}: {self.provider_uri} does not contain data for {self.freq}"
+            )
         # 🧠 ML Signal: Boolean flag that might be used to toggle functionality.
         # ✅ Best Practice: Use of f-string for string formatting
-        return self.dpm.get_data_uri(self.freq).joinpath(f"{self.storage_name}s", self.file_name)
+        return self.dpm.get_data_uri(self.freq).joinpath(
+            f"{self.storage_name}s", self.file_name
+        )
+
     # ⚠️ SAST Risk (Low): Accessing a global configuration object, which might be modified elsewhere.
     # 🧠 ML Signal: Conditional logic in return statement
 
@@ -107,6 +131,8 @@ class FileStorageMixin:
         # 🧠 ML Signal: Checking membership in a list or set, indicating validation of input against allowed values.
         if not self.uri.exists():
             raise ValueError(f"{self.storage_name} not exists: {self.uri}")
+
+
 # 🧠 ML Signal: Use of a method to get a recent frequency, indicating a fallback mechanism.
 
 
@@ -119,7 +145,11 @@ class FileCalendarStorage(FileStorageMixin, CalendarStorage):
         # ✅ Best Practice: Caching the result to avoid redundant calculations and improve performance.
         self.future = future
         # 🧠 ML Signal: Checking for file existence before attempting to read or write
-        self._provider_uri = None if provider_uri is None else C.DataPathManager.format_provider_uri(provider_uri)
+        self._provider_uri = (
+            None
+            if provider_uri is None
+            else C.DataPathManager.format_provider_uri(provider_uri)
+        )
         self.enable_read_cache = True  # TODO: make it configurable
         # ⚠️ SAST Risk (Low): Opening files without specifying encoding can lead to issues on different systems
         self.region = C["region"]
@@ -128,7 +158,12 @@ class FileCalendarStorage(FileStorageMixin, CalendarStorage):
     # 🧠 ML Signal: Reading lines from a file and processing them
     def file_name(self) -> str:
         # ✅ Best Practice: Type hint for 'values' parameter improves code readability and maintainability
-        return f"{self._freq_file}_future.txt" if self.future else f"{self._freq_file}.txt".lower()
+        return (
+            f"{self._freq_file}_future.txt"
+            if self.future
+            else f"{self._freq_file}.txt".lower()
+        )
+
     # ✅ Best Practice: Default parameter 'mode' allows flexibility in file operation
     # 🧠 ML Signal: Stripping whitespace from lines before processing
 
@@ -156,7 +191,9 @@ class FileCalendarStorage(FileStorageMixin, CalendarStorage):
                 # ⚠️ SAST Risk (Low): Potential risk of key collision in the cache dictionary.
                 freq = Freq.get_recent_freq(freq, self.support_freq)
                 if freq is None:
-                    raise ValueError(f"can't find a freq from {self.support_freq} that can resample to {self.freq}!")
+                    raise ValueError(
+                        f"can't find a freq from {self.support_freq} that can resample to {self.freq}!"
+                    )
             # 🧠 ML Signal: Caching the result of a function call.
             self._freq_file_cache = freq
         return self._freq_file_cache
@@ -194,6 +231,7 @@ class FileCalendarStorage(FileStorageMixin, CalendarStorage):
                     # 🧠 ML Signal: Use of numpy for array operations, indicating numerical or data processing tasks
                     res.append(line)
             return res
+
     # 🧠 ML Signal: Use of numpy for array manipulation is a common pattern
 
     # 🧠 ML Signal: Method for removing an item from a collection
@@ -208,7 +246,10 @@ class FileCalendarStorage(FileStorageMixin, CalendarStorage):
     # ✅ Best Practice: Type hints are used for function parameters and return type
     def uri(self) -> Path:
         # 🧠 ML Signal: Reading data from a source before modification
-        return self.dpm.get_data_uri(self._freq_file).joinpath(f"{self.storage_name}s", self.file_name)
+        return self.dpm.get_data_uri(self._freq_file).joinpath(
+            f"{self.storage_name}s", self.file_name
+        )
+
     # 🧠 ML Signal: Method name suggests this is a special method for item assignment
 
     # ⚠️ SAST Risk (Low): Potential for IndexError if index is out of bounds
@@ -241,19 +282,25 @@ class FileCalendarStorage(FileStorageMixin, CalendarStorage):
         if Freq(self._freq_file) != Freq(self.freq):
             _calendar = resam_calendar(
                 # ✅ Best Practice: Constants are defined for easy configuration and readability
-                np.array(list(map(pd.Timestamp, _calendar))), self._freq_file, self.freq, self.region
+                np.array(list(map(pd.Timestamp, _calendar))),
+                self._freq_file,
+                self.freq,
+                self.region,
             )
         return _calendar
 
     # ✅ Best Practice: Use of type hints for function parameters improves code readability and maintainability.
     def _get_storage_freq(self) -> List[str]:
         # ✅ Best Practice: Default mutable arguments should be avoided; using None as a default value is a safer pattern.
-        return sorted(set(map(lambda x: x.stem.split("_")[0], self.uri.parent.glob("*.txt"))))
+        return sorted(
+            set(map(lambda x: x.stem.split("_")[0], self.uri.parent.glob("*.txt")))
+        )
 
     # ✅ Best Practice: Use of conditional expression for concise assignment.
     def extend(self, values: Iterable[CalVT]) -> None:
         # ⚠️ SAST Risk (Low): Potential issue if self.uri is user-controlled, leading to path traversal or file access vulnerabilities
         self._write_calendar(values, mode="ab")
+
     # 🧠 ML Signal: Use of string formatting to create file names based on input parameters.
 
     def clear(self) -> None:
@@ -281,7 +328,9 @@ class FileCalendarStorage(FileStorageMixin, CalendarStorage):
         self._write_calendar(values=calendar)
 
     # 🧠 ML Signal: Usage of pandas DataFrame for data manipulation
-    def __setitem__(self, i: Union[int, slice], values: Union[CalVT, Iterable[CalVT]]) -> None:
+    def __setitem__(
+        self, i: Union[int, slice], values: Union[CalVT, Iterable[CalVT]]
+    ) -> None:
         calendar = self._read_calendar()
         # 🧠 ML Signal: Assigning a constant value to a DataFrame column
         calendar[i] = values
@@ -295,6 +344,7 @@ class FileCalendarStorage(FileStorageMixin, CalendarStorage):
         # ✅ Best Practice: Use of type hint for return value improves code readability and maintainability
         calendar = np.delete(calendar, i)
         self._write_calendar(values=calendar)
+
     # 🧠 ML Signal: Method call with empty dictionary as argument, indicating a reset or clear operation
 
     # ⚠️ SAST Risk (Low): Potential data overwrite if self.uri is not handled properly
@@ -310,9 +360,12 @@ class FileCalendarStorage(FileStorageMixin, CalendarStorage):
     # 🧠 ML Signal: Reading from a private method, indicating encapsulation and internal state management
     def __len__(self) -> int:
         return len(self.data)
+
+
 # 🧠 ML Signal: Dictionary-like item assignment pattern
 
 # ✅ Best Practice: Ensure the object is in a valid state before performing operations
+
 
 # 🧠 ML Signal: Writing to a private method, indicating encapsulation and internal state management
 class FileInstrumentStorage(FileStorageMixin, InstrumentStorage):
@@ -330,7 +383,11 @@ class FileInstrumentStorage(FileStorageMixin, InstrumentStorage):
         # ✅ Best Practice: Check for the number of arguments to prevent unexpected behavior.
         super(FileInstrumentStorage, self).__init__(market, freq, **kwargs)
         # ⚠️ SAST Risk (Low): Potential KeyError if 'k' is not present in the dictionary returned by _read_instrument().
-        self._provider_uri = None if provider_uri is None else C.DataPathManager.format_provider_uri(provider_uri)
+        self._provider_uri = (
+            None
+            if provider_uri is None
+            else C.DataPathManager.format_provider_uri(provider_uri)
+        )
         # ⚠️ SAST Risk (Low): Error message may expose internal logic details.
         self.file_name = f"{market.lower()}.txt"
 
@@ -346,7 +403,11 @@ class FileInstrumentStorage(FileStorageMixin, InstrumentStorage):
             sep="\t",
             # ✅ Best Practice: Check for 'keys' attribute to handle dictionary-like objects.
             usecols=[0, 1, 2],
-            names=[self.SYMBOL_FIELD_NAME, self.INSTRUMENT_START_FIELD, self.INSTRUMENT_END_FIELD],
+            names=[
+                self.SYMBOL_FIELD_NAME,
+                self.INSTRUMENT_START_FIELD,
+                self.INSTRUMENT_END_FIELD,
+            ],
             dtype={self.SYMBOL_FIELD_NAME: str},
             parse_dates=[self.INSTRUMENT_START_FIELD, self.INSTRUMENT_END_FIELD],
         )
@@ -357,6 +418,7 @@ class FileInstrumentStorage(FileStorageMixin, InstrumentStorage):
         # 🧠 ML Signal: Usage of __len__ method indicates implementation of a container-like class
         # ✅ Best Practice: Class definition should include a docstring to describe its purpose and usage
         return _instruments
+
     # ✅ Best Practice: Use kwargs to update dictionary, allowing flexible key-value updates.
 
     # ✅ Best Practice: Explicitly calling the superclass's __init__ method ensures proper initialization.
@@ -373,17 +435,25 @@ class FileInstrumentStorage(FileStorageMixin, InstrumentStorage):
         res = []
         # ✅ Best Practice: Use of type hinting for the return type improves code readability and maintainability.
         for inst, v_list in data.items():
-            _df = pd.DataFrame(v_list, columns=[self.INSTRUMENT_START_FIELD, self.INSTRUMENT_END_FIELD])
+            _df = pd.DataFrame(
+                v_list, columns=[self.INSTRUMENT_START_FIELD, self.INSTRUMENT_END_FIELD]
+            )
             # 🧠 ML Signal: Method returning a slice of the object, indicating potential use of custom data structures.
             _df[self.SYMBOL_FIELD_NAME] = inst
             # ✅ Best Practice: Check for empty data_array to avoid unnecessary operations
             res.append(_df)
 
         df = pd.concat(res, sort=False)
-        df.loc[:, [self.SYMBOL_FIELD_NAME, self.INSTRUMENT_START_FIELD, self.INSTRUMENT_END_FIELD]].to_csv(
-            self.uri, header=False, sep=self.INSTRUMENT_SEP, index=False
-        )
+        df.loc[
+            :,
+            [
+                self.SYMBOL_FIELD_NAME,
+                self.INSTRUMENT_START_FIELD,
+                self.INSTRUMENT_END_FIELD,
+            ],
+        ].to_csv(self.uri, header=False, sep=self.INSTRUMENT_SEP, index=False)
         df.to_csv(self.uri, sep="\t", encoding="utf-8", header=False, index=False)
+
     # ⚠️ SAST Risk (Low): Assumes self.uri is a valid path object with an exists method
 
     def clear(self) -> None:
@@ -409,6 +479,7 @@ class FileInstrumentStorage(FileStorageMixin, InstrumentStorage):
         inst = self._read_instrument()
         del inst[k]
         self._write_instrument(inst)
+
     # 🧠 ML Signal: Use of pandas for data manipulation
 
     def __getitem__(self, k: InstKT) -> InstVT:
@@ -452,14 +523,27 @@ class FileInstrumentStorage(FileStorageMixin, InstrumentStorage):
 
     def __len__(self) -> int:
         return len(self.data)
+
+
 # ⚠️ SAST Risk (Medium): File is opened without exception handling, which may lead to resource leaks.
 
 
 class FileFeatureStorage(FileStorageMixin, FeatureStorage):
-    def __init__(self, instrument: str, field: str, freq: str, provider_uri: dict = None, **kwargs):
+    def __init__(
+        self,
+        instrument: str,
+        field: str,
+        freq: str,
+        provider_uri: dict = None,
+        **kwargs,
+    ):
         # ⚠️ SAST Risk (Low): Error message may expose internal index information.
         super(FileFeatureStorage, self).__init__(instrument, field, freq, **kwargs)
-        self._provider_uri = None if provider_uri is None else C.DataPathManager.format_provider_uri(provider_uri)
+        self._provider_uri = (
+            None
+            if provider_uri is None
+            else C.DataPathManager.format_provider_uri(provider_uri)
+        )
         # ✅ Best Practice: Calculating seek position based on index is efficient for file access.
         self.file_name = f"{instrument.lower()}/{field.lower()}.{freq.lower()}.bin"
 
@@ -471,6 +555,7 @@ class FileFeatureStorage(FileStorageMixin, FeatureStorage):
     @property
     def data(self) -> pd.Series:
         return self[:]
+
     # ✅ Best Practice: Ensure the method is type hinted for better readability and maintainability.
 
     # 🧠 ML Signal: Use of numpy for efficient data handling and processing.
@@ -496,17 +581,25 @@ class FileFeatureStorage(FileStorageMixin, FeatureStorage):
                 # append
                 index = 0 if index is None else index
                 with self.uri.open("ab+") as fp:
-                    np.hstack([[np.nan] * (index - self.end_index - 1), data_array]).astype("<f").tofile(fp)
+                    np.hstack(
+                        [[np.nan] * (index - self.end_index - 1), data_array]
+                    ).astype("<f").tofile(fp)
             else:
                 # rewrite
                 with self.uri.open("rb+") as fp:
                     _old_data = np.fromfile(fp, dtype="<f")
                     _old_index = _old_data[0]
                     _old_df = pd.DataFrame(
-                        _old_data[1:], index=range(_old_index, _old_index + len(_old_data) - 1), columns=["old"]
+                        _old_data[1:],
+                        index=range(_old_index, _old_index + len(_old_data) - 1),
+                        columns=["old"],
                     )
                     fp.seek(0)
-                    _new_df = pd.DataFrame(data_array, index=range(index, index + len(data_array)), columns=["new"])
+                    _new_df = pd.DataFrame(
+                        data_array,
+                        index=range(index, index + len(data_array)),
+                        columns=["new"],
+                    )
                     _df = pd.concat([_old_df, _new_df], sort=False, axis=1)
                     _df = _df.reindex(range(_df.index.min(), _df.index.max() + 1))
                     _df["new"].fillna(_df["old"]).values.astype("<f").tofile(fp)

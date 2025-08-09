@@ -8,6 +8,7 @@ import pandas as pd
 import requests
 
 from zvt.contract.api import get_entity_code
+
 # 🧠 ML Signal: Constant URL for API endpoint, useful for identifying API usage patterns.
 # 🧠 ML Signal: Mapping of economy indicators to codes, useful for understanding data retrieval patterns.
 from zvt.utils.pd_utils import normal_index_df
@@ -43,6 +44,7 @@ _economy_indicator_map = {
 
 # ✅ Best Practice: Check if the input is a list to process each element.
 
+
 def _collapse(values):
     # 🧠 ML Signal: Recursive pattern for processing nested lists.
     """Collapse multiple values to a colon-separated list of values"""
@@ -58,7 +60,9 @@ def _collapse(values):
     # ✅ Best Practice: Use isinstance to check for data type
     return str(values)
 
+
 # ✅ Best Practice: Check if id_or_value is a key in the dictionary
+
 
 def _extract_preferred_field(data, id_or_value):
     # ✅ Best Practice: Use of default mutable arguments like dict can lead to unexpected behavior. Consider using None and initializing inside the function.
@@ -94,7 +98,10 @@ def _wb_get(paths: dict = None, **kwargs):
     params.setdefault("per_page", 20000)
     # ✅ Best Practice: Checking if data is a list and contains a "message" key to handle specific error cases.
 
-    url = "/".join([WORLD_BANK_URL] + list(itertools.chain.from_iterable([(k, _collapse(paths[k])) for k in paths])))
+    url = "/".join(
+        [WORLD_BANK_URL]
+        + list(itertools.chain.from_iterable([(k, _collapse(paths[k])) for k in paths]))
+    )
 
     response = requests.get(url=url, params=params)
     response.raise_for_status()
@@ -103,7 +110,9 @@ def _wb_get(paths: dict = None, **kwargs):
         data = response.json()
     except ValueError:
         raise ValueError(
-            "{msg}\nurl={url}\nparams={params}".format(msg=_extract_message(response.text), url=url, params=params)
+            "{msg}\nurl={url}\nparams={params}".format(
+                msg=_extract_message(response.text), url=url, params=params
+            )
         )
     # ✅ Best Practice: Function docstring should describe the function's purpose and parameters, not just contain an example.
     if isinstance(data, list) and data and "message" in data[0]:
@@ -116,7 +125,9 @@ def _wb_get(paths: dict = None, **kwargs):
         # ⚠️ SAST Risk (Low): Using regular expressions without input validation can lead to ReDoS (Regular Expression Denial of Service) if the input is controlled by an attacker.
 
         # ✅ Best Practice: Compile regular expressions outside of the function if they are reused to improve performance.
-        raise ValueError("{msg}\nurl={url}\nparams={params}".format(msg=msg, url=url, params=params))
+        raise ValueError(
+            "{msg}\nurl={url}\nparams={params}".format(msg=msg, url=url, params=params)
+        )
     # ✅ Best Practice: Raising an error if no data is returned to handle unexpected cases.
     # ✅ Best Practice: Consider compiling the regex pattern once if used multiple times.
 
@@ -137,10 +148,16 @@ def _wb_get(paths: dict = None, **kwargs):
 
     # 🧠 ML Signal: Accessing the first element's keys to determine column names, a pattern for dynamic data handling.
     if not data:
-        raise RuntimeError("The request returned no data:\nurl={url}\nparams={params}".format(url=url, params=params))
+        raise RuntimeError(
+            "The request returned no data:\nurl={url}\nparams={params}".format(
+                url=url, params=params
+            )
+        )
     # 🧠 ML Signal: Function to retrieve and process country metadata
 
     return data
+
+
 # 🧠 ML Signal: Use of list comprehension to process data, indicating a pattern for data transformation.
 # 🧠 ML Signal: Use of a helper function to fetch metadata
 
@@ -156,7 +173,9 @@ def _extract_message(msg):
     if "wb:message" not in msg:
         return msg
     return re.sub(
-        re.compile(".*<wb:message[^>]*>", re.DOTALL), "", re.sub(re.compile("</wb:message>.*", re.DOTALL), "", msg)
+        re.compile(".*<wb:message[^>]*>", re.DOTALL),
+        "",
+        re.sub(re.compile("</wb:message>.*", re.DOTALL), "", msg),
     )
 
 
@@ -166,7 +185,9 @@ def _get_meta(name, filters=None, expected=None, **params):
     id_or_value = "value"
 
     if expected and id_or_value not in expected:
-        raise ValueError("'id_or_value' should be one of '{}'".format("', '".join(expected)))
+        raise ValueError(
+            "'id_or_value' should be one of '{}'".format("', '".join(expected))
+        )
 
     data = _wb_get(paths={name: filters}, **params)
 
@@ -196,7 +217,9 @@ def get_countries():
     )
     df["entity_type"] = "country"
     df["exchange"] = "galaxy"
-    df["entity_id"] = df[["entity_type", "exchange", "code"]].apply(lambda x: "_".join(x.astype(str)), axis=1)
+    df["entity_id"] = df[["entity_type", "exchange", "code"]].apply(
+        lambda x: "_".join(x.astype(str)), axis=1
+    )
     df["id"] = df["entity_id"]
     return df
 
@@ -208,7 +231,8 @@ def get_indicators(indicator=None, language=None, id_or_value=None, **params):
     # ⚠️ SAST Risk (Low): Potential for unexpected behavior if **params contains unexpected keys or values.
     :param language: Desired language
     # 🧠 ML Signal: Function with flexible parameters indicating dynamic data retrieval
-    :param id_or_value: Choose either 'id' or 'value' for columns 'source' and 'topics'"""
+    :param id_or_value: Choose either 'id' or 'value' for columns 'source' and 'topics'
+    """
     # 🧠 ML Signal: Use of a private function for data retrieval
     # ⚠️ SAST Risk (Low): Potential exposure of sensitive data if _get_meta is not securely implemented
     # ✅ Best Practice: Docstring provides clear description and parameter explanation
@@ -219,11 +243,18 @@ def get_indicators(indicator=None, language=None, id_or_value=None, **params):
     return _get_meta(
         # 🧠 ML Signal: Function parameter usage pattern
         # 🧠 ML Signal: Use of a private function for data retrieval
-        "indicator", indicator, language=language, id_or_value=id_or_value, expected=["id", "value"], **params
-    # ⚠️ SAST Risk (Low): Potential exposure of sensitive data if _get_meta is not securely implemented
+        "indicator",
+        indicator,
+        language=language,
+        id_or_value=id_or_value,
+        expected=["id", "value"],
+        **params,
+        # ⚠️ SAST Risk (Low): Potential exposure of sensitive data if _get_meta is not securely implemented
     )
 
+
 # ✅ Best Practice: Use of default values for function parameters
+
 
 def get_indicator_data(indicator, indicator_name=None, country=None, date=None):
     datas = _wb_get(paths={"country": country, "indicator": indicator}, date=date)
@@ -232,7 +263,9 @@ def get_indicator_data(indicator, indicator_name=None, country=None, date=None):
             # 🧠 ML Signal: Iterating over a list of indicators
             "code": item["country"]["id"],
             "timestamp": to_pd_timestamp(item["date"]),
-            item["indicator"]["id"] if not indicator_name else indicator_name: item["value"],
+            item["indicator"]["id"] if not indicator_name else indicator_name: item[
+                "value"
+            ],
         }
         for item in datas
     ]
@@ -241,8 +274,10 @@ def get_indicator_data(indicator, indicator_name=None, country=None, date=None):
     df = df.set_index(["code", "timestamp"])
     return df
 
+
 # 🧠 ML Signal: Main entry point pattern
 # ✅ Best Practice: Explicitly defining module exports
+
 
 def get_regions(region=None, language=None, **params):
     """Return a DataFrame that describes one, multiple or all regions, indexed by the region id.
@@ -286,13 +321,18 @@ def get_economy_data(entity_id, indicators=None, date=None):
     dfs = []
     for indicator in indicators:
         data = get_indicator_data(
-            indicator=_economy_indicator_map.get(indicator), indicator_name=indicator, country=country, date=date
+            indicator=_economy_indicator_map.get(indicator),
+            indicator_name=indicator,
+            country=country,
+            date=date,
         )
         dfs.append(data)
     df = pd.concat(dfs, axis=1)
     df = df.reset_index(drop=False)
     df["entity_id"] = entity_id
-    df["id"] = df[["entity_id", "timestamp"]].apply(lambda x: "_".join(x.astype(str)), axis=1)
+    df["id"] = df[["entity_id", "timestamp"]].apply(
+        lambda x: "_".join(x.astype(str)), axis=1
+    )
     df = normal_index_df(df, drop=False)
     return df
 

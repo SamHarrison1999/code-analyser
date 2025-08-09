@@ -11,8 +11,10 @@ from zvt import zvt_env
 from zvt.rest.data import data_router
 from zvt.rest.factor import factor_router
 from zvt.rest.misc import misc_router
+
 # ✅ Best Practice: Use of ORJSONResponse for better performance with JSON serialization
 from zvt.rest.trading import trading_router
+
 # ⚠️ SAST Risk (Low): Allowing all origins can lead to security risks if not properly managed
 from zvt.rest.work import work_router
 
@@ -35,6 +37,8 @@ app.add_middleware(
 # ✅ Best Practice: Define main function to encapsulate script logic
 async def root():
     return {"message": "Hello World"}
+
+
 # ⚠️ SAST Risk (Medium): os.path.join usage without validation of zvt_env["resource_path"] could lead to path traversal
 
 # 🧠 ML Signal: Usage of multiple routers indicates a modular API design
@@ -54,7 +58,9 @@ add_pagination(app)
 
 def main():
     log_config = os.path.join(zvt_env["resource_path"], "log_conf.yaml")
-    uvicorn.run("zvt_server:app", host="0.0.0.0", reload=True, port=8090, log_config=log_config)
+    uvicorn.run(
+        "zvt_server:app", host="0.0.0.0", reload=True, port=8090, log_config=log_config
+    )
 
 
 if __name__ == "__main__":

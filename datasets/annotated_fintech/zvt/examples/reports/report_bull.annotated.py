@@ -10,6 +10,7 @@ from zvt import init_log
 from zvt.api.kdata import get_latest_kdata_date
 from zvt.api.selector import get_middle_and_big_stock
 from zvt.contract import AdjustType
+
 # ✅ Best Practice: Using a logger instead of print statements for logging is a best practice.
 from zvt.informer import EmailInformer
 
@@ -28,7 +29,9 @@ email_informer = EmailInformer()
 
 @sched.scheduled_job("cron", hour=18, minute=0, day_of_week="mon-fri")
 def report_bull():
-    target_date = get_latest_kdata_date(entity_type="stock", adjust_type=AdjustType.hfq, provider="em")
+    target_date = get_latest_kdata_date(
+        entity_type="stock", adjust_type=AdjustType.hfq, provider="em"
+    )
     entity_ids = get_middle_and_big_stock(timestamp=target_date)
 
     report_targets(

@@ -7,6 +7,7 @@ from __future__ import print_function
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 import numpy as np
 import pandas as pd
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 from typing import Text, Union
 import copy
@@ -14,12 +15,15 @@ from ...utils import get_or_create_path
 from ...log import get_module_logger
 
 import torch
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 import torch.nn as nn
 import torch.nn.init as init
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 # ✅ Best Practice: Class names should follow the CapWords convention for readability
 import torch.optim as optim
+
 # ✅ Best Practice: Use of relative imports for better module structure and maintainability
 
 from .pytorch_utils import count_parameters
@@ -52,32 +56,52 @@ class SFM_Model(nn.Module):
         self.device = device
 
         # 🧠 ML Signal: Use of Xavier and orthogonal initialization for weights
-        self.W_i = nn.Parameter(init.xavier_uniform_(torch.empty((self.input_dim, self.hidden_dim))))
-        self.U_i = nn.Parameter(init.orthogonal_(torch.empty(self.hidden_dim, self.hidden_dim)))
+        self.W_i = nn.Parameter(
+            init.xavier_uniform_(torch.empty((self.input_dim, self.hidden_dim)))
+        )
+        self.U_i = nn.Parameter(
+            init.orthogonal_(torch.empty(self.hidden_dim, self.hidden_dim))
+        )
         # 🧠 ML Signal: Use of Xavier and orthogonal initialization for weights
         self.b_i = nn.Parameter(torch.zeros(self.hidden_dim))
 
-        self.W_ste = nn.Parameter(init.xavier_uniform_(torch.empty(self.input_dim, self.hidden_dim)))
+        self.W_ste = nn.Parameter(
+            init.xavier_uniform_(torch.empty(self.input_dim, self.hidden_dim))
+        )
         # 🧠 ML Signal: Use of Xavier and orthogonal initialization for weights
-        self.U_ste = nn.Parameter(init.orthogonal_(torch.empty(self.hidden_dim, self.hidden_dim)))
+        self.U_ste = nn.Parameter(
+            init.orthogonal_(torch.empty(self.hidden_dim, self.hidden_dim))
+        )
         self.b_ste = nn.Parameter(torch.ones(self.hidden_dim))
         # 🧠 ML Signal: Use of Xavier and orthogonal initialization for weights
 
-        self.W_fre = nn.Parameter(init.xavier_uniform_(torch.empty(self.input_dim, self.freq_dim)))
-        self.U_fre = nn.Parameter(init.orthogonal_(torch.empty(self.hidden_dim, self.freq_dim)))
+        self.W_fre = nn.Parameter(
+            init.xavier_uniform_(torch.empty(self.input_dim, self.freq_dim))
+        )
+        self.U_fre = nn.Parameter(
+            init.orthogonal_(torch.empty(self.hidden_dim, self.freq_dim))
+        )
         # 🧠 ML Signal: Use of Xavier and orthogonal initialization for weights
         self.b_fre = nn.Parameter(torch.ones(self.freq_dim))
 
         # 🧠 ML Signal: Use of Xavier and orthogonal initialization for weights
-        self.W_c = nn.Parameter(init.xavier_uniform_(torch.empty(self.input_dim, self.hidden_dim)))
-        self.U_c = nn.Parameter(init.orthogonal_(torch.empty(self.hidden_dim, self.hidden_dim)))
+        self.W_c = nn.Parameter(
+            init.xavier_uniform_(torch.empty(self.input_dim, self.hidden_dim))
+        )
+        self.U_c = nn.Parameter(
+            init.orthogonal_(torch.empty(self.hidden_dim, self.hidden_dim))
+        )
         self.b_c = nn.Parameter(torch.zeros(self.hidden_dim))
         # 🧠 ML Signal: Use of Xavier and orthogonal initialization for weights
         # 🧠 ML Signal: Reshaping input data is a common preprocessing step in ML models
 
-        self.W_o = nn.Parameter(init.xavier_uniform_(torch.empty(self.input_dim, self.hidden_dim)))
+        self.W_o = nn.Parameter(
+            init.xavier_uniform_(torch.empty(self.input_dim, self.hidden_dim))
+        )
         # 🧠 ML Signal: Permuting dimensions is often used in sequence models
-        self.U_o = nn.Parameter(init.orthogonal_(torch.empty(self.hidden_dim, self.hidden_dim)))
+        self.U_o = nn.Parameter(
+            init.orthogonal_(torch.empty(self.hidden_dim, self.hidden_dim))
+        )
         # 🧠 ML Signal: Use of Xavier and orthogonal initialization for weights
         self.b_o = nn.Parameter(torch.zeros(self.hidden_dim))
 
@@ -85,7 +109,9 @@ class SFM_Model(nn.Module):
         self.b_a = nn.Parameter(torch.zeros(self.hidden_dim))
 
         # 🧠 ML Signal: Initializing states is typical in RNNs and LSTMs
-        self.W_p = nn.Parameter(init.xavier_uniform_(torch.empty(self.hidden_dim, self.output_dim)))
+        self.W_p = nn.Parameter(
+            init.xavier_uniform_(torch.empty(self.hidden_dim, self.output_dim))
+        )
         # ✅ Best Practice: Use of nn.Linear for defining fully connected layers
         self.b_p = nn.Parameter(torch.zeros(self.output_dim))
         # 🧠 ML Signal: Getting constants is a pattern in recurrent models
@@ -128,9 +154,13 @@ class SFM_Model(nn.Module):
             x_o = torch.matmul(x * B_W[0], self.W_o) + self.b_o
 
             i = self.inner_activation(x_i + torch.matmul(h_tm1 * B_U[0], self.U_i))
-            ste = self.inner_activation(x_ste + torch.matmul(h_tm1 * B_U[0], self.U_ste))
+            ste = self.inner_activation(
+                x_ste + torch.matmul(h_tm1 * B_U[0], self.U_ste)
+            )
             # ✅ Best Practice: Reshaping tensors for compatibility in operations
-            fre = self.inner_activation(x_fre + torch.matmul(h_tm1 * B_U[0], self.U_fre))
+            fre = self.inner_activation(
+                x_fre + torch.matmul(h_tm1 * B_U[0], self.U_fre)
+            )
 
             ste = torch.reshape(ste, (-1, self.hidden_dim, 1))
             # ✅ Best Practice: Reshaping tensors for compatibility in operations
@@ -206,6 +236,7 @@ class SFM_Model(nn.Module):
             None,
             None,
         ]
+
     # 🧠 ML Signal: Logging initialization and parameters can be used to understand model configuration patterns
 
     def get_constants(self, x):
@@ -276,7 +307,9 @@ class SFM(Model):
         self.eval_steps = eval_steps
         self.optimizer = optimizer.lower()
         self.loss = loss
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         # 🧠 ML Signal: Instantiation of the model with configuration parameters
         self.seed = seed
 
@@ -334,9 +367,9 @@ class SFM(Model):
                 self.use_gpu,
                 # ✅ Best Practice: Use .item() to convert a single-valued tensor to a Python number
                 seed,
-            # 🧠 ML Signal: Use of np.arange to create an array of indices
+                # 🧠 ML Signal: Use of np.arange to create an array of indices
             )
-        # ✅ Best Practice: Return the mean of losses and scores for better interpretability
+            # ✅ Best Practice: Return the mean of losses and scores for better interpretability
         )
         # 🧠 ML Signal: Shuffling data indices for stochastic gradient descent
 
@@ -361,7 +394,9 @@ class SFM(Model):
         # 🧠 ML Signal: Backward pass for gradient computation
         # ⚠️ SAST Risk (Low): Potential mutable default argument for evals_result
         self.logger.info("model:\n{:}".format(self.sfm_model))
-        self.logger.info("model size: {:.4f} MB".format(count_parameters(self.sfm_model)))
+        self.logger.info(
+            "model size: {:.4f} MB".format(count_parameters(self.sfm_model))
+        )
 
         if optimizer.lower() == "adam":
             self.train_optimizer = optim.Adam(self.sfm_model.parameters(), lr=self.lr)
@@ -370,7 +405,9 @@ class SFM(Model):
         elif optimizer.lower() == "gd":
             self.train_optimizer = optim.SGD(self.sfm_model.parameters(), lr=self.lr)
         else:
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
 
         self.fitted = False
         self.sfm_model.to(self.device)
@@ -395,8 +432,16 @@ class SFM(Model):
             if len(indices) - i < self.batch_size:
                 break
 
-            feature = torch.from_numpy(x_values[indices[i : i + self.batch_size]]).float().to(self.device)
-            label = torch.from_numpy(y_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            feature = (
+                torch.from_numpy(x_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
+            label = (
+                torch.from_numpy(y_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
 
             pred = self.sfm_model(feature)
             loss = self.loss_fn(pred, label)
@@ -435,9 +480,17 @@ class SFM(Model):
             # ⚠️ SAST Risk (Low): Potential risk if self.loss_fn is not properly validated or sanitized, leading to unexpected behavior.
             # ⚠️ SAST Risk (Low): Potential exception if 'self.fitted' is not a boolean
 
-            feature = torch.from_numpy(x_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            feature = (
+                torch.from_numpy(x_train_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
             # ⚠️ SAST Risk (Low): Use of string formatting with user-controlled input in exception message, though risk is minimal here.
-            label = torch.from_numpy(y_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
+            label = (
+                torch.from_numpy(y_train_values[indices[i : i + self.batch_size]])
+                .float()
+                .to(self.device)
+            )
             # 🧠 ML Signal: Usage of dataset preparation for prediction
 
             pred = self.sfm_model(feature)
@@ -455,7 +508,7 @@ class SFM(Model):
         dataset: DatasetH,
         evals_result=dict(),
         save_path=None,
-    # ⚠️ SAST Risk (Low): Potential device mismatch if 'self.device' is not set correctly
+        # ⚠️ SAST Risk (Low): Potential device mismatch if 'self.device' is not set correctly
     ):
         df_train, df_valid = dataset.prepare(
             # ✅ Best Practice: Use of 'torch.no_grad()' for inference to save memory
@@ -465,12 +518,14 @@ class SFM(Model):
             col_set=["feature", "label"],
             # 🧠 ML Signal: Model prediction and conversion to numpy
             data_key=DataHandlerLP.DK_L,
-        # ✅ Best Practice: Encapsulating initialization logic in a separate method
+            # ✅ Best Practice: Encapsulating initialization logic in a separate method
         )
         # ✅ Best Practice: Initializing or resetting instance variables to default values
         if df_train.empty or df_valid.empty:
             # 🧠 ML Signal: Returning predictions as a pandas Series
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
         # ✅ Best Practice: Initializing or resetting instance variables to default values
         x_train, y_train = df_train["feature"], df_train["label"]
         x_valid, y_valid = df_valid["feature"], df_valid["label"]
@@ -545,7 +600,9 @@ class SFM(Model):
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
 
-        x_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        x_test = dataset.prepare(
+            segment, col_set="feature", data_key=DataHandlerLP.DK_I
+        )
         index = x_test.index
         self.sfm_model.eval()
         x_values = x_test.values

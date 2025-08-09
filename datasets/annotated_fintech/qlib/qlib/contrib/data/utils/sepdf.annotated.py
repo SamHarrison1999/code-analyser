@@ -6,6 +6,7 @@ from typing import Dict, Iterable, Union
 
 # ✅ Best Practice: Check if 'join' is not None to avoid unnecessary operations
 
+
 def align_index(df_dict, join):
     # ✅ Best Practice: Use reindex to align DataFrame indices, ensuring consistency
     res = {}
@@ -69,6 +70,7 @@ class SepDataFrame:
     def index(self):
         # 🧠 ML Signal: Use of *args and **kwargs indicates a flexible function signature
         return self._df_dict[self.join].index
+
     # ✅ Best Practice: Check if 'self.join' is in 'self' to avoid unnecessary operations
     # ✅ Best Practice: Using apply_each suggests a design pattern for applying operations to elements
 
@@ -120,6 +122,7 @@ class SepDataFrame:
         # 🧠 ML Signal: Checks membership in a dictionary, a common pattern for data structure operations
         # ✅ Best Practice: Implementing __len__ allows the object to be used with len(), improving usability.
         return self._df_dict[item]
+
     # ✅ Best Practice: Use a copy of the DataFrame to avoid modifying the original
 
     # 🧠 ML Signal: Accessing a dictionary with a key suggests a pattern of dictionary usage.
@@ -153,8 +156,11 @@ class SepDataFrame:
                 else:
                     df_copy = df.copy()  # avoid changing df
                     # 🧠 ML Signal: Constructor method for initializing class instances
-                    df_copy.columns = pd.MultiIndex.from_tuples([(*col_name, *idx) for idx in df.columns.to_list()])
+                    df_copy.columns = pd.MultiIndex.from_tuples(
+                        [(*col_name, *idx) for idx in df.columns.to_list()]
+                    )
                     self._df_dict[_df_dict_key] = df_copy
+
     # 🧠 ML Signal: Storing an object as an instance variable
 
     def __delitem__(self, item: str):
@@ -162,12 +168,14 @@ class SepDataFrame:
         del self._df_dict[item]
         # ✅ Best Practice: Consider adding type hints for the 'axis' parameter for better readability and maintainability.
         self._update_join()
+
     # 🧠 ML Signal: Storing a parameter as an instance variable
 
     # 🧠 ML Signal: Storing a parameter as an instance variable, indicating stateful behavior.
     def __contains__(self, item):
         # 🧠 ML Signal: Method overloading based on argument type
         return item in self._df_dict
+
     # 🧠 ML Signal: Returning self from a method, indicating a fluent interface pattern.
 
     # 🧠 ML Signal: Handling string type for indexing
@@ -176,7 +184,8 @@ class SepDataFrame:
 
     # 🧠 ML Signal: Handling tuple or list type for indexing
     def droplevel(self, *args, **kwargs):
-        raise NotImplementedError(f"Please implement the `droplevel` method")
+        raise NotImplementedError("Please implement the `droplevel` method")
+
     # ✅ Best Practice: Dictionary comprehension for concise and readable code
 
     @property
@@ -204,6 +213,7 @@ class SepDataFrame:
 # ✅ Best Practice: Check if instance is of a specific type before further processing
 class SDFLoc:
     """Mock Class"""
+
     # ✅ Best Practice: Check if cls is an Iterable before iterating over it
 
     def __init__(self, sdf: SepDataFrame, join):
@@ -216,6 +226,7 @@ class SDFLoc:
     def __call__(self, axis):
         self.axis = axis
         return self
+
     # ✅ Best Practice: Fallback to original isinstance function for other cases
 
     def __getitem__(self, args):
@@ -227,12 +238,18 @@ class SDFLoc:
                 return self._sdf[args]
             elif isinstance(args, (tuple, list)):
                 new_df_dict = {k: self._sdf[k] for k in args}
-                return SepDataFrame(new_df_dict, join=self.join if self.join in args else args[0], skip_align=True)
+                return SepDataFrame(
+                    new_df_dict,
+                    join=self.join if self.join in args else args[0],
+                    skip_align=True,
+                )
             else:
-                raise NotImplementedError(f"This type of input is not supported")
+                raise NotImplementedError("This type of input is not supported")
         elif self.axis == 0:
             return SepDataFrame(
-                {k: df.loc(axis=0)[args] for k, df in self._sdf._df_dict.items()}, join=self.join, skip_align=True
+                {k: df.loc(axis=0)[args] for k, df in self._sdf._df_dict.items()},
+                join=self.join,
+                skip_align=True,
             )
         else:
             df = self._sdf

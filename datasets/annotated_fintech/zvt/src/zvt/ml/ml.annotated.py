@@ -4,6 +4,7 @@ from typing import Union, Type, List
 
 import pandas as pd
 from sklearn.linear_model import LinearRegression, SGDRegressor
+
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -15,11 +16,18 @@ from zvt.contract.drawer import Drawer
 from zvt.domain import Stock
 from zvt.factors.transformers import MaTransformer
 from zvt.ml.lables import RelativePerformance, BehaviorCategory
+
 # 🧠 ML Signal: Function calculates percentage change, useful for time series analysis
 # ✅ Best Practice: Using a logger instead of print statements for logging is a best practice.
-from zvt.utils.pd_utils import group_by_entity_id, normalize_group_compute_result, pd_is_not_null
+from zvt.utils.pd_utils import (
+    group_by_entity_id,
+    normalize_group_compute_result,
+    pd_is_not_null,
+)
+
 # ✅ Best Practice: Function name should be more descriptive, e.g., calculate_percentage_change
 from zvt.utils.time_utils import to_pd_timestamp
+
 # ✅ Best Practice: Type hint for predict_range would improve readability and maintainability
 # 🧠 ML Signal: Function uses percentage change to classify behavior, useful for trend prediction models
 
@@ -30,15 +38,19 @@ logger = logging.getLogger(__name__)
 # ⚠️ SAST Risk (Low): No input validation for s, could lead to unexpected behavior if not a pd.Series
 # 🧠 ML Signal: Uses percentage change over a specified range, indicating a pattern for time series analysis
 
+
 # 🧠 ML Signal: Function for time series prediction by shifting data
 def cal_change(s: pd.Series, predict_range):
     # ✅ Best Practice: Function name should be more descriptive, e.g., `calculate_prediction`
     # 🧠 ML Signal: Lambda function categorizes data, useful for classification tasks
     return s.pct_change(periods=-predict_range)
+
+
 # ⚠️ SAST Risk (Low): Function lacks error handling for cases where 's' is not comparable to 'RelativePerformance' values
 
 # ⚠️ SAST Risk (Low): No input validation for `s` and `predict_range`
 # ✅ Best Practice: Consider adding type hints for the function parameters and return type for better readability and maintainability
+
 
 # ✅ Best Practice: Add type hints for function parameters and return type
 def cal_behavior_cls(s: pd.Series, predict_range):
@@ -46,9 +58,12 @@ def cal_behavior_cls(s: pd.Series, predict_range):
     return s.pct_change(periods=-predict_range).apply(
         lambda x: BehaviorCategory.up.value if x > 0 else BehaviorCategory.down.value
     )
+
+
 # ⚠️ SAST Risk (Low): Potential AttributeError if 'RelativePerformance' or its attributes are not defined
 
 # ✅ Best Practice: Use of type annotations for class attributes improves code readability and maintainability.
+
 
 def cal_predict(s: pd.Series, predict_range):
     # ⚠️ SAST Risk (Low): Potential AttributeError if 'RelativePerformance' or its attributes are not defined
@@ -80,7 +95,7 @@ class MLMachine(object):
         # ✅ Best Practice: Initialize instance variables in the constructor for clarity and maintainability.
         data_provider: str = None,
         label_method: str = "raw",
-    # ✅ Best Practice: Convert timestamps to a consistent format for internal processing.
+        # ✅ Best Practice: Convert timestamps to a consistent format for internal processing.
     ) -> None:
         """
 
@@ -135,10 +150,14 @@ class MLMachine(object):
         # ✅ Best Practice: Use a list to define column names, making it easy to modify or extend.
         # 🧠 ML Signal: Usage of a function to retrieve data based on parameters, indicating a pattern for data retrieval.
         # 🧠 ML Signal: Use of self.entity_ids suggests an object-oriented approach, indicating a pattern for instance variable usage.
-        self.feature_df = self.build_feature(self.entity_ids, self.start_timestamp, self.end_timestamp)
+        self.feature_df = self.build_feature(
+            self.entity_ids, self.start_timestamp, self.end_timestamp
+        )
         # drop na in feature
         self.feature_df = self.feature_df.dropna()
-        self.feature_names = list(set(self.feature_df.columns) - {"entity_id", "timestamp"})
+        self.feature_names = list(
+            set(self.feature_df.columns) - {"entity_id", "timestamp"}
+        )
         self.feature_df = self.feature_df.loc[:, self.feature_names]
 
         # 🧠 ML Signal: Use of self.start_timestamp and self.end_timestamp indicates a pattern for time-based data retrieval.
@@ -149,7 +168,9 @@ class MLMachine(object):
         self.label_name = self.label_ser.name
 
         # 🧠 ML Signal: Use of self.level suggests a pattern for hierarchical or leveled data retrieval.
-        self.training_X, self.training_y, self.testing_X, self.testing_y = self.split_data()
+        self.training_X, self.training_y, self.testing_X, self.testing_y = (
+            self.split_data()
+        )
         # 🧠 ML Signal: Dynamic label creation based on prediction steps and method
 
         # 🧠 ML Signal: Use of self.adjust_type indicates a pattern for data adjustment or transformation.
@@ -167,13 +188,26 @@ class MLMachine(object):
     # 🧠 ML Signal: Applying a prediction calculation function
     def split_data(self):
         # 🧠 ML Signal: Renaming series for label identification
-        training_x = self.feature_df[self.feature_df.index.get_level_values("timestamp") < self.predict_start_timestamp]
-        training_y = self.label_ser[self.label_ser.index.get_level_values("timestamp") < self.predict_start_timestamp]
+        training_x = self.feature_df[
+            self.feature_df.index.get_level_values("timestamp")
+            < self.predict_start_timestamp
+        ]
+        training_y = self.label_ser[
+            self.label_ser.index.get_level_values("timestamp")
+            < self.predict_start_timestamp
+        ]
 
-        testing_x = self.feature_df[self.feature_df.index.get_level_values("timestamp") >= self.predict_start_timestamp]
-        testing_y = self.label_ser[self.label_ser.index.get_level_values("timestamp") >= self.predict_start_timestamp]
+        testing_x = self.feature_df[
+            self.feature_df.index.get_level_values("timestamp")
+            >= self.predict_start_timestamp
+        ]
+        testing_y = self.label_ser[
+            self.label_ser.index.get_level_values("timestamp")
+            >= self.predict_start_timestamp
+        ]
         # 🧠 ML Signal: Use of change data for label creation
         return training_x, training_y, testing_x, testing_y
+
     # 🧠 ML Signal: Grouping data by entity for feature calculation
     # 🧠 ML Signal: Applying a change calculation function
 
@@ -195,9 +229,10 @@ class MLMachine(object):
             index=["entity_id", "timestamp"],
             # ⚠️ SAST Risk (Low): Potential for misuse if `params` contains unsafe data
             drop_index_col=True,
-        # 🧠 ML Signal: Use of conditional logic to determine different processing paths
-        # 🧠 ML Signal: Applying a behavior classification function
+            # 🧠 ML Signal: Use of conditional logic to determine different processing paths
+            # 🧠 ML Signal: Applying a behavior classification function
         )
+
     # 🧠 ML Signal: Returns the trained model
 
     # 🧠 ML Signal: Renaming series for label identification
@@ -209,8 +244,9 @@ class MLMachine(object):
         # 🧠 ML Signal: Shifting prediction results for alignment
         if self.label_method == "raw":
             y = (
-                group_by_entity_id(self.kdata_df["close"])
-                .apply(lambda x: cal_predict(x, self.predict_steps))
+                group_by_entity_id(self.kdata_df["close"]).apply(
+                    lambda x: cal_predict(x, self.predict_steps)
+                )
                 # 🧠 ML Signal: Normalizing computed results for consistency
                 # 🧠 ML Signal: Use of a custom Drawer class for visualization
                 .rename(label_name)
@@ -219,9 +255,8 @@ class MLMachine(object):
             y = (
                 group_by_entity_id(self.kdata_df["close"])
                 # 🧠 ML Signal: Visualization method call
-                .apply(lambda x: cal_change(x, self.predict_steps))
-                .rename(label_name)
-            # 🧠 ML Signal: Method for making predictions using a model
+                .apply(lambda x: cal_change(x, self.predict_steps)).rename(label_name)
+                # 🧠 ML Signal: Method for making predictions using a model
             )
         # 🧠 ML Signal: Conversion of prediction results to DataFrame
         elif self.label_method == "behavior_cls":
@@ -229,8 +264,9 @@ class MLMachine(object):
             # 🧠 ML Signal: Storing predictions in a pandas Series
             # ✅ Best Practice: Use of pandas Series for aligning predictions with indices
             y = (
-                group_by_entity_id(self.kdata_df["close"])
-                .apply(lambda x: cal_behavior_cls(x, self.predict_steps))
+                group_by_entity_id(self.kdata_df["close"]).apply(
+                    lambda x: cal_behavior_cls(x, self.predict_steps)
+                )
                 # 🧠 ML Signal: Use of a custom Drawer class for visualization
                 # ✅ Best Practice: Docstring provides a clear description of the method's purpose and expected input/output.
                 # 🧠 ML Signal: Visualization method call
@@ -266,10 +302,15 @@ class MLMachine(object):
         else:
             pred_df = self.pred_y.to_frame(name="pred_result").loc[[entity_id], :]
             # 🧠 ML Signal: Use of moving average windows for feature transformation
-            df = self.testing_y.to_frame(name="real_result").loc[[entity_id], :].join(pred_df, how="outer")
+            df = (
+                self.testing_y.to_frame(name="real_result")
+                .loc[[entity_id], :]
+                .join(pred_df, how="outer")
+            )
 
             drawer = Drawer(main_df=df)
             drawer.draw_table()
+
     # 🧠 ML Signal: Instantiation and usage of a machine learning pipeline
 
     def predict(self):
@@ -284,7 +325,10 @@ class MLMachine(object):
         # mean_squared_error(self.testing_y, self.pred_y)
 
     def build_feature(
-        self, entity_ids: List[str], start_timestamp: pd.Timestamp, end_timestamp: pd.Timestamp
+        self,
+        entity_ids: List[str],
+        start_timestamp: pd.Timestamp,
+        end_timestamp: pd.Timestamp,
     ) -> pd.DataFrame:
         """
         result df format
@@ -307,7 +351,10 @@ class StockMLMachine(MLMachine):
 
 class MaStockMLMachine(StockMLMachine):
     def build_feature(
-        self, entity_ids: List[str], start_timestamp: pd.Timestamp, end_timestamp: pd.Timestamp
+        self,
+        entity_ids: List[str],
+        start_timestamp: pd.Timestamp,
+        end_timestamp: pd.Timestamp,
     ) -> pd.DataFrame:
         """
 

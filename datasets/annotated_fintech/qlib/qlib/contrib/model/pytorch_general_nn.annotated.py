@@ -73,7 +73,7 @@ class GeneralPTNN(Model):
             # 🧠 ML Signal: Batch size is a common hyperparameter in ML models
             "num_layers": 2,
             "dropout": 0.0,
-        # 🧠 ML Signal: Early stopping is a common technique in ML models
+            # 🧠 ML Signal: Early stopping is a common technique in ML models
         },
     ):
         # 🧠 ML Signal: Optimizer choice is a common hyperparameter in ML models
@@ -95,12 +95,16 @@ class GeneralPTNN(Model):
         self.optimizer = optimizer.lower()
         self.loss = loss
         self.weight_decay = weight_decay
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.n_jobs = n_jobs
         self.seed = seed
 
         self.pt_model_uri, self.pt_model_kwargs = pt_model_uri, pt_model_kwargs
-        self.dnn_model = init_instance_by_config({"class": pt_model_uri, "kwargs": pt_model_kwargs})
+        self.dnn_model = init_instance_by_config(
+            {"class": pt_model_uri, "kwargs": pt_model_kwargs}
+        )
 
         self.logger.info(
             "GeneralPTNN parameters setting:"
@@ -135,7 +139,7 @@ class GeneralPTNN(Model):
                 pt_model_uri,
                 pt_model_kwargs,
             )
-        # 🧠 ML Signal: Checks if the computation is set to run on a GPU, indicating hardware usage preference
+            # 🧠 ML Signal: Checks if the computation is set to run on a GPU, indicating hardware usage preference
         )
         # 🧠 ML Signal: Model size logging is useful for understanding resource requirements
 
@@ -152,21 +156,29 @@ class GeneralPTNN(Model):
         self.logger.info("model:\n{:}".format(self.dnn_model))
         # 🧠 ML Signal: Gradient Descent optimizer is a common choice in ML models
         # 🧠 ML Signal: Use of torch.mean for averaging loss
-        self.logger.info("model size: {:.4f} MB".format(count_parameters(self.dnn_model)))
+        self.logger.info(
+            "model size: {:.4f} MB".format(count_parameters(self.dnn_model))
+        )
 
         # ✅ Best Practice: Default weight initialization with torch.ones_like
         if optimizer.lower() == "adam":
             # ⚠️ SAST Risk (Low): Use of NotImplementedError for unsupported optimizers
-            self.train_optimizer = optim.Adam(self.dnn_model.parameters(), lr=self.lr, weight_decay=weight_decay)
+            self.train_optimizer = optim.Adam(
+                self.dnn_model.parameters(), lr=self.lr, weight_decay=weight_decay
+            )
         elif optimizer.lower() == "gd":
             # 🧠 ML Signal: Learning rate scheduler is a common technique in ML models
             # 🧠 ML Signal: Use of mean squared error (mse) as a loss function
             # 🧠 ML Signal: Function definition for metric calculation, indicating a pattern for evaluating model performance
-            self.train_optimizer = optim.SGD(self.dnn_model.parameters(), lr=self.lr, weight_decay=weight_decay)
+            self.train_optimizer = optim.SGD(
+                self.dnn_model.parameters(), lr=self.lr, weight_decay=weight_decay
+            )
         else:
             # ⚠️ SAST Risk (Low): Potential for unhandled exception if self.loss is not "mse"
             # 🧠 ML Signal: Use of torch.isfinite to create a mask, indicating handling of non-finite values in tensors
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
 
         # 🧠 ML Signal: Conditional logic based on metric type, showing a pattern for selecting evaluation criteria
         # === ReduceLROnPlateau learning rate scheduler ===
@@ -174,7 +186,12 @@ class GeneralPTNN(Model):
         self.lr_scheduler = ReduceLROnPlateau(
             # ⚠️ SAST Risk (Low): Potential information disclosure through error messages
             # 🧠 ML Signal: Use of a loss function, indicating a pattern for model evaluation
-            self.train_optimizer, mode="min", factor=0.5, patience=5, min_lr=1e-6, threshold=1e-5
+            self.train_optimizer,
+            mode="min",
+            factor=0.5,
+            patience=5,
+            min_lr=1e-6,
+            threshold=1e-5,
         )
         self.fitted = False
         self.dnn_model.to(self.device)
@@ -200,6 +217,7 @@ class GeneralPTNN(Model):
             return self.mse(pred[mask], label[mask].view(-1, 1), weight[mask])
 
         raise ValueError("unknown loss `%s`" % self.loss)
+
     # ⚠️ SAST Risk (Low): Raising a generic exception without specific handling can lead to unhandled exceptions.
 
     # 🧠 ML Signal: Iterating over data_loader indicates a training loop
@@ -289,12 +307,18 @@ class GeneralPTNN(Model):
     ):
         ists = isinstance(dataset, TSDatasetH)  # is this time series dataset
 
-        dl_train = dataset.prepare("train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
-        dl_valid = dataset.prepare("valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)
+        dl_train = dataset.prepare(
+            "train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
+        dl_valid = dataset.prepare(
+            "valid", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
+        )
         self.logger.info(f"Train samples: {len(dl_train)}")
         self.logger.info(f"Valid samples: {len(dl_valid)}")
         if dl_train.empty or dl_valid.empty:
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
 
         if reweighter is None:
             wl_train = np.ones(len(dl_train))
@@ -307,8 +331,12 @@ class GeneralPTNN(Model):
 
         # Preprocess for data.  To align to Dataset Interface for DataLoader
         if ists:
-            dl_train.config(fillna_type="ffill+bfill")  # process nan brought by dataloader
-            dl_valid.config(fillna_type="ffill+bfill")  # process nan brought by dataloader
+            dl_train.config(
+                fillna_type="ffill+bfill"
+            )  # process nan brought by dataloader
+            dl_valid.config(
+                fillna_type="ffill+bfill"
+            )  # process nan brought by dataloader
         else:
             # If it is a tabular, we convert the dataframe to numpy to be indexable by DataLoader
             # ⚠️ SAST Risk (Low): Potential memory leak if GPU memory is not properly managed
@@ -321,7 +349,7 @@ class GeneralPTNN(Model):
             shuffle=True,
             num_workers=self.n_jobs,
             drop_last=True,
-        # ✅ Best Practice: Use of descriptive logging to track the number of test samples
+            # ✅ Best Practice: Use of descriptive logging to track the number of test samples
         )
         valid_loader = DataLoader(
             ConcatDataset(dl_valid, wl_valid),
@@ -357,7 +385,9 @@ class GeneralPTNN(Model):
             self.logger.info("evaluating...")
             train_loss, train_score = self.test_epoch(train_loader)
             val_loss, val_score = self.test_epoch(valid_loader)
-            self.logger.info("Epoch%d: train %.6f, valid %.6f" % (step, train_score, val_score))
+            self.logger.info(
+                "Epoch%d: train %.6f, valid %.6f" % (step, train_score, val_score)
+            )
             evals_result["train"].append(train_score)
             evals_result["valid"].append(val_score)
 
@@ -395,18 +425,24 @@ class GeneralPTNN(Model):
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
 
-        dl_test = dataset.prepare("test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I)
+        dl_test = dataset.prepare(
+            "test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I
+        )
         self.logger.info(f"Test samples: {len(dl_test)}")
 
         if isinstance(dataset, TSDatasetH):
-            dl_test.config(fillna_type="ffill+bfill")  # process nan brought by dataloader
+            dl_test.config(
+                fillna_type="ffill+bfill"
+            )  # process nan brought by dataloader
             index = dl_test.get_index()
         else:
             # If it is a tabular, we convert the dataframe to numpy to be indexable by DataLoader
             index = dl_test.index
             dl_test = dl_test.values
 
-        test_loader = DataLoader(dl_test, batch_size=self.batch_size, num_workers=self.n_jobs)
+        test_loader = DataLoader(
+            dl_test, batch_size=self.batch_size, num_workers=self.n_jobs
+        )
         self.dnn_model.eval()
         preds = []
 

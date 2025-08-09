@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
+
 # ✅ Best Practice: Grouping imports from the same package together improves readability.
 import requests
 
@@ -13,6 +14,7 @@ from zvt.utils.utils import json_callback_param
 
 # 🧠 ML Signal: Use of a dictionary to map categories to URLs, indicating a pattern of categorization
 # ⚠️ SAST Risk (Low): Hardcoded URLs can lead to maintenance issues if the URLs change
+
 
 class EastmoneyBlockRecorder(Recorder):
     provider = "eastmoney"
@@ -53,21 +55,29 @@ class EastmoneyBlockRecorder(Recorder):
                         # 🧠 ML Signal: Custom class definition indicating a specific data recording pattern
                         "category": category.value,
                     }
-                # ✅ Best Practice: Check if list is not empty before processing
-                # 🧠 ML Signal: Static string assignment indicating a specific data source
+                    # ✅ Best Practice: Check if list is not empty before processing
+                    # 🧠 ML Signal: Static string assignment indicating a specific data source
                 )
             # 🧠 ML Signal: Creating a DataFrame from a list of dictionaries
             if the_list:
                 # 🧠 ML Signal: Static assignment of schema indicating data structure
                 df = pd.DataFrame.from_records(the_list)
                 # ⚠️ SAST Risk (Medium): No validation or sanitization before database insertion
-                df_to_db(data_schema=self.data_schema, df=df, provider=self.provider, force_update=self.force_update)
+                df_to_db(
+                    data_schema=self.data_schema,
+                    df=df,
+                    provider=self.provider,
+                    force_update=self.force_update,
+                )
             # ⚠️ SAST Risk (Medium): No error handling for network issues or invalid responses
             # 🧠 ML Signal: Static string assignment indicating a specific data source
             self.logger.info(f"finish record eastmoney blocks:{category.value}")
+
+
 # 🧠 ML Signal: Logging information
 
 # 🧠 ML Signal: Static assignment of schema indicating data structure
+
 
 # ⚠️ SAST Risk (Medium): json_callback_param may execute arbitrary code if not properly sanitized
 class EastmoneyBlockStockRecorder(TimeSeriesDataRecorder):
@@ -85,7 +95,9 @@ class EastmoneyBlockStockRecorder(TimeSeriesDataRecorder):
     category_stocks_url = "https://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C.{}{}&sty=SFCOO&st=(Close)&sr=-1&p=1&ps=300&cb=jsonp_B66B5BAA1C1B47B5BB9778045845B947&token=7bc05d0d4c3c22ef9fca8c2a912d779c"
 
     def record(self, entity, start, end, size, timestamps):
-        resp = requests.get(self.category_stocks_url.format(entity.code, "1"), headers=DEFAULT_HEADER)
+        resp = requests.get(
+            self.category_stocks_url.format(entity.code, "1"), headers=DEFAULT_HEADER
+        )
         try:
             results = json_callback_param(resp.text)
             the_list = []
@@ -120,9 +132,16 @@ class EastmoneyBlockStockRecorder(TimeSeriesDataRecorder):
                 )
             if the_list:
                 df = pd.DataFrame.from_records(the_list)
-                df_to_db(data_schema=self.data_schema, df=df, provider=self.provider, force_update=True)
+                df_to_db(
+                    data_schema=self.data_schema,
+                    df=df,
+                    provider=self.provider,
+                    force_update=True,
+                )
 
-            self.logger.info("finish recording block:{},{}".format(entity.category, entity.name))
+            self.logger.info(
+                "finish recording block:{},{}".format(entity.category, entity.name)
+            )
 
         except Exception as e:
             self.logger.error("error:,resp.text:", e, resp.text)

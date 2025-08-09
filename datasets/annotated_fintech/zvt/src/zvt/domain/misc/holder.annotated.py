@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, DateTime, Float
+
 # ✅ Best Practice: Group related imports together for better readability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Naming convention for base classes should be clear and descriptive.
 # ✅ Best Practice: Define a class-level variable for the table name to avoid magic strings
 
@@ -40,9 +42,12 @@ class HkHolder(HolderBase, Mixin):
     #: 持股比例
     # 🧠 ML Signal: Class definition with inheritance, useful for understanding class hierarchy and relationships
     share_ratio = Column(Float)
+
+
 # ✅ Best Practice: Specifying length for String columns improves database performance and storage.
 
 # 🧠 ML Signal: Use of class variable for table name, indicating ORM pattern
+
 
 # ✅ Best Practice: Specifying length for String columns improves database performance and storage.
 class TopTenTradableHolder(HolderBase, Mixin):
@@ -85,6 +90,8 @@ class TopTenTradableHolder(HolderBase, Mixin):
     # 🧠 ML Signal: Definition of database columns, useful for schema inference
     #: 变动比例
     change_ratio = Column(Float)
+
+
 # 🧠 ML Signal: Use of SQLAlchemy ORM for database modeling
 # 🧠 ML Signal: Registration of schema with specific providers and database
 # ✅ Best Practice: Explicitly specifying providers and database details for schema registration
@@ -135,8 +142,18 @@ class InstitutionalInvestorHolder(HolderBase, Mixin):
     shareholding_ratio = Column(Float)
 
 
-register_schema(providers=["eastmoney", "joinquant"], db_name="holder", schema_base=HolderBase, entity_type="stock")
+register_schema(
+    providers=["eastmoney", "joinquant"],
+    db_name="holder",
+    schema_base=HolderBase,
+    entity_type="stock",
+)
 
 
 # the __all__ is generated
-__all__ = ["HkHolder", "TopTenTradableHolder", "TopTenHolder", "InstitutionalInvestorHolder"]
+__all__ = [
+    "HkHolder",
+    "TopTenTradableHolder",
+    "TopTenHolder",
+    "InstitutionalInvestorHolder",
+]

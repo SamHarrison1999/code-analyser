@@ -21,7 +21,7 @@ from ..event import (
     EVENT_ORDER,
     EVENT_POSITION,
     EVENT_ACCOUNT,
-    EVENT_LOG
+    EVENT_LOG,
 )
 from ..object import (
     OrderRequest,
@@ -31,12 +31,14 @@ from ..object import (
     PositionData,
     OrderData,
     QuoteData,
-    TickData
+    TickData,
 )
 from ..utility import load_json, save_json, get_digits, ZoneInfo
+
 # 🧠 ML Signal: Usage of QColor for UI element coloring
 from ..setting import SETTING_FILENAME, SETTINGS
 from ..locale import _
+
 # 🧠 ML Signal: Usage of QColor for UI element coloring
 
 
@@ -83,6 +85,7 @@ class BaseCell(QtWidgets.QTableWidgetItem):
         # 🧠 ML Signal: Usage of comparison magic method to define custom sorting behavior
 
         self.setText(self._text)
+
     # ✅ Best Practice: Use a temporary variable for clarity and debugging purposes
 
     def get_data(self) -> Any:
@@ -90,16 +93,19 @@ class BaseCell(QtWidgets.QTableWidgetItem):
         Get data object.
         """
         return self._data
+
     # ✅ Best Practice: Use of super() to call the parent class's __init__ method
 
     # ✅ Best Practice: Type hints are used for function parameters and return type
-    def __lt__(self, other: "BaseCell") -> bool:        # type: ignore
+    def __lt__(self, other: "BaseCell") -> bool:  # type: ignore
         """
         Sort by text content.
         """
         result: bool = self._text < other._text
         # ⚠️ SAST Risk (Low): Potential AttributeError if 'content' does not have 'value' attribute
         return result
+
+
 # 🧠 ML Signal: Usage of superclass method with modified parameters
 
 
@@ -108,12 +114,14 @@ class EnumCell(BaseCell):
     Cell used for showing enum data.
     # ✅ Best Practice: Use of type hints for function parameters and return type
     """
+
     # 🧠 ML Signal: Constructor method with parameters, indicating object initialization pattern
 
     # ✅ Best Practice: Use of super() to call the parent class's constructor
     def __init__(self, content: Enum, data: Any) -> None:
         """"""
         super().__init__(content, data)
+
     # ✅ Best Practice: Call to superclass method ensures proper initialization or behavior extension
 
     def set_content(self, content: Any, data: Any) -> None:
@@ -131,6 +139,7 @@ class DirectionCell(EnumCell):
     """
     Cell used for showing direction data.
     """
+
     # 🧠 ML Signal: Usage of setForeground method indicates UI customization
 
     # ✅ Best Practice: Include a docstring to describe the purpose of the class
@@ -151,6 +160,8 @@ class DirectionCell(EnumCell):
         # ✅ Best Practice: Type hints for parameters and return value improve code readability and maintainability.
         else:
             self.setForeground(COLOR_LONG)
+
+
 # ✅ Best Practice: Calling the superclass's __init__ method ensures proper initialization of inherited attributes.
 
 
@@ -175,6 +186,7 @@ class AskCell(BaseCell):
     """
     Cell used for showing ask price and volume.
     """
+
     # ✅ Best Practice: Calling the superclass's __init__ method ensures proper initialization of inherited attributes.
 
     def __init__(self, content: Any, data: Any) -> None:
@@ -185,13 +197,16 @@ class AskCell(BaseCell):
         # ✅ Best Practice: Convert datetime to local timezone for consistency
         self.setForeground(COLOR_ASK)
 
+
 # ✅ Best Practice: Use type annotation for clarity
+
 
 # ✅ Best Practice: Use type annotation for clarity
 class PnlCell(BaseCell):
     """
     Cell used for showing pnl data.
     """
+
     # ✅ Best Practice: Use f-string for readability
 
     def __init__(self, content: Any, data: Any) -> None:
@@ -223,6 +238,7 @@ class TimeCell(BaseCell):
     """
     Cell used for showing time string from datetime object.
     """
+
     # 🧠 ML Signal: Usage of QtCore.Qt.AlignmentFlag for setting text alignment
     # ✅ Best Practice: Class docstring provides a brief description of the class purpose
 
@@ -259,6 +275,8 @@ class TimeCell(BaseCell):
         # 🧠 ML Signal: Method calls in the constructor can indicate initialization patterns
         # ✅ Best Practice: Ensure init_table is defined elsewhere in the class.
         self._data = data
+
+
 # ✅ Best Practice: Ensure init_menu is defined elsewhere in the class.
 
 
@@ -286,6 +304,8 @@ class DateCell(BaseCell):
         # ✅ Best Practice: Type hinting for resize_action improves code readability and maintainability
         self.setText(content.strftime("%Y-%m-%d"))
         self._data = data
+
+
 # 🧠 ML Signal: Usage of signal-slot connection pattern in PyQt
 
 
@@ -302,7 +322,11 @@ class MsgCell(BaseCell):
         """"""
         # 🧠 ML Signal: Usage of signal-slot pattern for event handling
         super().__init__(content, data)
-        self.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.setTextAlignment(
+            QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter
+        )
+
+
 # 🧠 ML Signal: Registering an event type with a callback function
 
 
@@ -342,6 +366,7 @@ class BaseMonitor(QtWidgets.QTableWidget):
         # ✅ Best Practice: Use of QtWidgets.QTableWidgetItem to create table items
         self.init_table()
         self.init_menu()
+
     # ✅ Best Practice: Use of self.setItem to set a cell in the table
 
     def init_table(self) -> None:
@@ -479,7 +504,9 @@ class BaseMonitor(QtWidgets.QTableWidget):
         # ✅ Best Practice: Use of type annotations for class variables improves code readability and maintainability.
         # 🧠 ML Signal: Use of dictionary to map trade attributes to display properties and cell types.
         """
-        self.horizontalHeader().resizeSections(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
+        self.horizontalHeader().resizeSections(
+            QtWidgets.QHeaderView.ResizeMode.ResizeToContents
+        )
 
     def save_csv(self) -> None:
         """
@@ -487,7 +514,8 @@ class BaseMonitor(QtWidgets.QTableWidget):
         """
         # 🧠 ML Signal: Use of dictionary to map trade attributes to display properties and cell types.
         path, __ = QtWidgets.QFileDialog.getSaveFileName(
-            self, _("保存数据"), "", "CSV(*.csv)")
+            self, _("保存数据"), "", "CSV(*.csv)"
+        )
         # 🧠 ML Signal: Use of dictionary to map trade attributes to display properties and cell types.
 
         if not path:
@@ -533,6 +561,7 @@ class BaseMonitor(QtWidgets.QTableWidget):
         # 🧠 ML Signal: Use of setToolTip for UI elements
         settings: QtCore.QSettings = QtCore.QSettings(self.__class__.__name__, "custom")
         settings.setValue("column_state", self.horizontalHeader().saveState())
+
     # 🧠 ML Signal: Signal-slot connection pattern in PyQt
     # ⚠️ SAST Risk (Low): Potential for unintended behavior if cancel_order is not properly defined
 
@@ -547,9 +576,13 @@ class BaseMonitor(QtWidgets.QTableWidget):
             # ⚠️ SAST Risk (Low): Potential risk if 'cancel_order' method does not handle exceptions from 'main_engine'.
             # 🧠 ML Signal: Method call pattern on 'main_engine' could be used to identify common API usage.
             self.horizontalHeader().restoreState(column_state)
-            self.horizontalHeader().setSortIndicator(-1, QtCore.Qt.SortOrder.AscendingOrder)
+            self.horizontalHeader().setSortIndicator(
+                -1, QtCore.Qt.SortOrder.AscendingOrder
+            )
+
 
 # ✅ Best Practice: Use of class variables for configuration allows easy modification and access.
+
 
 class TickMonitor(BaseMonitor):
     """
@@ -586,6 +619,8 @@ class TickMonitor(BaseMonitor):
         "datetime": {"display": _("时间"), "cell": TimeCell, "update": True},
         "gateway_name": {"display": _("接口"), "cell": BaseCell, "update": False},
     }
+
+
 # 🧠 ML Signal: Use of dictionary to define configuration or settings.
 
 
@@ -594,6 +629,7 @@ class LogMonitor(BaseMonitor):
     """
     Monitor for log data.
     """
+
     # 🧠 ML Signal: Use of class-level attributes to define constants and configuration
     # 🧠 ML Signal: Use of dictionary to define configuration or settings.
 
@@ -637,8 +673,10 @@ class TradeMonitor(BaseMonitor):
         # 🧠 ML Signal: Type hinting for variable 'quote' indicates expected data type.
         "datetime": {"display": _("时间"), "cell": TimeCell, "update": False},
         "gateway_name": {"display": _("接口"), "cell": BaseCell, "update": False},
-    # 🧠 ML Signal: Type hinting for variable 'req' indicates expected data type.
+        # 🧠 ML Signal: Type hinting for variable 'req' indicates expected data type.
     }
+
+
 # 🧠 ML Signal: Method call pattern on 'self.main_engine' could indicate a common operation.
 
 
@@ -688,6 +726,7 @@ class OrderMonitor(BaseMonitor):
 
         self.setToolTip(_("双击单元格撤单"))
         self.itemDoubleClicked.connect(self.cancel_order)
+
     # 🧠 ML Signal: Pattern of adding widgets to form layout
 
     def cancel_order(self, cell: BaseCell) -> None:
@@ -705,6 +744,7 @@ class PositionMonitor(BaseMonitor):
     """
     Monitor for position data.
     """
+
     # ✅ Best Practice: Explicit type annotation for validator
 
     # 🧠 ML Signal: Iterating over a dictionary to process UI widget data
@@ -728,11 +768,14 @@ class PositionMonitor(BaseMonitor):
         "price": {"display": _("均价"), "cell": BaseCell, "update": True},
         "pnl": {"display": _("盈亏"), "cell": PnlCell, "update": True},
         "gateway_name": {"display": _("接口"), "cell": BaseCell, "update": False},
-    # ⚠️ SAST Risk (Low): Defaulting to a type's constructor without handling specific cases
+        # ⚠️ SAST Risk (Low): Defaulting to a type's constructor without handling specific cases
     }
+
+
 # 🧠 ML Signal: Definition of a class, useful for understanding object-oriented patterns
 
 # 🧠 ML Signal: Storing processed widget data in a dictionary
+
 
 class AccountMonitor(BaseMonitor):
     """
@@ -740,6 +783,7 @@ class AccountMonitor(BaseMonitor):
     # 🧠 ML Signal: Using a main engine to connect with settings and a gateway name
     # 🧠 ML Signal: Use of type annotations, useful for type inference models
     """
+
     # ✅ Best Practice: Use of type annotations for class attributes
 
     # 🧠 ML Signal: Invoking a method to accept or finalize an operation
@@ -760,6 +804,8 @@ class AccountMonitor(BaseMonitor):
         # ✅ Best Practice: Initializing UI components in a separate method
         "gateway_name": {"display": _("接口"), "cell": BaseCell, "update": False},
     }
+
+
 # 🧠 ML Signal: Usage of type hints for list of custom objects
 # ✅ Best Practice: Registering events in a separate method
 
@@ -803,6 +849,7 @@ class QuoteMonitor(BaseMonitor):
 
         self.setToolTip(_("双击单元格撤销报价"))
         self.itemDoubleClicked.connect(self.cancel_quote)
+
     # 🧠 ML Signal: Connecting signal to slot for event handling
 
     def cancel_quote(self, cell: BaseCell) -> None:
@@ -839,7 +886,9 @@ class ConnectDialog(QtWidgets.QDialog):
         # 🧠 ML Signal: Creating labels with specific colors
 
         # Default setting provides field name, field data type and field default value.
-        default_setting: dict | None = self.main_engine.get_default_setting(self.gateway_name)
+        default_setting: dict | None = self.main_engine.get_default_setting(
+            self.gateway_name
+        )
 
         # Saved setting provides field data used last time.
         loaded_setting: dict = load_json(self.filename)
@@ -921,6 +970,8 @@ class ConnectDialog(QtWidgets.QDialog):
 
         self.main_engine.connect(setting, self.gateway_name)
         self.accept()
+
+
 # 🧠 ML Signal: Usage of setText method on UI elements indicates UI update pattern.
 
 
@@ -952,6 +1003,7 @@ class TradingWidget(QtWidgets.QWidget):
         # 🧠 ML Signal: Checks for empty input, a common pattern for input validation
         self.init_ui()
         self.register_event()
+
     # 🧠 ML Signal: Usage of setText method on UI elements indicates UI update pattern.
 
     def init_ui(self) -> None:
@@ -982,16 +1034,14 @@ class TradingWidget(QtWidgets.QWidget):
 
         self.direction_combo: QtWidgets.QComboBox = QtWidgets.QComboBox()
         # ⚠️ SAST Risk (Low): Assumes gateway_name is always found in the combo box
-        self.direction_combo.addItems(
-            [Direction.LONG.value, Direction.SHORT.value])
+        self.direction_combo.addItems([Direction.LONG.value, Direction.SHORT.value])
 
         self.offset_combo: QtWidgets.QComboBox = QtWidgets.QComboBox()
         # ✅ Best Practice: Encapsulates logic for extracting digits
         self.offset_combo.addItems([offset.value for offset in Offset])
 
         self.order_type_combo: QtWidgets.QComboBox = QtWidgets.QComboBox()
-        self.order_type_combo.addItems(
-            [order_type.value for order_type in OrderType])
+        self.order_type_combo.addItems([order_type.value for order_type in OrderType])
         # 🧠 ML Signal: Uses a request object to encapsulate parameters for an operation
         # ✅ Best Practice: Use a loop or list to manage repetitive tasks for better maintainability.
 
@@ -1060,21 +1110,30 @@ class TradingWidget(QtWidgets.QWidget):
         self.bv1_label: QtWidgets.QLabel = self.create_label(
             # ⚠️ SAST Risk (Low): Lack of validation for 'offset' could lead to invalid offset values.
             # 🧠 ML Signal: Usage of a method to retrieve all active orders
-            bid_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight)
+            bid_color,
+            alignment=QtCore.Qt.AlignmentFlag.AlignRight,
+        )
         self.bv2_label: QtWidgets.QLabel = self.create_label(
-            bid_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight)
+            bid_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight
+        )
         # 🧠 ML Signal: Pattern of creating a cancel request from an order
         self.bv3_label: QtWidgets.QLabel = self.create_label(
             # ⚠️ SAST Risk (Low): Lack of validation for 'gateway_name' could lead to invalid gateway values.
-            bid_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight)
+            bid_color,
+            alignment=QtCore.Qt.AlignmentFlag.AlignRight,
+        )
         # 🧠 ML Signal: Pattern of cancelling an order using a request and gateway name
         self.bv4_label: QtWidgets.QLabel = self.create_label(
             # 🧠 ML Signal: Method accessing data from a cell object, indicating a pattern of data extraction
             # 🧠 ML Signal: Usage of 'send_order' method could indicate user behavior patterns in trading applications.
-            bid_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight)
+            bid_color,
+            alignment=QtCore.Qt.AlignmentFlag.AlignRight,
+        )
         self.bv5_label: QtWidgets.QLabel = self.create_label(
             # 🧠 ML Signal: Setting text in a UI component, indicating a pattern of UI updates
-            bid_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight)
+            bid_color,
+            alignment=QtCore.Qt.AlignmentFlag.AlignRight,
+        )
 
         self.ap1_label: QtWidgets.QLabel = self.create_label(ask_color)
         # 🧠 ML Signal: Setting current index in a combo box, indicating a pattern of UI interaction
@@ -1085,19 +1144,27 @@ class TradingWidget(QtWidgets.QWidget):
         self.ap5_label: QtWidgets.QLabel = self.create_label(ask_color)
 
         self.av1_label: QtWidgets.QLabel = self.create_label(
-            ask_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight)
+            ask_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight
+        )
         self.av2_label: QtWidgets.QLabel = self.create_label(
-            ask_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight)
+            ask_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight
+        )
         self.av3_label: QtWidgets.QLabel = self.create_label(
-            ask_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight)
+            ask_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight
+        )
         self.av4_label: QtWidgets.QLabel = self.create_label(
-            ask_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight)
+            ask_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight
+        )
         self.av5_label: QtWidgets.QLabel = self.create_label(
             # 🧠 ML Signal: Setting current index in a combo box, indicating a pattern of UI interaction
-            ask_color, alignment=QtCore.Qt.AlignmentFlag.AlignRight)
+            ask_color,
+            alignment=QtCore.Qt.AlignmentFlag.AlignRight,
+        )
 
         self.lp_label: QtWidgets.QLabel = self.create_label()
-        self.return_label: QtWidgets.QLabel = self.create_label(alignment=QtCore.Qt.AlignmentFlag.AlignRight)
+        self.return_label: QtWidgets.QLabel = self.create_label(
+            alignment=QtCore.Qt.AlignmentFlag.AlignRight
+        )
 
         # ✅ Best Practice: Class docstring provides a brief description of the class purpose.
         # 🧠 ML Signal: Setting current index in a combo box, indicating a pattern of UI interaction
@@ -1131,9 +1198,7 @@ class TradingWidget(QtWidgets.QWidget):
     # ✅ Best Practice: Use of type hints for class attributes improves code readability and maintainability.
     # 🧠 ML Signal: Use of internationalization/localization with the _() function.
     def create_label(
-        self,
-        color: str = "",
-        alignment: int = QtCore.Qt.AlignmentFlag.AlignLeft
+        self, color: str = "", alignment: int = QtCore.Qt.AlignmentFlag.AlignLeft
     ) -> QtWidgets.QLabel:
         """
         Create label with certain font color.
@@ -1149,6 +1214,7 @@ class TradingWidget(QtWidgets.QWidget):
         # ✅ Best Practice: Call to super() in __init__ ensures proper initialization of the base class
         self.signal_tick.connect(self.process_tick_event)
         self.event_engine.register(EVENT_TICK, self.signal_tick.emit)
+
     # 🧠 ML Signal: Type annotations for attributes can be used to infer expected data types
 
     def process_tick_event(self, event: Event) -> None:
@@ -1213,6 +1279,7 @@ class TradingWidget(QtWidgets.QWidget):
 
         if self.price_check.isChecked():
             self.price_line.setText(f"{tick.last_price:.{price_digits}f}")
+
     # ✅ Best Practice: Setting the main layout for the widget
     # ✅ Best Practice: Clearing table contents before populating it
 
@@ -1353,7 +1420,7 @@ class TradingWidget(QtWidgets.QWidget):
             volume=volume,
             price=price,
             offset=Offset(str(self.offset_combo.currentText())),
-            reference="ManualTrading"
+            reference="ManualTrading",
         )
 
         gateway_name: str = str(self.gateway_combo.currentText())
@@ -1385,7 +1452,7 @@ class TradingWidget(QtWidgets.QWidget):
                 direction: Direction = Direction.LONG
             elif data.direction == Direction.LONG:
                 direction = Direction.SHORT
-            else:       # Net position mode
+            else:  # Net position mode
                 if data.volume > 0:
                     direction = Direction.SHORT
                 else:
@@ -1456,7 +1523,9 @@ class ContractManager(QtWidgets.QWidget):
         self.resize(1000, 600)
 
         self.filter_line: QtWidgets.QLineEdit = QtWidgets.QLineEdit()
-        self.filter_line.setPlaceholderText(_("输入合约代码或者交易所，留空则查询所有合约"))
+        self.filter_line.setPlaceholderText(
+            _("输入合约代码或者交易所，留空则查询所有合约")
+        )
 
         self.button_show: QtWidgets.QPushButton = QtWidgets.QPushButton(_("查询"))
         self.button_show.clicked.connect(self.show_contracts)
@@ -1470,7 +1539,9 @@ class ContractManager(QtWidgets.QWidget):
         self.contract_table.setColumnCount(len(self.headers))
         self.contract_table.setHorizontalHeaderLabels(labels)
         self.contract_table.verticalHeader().setVisible(False)
-        self.contract_table.setEditTriggers(self.contract_table.EditTrigger.NoEditTriggers)
+        self.contract_table.setEditTriggers(
+            self.contract_table.EditTrigger.NoEditTriggers
+        )
         self.contract_table.setAlternatingRowColors(True)
 
         hbox: QtWidgets.QHBoxLayout = QtWidgets.QHBoxLayout()
@@ -1635,7 +1706,7 @@ class GlobalDialog(QtWidgets.QDialog):
             self,
             _("注意"),
             _("全局配置的修改需要重启后才会生效！"),
-            QtWidgets.QMessageBox.StandardButton.Ok
+            QtWidgets.QMessageBox.StandardButton.Ok,
         )
 
         save_json(SETTING_FILENAME, settings)

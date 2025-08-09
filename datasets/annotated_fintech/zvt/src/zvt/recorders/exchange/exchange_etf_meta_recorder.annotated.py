@@ -10,22 +10,28 @@ import requests
 
 from zvt.api.utils import china_stock_code_to_id
 from zvt.contract.api import df_to_db
+
 # ✅ Best Practice: Class should have a docstring explaining its purpose and usage
 from zvt.contract.recorder import Recorder
 from zvt.domain import EtfStock, Etf
+
 # ✅ Best Practice: Class attributes should be documented or initialized in __init__
 from zvt.recorders.consts import DEFAULT_SH_ETF_LIST_HEADER
+
 # ✅ Best Practice: Use of default parameter values for flexibility and ease of use
 from zvt.utils.time_utils import now_pd_timestamp
 
 # ✅ Best Practice: Proper use of super() to initialize the parent class
+
 
 class ChinaETFListSpider(Recorder):
     # ⚠️ SAST Risk (Medium): Hardcoded URL can lead to security risks if the endpoint changes or is compromised.
     data_schema = EtfStock
 
     # ⚠️ SAST Risk (Medium): No error handling for the HTTP request, which can lead to unhandled exceptions.
-    def __init__(self, force_update=False, sleeping_time=10.0, provider="exchange") -> None:
+    def __init__(
+        self, force_update=False, sleeping_time=10.0, provider="exchange"
+    ) -> None:
         self.provider = provider
         # ⚠️ SAST Risk (Medium): No validation of the response before decoding, which can lead to security issues.
         super().__init__(force_update, sleeping_time)
@@ -114,8 +120,9 @@ class ChinaETFListSpider(Recorder):
     def download_sh_etf_component(self, df: pd.DataFrame):
         query_url = (
             # ✅ Best Practice: Use rename with inplace=True for clarity and efficiency.
-            "http://query.sse.com.cn/infodisplay/queryConstituentStockInfo.do?" "isPagination=false&type={}&etfClass={}"
-        # ✅ Best Practice: Consider adding type hints for the method parameters and return type for better readability and maintainability.
+            "http://query.sse.com.cn/infodisplay/queryConstituentStockInfo.do?"
+            "isPagination=false&type={}&etfClass={}"
+            # ✅ Best Practice: Consider adding type hints for the method parameters and return type for better readability and maintainability.
         )
 
         etf_df = df[(df["ETF_CLASS"] == "1") | (df["ETF_CLASS"] == "2")]
@@ -138,7 +145,10 @@ class ChinaETFListSpider(Recorder):
             # ⚠️ SAST Risk (Medium): No error handling for network request failures.
             # 🧠 ML Signal: Logging information about processed data.
             response_df = response_df[["instrumentId", "instrumentName"]].copy()
-            response_df.rename(columns={"instrumentId": "stock_code", "instrumentName": "stock_name"}, inplace=True)
+            response_df.rename(
+                columns={"instrumentId": "stock_code", "instrumentName": "stock_name"},
+                inplace=True,
+            )
 
             # 🧠 ML Signal: Usage of sleep to manage request rate.
             response_df["entity_id"] = etf_id
@@ -150,10 +160,14 @@ class ChinaETFListSpider(Recorder):
             response_df["name"] = etf["FUND_NAME"]
             response_df["timestamp"] = now_pd_timestamp()
 
-            response_df["stock_id"] = response_df["stock_code"].apply(lambda code: china_stock_code_to_id(code))
+            response_df["stock_id"] = response_df["stock_code"].apply(
+                lambda code: china_stock_code_to_id(code)
+            )
             response_df["id"] = response_df["stock_id"].apply(lambda x: f"{etf_id}_{x}")
 
-            df_to_db(data_schema=self.data_schema, df=response_df, provider=self.provider)
+            df_to_db(
+                data_schema=self.data_schema, df=response_df, provider=self.provider
+            )
             # ✅ Best Practice: Use f-strings for better readability and performance.
             self.logger.info(f'{etf["FUND_NAME"]} - {etf_code} 成分股抓取完成...')
 
@@ -169,7 +183,9 @@ class ChinaETFListSpider(Recorder):
             etf_code = etf["证券代码"]
 
             if len(underlying_index) == 0:
-                self.logger.info(f'{etf["证券简称"]} - {etf_code} 非 A 股市场指数，跳过...')
+                self.logger.info(
+                    f'{etf["证券简称"]} - {etf_code} 非 A 股市场指数，跳过...'
+                )
                 continue
 
             # ⚠️ SAST Risk (Medium): Ensure `df_to_db` handles SQL injection and data validation.
@@ -184,7 +200,9 @@ class ChinaETFListSpider(Recorder):
                 # ✅ Best Practice: Initialize an empty DataFrame for concatenation
                 dfs = pd.read_html(response.text, header=1)
             except ValueError as error:
-                self.logger.error(f"HTML parse error: {error}, response: {response.text}")
+                self.logger.error(
+                    f"HTML parse error: {error}, response: {response.text}"
+                )
                 # 🧠 ML Signal: Iterating over a fixed set of ETF classes
                 continue
 
@@ -196,14 +214,19 @@ class ChinaETFListSpider(Recorder):
             response_df = dfs[3].copy()
             # ✅ Best Practice: Use .get() to safely access dictionary keys
             response_df = response_df.dropna(axis=1, how="any")
-            response_df["品种代码"] = response_df["品种代码"].apply(lambda x: f"{x:06d}")
+            response_df["品种代码"] = response_df["品种代码"].apply(
+                lambda x: f"{x:06d}"
+            )
             # ✅ Best Practice: Explicitly select relevant columns
 
             etf_id = f"etf_sz_{etf_code}"
             # ✅ Best Practice: Use pd.concat for DataFrame concatenation
             response_df = response_df[["品种代码", "品种名称"]].copy()
             # ✅ Best Practice: Use .copy() to avoid modifying the original DataFrame
-            response_df.rename(columns={"品种代码": "stock_code", "品种名称": "stock_name"}, inplace=True)
+            response_df.rename(
+                columns={"品种代码": "stock_code", "品种名称": "stock_name"},
+                inplace=True,
+            )
 
             response_df["entity_id"] = etf_id
             response_df["entity_type"] = "etf"
@@ -217,14 +240,19 @@ class ChinaETFListSpider(Recorder):
             response_df["timestamp"] = now_pd_timestamp()
 
             # ⚠️ SAST Risk (Low): Use of regular expressions can lead to ReDoS if not properly constrained
-            response_df["stock_id"] = response_df["stock_code"].apply(lambda code: china_stock_code_to_id(code))
+            response_df["stock_id"] = response_df["stock_code"].apply(
+                lambda code: china_stock_code_to_id(code)
+            )
             response_df["id"] = response_df["stock_id"].apply(lambda x: f"{etf_id}_{x}")
 
-            df_to_db(data_schema=self.data_schema, df=response_df, provider=self.provider)
+            df_to_db(
+                data_schema=self.data_schema, df=response_df, provider=self.provider
+            )
             self.logger.info(f'{etf["证券简称"]} - {etf_code} 成分股抓取完成...')
             # 🧠 ML Signal: Extracting numeric patterns from text
 
             self.sleep()
+
     # 🧠 ML Signal: Applying a function to a DataFrame column
 
     @staticmethod

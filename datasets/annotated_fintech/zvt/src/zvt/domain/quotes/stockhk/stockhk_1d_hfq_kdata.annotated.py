@@ -6,6 +6,7 @@ from sqlalchemy.orm import declarative_base
 # ✅ Best Practice: Using a descriptive variable name for the base class improves code readability.
 from zvt.contract.register import register_schema
 from zvt.domain.quotes import StockhkKdataCommon
+
 # 🧠 ML Signal: Use of class inheritance to extend functionality
 
 # ✅ Best Practice: Use of __all__ to define public API of the module
@@ -19,7 +20,12 @@ class Stockhk1dHfqKdata(KdataBase, StockhkKdataCommon):
     __tablename__ = "stockhk_1d_hfq_kdata"
 
 
-register_schema(providers=["em"], db_name="stockhk_1d_hfq_kdata", schema_base=KdataBase, entity_type="stockhk")
+register_schema(
+    providers=["em"],
+    db_name="stockhk_1d_hfq_kdata",
+    schema_base=KdataBase,
+    entity_type="stockhk",
+)
 
 
 # the __all__ is generated

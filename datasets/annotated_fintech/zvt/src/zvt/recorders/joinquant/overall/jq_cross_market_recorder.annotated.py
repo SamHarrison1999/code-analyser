@@ -1,15 +1,20 @@
 from jqdatapy.api import run_query
+
 # 🧠 ML Signal: Importing specific functions from a module indicates usage patterns and dependencies
 
 from zvt.contract.recorder import TimeSeriesDataRecorder
+
 # 🧠 ML Signal: Importing specific classes from a module indicates usage patterns and dependencies
 from zvt.domain import Index, CrossMarketSummary
 from zvt.utils.time_utils import to_time_str
+
 # 🧠 ML Signal: Importing specific classes from a module indicates usage patterns and dependencies
 from zvt.utils.utils import multiple_number
+
 # ✅ Best Practice: Class attributes are defined at the top for clarity and maintainability
 
 # 🧠 ML Signal: Importing specific functions from a module indicates usage patterns and dependencies
+
 
 # 🧠 ML Signal: Use of a specific entity schema indicates a pattern in data handling
 class CrossMarketSummaryRecorder(TimeSeriesDataRecorder):
@@ -24,7 +29,13 @@ class CrossMarketSummaryRecorder(TimeSeriesDataRecorder):
     provider = "joinquant"
     data_schema = CrossMarketSummary
 
-    def __init__(self, force_update=False, sleeping_time=5, real_time=False, fix_duplicate_way="add") -> None:
+    def __init__(
+        self,
+        force_update=False,
+        sleeping_time=5,
+        real_time=False,
+        fix_duplicate_way="add",
+    ) -> None:
 
         # 聚宽编码
         # 市场通编码	市场通名称
@@ -56,7 +67,10 @@ class CrossMarketSummaryRecorder(TimeSeriesDataRecorder):
 
     def record(self, entity, start, end, size, timestamps):
         # 🧠 ML Signal: Applying transformation to numerical data
-        df = run_query(table="finance.STK_ML_QUOTA", conditions=f"link_id#=#{entity.code}&day#>=#{to_time_str(start)}")
+        df = run_query(
+            table="finance.STK_ML_QUOTA",
+            conditions=f"link_id#=#{entity.code}&day#>=#{to_time_str(start)}",
+        )
         print(df)
         # 🧠 ML Signal: Applying transformation to numerical data
 
@@ -77,7 +91,9 @@ class CrossMarketSummaryRecorder(TimeSeriesDataRecorder):
                 "sell_amount": multiple_number(item["sell_amount"], 100000000),
                 "sell_volume": item["sell_volume"],
                 "quota_daily": multiple_number(item["quota_daily"], 100000000),
-                "quota_daily_balance": multiple_number(item["quota_daily_balance"], 100000000),
+                "quota_daily_balance": multiple_number(
+                    item["quota_daily_balance"], 100000000
+                ),
             }
 
             json_results.append(result)

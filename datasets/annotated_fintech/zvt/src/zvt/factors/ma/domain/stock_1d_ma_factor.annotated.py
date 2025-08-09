@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, Float, String
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
+
 # ✅ Best Practice: Naming convention for classes should follow CamelCase.
 
 # ✅ Best Practice: Use of SQLAlchemy's Column to define table schema
 Stock1dMaFactorBase = declarative_base()
 
 # ✅ Best Practice: Use of SQLAlchemy's Column to define table schema
+
 
 class Stock1dMaFactor(Stock1dMaFactorBase, Mixin):
     # ✅ Best Practice: Use of SQLAlchemy's Column to define table schema
@@ -45,7 +48,9 @@ class Stock1dMaFactor(Stock1dMaFactorBase, Mixin):
     ma250 = Column(Float)
 
 
-register_schema(providers=["zvt"], db_name="stock_1d_ma_factor", schema_base=Stock1dMaFactorBase)
+register_schema(
+    providers=["zvt"], db_name="stock_1d_ma_factor", schema_base=Stock1dMaFactorBase
+)
 
 
 # the __all__ is generated

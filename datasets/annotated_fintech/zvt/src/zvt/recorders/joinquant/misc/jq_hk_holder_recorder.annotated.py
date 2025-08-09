@@ -1,18 +1,23 @@
 import pandas as pd
+
 # 🧠 ML Signal: Importing specific functions from a module indicates selective usage patterns
 from jqdatapy.api import run_query
 
 # 🧠 ML Signal: Importing specific functions from a module indicates selective usage patterns
 from zvt.contract.api import df_to_db, get_data
 from zvt.contract.recorder import TimestampsDataRecorder
+
 # 🧠 ML Signal: Importing specific classes from a module indicates selective usage patterns
 from zvt.domain import Index
 from zvt.domain.misc.holder import HkHolder
+
 # 🧠 ML Signal: Importing specific classes from a module indicates selective usage patterns
 from zvt.recorders.joinquant.common import to_entity_id
 from zvt.utils.pd_utils import pd_is_not_null
+
 # 🧠 ML Signal: Importing specific classes from a module indicates selective usage patterns
 from zvt.utils.time_utils import to_time_str, TIME_FORMAT_DAY, to_pd_timestamp
+
 # ✅ Best Practice: Class attributes should be documented to explain their purpose and usage.
 
 # 🧠 ML Signal: Importing specific functions from a module indicates selective usage patterns
@@ -78,21 +83,26 @@ class JoinquantHkHolderRecorder(TimestampsDataRecorder):
             start_timestamp=start_timestamp,
             # 🧠 ML Signal: Iterating over timestamps to process data for each timestamp
             end_timestamp=end_timestamp,
-        # 🧠 ML Signal: Specifying return type for data retrieval.
-        # ⚠️ SAST Risk (Low): Potential SQL injection risk if `entity.code` or `timestamp` are not sanitized
+            # 🧠 ML Signal: Specifying return type for data retrieval.
+            # ⚠️ SAST Risk (Low): Potential SQL injection risk if `entity.code` or `timestamp` are not sanitized
         )
 
     def init_timestamps(self, entity):
         # 🧠 ML Signal: Use of session for database operations.
         # 聚宽数据从2017年3月17开始
-        return pd.date_range(start=to_pd_timestamp("2017-3-17"), end=pd.Timestamp.now(), freq="B").tolist()
+        return pd.date_range(
+            start=to_pd_timestamp("2017-3-17"), end=pd.Timestamp.now(), freq="B"
+        ).tolist()
+
     # ✅ Best Practice: Check if records list is not empty before accessing its elements.
     # ✅ Best Practice: Consider using logging instead of print for better control over output
 
     # 覆盖这个方式是因为，HkHolder里面entity其实是股票，而recorder中entity是 Index类型(沪股通/深股通)
     def get_latest_saved_record(self, entity):
         # 🧠 ML Signal: Checking if DataFrame is not null before processing
-        order = eval("self.data_schema.{}.desc()".format(self.get_evaluated_time_field()))
+        order = eval(
+            "self.data_schema.{}.desc()".format(self.get_evaluated_time_field())
+        )
         # ✅ Best Practice: Use rename with a dictionary for clarity and maintainability
 
         records = get_data(
@@ -119,28 +129,43 @@ class JoinquantHkHolderRecorder(TimestampsDataRecorder):
     def record(self, entity, start, end, size, timestamps):
         for timestamp in timestamps:
             df = run_query(
-                table="finance.STK_HK_HOLD_INFO", conditions=f"link_id#=#{entity.code}&day#=#{to_time_str(timestamp)}"
+                table="finance.STK_HK_HOLD_INFO",
+                conditions=f"link_id#=#{entity.code}&day#=#{to_time_str(timestamp)}",
             )
             print(df)
 
             if pd_is_not_null(df):
                 df.rename(
-                    columns={"day": "timestamp", "link_id": "holder_code", "link_name": "holder_name"}, inplace=True
+                    columns={
+                        "day": "timestamp",
+                        "link_id": "holder_code",
+                        "link_name": "holder_name",
+                    },
+                    inplace=True,
                 )
                 df["timestamp"] = pd.to_datetime(df["timestamp"])
 
-                df["entity_id"] = df["code"].apply(lambda x: to_entity_id(entity_type="stock", jq_code=x))
+                df["entity_id"] = df["code"].apply(
+                    lambda x: to_entity_id(entity_type="stock", jq_code=x)
+                )
                 df["code"] = df["code"].apply(lambda x: x.split(".")[0])
 
                 # id格式为:{holder_name}_{entity_id}_{timestamp}
                 df["id"] = df[["holder_name", "entity_id", "timestamp"]].apply(
                     lambda se: "{}_{}_{}".format(
-                        se["holder_name"], se["entity_id"], to_time_str(se["timestamp"], fmt=TIME_FORMAT_DAY)
+                        se["holder_name"],
+                        se["entity_id"],
+                        to_time_str(se["timestamp"], fmt=TIME_FORMAT_DAY),
                     ),
                     axis=1,
                 )
 
-                df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+                df_to_db(
+                    df=df,
+                    data_schema=self.data_schema,
+                    provider=self.provider,
+                    force_update=self.force_update,
+                )
 
 
 if __name__ == "__main__":

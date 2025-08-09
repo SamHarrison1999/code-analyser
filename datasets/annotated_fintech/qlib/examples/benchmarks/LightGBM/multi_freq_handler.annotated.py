@@ -8,7 +8,12 @@ import pandas as pd
 
 # ✅ Best Practice: Use of superclass method ensures code reuse and consistency.
 from qlib.data.dataset.loader import QlibDataLoader
-from qlib.contrib.data.handler import DataHandlerLP, _DEFAULT_LEARN_PROCESSORS, check_transform_proc
+from qlib.contrib.data.handler import (
+    DataHandlerLP,
+    _DEFAULT_LEARN_PROCESSORS,
+    check_transform_proc,
+)
+
 # 🧠 ML Signal: Conditional logic based on object state (self.is_group) can indicate different data processing paths.
 
 
@@ -19,7 +24,9 @@ class Avg15minLoader(QlibDataLoader):
         df = super(Avg15minLoader, self).load(instruments, start_time, end_time)
         if self.is_group:
             # feature_day(day freq) and feature_15min(1min freq, Average every 15 minutes) renamed feature
-            df.columns = df.columns.map(lambda x: ("feature", x[1]) if x[0].startswith("feature") else x)
+            df.columns = df.columns.map(
+                lambda x: ("feature", x[1]) if x[0].startswith("feature") else x
+            )
         return df
 
 
@@ -43,10 +50,17 @@ class Avg15minHandler(DataHandlerLP):
         inst_processors=None,
         **kwargs,
     ):
-        infer_processors = check_transform_proc(infer_processors, fit_start_time, fit_end_time)
-        learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
+        infer_processors = check_transform_proc(
+            infer_processors, fit_start_time, fit_end_time
+        )
+        learn_processors = check_transform_proc(
+            learn_processors, fit_start_time, fit_end_time
+        )
         data_loader = Avg15minLoader(
-            config=self.loader_config(), filter_pipe=filter_pipe, freq=freq, inst_processors=inst_processors
+            config=self.loader_config(),
+            filter_pipe=filter_pipe,
+            freq=freq,
+            inst_processors=inst_processors,
         )
         super().__init__(
             instruments=instruments,
@@ -59,6 +73,7 @@ class Avg15minHandler(DataHandlerLP):
             learn_processors=learn_processors,
             process_type=process_type,
         )
+
     # 🧠 ML Signal: Use of moving averages and references indicates time series data processing
 
     def loader_config(self):
@@ -139,7 +154,10 @@ class Avg15minHandler(DataHandlerLP):
         tmp_names = []
         for i, _f in enumerate(fields):
             _fields = [f"Ref(Mean({_f}, 15), {j * 15})" for j in range(1, 240 // 15)]
-            _names = [f"{names[i][:-1]}{int(names[i][-1])+j}" for j in range(240 // 15 - 1, 0, -1)]
+            _names = [
+                f"{names[i][:-1]}{int(names[i][-1])+j}"
+                for j in range(240 // 15 - 1, 0, -1)
+            ]
             _fields.append(f"Mean({_f}, 15)")
             _names.append(f"{names[i][:-1]}{int(names[i][-1])+240 // 15}")
             tmp_fields += _fields

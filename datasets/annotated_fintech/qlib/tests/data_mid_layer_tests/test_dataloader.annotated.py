@@ -2,17 +2,21 @@
 # dump alpha 360 to dataframe and merge it with Alpha158
 
 import sys
+
 # ✅ Best Practice: Use of Path for file path operations improves cross-platform compatibility.
 import unittest
 import qlib
+
 # ⚠️ SAST Risk (Low): Modifying sys.path can lead to potential import conflicts or security issues.
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent))
 from qlib.data.dataset.loader import NestedDataLoader, QlibDataLoader
 from qlib.data.dataset.handler import DataHandlerLP
+
 # ✅ Best Practice: Inheriting from unittest.TestCase to create a test case class
 from qlib.contrib.data.loader import Alpha158DL, Alpha360DL
+
 # 🧠 ML Signal: Initialization of a library with specific parameters
 from qlib.data.dataset.processor import Fillna
 from qlib.data import D
@@ -31,15 +35,24 @@ class TestDataLoader(unittest.TestCase):
                 {
                     "class": "qlib.contrib.data.loader.Alpha360DL",
                     # ✅ Best Practice: Ensuring dataset is not None before proceeding
-                    "kwargs": {"config": {"label": (["Ref($close, -2)/Ref($close, -1) - 1"], ["LABEL0"])}},
+                    "kwargs": {
+                        "config": {
+                            "label": (
+                                ["Ref($close, -2)/Ref($close, -1) - 1"],
+                                ["LABEL0"],
+                            )
+                        }
+                    },
                 },
             ]
-        # 🧠 ML Signal: Extracting specific elements from a list of tuples
+            # 🧠 ML Signal: Extracting specific elements from a list of tuples
         )
         # Of course you can use StaticDataLoader
         # 🧠 ML Signal: Checking for expected features in the dataset
 
-        dataset = nd.load(instruments="csi300", start_time="2020-01-01", end_time="2020-01-31")
+        dataset = nd.load(
+            instruments="csi300", start_time="2020-01-01", end_time="2020-01-31"
+        )
 
         assert dataset is not None
 

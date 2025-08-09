@@ -245,17 +245,18 @@ class TA:
         smoothing_period: int = 12,
         column: str = "close",
     ) -> Series:
-        """ Vidya (variable index dynamic average) indicator is a modification of the traditional Exponential Moving Average (EMA) indicator.
+        """Vidya (variable index dynamic average) indicator is a modification of the traditional Exponential Moving Average (EMA) indicator.
         The main difference between EMA and Vidya is in the way the smoothing factor F is calculated.
         In EMA the smoothing factor is a constant value F=2/(period+1);
-        in Vidya the smoothing factor is variable and depends on bar-to-bar price movements."""
+        in Vidya the smoothing factor is variable and depends on bar-to-bar price movements.
+        """
 
         raise NotImplementedError
 
     @classmethod
     def ER(cls, ohlc: DataFrame, period: int = 10, column: str = "close") -> Series:
         """The Kaufman Efficiency indicator is an oscillator indicator that oscillates between +100 and -100, where zero is the center point.
-         +100 is upward forex trending market and -100 is downwards trending markets."""
+        +100 is upward forex trending market and -100 is downwards trending markets."""
 
         change = ohlc[column].diff(period).abs()
         volatility = ohlc[column].diff().abs().rolling(window=period).sum()
@@ -273,7 +274,8 @@ class TA:
         column: str = "close",
     ) -> Series:
         """Developed by Perry Kaufman, Kaufman's Adaptive Moving Average (KAMA) is a moving average designed to account for market noise or volatility.
-        Its main advantage is that it takes into consideration not just the direction, but the market volatility as well."""
+        Its main advantage is that it takes into consideration not just the direction, but the market volatility as well.
+        """
 
         er = cls.ER(ohlc, er)
         fast_alpha = 2 / (ema_fast + 1)
@@ -314,7 +316,8 @@ class TA:
     ) -> Series:
         """ZLEMA is an abbreviation of Zero Lag Exponential Moving Average. It was developed by John Ehlers and Rick Way.
         ZLEMA is a kind of Exponential moving average but its main idea is to eliminate the lag arising from the very nature of the moving averages
-        and other trend following indicators. As it follows price closer, it also provides better price averaging and responds better to price swings."""
+        and other trend following indicators. As it follows price closer, it also provides better price averaging and responds better to price swings.
+        """
 
         lag = (period - 1) / 2
 
@@ -403,7 +406,9 @@ class TA:
                 evwma.append(evwma[-1] * x[1] + y[1])
 
         return pd.Series(
-            evwma[1:], index=ohlcv.index, name="{0} period EVWMA.".format(period),
+            evwma[1:],
+            index=ohlcv.index,
+            name="{0} period EVWMA.".format(period),
         )
 
     @classmethod
@@ -460,7 +465,7 @@ class TA:
         raise NotImplementedError
 
     @classmethod
-    def FRAMA(cls, ohlc: DataFrame, period: int = 16, batch: int=10) -> Series:
+    def FRAMA(cls, ohlc: DataFrame, period: int = 16, batch: int = 10) -> Series:
         """Fractal Adaptive Moving Average
         Source: http://www.stockspotter.com/Files/frama.pdf
         Adopted from: https://www.quantopian.com/posts/frama-fractal-adaptive-moving-average-in-python
@@ -487,7 +492,7 @@ class TA:
         # calculate fractal dimension
         D = (np.log(n1 + n2) - np.log(n3)) / np.log(2)
         alp = np.exp(-4.6 * (D - 1))
-        alp = np.clip(alp, .01, 1).values
+        alp = np.clip(alp, 0.01, 1).values
 
         filt = c.values
         for i, x in enumerate(alp):
@@ -496,7 +501,9 @@ class TA:
                 continue
             filt[i] = cl * x + (1 - x) * filt[i - 1]
 
-        return pd.Series(filt, index=ohlc.index, name="{0} period FRAMA.".format(period))
+        return pd.Series(
+            filt, index=ohlc.index, name="{0} period FRAMA.".format(period)
+        )
 
     @classmethod
     def MACD(
@@ -581,8 +588,9 @@ class TA:
         column: str = "close",
         adjust: bool = True,
     ) -> DataFrame:
-        """"Volume-Weighted MACD" is an indicator that shows how a volume-weighted moving average can be used to calculate moving average convergence/divergence (MACD).
-        This technique was first used by Buff Dormeier, CMT, and has been written about since at least 2002."""
+        """ "Volume-Weighted MACD" is an indicator that shows how a volume-weighted moving average can be used to calculate moving average convergence/divergence (MACD).
+        This technique was first used by Buff Dormeier, CMT, and has been written about since at least 2002.
+        """
 
         vp = ohlcv["volume"] * ohlcv[column]
         _fast = pd.Series(
@@ -648,13 +656,14 @@ class TA:
         To construct a 10-day momentum line, simply subtract the closing price 10 days ago from the last closing price.
         This positive or negative value is then plotted around a zero line."""
 
-        return pd.Series(ohlc[column].diff(period), name="MOM".format(period))
+        return pd.Series(ohlc[column].diff(period), name="MOM".format())
 
     @classmethod
     def ROC(cls, ohlc: DataFrame, period: int = 12, column: str = "close") -> Series:
         """The Rate-of-Change (ROC) indicator, which is also referred to as simply Momentum,
         is a pure momentum oscillator that measures the percent change in price from one period to the next.
-        The ROC calculation compares the current price with the price “n” periods ago."""
+        The ROC calculation compares the current price with the price “n” periods ago.
+        """
 
         return pd.Series(
             (ohlc[column].diff(period) / ohlc[column].shift(period)) * 100, name="ROC"
@@ -739,7 +748,7 @@ class TA:
         _wma = v1.rolling(wma_period, min_periods=wma_period)
         v2 = _wma.apply(linear(weights), raw=True)
 
-        ift = pd.Series(((v2 ** 2 - 1) / (v2 ** 2 + 1)), name="IFT_RSI")
+        ift = pd.Series(((v2**2 - 1) / (v2**2 + 1)), name="IFT_RSI")
 
         return ift
 
@@ -821,7 +830,8 @@ class TA:
     def SAR(cls, ohlc: DataFrame, af: int = 0.02, amax: int = 0.2) -> Series:
         """SAR stands for “stop and reverse,” which is the actual indicator used in the system.
         SAR trails price as the trend extends over time. The indicator is below prices when prices are rising and above prices when prices are falling.
-        In this regard, the indicator stops and reverses when the price trend reverses and breaks above or below the indicator."""
+        In this regard, the indicator stops and reverses when the price trend reverses and breaks above or below the indicator.
+        """
         high, low = ohlc.high, ohlc.low
 
         # Starting values
@@ -941,13 +951,13 @@ class TA:
         std_multiplier: float = 2,
     ) -> DataFrame:
         """
-         Developed by John Bollinger, Bollinger Bands® are volatility bands placed above and below a moving average.
-         Volatility is based on the standard deviation, which changes as volatility increases and decreases.
-         The bands automatically widen when volatility increases and narrow when volatility decreases.
+        Developed by John Bollinger, Bollinger Bands® are volatility bands placed above and below a moving average.
+        Volatility is based on the standard deviation, which changes as volatility increases and decreases.
+        The bands automatically widen when volatility increases and narrow when volatility decreases.
 
-         This method allows input of some other form of moving average like EMA or KAMA around which BBAND will be formed.
-         Pass desired moving average as <MA> argument. For example BBANDS(MA=TA.KAMA(20)).
-         """
+        This method allows input of some other form of moving average like EMA or KAMA around which BBAND will be formed.
+        Pass desired moving average as <MA> argument. For example BBANDS(MA=TA.KAMA(20)).
+        """
 
         std = ohlc[column].rolling(window=period).std()
 
@@ -969,7 +979,6 @@ class TA:
         std_multiplier: float = 0.8,
         column: str = "close",
     ) -> DataFrame:
-
         """
         "MOBO bands are based on a zone of 0.80 standard deviation with a 10 period look-back"
         If the price breaks out of the MOBO band it can signify a trend move or price spike
@@ -1024,7 +1033,8 @@ class TA:
         The channels are typically set two Average True Range values above and below the 20-day EMA.
         The exponential moving average dictates direction and the Average True Range sets channel width.
         Keltner Channels are a trend following indicator used to identify reversals with channel breakouts and channel direction.
-        Channels can also be used to identify overbought and oversold levels when the trend is flat."""
+        Channels can also be used to identify overbought and oversold levels when the trend is flat.
+        """
 
         if not isinstance(MA, pd.core.series.Series):
             middle = pd.Series(cls.EMA(ohlc, period), name="KC_MIDDLE")
@@ -1108,7 +1118,8 @@ class TA:
     def ADX(cls, ohlc: DataFrame, period: int = 14, adjust: bool = True) -> Series:
         """The A.D.X. is 100 * smoothed moving average of absolute value (DMI +/-) divided by (DMI+ + DMI-). ADX does not indicate trend direction or momentum,
         only trend strength. Generally, A.D.X. readings below 20 indicate trend weakness,
-        and readings above 40 indicate trend strength. An extremely strong trend is indicated by readings above 50"""
+        and readings above 40 indicate trend strength. An extremely strong trend is indicated by readings above 50
+        """
 
         dmi = cls.DMI(ohlc, period)
         return pd.Series(
@@ -1197,10 +1208,10 @@ class TA:
     @classmethod
     def STOCH(cls, ohlc: DataFrame, period: int = 14) -> Series:
         """Stochastic oscillator %K
-         The stochastic oscillator is a momentum indicator comparing the closing price of a security
-         to the range of its prices over a certain period of time.
-         The sensitivity of the oscillator to market movements is reducible by adjusting that time
-         period or by taking a moving average of the result.
+        The stochastic oscillator is a momentum indicator comparing the closing price of a security
+        to the range of its prices over a certain period of time.
+        The sensitivity of the oscillator to market movements is reducible by adjusting that time
+        period or by taking a moving average of the result.
         """
 
         highest_high = ohlc["high"].rolling(center=False, window=period).max()
@@ -1243,10 +1254,10 @@ class TA:
     @classmethod
     def WILLIAMS(cls, ohlc: DataFrame, period: int = 14) -> Series:
         """Williams %R, or just %R, is a technical analysis oscillator showing the current closing price in relation to the high and low
-         of the past N days (for a given N). It was developed by a publisher and promoter of trading materials, Larry Williams.
-         Its purpose is to tell whether a stock or commodity market is trading near the high or the low, or somewhere in between,
-         of its recent trading range.
-         The oscillator is on a negative scale, from −100 (lowest) up to 0 (highest).
+        of the past N days (for a given N). It was developed by a publisher and promoter of trading materials, Larry Williams.
+        Its purpose is to tell whether a stock or commodity market is trading near the high or the low, or somewhere in between,
+        of its recent trading range.
+        The oscillator is on a negative scale, from −100 (lowest) up to 0 (highest).
         """
 
         highest_high = ohlc["high"].rolling(center=False, window=period).max()
@@ -1285,7 +1296,7 @@ class TA:
         """'EMA',
         Awesome Oscillator is an indicator used to measure market momentum. AO calculates the difference of a 34 Period and 5 Period Simple Moving Averages.
         The Simple Moving Averages that are used are not calculated using closing price but rather each bar's midpoints.
-        AO is generally used to affirm trends or to anticipate possible reversals. """
+        AO is generally used to affirm trends or to anticipate possible reversals."""
 
         slow = pd.Series(
             ((ohlc["high"] + ohlc["low"]) / 2).rolling(window=slow_period).mean(),
@@ -1302,7 +1313,8 @@ class TA:
     def MI(cls, ohlc: DataFrame, period: int = 9, adjust: bool = True) -> Series:
         """Developed by Donald Dorsey, the Mass Index uses the high-low range to identify trend reversals based on range expansions.
         In this sense, the Mass Index is a volatility indicator that does not have a directional bias.
-        Instead, the Mass Index identifies range bulges that can foreshadow a reversal of the current trend."""
+        Instead, the Mass Index identifies range bulges that can foreshadow a reversal of the current trend.
+        """
 
         _range = pd.Series(ohlc["high"] - ohlc["low"], name="range")
         EMA9 = _range.ewm(span=period, ignore_na=False, adjust=adjust).mean()
@@ -1322,12 +1334,12 @@ class TA:
     @classmethod
     def VORTEX(cls, ohlc: DataFrame, period: int = 14) -> DataFrame:
         """The Vortex indicator plots two oscillating lines, one to identify positive trend movement and the other
-         to identify negative price movement.
-         Indicator construction revolves around the highs and lows of the last two days or periods.
-         The distance from the current high to the prior low designates positive trend movement while the
-         distance between the current low and the prior high designates negative trend movement.
-         Strongly positive or negative trend movements will show a longer length between the two numbers while
-         weaker positive or negative trend movement will show a shorter length."""
+        to identify negative price movement.
+        Indicator construction revolves around the highs and lows of the last two days or periods.
+        The distance from the current high to the prior low designates positive trend movement while the
+        distance between the current low and the prior high designates negative trend movement.
+        Strongly positive or negative trend movements will show a longer length between the two numbers while
+        weaker positive or negative trend movement will show a shorter length."""
 
         VMP = pd.Series((ohlc["high"] - ohlc["low"].shift()).abs())
         VMM = pd.Series((ohlc["low"] - ohlc["high"].shift()).abs())
@@ -1347,7 +1359,8 @@ class TA:
     ) -> DataFrame:
         """Know Sure Thing (KST) is a momentum oscillator based on the smoothed rate-of-change for four different time frames.
         KST measures price momentum for four different price cycles. It can be used just like any momentum oscillator.
-        Chartists can look for divergences, overbought/oversold readings, signal line crossovers and centerline crossovers."""
+        Chartists can look for divergences, overbought/oversold readings, signal line crossovers and centerline crossovers.
+        """
 
         r1 = cls.ROC(ohlc, r1).rolling(window=10).mean()
         r2 = cls.ROC(ohlc, r2).rolling(window=10).mean()
@@ -1413,11 +1426,12 @@ class TA:
         """The accumulation/distribution line was created by Marc Chaikin to determine the flow of money into or out of a security.
         It should not be confused with the advance/decline line. While their initials might be the same, these are entirely different indicators,
         and their uses are different as well. Whereas the advance/decline line can provide insight into market movements,
-        the accumulation/distribution line is of use to traders looking to measure buy/sell pressure on a security or confirm the strength of a trend."""
+        the accumulation/distribution line is of use to traders looking to measure buy/sell pressure on a security or confirm the strength of a trend.
+        """
 
         MFM = pd.Series(
-            ((ohlcv["close"] - ohlcv["low"])
-            - (ohlcv["high"] - ohlcv["close"])) / (ohlcv["high"] - ohlcv["low"]),
+            ((ohlcv["close"] - ohlcv["low"]) - (ohlcv["high"] - ohlcv["close"]))
+            / (ohlcv["high"] - ohlcv["low"]),
             name="MFM",
         )  # Money flow multiplier
         MFV = pd.Series(MFM * ohlcv["volume"], name="MFV")
@@ -1427,9 +1441,9 @@ class TA:
     @inputvalidator(input_="ohlcv")
     def CHAIKIN(cls, ohlcv: DataFrame, adjust: bool = True) -> Series:
         """Chaikin Oscillator, named after its creator, Marc Chaikin, the Chaikin oscillator is an oscillator that measures the accumulation/distribution
-         line of the moving average convergence divergence (MACD). The Chaikin oscillator is calculated by subtracting a 10-day exponential moving average (EMA)
-         of the accumulation/distribution line from a three-day EMA of the accumulation/distribution line, and highlights the momentum implied by the
-         accumulation/distribution line."""
+        line of the moving average convergence divergence (MACD). The Chaikin oscillator is calculated by subtracting a 10-day exponential moving average (EMA)
+        of the accumulation/distribution line from a three-day EMA of the accumulation/distribution line, and highlights the momentum implied by the
+        accumulation/distribution line."""
 
         return pd.Series(
             cls.ADL(ohlcv).ewm(span=3, min_periods=2, adjust=adjust).mean()
@@ -1443,7 +1457,8 @@ class TA:
         the inflow and outflow of money into a security over a specific period of time.
         MFI can be understood as RSI adjusted for volume.
         The money flow indicator is one of the more reliable indicators of overbought and oversold conditions, perhaps partly because
-        it uses the higher readings of 80 and 20 as compared to the RSI's overbought/oversold readings of 70 and 30"""
+        it uses the higher readings of 80 and 20 as compared to the RSI's overbought/oversold readings of 70 and 30
+        """
 
         tp = cls.TP(ohlc)
         rmf = pd.Series(tp * ohlc["volume"], name="rmf")  ## Real Money Flow
@@ -1494,7 +1509,7 @@ class TA:
         neg_change = ohlcv[column] < ohlcv[column].shift(1)
         pos_change = ohlcv[column] >= ohlcv[column].shift(1)
         no_change = ohlcv[column] == ohlcv[column].shift(1)
-        
+
         if pos_change.any():
             ohlcv.loc[pos_change, "OBV"] = ohlcv["volume"]
         if neg_change.any():
@@ -1532,7 +1547,8 @@ class TA:
         It is a leading indicator that calculates buy and sell signals based on oversold / overbought conditions.
         Oscillations between the 5% and 40% levels mark a bullish trend zone, while oscillations between -40% and 5% mark a bearish trend zone.
         Meanwhile, readings above 40% signal an overbought condition, while readings above 60% signal an extremely overbought condition.
-        Alternatively, readings below -40% indicate an oversold condition, which becomes extremely oversold below -60%."""
+        Alternatively, readings below -40% indicate an oversold condition, which becomes extremely oversold below -60%.
+        """
 
         sign = lambda a: (a > 0) - (a < 0)
         r = ohlc[column].diff().apply(sign) * ohlc["volume"]
@@ -1574,7 +1590,7 @@ class TA:
         adjust: bool = True,
     ) -> Series:
         """Elder's Force Index is an indicator that uses price and volume to assess the power
-         behind a move or identify possible turning points."""
+        behind a move or identify possible turning points."""
 
         # https://tradingsim.com/blog/elders-force-index/
         fi = pd.Series(ohlcv[column].diff() * ohlcv["volume"])
@@ -1616,7 +1632,8 @@ class TA:
         """Ease of Movement (EMV) is a volume-based oscillator that fluctuates above and below the zero line.
         As its name implies, it is designed to measure the 'ease' of price movement.
         prices are advancing with relative ease when the oscillator is in positive territory.
-        Conversely, prices are declining with relative ease when the oscillator is in negative territory."""
+        Conversely, prices are declining with relative ease when the oscillator is in negative territory.
+        """
 
         distance = pd.Series(
             ((ohlcv["high"] + ohlcv["low"]) / 2)
@@ -1884,7 +1901,9 @@ class TA:
 
         senkou_span_a = pd.Series(
             ((tenkan_sen + kijun_sen) / 2), name="senkou_span_a"
-        ) .shift(kijun_period) ## Leading span
+        ).shift(
+            kijun_period
+        )  ## Leading span
 
         senkou_span_b = pd.Series(
             (
@@ -2056,7 +2075,8 @@ class TA:
         cutoff = pd.Series(factor * vinter * ohlc["close"], name="cutoff")
         price_change = pd.Series(typical.diff(), name="pc")  # price change
         mav = pd.Series(
-            ohlc["volume"].rolling(center=False, window=period).mean(), name="mav",
+            ohlc["volume"].rolling(center=False, window=period).mean(),
+            name="mav",
         )
 
         _va = pd.concat([ohlc["volume"], mav.shift()], axis=1)
@@ -2064,7 +2084,7 @@ class TA:
         _mp.fillna(value=0, inplace=True)
 
         def _vol_added(row):
-            """ Determine the maximum volume to be added"""
+            """Determine the maximum volume to be added"""
 
             if row["volume"] > vfactor * row["mav"]:
                 return vfactor * row["mav"]
@@ -2103,9 +2123,7 @@ class TA:
         return vfi
 
     @classmethod
-    def MSD(
-        cls, ohlc: DataFrame, period: int = 21, column: str = "close"
-    ) -> Series:
+    def MSD(cls, ohlc: DataFrame, period: int = 21, column: str = "close") -> Series:
         """
         Standard deviation is a statistical term that measures the amount of variability or dispersion around an average.
         Standard deviation is also a measure of volatility. Generally speaking, dispersion is the difference between the actual value and the average value.
@@ -2129,7 +2147,7 @@ class TA:
         k_period: int = 10,
         d_period: int = 3,
         column: str = "close",
-        adjust: bool = True
+        adjust: bool = True,
     ) -> Series:
         """
         The Schaff Trend Cycle (Oscillator) can be viewed as Double Smoothed
@@ -2166,10 +2184,16 @@ class TA:
 
         MACD = pd.Series((EMA_fast - EMA_slow), name="MACD")
 
-        STOK = pd.Series((
-            (MACD - MACD.rolling(window=k_period).min())
-            / (MACD.rolling(window=k_period).max() - MACD.rolling(window=k_period).min())
-            ) * 100)
+        STOK = pd.Series(
+            (
+                (MACD - MACD.rolling(window=k_period).min())
+                / (
+                    MACD.rolling(window=k_period).max()
+                    - MACD.rolling(window=k_period).min()
+                )
+            )
+            * 100
+        )
 
         STOD = STOK.rolling(window=d_period).mean()
         STOD_DoubleSmooth = STOD.rolling(window=d_period).mean()  # "double smoothed"
@@ -2184,7 +2208,7 @@ class TA:
         period_slow: int = 30,
         k_period: int = 10,
         d_period: int = 3,
-        adjust: bool = True
+        adjust: bool = True,
     ) -> Series:
         """Modification of Schaff Trend Cycle using EVWMA MACD for calculation"""
 
@@ -2193,16 +2217,21 @@ class TA:
 
         macd = ema_fast - ema_slow
 
-        STOK = pd.Series((
-            (macd - macd.rolling(window=k_period).min())
-            / (macd.rolling(window=k_period).max() - macd.rolling(window=k_period).min())
-            ) * 100)
+        STOK = pd.Series(
+            (
+                (macd - macd.rolling(window=k_period).min())
+                / (
+                    macd.rolling(window=k_period).max()
+                    - macd.rolling(window=k_period).min()
+                )
+            )
+            * 100
+        )
 
         STOD = STOK.rolling(window=d_period).mean()
         STOD_DoubleSmooth = STOD.rolling(window=d_period).mean()
 
         return pd.Series(STOD_DoubleSmooth, name="{0} period EVSTC".format(k_period))
-
 
     @classmethod
     def WILLIAMS_FRACTAL(cls, ohlc: DataFrame, period: int = 2) -> DataFrame:
@@ -2244,19 +2273,30 @@ class TA:
     def VC(cls, ohlc: DataFrame, period: int = 5) -> DataFrame:
         """Value chart
         Implementation based on a book by Mark Helweg & David Stendahl: Dynamic Trading Indicators: Winning with Value Charts and Price Action Profile
-        
+
         :period: Specifies the number of Periods used for VC calculation
         """
 
         float_axis = ((ohlc.high + ohlc.low) / 2).rolling(window=period).mean()
         vol_unit = (ohlc.high - ohlc.low).rolling(window=period).mean() * 0.2
 
-        value_chart_high = pd.Series((ohlc.high - float_axis) / vol_unit, name="Value Chart High")
-        value_chart_low = pd.Series((ohlc.low - float_axis) / vol_unit, name="Value Chart Low")
-        value_chart_close = pd.Series((ohlc.close - float_axis) / vol_unit, name="Value Chart Close")
-        value_chart_open = pd.Series((ohlc.open - float_axis) / vol_unit, name="Value Chart Open")
+        value_chart_high = pd.Series(
+            (ohlc.high - float_axis) / vol_unit, name="Value Chart High"
+        )
+        value_chart_low = pd.Series(
+            (ohlc.low - float_axis) / vol_unit, name="Value Chart Low"
+        )
+        value_chart_close = pd.Series(
+            (ohlc.close - float_axis) / vol_unit, name="Value Chart Close"
+        )
+        value_chart_open = pd.Series(
+            (ohlc.open - float_axis) / vol_unit, name="Value Chart Open"
+        )
 
-        return pd.concat([value_chart_high, value_chart_low, value_chart_close, value_chart_open], axis=1)
+        return pd.concat(
+            [value_chart_high, value_chart_low, value_chart_close, value_chart_open],
+            axis=1,
+        )
 
     @classmethod
     def WAVEPM(
@@ -2264,7 +2304,7 @@ class TA:
         ohlc: DataFrame,
         period: int = 14,
         lookback_period: int = 100,
-        column: str = "close"
+        column: str = "close",
     ) -> Series:
         """
         The Wave PM (Whistler Active Volatility Energy Price Mass) indicator is an oscillator described in the Mark
@@ -2290,9 +2330,11 @@ class TA:
             return output
 
         def osc(input_dev, mean, power):
-            variance = Series(power).rolling(window=lookback_period).sum() / lookback_period
+            variance = (
+                Series(power).rolling(window=lookback_period).sum() / lookback_period
+            )
             calc_dev = np.sqrt(variance) * mean
-            y = (input_dev / calc_dev)
+            y = input_dev / calc_dev
             oscLine = tanh(y)
             return oscLine
 

@@ -2,6 +2,7 @@
 # Licensed under the MIT License.
 
 import atexit
+
 # ✅ Best Practice: Group imports into standard library, third-party, and local sections
 import logging
 import sys
@@ -9,6 +10,7 @@ import traceback
 
 # ✅ Best Practice: Provide a clear and concise docstring explaining the function's purpose and limitations.
 from ..log import get_module_logger
+
 # ✅ Best Practice: Use of a logger for the module instead of print statements
 from . import R
 from .recorder import Recorder
@@ -28,10 +30,15 @@ def experiment_exit_handler():
     - If pdb is used in your program, excepthook will not be triggered when it ends.  The status will be finished
     """
     sys.excepthook = experiment_exception_hook  # handle uncaught exception
-    atexit.register(R.end_exp, recorder_status=Recorder.STATUS_FI)  # will not take effect if experiment ends
+    atexit.register(
+        R.end_exp, recorder_status=Recorder.STATUS_FI
+    )  # will not take effect if experiment ends
+
+
 # 🧠 ML Signal: Logging exception details can be used to train models for anomaly detection.
 
 # ⚠️ SAST Risk (Low): Logging exception details might expose sensitive information.
+
 
 def experiment_exception_hook(exc_type, value, tb):
     """

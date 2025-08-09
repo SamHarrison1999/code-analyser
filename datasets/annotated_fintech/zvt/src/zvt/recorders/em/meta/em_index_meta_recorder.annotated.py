@@ -4,10 +4,13 @@
 # ✅ Best Practice: Grouping imports from the same module together improves readability
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import Recorder
+
 # ✅ Best Practice: Class definition should include a docstring to describe its purpose and usage.
 from zvt.domain import Index
+
 # 🧠 ML Signal: Importing specific functions or classes indicates usage patterns and dependencies
 from zvt.recorders.em import em_api
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability
 # ✅ Best Practice: Class attributes should be documented to explain their purpose.
 
@@ -30,7 +33,12 @@ class EMIndexRecorder(Recorder):
         # 🧠 ML Signal: Method invocation on an object
         # ✅ Best Practice: Use of __all__ to define public API of the module
         self.logger.info(df)
-        df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+        df_to_db(
+            df=df,
+            data_schema=self.data_schema,
+            provider=self.provider,
+            force_update=self.force_update,
+        )
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ from zvt.domain import (
     StockInstitutionalInvestorHolder,
     StockTopTenFreeHolder,
     StockActorSummary,
-# ✅ Best Practice: Grouping imports into standard, third-party, and local sections improves readability.
+    # ✅ Best Practice: Grouping imports into standard, third-party, and local sections improves readability.
 )
 from zvt.utils.recorder_utils import run_data_recorder
 
@@ -34,13 +34,19 @@ def record_actor_data(data_provider="em", entity_provider="em"):
     )
     run_data_recorder(
         # ✅ Best Practice: Logging initialization for better traceability and debugging
-        domain=StockTopTenFreeHolder, data_provider=data_provider, entity_provider=entity_provider, day_data=True
+        domain=StockTopTenFreeHolder,
+        data_provider=data_provider,
+        entity_provider=entity_provider,
+        day_data=True,
     )
     # 🧠 ML Signal: Function call without arguments indicating default behavior
     # ⚠️ SAST Risk (Low): Potential risk if sched is not properly initialized or managed
     # ⚠️ SAST Risk (Low): Direct access to a protected member of an object
     run_data_recorder(
-        domain=StockActorSummary, data_provider=data_provider, entity_provider=entity_provider, day_data=True
+        domain=StockActorSummary,
+        data_provider=data_provider,
+        entity_provider=entity_provider,
+        day_data=True,
     )
 
 

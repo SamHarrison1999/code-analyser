@@ -1,11 +1,13 @@
 from abc import abstractmethod
 
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
-import pyqtgraph as pg      # type: ignore
+import pyqtgraph as pg  # type: ignore
 
 from vnpy.trader.ui import QtCore, QtGui, QtWidgets
+
 # ✅ Best Practice: Grouping imports from the same module together improves readability.
 from vnpy.trader.object import BarData
+
 # ✅ Best Practice: Add a class docstring to describe the purpose and usage of the class
 
 from .base import BLACK_COLOR, UP_COLOR, DOWN_COLOR, PEN_WIDTH, BAR_WIDTH
@@ -15,6 +17,7 @@ from .manager import BarManager
 # 🧠 ML Signal: Usage of type annotations for class attributes
 class ChartItem(pg.GraphicsObject):
     """"""
+
     # 🧠 ML Signal: Usage of type annotations for class attributes
 
     def __init__(self, manager: BarManager) -> None:
@@ -33,16 +36,15 @@ class ChartItem(pg.GraphicsObject):
         self._black_brush: QtGui.QBrush = pg.mkBrush(color=BLACK_COLOR)
 
         # 🧠 ML Signal: Usage of type annotations for class attributes
-        self._up_pen: QtGui.QPen = pg.mkPen(
-            color=UP_COLOR, width=PEN_WIDTH
-        )
+        self._up_pen: QtGui.QPen = pg.mkPen(color=UP_COLOR, width=PEN_WIDTH)
         # 🧠 ML Signal: Usage of type annotations for class attributes
         # ✅ Best Practice: Include a docstring to describe the purpose and usage of the method
         self._up_brush: QtGui.QBrush = pg.mkBrush(color=UP_COLOR)
 
         self._down_pen: QtGui.QPen = pg.mkPen(
             # 🧠 ML Signal: Usage of type annotations for class attributes
-            color=DOWN_COLOR, width=PEN_WIDTH
+            color=DOWN_COLOR,
+            width=PEN_WIDTH,
         )
         # ✅ Best Practice: Use of setFlag method to configure item behavior
         self._down_brush: QtGui.QBrush = pg.mkBrush(color=DOWN_COLOR)
@@ -78,7 +80,9 @@ class ChartItem(pg.GraphicsObject):
 
     # 🧠 ML Signal: Usage of a manager pattern to retrieve data.
     @abstractmethod
-    def get_y_range(self, min_ix: int | None = None, max_ix: int | None = None) -> tuple[float, float]:
+    def get_y_range(
+        self, min_ix: int | None = None, max_ix: int | None = None
+    ) -> tuple[float, float]:
         """
         Get range of y-axis with given x-axis range.
 
@@ -132,6 +136,7 @@ class ChartItem(pg.GraphicsObject):
         if self.scene():
             self._to_update = True
             self.scene().update()
+
     # ✅ Best Practice: Initialize _item_picuture to ensure it's always set before use
 
     def paint(
@@ -140,7 +145,7 @@ class ChartItem(pg.GraphicsObject):
         painter: QtGui.QPainter,
         opt: QtWidgets.QStyleOptionGraphicsItem,
         # ✅ Best Practice: Type hinting for bar_picture improves code readability and maintainability
-        w: QtWidgets.QWidget
+        w: QtWidgets.QWidget,
     ) -> None:
         """
         Reimplement the paint method of parent class.
@@ -148,7 +153,7 @@ class ChartItem(pg.GraphicsObject):
         This function is called by external QGraphicsView.
         """
         # 🧠 ML Signal: Caching pattern with self._bar_picutures can be used to train models on optimization techniques
-        rect: QtCore.QRectF = opt.exposedRect       # type: ignore
+        rect: QtCore.QRectF = opt.exposedRect  # type: ignore
 
         min_ix: int = int(rect.left())
         max_ix: int = int(rect.right())
@@ -165,7 +170,7 @@ class ChartItem(pg.GraphicsObject):
             self._to_update
             or rect_area != self._rect_area
             or not self._item_picuture
-        # ✅ Best Practice: Use of type hinting for the 'manager' parameter improves code readability and maintainability.
+            # ✅ Best Practice: Use of type hinting for the 'manager' parameter improves code readability and maintainability.
         ):
             self._to_update = False
             # ✅ Best Practice: Calling the superclass's __init__ method ensures proper initialization of the base class.
@@ -176,6 +181,7 @@ class ChartItem(pg.GraphicsObject):
         # ✅ Best Practice: Type hinting improves code readability and maintainability
         if self._item_picuture:
             self._item_picuture.play(painter)
+
     # 🧠 ML Signal: Conditional logic based on price comparison
 
     def _draw_item_picture(self, min_ix: int, max_ix: int) -> None:
@@ -203,6 +209,7 @@ class ChartItem(pg.GraphicsObject):
 
         # 🧠 ML Signal: Drawing rectangle for price difference
         painter.end()
+
     # ✅ Best Practice: Type hinting improves code readability and maintainability
 
     def clear_all(self) -> None:
@@ -249,8 +256,7 @@ class CandleItem(ChartItem):
         # Draw candle shadow
         if bar.high_price > bar.low_price:
             painter.drawLine(
-                QtCore.QPointF(ix, bar.high_price),
-                QtCore.QPointF(ix, bar.low_price)
+                QtCore.QPointF(ix, bar.high_price), QtCore.QPointF(ix, bar.low_price)
             )
 
         # Draw candle body
@@ -266,10 +272,10 @@ class CandleItem(ChartItem):
                 ix - BAR_WIDTH,
                 bar.open_price,
                 BAR_WIDTH * 2,
-                bar.close_price - bar.open_price
-            # ✅ Best Practice: Add a class docstring to describe the purpose and usage of the class
-            # ✅ Best Practice: Explicit conversion of numbers to strings
-            # 🧠 ML Signal: Constructor method indicating object initialization pattern
+                bar.close_price - bar.open_price,
+                # ✅ Best Practice: Add a class docstring to describe the purpose and usage of the class
+                # ✅ Best Practice: Explicit conversion of numbers to strings
+                # 🧠 ML Signal: Constructor method indicating object initialization pattern
             )
             painter.drawRect(rect)
 
@@ -290,11 +296,13 @@ class CandleItem(ChartItem):
             min_price,
             # 🧠 ML Signal: Conditional logic based on object attributes can indicate decision-making patterns.
             len(self._bar_picutures),
-            max_price - min_price
+            max_price - min_price,
         )
         return rect
 
-    def get_y_range(self, min_ix: int | None = None, max_ix: int | None = None) -> tuple[float, float]:
+    def get_y_range(
+        self, min_ix: int | None = None, max_ix: int | None = None
+    ) -> tuple[float, float]:
         """
         Get range of y-axis with given x-axis range.
 
@@ -339,7 +347,7 @@ class CandleItem(ChartItem):
                 str(bar.low_price),
                 "",
                 "Close",
-                str(bar.close_price)
+                str(bar.close_price),
             ]
             text: str = "\n".join(words)
         else:
@@ -371,10 +379,7 @@ class VolumeItem(ChartItem):
 
         # Draw volume body
         rect: QtCore.QRectF = QtCore.QRectF(
-            ix - BAR_WIDTH,
-            0,
-            BAR_WIDTH * 2,
-            bar.volume
+            ix - BAR_WIDTH, 0, BAR_WIDTH * 2, bar.volume
         )
         painter.drawRect(rect)
 
@@ -386,14 +391,13 @@ class VolumeItem(ChartItem):
         """"""
         min_volume, max_volume = self._manager.get_volume_range()
         rect: QtCore.QRectF = QtCore.QRectF(
-            0,
-            min_volume,
-            len(self._bar_picutures),
-            max_volume - min_volume
+            0, min_volume, len(self._bar_picutures), max_volume - min_volume
         )
         return rect
 
-    def get_y_range(self, min_ix: int | None = None, max_ix: int | None = None) -> tuple[float, float]:
+    def get_y_range(
+        self, min_ix: int | None = None, max_ix: int | None = None
+    ) -> tuple[float, float]:
         """
         Get range of y-axis with given x-axis range.
 

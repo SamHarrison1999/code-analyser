@@ -4,24 +4,29 @@
 
 from __future__ import division
 from __future__ import print_function
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 
 import numpy as np
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import pandas as pd
 from typing import Text, Union
 import copy
 from ...utils import get_or_create_path
 from ...log import get_module_logger
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import torch
 import torch.nn as nn
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 import torch.optim as optim
 
 # ✅ Best Practice: Class docstring provides a clear description of the class and its parameters
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 from .pytorch_utils import count_parameters
+
 # ✅ Best Practice: Use of relative imports for better modularity and maintainability
 from ...model.base import Model
 from ...data.dataset import DatasetH
@@ -86,7 +91,9 @@ class GATs(Model):
         self.loss = loss
         self.base_model = base_model
         self.model_path = model_path
-        self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
+        self.device = torch.device(
+            "cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu"
+        )
         self.seed = seed
 
         self.logger.info(
@@ -143,13 +150,15 @@ class GATs(Model):
             # 🧠 ML Signal: Using SGD optimizer for training.
             # 🧠 ML Signal: Returns a boolean indicating GPU usage, useful for model training context
             base_model=self.base_model,
-        # 🧠 ML Signal: Calculation of squared error, a key step in mean squared error computation
+            # 🧠 ML Signal: Calculation of squared error, a key step in mean squared error computation
         )
         # 🧠 ML Signal: Custom loss function implementation
         self.logger.info("model:\n{:}".format(self.GAT_model))
         # ⚠️ SAST Risk (Low): Potential Denial of Service if input is not validated.
         # 🧠 ML Signal: Use of torch.mean, indicating usage of PyTorch for tensor operations
-        self.logger.info("model size: {:.4f} MB".format(count_parameters(self.GAT_model)))
+        self.logger.info(
+            "model size: {:.4f} MB".format(count_parameters(self.GAT_model))
+        )
         # ⚠️ SAST Risk (Low): Potential for unhandled exceptions if `torch.isnan` is not used correctly
 
         # 🧠 ML Signal: Tracking if the model has been fitted.
@@ -164,24 +173,29 @@ class GATs(Model):
         else:
             # ⚠️ SAST Risk (Low): Use of string formatting with `%` operator can lead to issues if not properly handled
             # 🧠 ML Signal: Conditional logic based on self.metric value
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError(
+                "optimizer {} is not supported!".format(optimizer)
+            )
 
         # ⚠️ SAST Risk (Low): Potential for negative loss values if self.loss_fn does not handle inputs correctly
         self.fitted = False
         # 🧠 ML Signal: Use of groupby operation on a DataFrame, indicating data aggregation pattern
         self.GAT_model.to(self.device)
+
     # ⚠️ SAST Risk (Low): Use of string interpolation in exception message, potential for format string vulnerability
 
     # 🧠 ML Signal: Use of numpy operations for array manipulation
     @property
     def use_gpu(self):
         return self.device != torch.device("cpu")
+
     # ✅ Best Practice: Conditional logic to handle optional shuffling
 
     def mse(self, pred, label):
         # 🧠 ML Signal: Use of shuffling, indicating data randomization pattern
         loss = (pred - label) ** 2
         return torch.mean(loss)
+
     # ⚠️ SAST Risk (Low): Use of np.random.shuffle can lead to non-deterministic behavior
 
     def loss_fn(self, pred, label):
@@ -193,6 +207,7 @@ class GATs(Model):
             return self.mse(pred[mask], label[mask])
 
         raise ValueError("unknown loss `%s`" % self.loss)
+
     # 🧠 ML Signal: Conversion of data to PyTorch tensors
 
     def metric_fn(self, pred, label):
@@ -288,7 +303,9 @@ class GATs(Model):
             data_key=DataHandlerLP.DK_L,
         )
         if df_train.empty or df_valid.empty:
-            raise ValueError("Empty data from dataset, please check your dataset config.")
+            raise ValueError(
+                "Empty data from dataset, please check your dataset config."
+            )
 
         x_train, y_train = df_train["feature"], df_train["label"]
         x_valid, y_valid = df_valid["feature"], df_valid["label"]
@@ -316,7 +333,9 @@ class GATs(Model):
             # ⚠️ SAST Risk (Low): Ensure 'x_values' is sanitized to prevent data integrity issues.
             self.logger.info("Loading pretrained model...")
             # 🧠 ML Signal: Definition of a custom neural network model class
-            pretrained_model.load_state_dict(torch.load(self.model_path, map_location=self.device))
+            pretrained_model.load_state_dict(
+                torch.load(self.model_path, map_location=self.device)
+            )
 
         # ✅ Best Practice: Ensure 'self.GAT_model' output is validated for expected shape and type.
         model_dict = self.GAT_model.state_dict()
@@ -324,7 +343,9 @@ class GATs(Model):
         pretrained_dict = {
             # ✅ Best Practice: Validate 'index' and 'preds' lengths match before creating the Series.
             # 🧠 ML Signal: Use of GRU for sequence modeling
-            k: v for k, v in pretrained_model.state_dict().items() if k in model_dict  # pylint: disable=E1135
+            k: v
+            for k, v in pretrained_model.state_dict().items()
+            if k in model_dict  # pylint: disable=E1135
         }
         model_dict.update(pretrained_dict)
         self.GAT_model.load_state_dict(model_dict)
@@ -418,7 +439,9 @@ class GATs(Model):
 
 
 class GATModel(nn.Module):
-    def __init__(self, d_feat=6, hidden_size=64, num_layers=2, dropout=0.0, base_model="GRU"):
+    def __init__(
+        self, d_feat=6, hidden_size=64, num_layers=2, dropout=0.0, base_model="GRU"
+    ):
         super().__init__()
 
         if base_model == "GRU":

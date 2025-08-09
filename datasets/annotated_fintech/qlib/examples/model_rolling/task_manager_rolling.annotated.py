@@ -9,9 +9,11 @@ Based on the ability of TaskManager, `worker` method offer a simple way for mult
 """
 
 from pprint import pprint
+
 # ✅ Best Practice: Constants should be imported from a dedicated module for better organization and maintainability.
 
 import fire
+
 # ✅ Best Practice: Importing specific functions or classes instead of the entire module can improve readability and reduce memory usage.
 import qlib
 from qlib.constant import REG_CN
@@ -21,7 +23,10 @@ from qlib.workflow.task.manage import TaskManager, run_task
 from qlib.workflow.task.collect import RecorderCollector
 from qlib.model.ens.group import RollingGroup
 from qlib.model.trainer import TrainerR, TrainerRM, task_train
-from qlib.tests.config import CSI100_RECORD_LGB_TASK_CONFIG, CSI100_RECORD_XGBOOST_TASK_CONFIG
+from qlib.tests.config import (
+    CSI100_RECORD_LGB_TASK_CONFIG,
+    CSI100_RECORD_XGBOOST_TASK_CONFIG,
+)
 
 
 class RollingTaskExample:
@@ -41,7 +46,10 @@ class RollingTaskExample:
         # 🧠 ML Signal: Initialization of qlib with specific provider_uri and region
         # TaskManager config
         if task_config is None:
-            task_config = [CSI100_RECORD_XGBOOST_TASK_CONFIG, CSI100_RECORD_LGB_TASK_CONFIG]
+            task_config = [
+                CSI100_RECORD_XGBOOST_TASK_CONFIG,
+                CSI100_RECORD_LGB_TASK_CONFIG,
+            ]
         mongo_conf = {
             # 🧠 ML Signal: Conditional initialization of TrainerR based on task_pool being None
             "task_url": task_url,
@@ -62,6 +70,7 @@ class RollingTaskExample:
         self.task_config = task_config
         # 🧠 ML Signal: Retrieving an experiment by name, indicating usage of experiment tracking
         self.rolling_gen = RollingGen(step=rolling_step, rtype=rolling_type)
+
     # ✅ Best Practice: Use of print statements for debugging or logging
 
     # 🧠 ML Signal: Iterating over a list of recorders, indicating batch processing
@@ -77,6 +86,7 @@ class RollingTaskExample:
         for rid in exp.list_recorders():
             # ✅ Best Practice: Consider adding a docstring to describe the function's purpose and parameters
             exp.delete_recorder(rid)
+
     # 🧠 ML Signal: Return statement usage pattern
 
     # 🧠 ML Signal: Use of print statements for logging or debugging
@@ -90,9 +100,9 @@ class RollingTaskExample:
             # ✅ Best Practice: Method should have a docstring to describe its purpose and behavior
             tasks=self.task_config,
             generators=self.rolling_gen,  # generate different date segments
-        # ✅ Best Practice: Function should have a docstring explaining its purpose and parameters
-        # 🧠 ML Signal: The use of a task pool and experiment name suggests a pattern for managing and tracking experiments.
-        # ✅ Best Practice: Consider using logging instead of print for better control over output
+            # ✅ Best Practice: Function should have a docstring explaining its purpose and parameters
+            # 🧠 ML Signal: The use of a task pool and experiment name suggests a pattern for managing and tracking experiments.
+            # ✅ Best Practice: Consider using logging instead of print for better control over output
         )
         # ⚠️ SAST Risk (Low): Ensure that task_train and self.task_pool are properly validated to prevent unexpected behavior.
         pprint(tasks)
@@ -104,6 +114,7 @@ class RollingTaskExample:
         print("========== task_training ==========")
         # 🧠 ML Signal: Accessing dataset configuration is indicative of data handling patterns
         self.trainer.train(tasks)
+
     # 🧠 ML Signal: Checking for a specific model type indicates a pattern for model selection
 
     # ✅ Best Practice: Returning multiple values as a tuple is a common and clear pattern
@@ -128,6 +139,7 @@ class RollingTaskExample:
             rolling_key = task_config["dataset"]["kwargs"]["segments"]["test"]
             # 🧠 ML Signal: Method call pattern for generating tasks
             return model_key, rolling_key
+
         # ⚠️ SAST Risk (Low): Directly printing the result may expose sensitive information
 
         # 🧠 ML Signal: Method call pattern for training on tasks

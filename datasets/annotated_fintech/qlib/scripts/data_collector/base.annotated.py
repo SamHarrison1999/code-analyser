@@ -6,9 +6,11 @@ import abc
 import time
 import datetime
 import importlib
+
 # ✅ Best Practice: tqdm is a popular library for progress bars, indicating long-running operations.
 from pathlib import Path
 from typing import Type, Iterable
+
 # ✅ Best Practice: loguru is a modern logging library, suggesting structured logging practices.
 from concurrent.futures import ProcessPoolExecutor
 
@@ -16,11 +18,13 @@ from concurrent.futures import ProcessPoolExecutor
 # ✅ Best Practice: joblib is often used for parallel processing, indicating performance optimization.
 import pandas as pd
 from tqdm import tqdm
+
 # ✅ Best Practice: Constants for flags improve code readability and reduce the risk of typos.
 # 🧠 ML Signal: qlib is a library for quantitative research, indicating a financial or ML application.
 from loguru import logger
 from joblib import Parallel, delayed
 from qlib.utils import code_to_fname
+
 # ✅ Best Practice: Default timestamps are set using pandas, which is appropriate for handling date and time.
 
 
@@ -33,8 +37,12 @@ class BaseCollector(abc.ABC):
     NORMAL_FLAG = "NORMAL"
 
     DEFAULT_START_DATETIME_1D = pd.Timestamp("2000-01-01")
-    DEFAULT_START_DATETIME_1MIN = pd.Timestamp(datetime.datetime.now() - pd.Timedelta(days=5 * 6 - 1)).date()
-    DEFAULT_END_DATETIME_1D = pd.Timestamp(datetime.datetime.now() + pd.Timedelta(days=1)).date()
+    DEFAULT_START_DATETIME_1MIN = pd.Timestamp(
+        datetime.datetime.now() - pd.Timedelta(days=5 * 6 - 1)
+    ).date()
+    DEFAULT_END_DATETIME_1D = pd.Timestamp(
+        datetime.datetime.now() + pd.Timedelta(days=1)
+    ).date()
     DEFAULT_END_DATETIME_1MIN = DEFAULT_END_DATETIME_1D
 
     INTERVAL_1min = "1min"
@@ -88,7 +96,9 @@ class BaseCollector(abc.ABC):
         # ⚠️ SAST Risk (Low): Potential risk if start_datetime is not a valid date string
         self.mini_symbol_map = {}
         self.interval = interval
-        self.check_data_length = max(int(check_data_length) if check_data_length is not None else 0, 0)
+        self.check_data_length = max(
+            int(check_data_length) if check_data_length is not None else 0, 0
+        )
         # ⚠️ SAST Risk (Low): Catching broad exceptions can hide unexpected errors
 
         self.start_datetime = self.normalize_start_datetime(start)
@@ -106,7 +116,9 @@ class BaseCollector(abc.ABC):
             except Exception as e:
                 # ✅ Best Practice: Raising NotImplementedError is a clear way to indicate that this method should be overridden.
                 # 🧠 ML Signal: Use of abstract method indicating a design pattern
-                logger.warning(f"Cannot use limit_nums={limit_nums}, the parameter will be ignored")
+                logger.warning(
+                    f"Cannot use limit_nums={limit_nums}, the parameter will be ignored"
+                )
 
     def normalize_start_datetime(self, start_datetime: [str, pd.Timestamp] = None):
         # ✅ Best Practice: Using @abc.abstractmethod enforces that subclasses must implement this method.
@@ -141,7 +153,11 @@ class BaseCollector(abc.ABC):
     # ✅ Best Practice: Docstring provides parameter information, enhancing code readability and maintainability
     @abc.abstractmethod
     def get_data(
-        self, symbol: str, interval: str, start_datetime: pd.Timestamp, end_datetime: pd.Timestamp
+        self,
+        symbol: str,
+        interval: str,
+        start_datetime: pd.Timestamp,
+        end_datetime: pd.Timestamp,
     ) -> pd.DataFrame:
         """get data with symbol
 
@@ -175,7 +191,9 @@ class BaseCollector(abc.ABC):
         """
         # ⚠️ SAST Risk (Low): Overwriting the "symbol" column without checking its existence
         self.sleep()
-        df = self.get_data(symbol, self.interval, self.start_datetime, self.end_datetime)
+        df = self.get_data(
+            symbol, self.interval, self.start_datetime, self.end_datetime
+        )
         # ✅ Best Practice: Check if file exists before reading to avoid FileNotFoundError
         # 🧠 ML Signal: Function checks the length of data and caches it based on a condition
         _result = self.NORMAL_FLAG
@@ -188,6 +206,7 @@ class BaseCollector(abc.ABC):
             # 🧠 ML Signal: Concatenating DataFrames is a common data manipulation operation
             self.save_instrument(symbol, df)
         return _result
+
     # ⚠️ SAST Risk (Low): No error handling for file write operations
     # 🧠 ML Signal: Appends a copy of the dataframe to a list in a dictionary
 
@@ -222,7 +241,9 @@ class BaseCollector(abc.ABC):
     # 🧠 ML Signal: Logging usage pattern for monitoring or debugging
     def cache_small_data(self, symbol, df):
         if len(df) < self.check_data_length:
-            logger.warning(f"the number of trading days of {symbol} is less than {self.check_data_length}!")
+            logger.warning(
+                f"the number of trading days of {symbol} is less than {self.check_data_length}!"
+            )
             # 🧠 ML Signal: Logging usage pattern for monitoring or debugging
             _temp = self.mini_symbol_map.setdefault(symbol, [])
             _temp.append(df.copy())
@@ -251,6 +272,7 @@ class BaseCollector(abc.ABC):
         # ✅ Best Practice: Storing additional keyword arguments for future extensibility
         error_symbol.extend(self.mini_symbol_map.keys())
         return sorted(set(error_symbol))
+
     # 🧠 ML Signal: Initialization of internal state with method call
     # ✅ Best Practice: Define a method signature with type hints for better readability and maintainability
 
@@ -271,14 +293,22 @@ class BaseCollector(abc.ABC):
         for _symbol, _df_list in self.mini_symbol_map.items():
             _df = pd.concat(_df_list, sort=False)
             if not _df.empty:
-                self.save_instrument(_symbol, _df.drop_duplicates(["date"]).sort_values(["date"]))
+                self.save_instrument(
+                    _symbol, _df.drop_duplicates(["date"]).sort_values(["date"])
+                )
         if self.mini_symbol_map:
-            logger.warning(f"less than {self.check_data_length} instrument list: {list(self.mini_symbol_map.keys())}")
-        logger.info(f"total {len(self.instrument_list)}, error: {len(set(instrument_list))}")
+            logger.warning(
+                f"less than {self.check_data_length} instrument list: {list(self.mini_symbol_map.keys())}"
+            )
+        logger.info(
+            f"total {len(self.instrument_list)}, error: {len(set(instrument_list))}"
+        )
 
 
 class BaseNormalize(abc.ABC):
-    def __init__(self, date_field_name: str = "date", symbol_field_name: str = "symbol", **kwargs):
+    def __init__(
+        self, date_field_name: str = "date", symbol_field_name: str = "symbol", **kwargs
+    ):
         """
 
         Parameters
@@ -292,6 +322,7 @@ class BaseNormalize(abc.ABC):
         self._symbol_field_name = symbol_field_name
         self.kwargs = kwargs
         self._calendar_list = self._get_calendar_list()
+
     # ⚠️ SAST Risk (Low): Potential directory traversal if source_dir or target_dir is user-controlled
 
     @abc.abstractmethod
@@ -305,9 +336,12 @@ class BaseNormalize(abc.ABC):
     def _get_calendar_list(self) -> Iterable[pd.Timestamp]:
         """Get benchmark calendar"""
         raise NotImplementedError("")
+
+
 # 🧠 ML Signal: Usage of a class instance with dynamic parameters
 
 # ✅ Best Practice: Convert file_path to Path object to ensure consistent path handling
+
 
 class Normalize:
     # 🧠 ML Signal: Usage of internal pandas API, which may indicate advanced data manipulation
@@ -323,7 +357,7 @@ class Normalize:
         date_field_name: str = "date",
         symbol_field_name: str = "symbol",
         **kwargs,
-    # 🧠 ML Signal: Conditional NA value handling based on column names
+        # 🧠 ML Signal: Conditional NA value handling based on column names
     ):
         """
 
@@ -353,8 +387,10 @@ class Normalize:
         self._max_workers = max_workers
 
         self._normalize_obj = normalize_class(
-            date_field_name=date_field_name, symbol_field_name=symbol_field_name, **kwargs
-        # ⚠️ SAST Risk (Low): Directory creation without proper permissions handling
+            date_field_name=date_field_name,
+            symbol_field_name=symbol_field_name,
+            **kwargs,
+            # ⚠️ SAST Risk (Low): Directory creation without proper permissions handling
         )
 
     def _executor(self, file_path: Path):
@@ -377,7 +413,10 @@ class Normalize:
             # ✅ Best Practice: Using @property decorator for abstract methods is a good practice for defining abstract properties
             keep_default_na=False,
             # ✅ Best Practice: Raising NotImplementedError in abstract methods is a common pattern to enforce implementation in subclasses.
-            na_values={col: symbol_na if col == self._symbol_field_name else default_na for col in columns},
+            na_values={
+                col: symbol_na if col == self._symbol_field_name else default_na
+                for col in columns
+            },
         )
 
         # ✅ Best Practice: Using @property decorator for abstract methods is a good practice to enforce property implementation in subclasses.
@@ -387,7 +426,9 @@ class Normalize:
         # ✅ Best Practice: Raising NotImplementedError is a clear way to indicate that a method should be overridden
         if df is not None and not df.empty:
             if self._end_date is not None:
-                _mask = pd.to_datetime(df[self._date_field_name]) <= pd.Timestamp(self._end_date)
+                _mask = pd.to_datetime(df[self._date_field_name]) <= pd.Timestamp(
+                    self._end_date
+                )
                 df = df[_mask]
             df.to_csv(self._target_dir.joinpath(file_path.name), index=False)
 
@@ -402,7 +443,9 @@ class Normalize:
 
 
 class BaseRun(abc.ABC):
-    def __init__(self, source_dir=None, normalize_dir=None, max_workers=1, interval="1d"):
+    def __init__(
+        self, source_dir=None, normalize_dir=None, max_workers=1, interval="1d"
+    ):
         """
 
         Parameters
@@ -432,6 +475,7 @@ class BaseRun(abc.ABC):
         self._cur_module = importlib.import_module("collector")
         self.max_workers = max_workers
         self.interval = interval
+
     # ✅ Best Practice: Use of default parameter values for flexibility and ease of use
 
     @property
@@ -487,7 +531,9 @@ class BaseRun(abc.ABC):
             $ python collector.py download_data --source_dir ~/.qlib/instrument_data/source --region CN --start 2020-11-01 --end 2020-11-10 --delay 0.1 --interval 1m
         """
 
-        _class = getattr(self._cur_module, self.collector_class_name)  # type: Type[BaseCollector]
+        _class = getattr(
+            self._cur_module, self.collector_class_name
+        )  # type: Type[BaseCollector]
         _class(
             self.source_dir,
             max_workers=self.max_workers,
@@ -501,7 +547,9 @@ class BaseRun(abc.ABC):
             **kwargs,
         ).collector_data()
 
-    def normalize_data(self, date_field_name: str = "date", symbol_field_name: str = "symbol", **kwargs):
+    def normalize_data(
+        self, date_field_name: str = "date", symbol_field_name: str = "symbol", **kwargs
+    ):
         """normalize data
 
         Parameters

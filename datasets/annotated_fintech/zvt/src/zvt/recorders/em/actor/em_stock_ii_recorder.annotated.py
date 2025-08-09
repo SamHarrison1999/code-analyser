@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import List
+
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local can improve readability.
 
 import pandas as pd
@@ -9,11 +10,18 @@ from zvt.contract import ActorType
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimestampsDataRecorder
 from zvt.domain import Stock, ActorMeta
+
 # 🧠 ML Signal: Inheritance from TimestampsDataRecorder indicates a pattern of extending functionality
 from zvt.domain.actor.stock_actor import StockInstitutionalInvestorHolder
+
 # ✅ Best Practice: Class definition should include a docstring to describe its purpose and usage
-from zvt.recorders.em.em_api import get_ii_holder_report_dates, get_ii_holder, actor_type_to_org_type
+from zvt.recorders.em.em_api import (
+    get_ii_holder_report_dates,
+    get_ii_holder,
+    actor_type_to_org_type,
+)
 from zvt.utils.time_utils import to_pd_timestamp, to_time_str
+
 # 🧠 ML Signal: Class attributes define configuration or metadata, useful for pattern recognition
 
 
@@ -68,12 +76,17 @@ class EMStockIIRecorder(TimestampsDataRecorder):
             the_date = to_time_str(timestamp)
             self.logger.info(f"to {entity.code} {the_date}")
             for actor_type in ActorType:
-                if actor_type == ActorType.private_equity or actor_type == ActorType.individual:
+                if (
+                    actor_type == ActorType.private_equity
+                    or actor_type == ActorType.individual
+                ):
                     continue
                 # ⚠️ SAST Risk (Low): Ensure df_to_db handles SQL injection and data validation
                 # 🧠 ML Signal: Creating a structured data record for actors
                 result = get_ii_holder(
-                    code=entity.code, report_date=the_date, org_type=actor_type_to_org_type(actor_type)
+                    code=entity.code,
+                    report_date=the_date,
+                    org_type=actor_type_to_org_type(actor_type),
                 )
                 if result:
                     holders = [
@@ -122,7 +135,11 @@ class EMStockIIRecorder(TimestampsDataRecorder):
                     ]
                     df1 = pd.DataFrame.from_records(actors)
                     df_to_db(
-                        data_schema=ActorMeta, df=df1, provider=self.provider, force_update=False, drop_duplicates=True
+                        data_schema=ActorMeta,
+                        df=df1,
+                        provider=self.provider,
+                        force_update=False,
+                        drop_duplicates=True,
                     )
 
 

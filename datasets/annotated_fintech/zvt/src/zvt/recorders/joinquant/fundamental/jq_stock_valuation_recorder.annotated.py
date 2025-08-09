@@ -2,6 +2,7 @@
 # ✅ Best Practice: Import only necessary functions or classes to improve readability and performance
 
 import pandas as pd
+
 # ✅ Best Practice: Avoid using private modules or functions as they may change without notice
 from jqdatapy.api import get_fundamentals
 from pandas._libs.tslibs.timedeltas import Timedelta
@@ -9,9 +10,11 @@ from pandas._libs.tslibs.timedeltas import Timedelta
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.domain import Stock, StockValuation, Etf
+
 # 🧠 ML Signal: Inheritance from TimeSeriesDataRecorder indicates a pattern for time series data handling
 from zvt.recorders.joinquant.common import to_jq_entity_id
 from zvt.utils.time_utils import now_pd_timestamp, to_time_str, to_pd_timestamp
+
 # 🧠 ML Signal: Use of a specific entity provider suggests a pattern for data source selection
 
 
@@ -42,17 +45,28 @@ class JqChinaStockValuationRecorder(TimeSeriesDataRecorder):
         # df = get_fundamentals_continuously(q, end_date=now_time_str(), count=count.days + 1, panel=False)
         df = get_fundamentals(
             # 🧠 ML Signal: Generating unique IDs using a combination of entity ID and timestamp
-            table="valuation", code=to_jq_entity_id(entity), date=to_time_str(end), count=min(count.days, 500)
+            table="valuation",
+            code=to_jq_entity_id(entity),
+            date=to_time_str(end),
+            count=min(count.days, 500),
         )
         # ✅ Best Practice: Renaming columns for clarity and consistency
         df["entity_id"] = entity.id
         df["timestamp"] = pd.to_datetime(df["day"])
         df["code"] = entity.code
         df["name"] = entity.name
-        df["id"] = df["timestamp"].apply(lambda x: "{}_{}".format(entity.id, to_time_str(x)))
+        df["id"] = df["timestamp"].apply(
+            lambda x: "{}_{}".format(entity.id, to_time_str(x))
+        )
         # 🧠 ML Signal: Data transformation by scaling values
         df = df.rename(
-            {"pe_ratio_lyr": "pe", "pe_ratio": "pe_ttm", "pb_ratio": "pb", "ps_ratio": "ps", "pcf_ratio": "pcf"},
+            {
+                "pe_ratio_lyr": "pe",
+                "pe_ratio": "pe_ttm",
+                "pb_ratio": "pb",
+                "ps_ratio": "ps",
+                "pcf_ratio": "pcf",
+            },
             axis="columns",
         )
 
@@ -66,7 +80,12 @@ class JqChinaStockValuationRecorder(TimeSeriesDataRecorder):
         df["capitalization"] = df["capitalization"] * 10000
         df["circulating_cap"] = df["circulating_cap"] * 10000
         df["turnover_ratio"] = df["turnover_ratio"] * 0.01
-        df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+        df_to_db(
+            df=df,
+            data_schema=self.data_schema,
+            provider=self.provider,
+            force_update=self.force_update,
+        )
 
         return None
 
@@ -78,7 +97,9 @@ if __name__ == "__main__":
     print(stocks)
     print(len(stocks))
 
-    JqChinaStockValuationRecorder(entity_ids=["stock_sz_300999"], force_update=True).run()
+    JqChinaStockValuationRecorder(
+        entity_ids=["stock_sz_300999"], force_update=True
+    ).run()
 
 
 # the __all__ is generated

@@ -5,9 +5,11 @@
 
 # 🧠 ML Signal: Use of *args to accept a variable number of arguments
 from torch.utils.data import Dataset
+
 # ✅ Best Practice: Use of __getitem__ method to allow object indexing
 
 # ✅ Best Practice: Storing datasets in an instance variable for later use
+
 
 # ✅ Best Practice: Implementing __len__ allows the object to be used with len()
 # 🧠 ML Signal: Iterating over a collection of datasets
@@ -16,6 +18,7 @@ class ConcatDataset(Dataset):
     def __init__(self, *datasets):
         # 🧠 ML Signal: Usage of min() function to determine the length
         self.datasets = datasets
+
     # 🧠 ML Signal: Iterating over self.datasets to calculate length
     # ✅ Best Practice: Initialize class attributes in the constructor for clarity and maintainability
     # ✅ Best Practice: Constructor should initialize all attributes

@@ -5,8 +5,10 @@ from sqlalchemy import Column, String, Float
 from sqlalchemy.orm import declarative_base
 
 from zvt.contract.register import register_schema, register_entity
+
 # ✅ Best Practice: Naming convention for base classes should be clear and descriptive.
 from zvt.contract.schema import TradableEntity
+
 # 🧠 ML Signal: Inheritance from multiple classes indicates a complex object model
 
 CountryMetaBase = declarative_base()

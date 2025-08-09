@@ -18,12 +18,14 @@ from ruamel.yaml import YAML
 from pathlib import Path
 from operator import xor
 from pprint import pprint
+
 # ✅ Best Practice: Use functools.wraps to preserve metadata of the original function.
 # ⚠️ SAST Risk (Low): Missing import statement for functools, which can lead to NameError.
 
 import qlib
 from qlib.workflow import R
 from qlib.tests.data import GetData
+
 # 🧠 ML Signal: Use of inspect to dynamically analyze function arguments
 
 
@@ -45,8 +47,12 @@ def only_allow_defined_args(function_to_decorate):
             # ✅ Best Practice: Include type hints for the 'results' parameter for better code readability and maintainability.
             # ⚠️ SAST Risk (High): Using os.system to kill a process is unsafe and can be replaced with a safer alternative.
             if arg_name not in valid_names:
-                raise ValueError("Unknown argument seen '%s', expected: [%s]" % (arg_name, ", ".join(valid_names)))
+                raise ValueError(
+                    "Unknown argument seen '%s', expected: [%s]"
+                    % (arg_name, ", ".join(valid_names))
+                )
         return function_to_decorate(*args, **kwargs)
+
     # 🧠 ML Signal: Custom signal handlers can indicate specific application behavior or resilience patterns.
     # ✅ Best Practice: Consider using defaultdict for cleaner initialization of nested dictionaries.
 
@@ -59,6 +65,8 @@ def only_allow_defined_args(function_to_decorate):
 def handler(signum, frame):
     # ⚠️ SAST Risk (Medium): The use of `tempfile.mkdtemp()` can lead to security issues if the temporary directory is not properly managed or cleaned up.
     os.system("kill -9 %d" % os.getpid())
+
+
 # ⚠️ SAST Risk (Low): Ensure that results[fn][metric] has more than one element before calling stdev to avoid runtime errors.
 
 # ✅ Best Practice: Using `Path` for file paths improves code readability and maintainability.
@@ -80,9 +88,17 @@ def cal_mean_std(results) -> dict:
         for metric in results[fn]:
             # ⚠️ SAST Risk (Medium): Accessing environment variables directly can lead to security issues if not handled properly.
             # ✅ Best Practice: subprocess should be imported at the top of the file for clarity and maintainability.
-            mean = statistics.mean(results[fn][metric]) if len(results[fn][metric]) > 1 else results[fn][metric][0]
+            mean = (
+                statistics.mean(results[fn][metric])
+                if len(results[fn][metric]) > 1
+                else results[fn][metric][0]
+            )
             # ✅ Best Practice: sys should be imported at the top of the file for clarity and maintainability.
-            std = statistics.stdev(results[fn][metric]) if len(results[fn][metric]) > 1 else 0
+            std = (
+                statistics.stdev(results[fn][metric])
+                if len(results[fn][metric]) > 1
+                else 0
+            )
             # 🧠 ML Signal: Returning multiple related paths can indicate a pattern of environment setup or configuration.
             # ✅ Best Practice: time should be imported at the top of the file for clarity and maintainability.
             mean_std[fn][metric] = [mean, std]
@@ -103,8 +119,12 @@ def create_env():
     # 🧠 ML Signal: Exception handling pattern can be used to train models on error management.
     # get anaconda activate path
     # ✅ Best Practice: Initialize variables at the start of the function for better readability.
-    conda_activate = Path(os.environ["CONDA_PREFIX"]) / "bin" / "activate"  # TODO: FIX ME!
+    conda_activate = (
+        Path(os.environ["CONDA_PREFIX"]) / "bin" / "activate"
+    )  # TODO: FIX ME!
     return temp_dir, env_path, python_path, conda_activate
+
+
 # ✅ Best Practice: Check for string type before processing to ensure correct handling of input.
 
 
@@ -113,7 +133,9 @@ def create_env():
 def execute(cmd, wait_when_err=False, raise_err=True):
     # 🧠 ML Signal: Converting strings to lowercase is a common pattern for case-insensitive comparisons.
     print("Running CMD:", cmd)
-    with subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=1, universal_newlines=True, shell=True) as p:
+    with subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, bufsize=1, universal_newlines=True, shell=True
+    ) as p:
         # ✅ Best Practice: Check for list type to ensure correct handling of input.
         for line in p.stdout:
             sys.stdout.write(line.split("\b")[0])
@@ -140,6 +162,8 @@ def execute(cmd, wait_when_err=False, raise_err=True):
     else:
         # ✅ Best Practice: Consider using pathlib.Path for path manipulations for better readability and maintainability
         return None
+
+
 # ✅ Best Practice: Use Pathlib for path manipulations for better readability and cross-platform compatibility.
 # 🧠 ML Signal: Usage of glob to find files based on patterns
 
@@ -159,7 +183,9 @@ def get_all_folders(models, exclude) -> dict:
     elif models is None:
         models = [f.name.lower() for f in os.scandir("benchmarks")]
     else:
-        raise ValueError("Input models type is not supported. Please provide str or list without space.")
+        raise ValueError(
+            "Input models type is not supported. Please provide str or list without space."
+        )
     for f in os.scandir("benchmarks"):
         add = xor(bool(f.name.lower() in models), bool(exclude))
         if add:
@@ -175,7 +201,7 @@ def get_all_files(folder_path, dataset, universe="") -> (str, str):
         universe = f"_{universe}"
     yaml_path = str(Path(f"{folder_path}") / f"*{dataset}{universe}.yaml")
     # 🧠 ML Signal: Collecting specific metrics for analysis
-    req_path = str(Path(f"{folder_path}") / f"*.txt")
+    req_path = str(Path(f"{folder_path}") / "*.txt")
     yaml_file = glob.glob(yaml_path)
     # 🧠 ML Signal: Collecting specific metrics for analysis
     req_file = glob.glob(req_path)
@@ -186,7 +212,9 @@ def get_all_files(folder_path, dataset, universe="") -> (str, str):
         # 🧠 ML Signal: Collecting specific metrics for analysis
         return yaml_file[0], req_file[0]
 
+
 # 🧠 ML Signal: Collecting specific metrics for analysis
+
 
 # ✅ Best Practice: Use of descriptive variable names for readability
 # function to retrieve all the results
@@ -224,10 +252,16 @@ def get_all_results(folders) -> dict:
                 if "1day.excess_return_with_cost.annualized_return" not in metrics:
                     print(f"{recorder_id} is skipped due to incomplete result")
                     continue
-                result["annualized_return_with_cost"].append(metrics["1day.excess_return_with_cost.annualized_return"])
+                result["annualized_return_with_cost"].append(
+                    metrics["1day.excess_return_with_cost.annualized_return"]
+                )
                 # ✅ Best Practice: Returning original path if 'seed' key is not found
-                result["information_ratio_with_cost"].append(metrics["1day.excess_return_with_cost.information_ratio"])
-                result["max_drawdown_with_cost"].append(metrics["1day.excess_return_with_cost.max_drawdown"])
+                result["information_ratio_with_cost"].append(
+                    metrics["1day.excess_return_with_cost.information_ratio"]
+                )
+                result["max_drawdown_with_cost"].append(
+                    metrics["1day.excess_return_with_cost.max_drawdown"]
+                )
                 result["ic"].append(metrics["IC"])
                 # ✅ Best Practice: Using os.path.join for cross-platform path construction
                 result["icir"].append(metrics["ICIR"])
@@ -412,14 +446,18 @@ class ModelRunner:
             if "torch" in content:
                 # automatically install pytorch according to nvidia's version
                 execute(
-                    f"{python_path} -m pip install light-the-torch", wait_when_err=wait_when_err
+                    f"{python_path} -m pip install light-the-torch",
+                    wait_when_err=wait_when_err,
                 )  # for automatically installing torch according to the nvidia driver
                 execute(
                     f"{env_path / 'bin' / 'ltt'} install --install-cmd '{python_path} -m pip install {{packages}}' -- -r {req_path}",
                     wait_when_err=wait_when_err,
                 )
             else:
-                execute(f"{python_path} -m pip install -r {req_path}", wait_when_err=wait_when_err)
+                execute(
+                    f"{python_path} -m pip install -r {req_path}",
+                    wait_when_err=wait_when_err,
+                )
             sys.stderr.write("\n")
 
             # read yaml, remove seed kwargs of model, and then save file in the temp_dir
@@ -433,8 +471,14 @@ class ModelRunner:
                 sys.stderr.write("\n")
             # install qlib
             sys.stderr.write("Installing qlib...\n")
-            execute(f"{python_path} -m pip install --upgrade pip", wait_when_err=wait_when_err)  # TODO: FIX ME!
-            execute(f"{python_path} -m pip install --upgrade cython", wait_when_err=wait_when_err)  # TODO: FIX ME!
+            execute(
+                f"{python_path} -m pip install --upgrade pip",
+                wait_when_err=wait_when_err,
+            )  # TODO: FIX ME!
+            execute(
+                f"{python_path} -m pip install --upgrade cython",
+                wait_when_err=wait_when_err,
+            )  # TODO: FIX ME!
             if fn == "TFT":
                 execute(
                     f"cd {env_path} && {python_path} -m pip install --upgrade --force-reinstall --ignore-installed PyYAML -e {qlib_uri}",
@@ -464,27 +508,34 @@ class ModelRunner:
                 input("Press Enter to Continue")
             shutil.rmtree(env_path)
         # print errors
-        sys.stderr.write(f"Here are some of the errors of the models...\n")
+        sys.stderr.write("Here are some of the errors of the models...\n")
         pprint(errors)
         self._collect_results(exp_folder_name, dataset)
 
     def _collect_results(self, exp_folder_name, dataset):
         folders = get_all_folders(exp_folder_name, dataset)
         # getting all results
-        sys.stderr.write(f"Retrieving results...\n")
+        sys.stderr.write("Retrieving results...\n")
         results = get_all_results(folders)
         if len(results) > 0:
             # calculating the mean and std
-            sys.stderr.write(f"Calculating the mean and std of results...\n")
+            sys.stderr.write("Calculating the mean and std of results...\n")
             results = cal_mean_std(results)
             # generating md table
-            sys.stderr.write(f"Generating markdown table...\n")
+            sys.stderr.write("Generating markdown table...\n")
             gen_and_save_md_table(results, dataset)
             sys.stderr.write("\n")
         sys.stderr.write("\n")
         # move results folder
-        shutil.move(exp_folder_name, exp_folder_name + f"_{dataset}_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}")
-        shutil.move("table.md", f"table_{dataset}_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.md")
+        shutil.move(
+            exp_folder_name,
+            exp_folder_name
+            + f"_{dataset}_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}",
+        )
+        shutil.move(
+            "table.md",
+            f"table_{dataset}_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.md",
+        )
 
 
 if __name__ == "__main__":

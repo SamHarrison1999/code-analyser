@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 from qlib.backtest import Order
+
 # 🧠 ML Signal: Inheritance from BaseStrategy indicates a design pattern for strategy-based trading systems
 from qlib.backtest.decision import OrderHelper, TradeDecisionWO, TradeRange
 from qlib.strategy.base import BaseStrategy
@@ -30,7 +31,9 @@ class SingleOrderStrategy(BaseStrategy):
 
     # 🧠 ML Signal: Usage of self._order attributes indicates reliance on instance state for behavior.
     # 🧠 ML Signal: Returning a constructed object with specific parameters can indicate a pattern of object creation.
-    def generate_trade_decision(self, execute_result: list | None = None) -> TradeDecisionWO:
+    def generate_trade_decision(
+        self, execute_result: list | None = None
+    ) -> TradeDecisionWO:
         oh: OrderHelper = self.common_infra.get("trade_exchange").get_order_helper()
         order_list = [
             oh.create(

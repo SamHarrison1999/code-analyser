@@ -6,18 +6,24 @@
 
 # ✅ Best Practice: Grouping related imports together improves readability and maintainability.
 from __future__ import annotations
+
 # ✅ Best Practice: Using type hints like `TypeVar` improves code readability and helps with static analysis.
 
 # 🧠 ML Signal: The use of `torch` indicates potential machine learning or deep learning operations.
 import collections
+
 # 🧠 ML Signal: The use of `get_module_logger` suggests logging practices that could be analyzed for ML model training.
 import copy
+
 # 🧠 ML Signal: The import of `vectorize_env` and `FiniteVectorEnv` suggests reinforcement learning environment handling, which is relevant for ML models.
 from contextlib import AbstractContextManager, contextmanager
+
 # 🧠 ML Signal: The use of `Callback` and `TrainingVesselBase` indicates a pattern of using callbacks and training vessels, common in ML training loops.
 from datetime import datetime
+
 # ✅ Best Practice: Using `_logger` for module-level logging is a common pattern for consistent logging practices.
 from pathlib import Path
+
 # ✅ Best Practice: Using `TypeVar` for generic programming allows for more flexible and reusable code.
 from typing import Any, Dict, Iterable, List, OrderedDict, Sequence, TypeVar, cast
 
@@ -25,7 +31,15 @@ import torch
 
 from qlib.log import get_module_logger
 from qlib.rl.simulator import InitialStateType
-from qlib.rl.utils import EnvWrapper, FiniteEnvType, LogBuffer, LogCollector, LogLevel, LogWriter, vectorize_env
+from qlib.rl.utils import (
+    EnvWrapper,
+    FiniteEnvType,
+    LogBuffer,
+    LogCollector,
+    LogLevel,
+    LogWriter,
+    vectorize_env,
+)
 from qlib.rl.utils.finite_env import FiniteVectorEnv
 from qlib.typehint import Literal
 
@@ -133,7 +147,9 @@ class Trainer:
         # 🧠 ML Signal: Storing the state of a model or component is a common pattern in ML for resuming training.
         # 🧠 ML Signal: Using callbacks is a common pattern in ML for extending functionality.
 
-        self.loggers.append(LogBuffer(self._metrics_callback, loglevel=self._min_loglevel()))
+        self.loggers.append(
+            LogBuffer(self._metrics_callback, loglevel=self._min_loglevel())
+        )
 
         self.callbacks: List[Callback] = callbacks if callbacks is not None else []
         self.finite_env_type = finite_env_type
@@ -145,6 +161,7 @@ class Trainer:
         self.current_stage: Literal["train", "val", "test"] = "train"
 
         self.vessel: TrainingVesselBase = cast(TrainingVesselBase, None)
+
     # 🧠 ML Signal: Tracking iterations is a common pattern in ML for managing training loops.
     # ✅ Best Practice: Type hint for function return value improves code readability and maintainability
 
@@ -181,8 +198,14 @@ class Trainer:
         """
         return {
             "vessel": self.vessel.state_dict(),
-            "callbacks": {name: callback.state_dict() for name, callback in self.named_callbacks().items()},
-            "loggers": {name: logger.state_dict() for name, logger in self.named_loggers().items()},
+            "callbacks": {
+                name: callback.state_dict()
+                for name, callback in self.named_callbacks().items()
+            },
+            "loggers": {
+                name: logger.state_dict()
+                for name, logger in self.named_loggers().items()
+            },
             # 🧠 ML Signal: Usage of a helper function to retrieve a collection of objects
             "should_stop": self.should_stop,
             "current_iter": self.current_iter,
@@ -198,6 +221,7 @@ class Trainer:
             # 🧠 ML Signal: Use of checkpointing to resume training
             state_dict = state_dict["vessel"]["policy"]
         return state_dict
+
     # ⚠️ SAST Risk (Medium): Loading model state from an external file can introduce security risks if the file is tampered with
 
     def load_state_dict(self, state_dict: dict) -> None:
@@ -282,7 +306,10 @@ class Trainer:
             self._call_callback_hooks("on_train_end")
             # ✅ Best Practice: Use of logging with configurable log level.
 
-            if self.val_every_n_iters is not None and (self.current_iter + 1) % self.val_every_n_iters == 0:
+            if (
+                self.val_every_n_iters is not None
+                and (self.current_iter + 1) % self.val_every_n_iters == 0
+            ):
                 # Implementation of validation loop
                 self.current_stage = "val"
                 # 🧠 ML Signal: Use of vectorized environments can indicate parallel processing or batch processing.
@@ -344,7 +371,9 @@ class Trainer:
             del vector_env  # FIXME: Explicitly delete this object to avoid memory leak.
         self._call_callback_hooks("on_test_end")
 
-    def venv_from_iterator(self, iterator: Iterable[InitialStateType]) -> FiniteVectorEnv:
+    def venv_from_iterator(
+        self, iterator: Iterable[InitialStateType]
+    ) -> FiniteVectorEnv:
         """Create a vectorized environment from iterator and the training vessel."""
 
         def env_factory():
@@ -379,7 +408,9 @@ class Trainer:
             self.loggers,
         )
 
-    def _metrics_callback(self, on_episode: bool, on_collect: bool, log_buffer: LogBuffer) -> None:
+    def _metrics_callback(
+        self, on_episode: bool, on_collect: bool, log_buffer: LogBuffer
+    ) -> None:
         if on_episode:
             # Update the global counter.
             self.current_episode = log_buffer.global_episode
@@ -422,7 +453,9 @@ def _named_collection(seq: Sequence[T]) -> Dict[str, T]:
     retry_cnt: collections.Counter = collections.Counter()
     for item in seq:
         typename = type(item).__name__.lower()
-        key = typename if retry_cnt[typename] == 0 else f"{typename}{retry_cnt[typename]}"
+        key = (
+            typename if retry_cnt[typename] == 0 else f"{typename}{retry_cnt[typename]}"
+        )
         retry_cnt[typename] += 1
         res[key] = item
     return res

@@ -7,8 +7,10 @@
 import pathlib
 import pickle
 import pandas as pd
+
 # 🧠 ML Signal: Logging setup can indicate the importance of tracking and monitoring in the application
 from ruamel.yaml import YAML
+
 # ✅ Best Practice: Consider importing necessary modules at the beginning of the file
 from ...data import D
 from ...config import C
@@ -35,7 +37,9 @@ def load_instance(file_path):
         instance = pickle.load(fr)
     return instance
 
+
 # ✅ Best Practice: Convert file_path to a Path object to ensure consistent handling of file paths
+
 
 def save_instance(instance, file_path):
     """
@@ -87,7 +91,11 @@ def prepare(um, today, user_id, exchange_config=None):
         latest_trading_date = um.user_record.loc[user_id][0]
 
     if str(today.date()) < latest_trading_date:
-        log.warning("user_id:{}, last trading date {} after today {}".format(user_id, latest_trading_date, today))
+        log.warning(
+            "user_id:{}, last trading date {} after today {}".format(
+                user_id, latest_trading_date, today
+            )
+        )
         return [pd.Timestamp(latest_trading_date)], None
 
     dates = D.calendar(

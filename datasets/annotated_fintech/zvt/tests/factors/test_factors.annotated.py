@@ -2,6 +2,7 @@
 # 🧠 ML Signal: Importing specific classes or functions indicates usage patterns and dependencies
 # 🧠 ML Signal: Function definition with a specific naming pattern
 from zvt.factors.zen.zen_factor import ZenFactor
+
 # 🧠 ML Signal: Instantiation of ZenFactor with specific parameters
 # ✅ Best Practice: Importing only necessary components improves code readability and maintainability
 

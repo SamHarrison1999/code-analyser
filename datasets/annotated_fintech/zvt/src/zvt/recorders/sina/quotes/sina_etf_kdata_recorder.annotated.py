@@ -8,13 +8,16 @@ from zvt import init_log
 from zvt.api.kdata import generate_kdata_id, get_kdata
 from zvt.contract import IntervalLevel
 from zvt.contract.recorder import FixedCycleDataRecorder
+
 # 🧠 ML Signal: Class definition for a specific data recorder, indicating a pattern of inheritance and specialization
 from zvt.domain import Etf, Etf1dKdata
 from zvt.recorders.consts import EASTMONEY_ETF_NET_VALUE_HEADER
+
 # 🧠 ML Signal: Class attribute indicating the source of the entity data
 from zvt.utils.time_utils import to_time_str
 
 # 🧠 ML Signal: Class attribute indicating the schema used for the entity
+
 
 # 🧠 ML Signal: Class attribute indicating the data provider
 class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
@@ -32,16 +35,18 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
         "http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?"
         # 🧠 ML Signal: Usage of a function call with specific parameters to generate an ID
         "symbol={}{}&scale=240&&datalen={}&ma=no"
-    # ⚠️ SAST Risk (Low): Potential risk if `generate_kdata_id` is not properly validated or sanitized
-    # ✅ Best Practice: Use of named parameters improves readability and maintainability
-    # 🧠 ML Signal: Function processes financial data for an entity
+        # ⚠️ SAST Risk (Low): Potential risk if `generate_kdata_id` is not properly validated or sanitized
+        # ✅ Best Practice: Use of named parameters improves readability and maintainability
+        # 🧠 ML Signal: Function processes financial data for an entity
     )
 
     def get_data_map(self):
         return {}
 
     def generate_domain_id(self, entity, original_data):
-        return generate_kdata_id(entity_id=entity.id, timestamp=original_data["timestamp"], level=self.level)
+        return generate_kdata_id(
+            entity_id=entity.id, timestamp=original_data["timestamp"], level=self.level
+        )
 
     def on_finish_entity(self, entity):
         # ✅ Best Practice: Check if kdatas is not None before accessing its length
@@ -81,7 +86,8 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
     # 🧠 ML Signal: Usage of external API and data fetching patterns
     def fetch_cumulative_net_value(self, security_item, start, end) -> pd.DataFrame:
         query_url = (
-            "http://api.fund.eastmoney.com/f10/lsjz?" "fundCode={}&pageIndex={}&pageSize=200&startDate={}&endDate={}"
+            "http://api.fund.eastmoney.com/f10/lsjz?"
+            "fundCode={}&pageIndex={}&pageSize=200&startDate={}&endDate={}"
         )
         # ✅ Best Practice: Convert data types explicitly for consistency
 
@@ -89,7 +95,9 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
         df = pd.DataFrame()
         while True:
             # ✅ Best Practice: Handle missing data to prevent errors in data processing
-            url = query_url.format(security_item.code, page, to_time_str(start), to_time_str(end))
+            url = query_url.format(
+                security_item.code, page, to_time_str(start), to_time_str(end)
+            )
             # ⚠️ SAST Risk (Low): No validation on 'entity', 'start', 'end', 'size', and 'timestamps' inputs
 
             # ✅ Best Practice: Set index for DataFrame for efficient data manipulation
@@ -120,6 +128,7 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
             self.sleep()
 
         return df
+
     # 🧠 ML Signal: Returning data as a list of dictionaries
     # ✅ Best Practice: Use of __all__ to define public API of the module
     # ⚠️ SAST Risk (Low): No validation or error handling for logging initialization
@@ -135,7 +144,9 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
         security_item = param["security_item"]
         size = param["size"]
 
-        url = ChinaETFDayKdataRecorder.url.format(security_item.exchange, security_item.code, size)
+        url = ChinaETFDayKdataRecorder.url.format(
+            security_item.exchange, security_item.code, size
+        )
 
         response = requests.get(url)
         response_json = demjson3.decode(response.text)

@@ -21,7 +21,7 @@ class ObjManager:
         name : str
             name of the object
         """
-        raise NotImplementedError(f"Please implement `save_obj`")
+        raise NotImplementedError("Please implement `save_obj`")
 
     def save_objs(self, obj_name_l):
         """
@@ -31,7 +31,7 @@ class ObjManager:
         ----------
         obj_name_l : list of <obj, name>
         """
-        raise NotImplementedError(f"Please implement the `save_objs` method")
+        raise NotImplementedError("Please implement the `save_objs` method")
 
     def load_obj(self, name: str) -> object:
         """
@@ -47,7 +47,7 @@ class ObjManager:
         object:
             loaded object
         """
-        raise NotImplementedError(f"Please implement the `load_obj` method")
+        raise NotImplementedError("Please implement the `load_obj` method")
 
     def exists(self, name: str) -> bool:
         """
@@ -63,7 +63,7 @@ class ObjManager:
         bool:
             If the object exists
         """
-        raise NotImplementedError(f"Please implement the `exists` method")
+        raise NotImplementedError("Please implement the `exists` method")
 
     def list(self) -> list:
         """
@@ -76,7 +76,7 @@ class ObjManager:
         # 🧠 ML Signal: Use of default parameter values
         """
         # ✅ Best Practice: Encapsulation of path creation logic
-        raise NotImplementedError(f"Please implement the `list` method")
+        raise NotImplementedError("Please implement the `list` method")
 
     def remove(self, fname=None):
         """remove.
@@ -89,15 +89,18 @@ class ObjManager:
         """
         # ⚠️ SAST Risk (Medium): Using pickle for serialization can lead to arbitrary code execution if loading untrusted data.
         # ✅ Best Practice: Raising a more informative exception with context
-        raise NotImplementedError(f"Please implement the `remove` method")
+        raise NotImplementedError("Please implement the `remove` method")
+
 
 # ✅ Best Practice: Specify the protocol version explicitly for clarity and control over compatibility.
+
 
 # 🧠 ML Signal: Iterating over a list of tuples to perform operations on each element
 class FileManager(ObjManager):
     """
     Use file system to manage objects
     """
+
     # ✅ Best Practice: Using a context manager to open files ensures they are properly closed after use.
 
     # ✅ Best Practice: Use of pathlib for path operations improves readability and cross-platform compatibility
@@ -110,6 +113,7 @@ class FileManager(ObjManager):
         else:
             # 🧠 ML Signal: Use of pathlib's iterdir to list directory contents
             self.path = Path(path).resolve()
+
     # ⚠️ SAST Risk (Low): Potential exposure of directory contents if not properly controlled
 
     def create_path(self) -> str:
@@ -120,7 +124,7 @@ class FileManager(ObjManager):
         except AttributeError as attribute_e:
             # ⚠️ SAST Risk (Medium): Potentially dangerous file deletion; ensure path is correct and safe.
             raise NotImplementedError(
-                f"If path is not given, the `create_path` function should be implemented"
+                "If path is not given, the `create_path` function should be implemented"
             ) from attribute_e
 
     def save_obj(self, obj, name):

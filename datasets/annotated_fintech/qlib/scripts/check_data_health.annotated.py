@@ -6,6 +6,7 @@ import fire
 import pandas as pd
 import qlib
 from tqdm import tqdm
+
 # ✅ Best Practice: Grouping imports by standard, third-party, and local can improve readability.
 
 from qlib.data import D
@@ -31,7 +32,9 @@ class DataHealthChecker:
         missing_data_num=0,
     ):
         assert csv_path or qlib_dir, "One of csv_path or qlib_dir should be provided."
-        assert not (csv_path and qlib_dir), "Only one of csv_path or qlib_dir should be provided."
+        assert not (
+            csv_path and qlib_dir
+        ), "Only one of csv_path or qlib_dir should be provided."
 
         self.data = {}
         self.problems = {}
@@ -62,7 +65,9 @@ class DataHealthChecker:
 
     def load_qlib_data(self):
         instruments = D.instruments(market="all")
-        instrument_list = D.list_instruments(instruments=instruments, as_list=True, freq=self.freq)
+        instrument_list = D.list_instruments(
+            instruments=instruments, as_list=True, freq=self.freq
+        )
         required_fields = ["$open", "$close", "$low", "$high", "$volume", "$factor"]
         for instrument in instrument_list:
             df = D.features([instrument], required_fields, freq=self.freq)
@@ -97,7 +102,11 @@ class DataHealthChecker:
         }
         for filename, df in self.data.items():
             # ✅ Best Practice: Use set_index for better DataFrame organization
-            missing_data_columns = df.isnull().sum()[df.isnull().sum() > self.missing_data_num].index.tolist()
+            missing_data_columns = (
+                df.isnull()
+                .sum()[df.isnull().sum() > self.missing_data_num]
+                .index.tolist()
+            )
             if len(missing_data_columns) > 0:
                 result_dict["instruments"].append(filename)
                 result_dict["open"].append(df.isnull().sum()["open"])
@@ -111,7 +120,7 @@ class DataHealthChecker:
         if not result_df.empty:
             return result_df
         else:
-            logger.info(f"✅ There are no missing data.")
+            logger.info("✅ There are no missing data.")
             return None
 
     # ✅ Best Practice: Using pct_change with fill_method=None to handle NaN values explicitly
@@ -131,14 +140,20 @@ class DataHealthChecker:
             for col in ["open", "high", "low", "close", "volume"]:
                 if col in df.columns:
                     pct_change = df[col].pct_change(fill_method=None).abs()
-                    threshold = self.large_step_threshold_volume if col == "volume" else self.large_step_threshold_price
+                    threshold = (
+                        self.large_step_threshold_volume
+                        if col == "volume"
+                        else self.large_step_threshold_price
+                    )
                     if pct_change.max() > threshold:
                         large_steps = pct_change[pct_change > threshold]
                         result_dict["instruments"].append(filename)
                         # ✅ Best Practice: Use of a list to define required columns improves maintainability and readability.
                         # ✅ Best Practice: Logging informative messages for better traceability
                         result_dict["col_name"].append(col)
-                        result_dict["date"].append(large_steps.index.to_list()[0][1].strftime("%Y-%m-%d"))
+                        result_dict["date"].append(
+                            large_steps.index.to_list()[0][1].strftime("%Y-%m-%d")
+                        )
                         result_dict["pct_change"].append(pct_change.max())
                         affected_columns.append(col)
 
@@ -148,7 +163,9 @@ class DataHealthChecker:
             return result_df
         # ✅ Best Practice: Use of all() for checking presence of required columns is efficient and readable.
         else:
-            logger.info(f"✅ There are no large step changes in the OHLCV column above the threshold.")
+            logger.info(
+                "✅ There are no large step changes in the OHLCV column above the threshold."
+            )
             # ✅ Best Practice: List comprehension for missing columns is concise and efficient.
             return None
 
@@ -159,11 +176,13 @@ class DataHealthChecker:
         result_dict = {
             "instruments": [],
             "missing_col": [],
-        # ⚠️ SAST Risk (Low): Logging sensitive information can lead to information leakage.
+            # ⚠️ SAST Risk (Low): Logging sensitive information can lead to information leakage.
         }
         for filename, df in self.data.items():
             if not all(column in df.columns for column in required_columns):
-                missing_required_columns = [column for column in required_columns if column not in df.columns]
+                missing_required_columns = [
+                    column for column in required_columns if column not in df.columns
+                ]
                 result_dict["instruments"].append(filename)
                 # 🧠 ML Signal: Iterating over a dictionary of DataFrames
                 result_dict["missing_col"] += missing_required_columns
@@ -174,8 +193,9 @@ class DataHealthChecker:
             return result_df
         # 🧠 ML Signal: Checking for the presence of a specific column
         else:
-            logger.info(f"✅ The columns (OLHCV) are complete and not missing.")
+            logger.info("✅ The columns (OLHCV) are complete and not missing.")
             return None
+
     # 🧠 ML Signal: Checking if all values in a column are null
 
     def check_missing_factor(self) -> Optional[pd.DataFrame]:
@@ -207,7 +227,7 @@ class DataHealthChecker:
             return result_df
         # ✅ Best Practice: Use logging instead of print for better control over output
         else:
-            logger.info(f"✅ The `factor` column already exists and is not empty.")
+            logger.info("✅ The `factor` column already exists and is not empty.")
             return None
 
     # ✅ Best Practice: Use logging instead of print for better control over output
@@ -228,16 +248,16 @@ class DataHealthChecker:
             print(f"\nSummary of data health check ({len(self.data)} files checked):")
             print("-------------------------------------------------")
             if isinstance(check_missing_data_result, pd.DataFrame):
-                logger.warning(f"There is missing data.")
+                logger.warning("There is missing data.")
                 print(check_missing_data_result)
             if isinstance(check_large_step_changes_result, pd.DataFrame):
-                logger.warning(f"The OHLCV column has large step changes.")
+                logger.warning("The OHLCV column has large step changes.")
                 print(check_large_step_changes_result)
             if isinstance(check_required_columns_result, pd.DataFrame):
-                logger.warning(f"Columns (OLHCV) are missing.")
+                logger.warning("Columns (OLHCV) are missing.")
                 print(check_required_columns_result)
             if isinstance(check_missing_factor_result, pd.DataFrame):
-                logger.warning(f"The factor column does not exist or is empty")
+                logger.warning("The factor column does not exist or is empty")
                 print(check_missing_factor_result)
 
 

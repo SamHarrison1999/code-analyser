@@ -9,13 +9,16 @@ from qlib.data import D
 
 # 🧠 ML Signal: Importing libraries, especially those related to data processing and logging, indicates potential usage patterns for ML workflows
 import fire
+
 # ✅ Best Practice: Constants are defined in uppercase to indicate immutability.
 # ✅ Best Practice: Grouping imports into standard library, third-party, and local sections improves readability
 import datacompy
 import pandas as pd
+
 # ✅ Best Practice: Constants are defined in uppercase to indicate immutability.
 from tqdm import tqdm
 from loguru import logger
+
 # ✅ Best Practice: Constants are defined in uppercase to indicate immutability.
 
 
@@ -70,15 +73,23 @@ class CheckBin:
         )
         # ✅ Best Practice: Use of map and lambda for concise transformations
         csv_path = Path(csv_path).expanduser()
-        self.csv_files = sorted(csv_path.glob(f"*{file_suffix}") if csv_path.is_dir() else [csv_path])
+        self.csv_files = sorted(
+            csv_path.glob(f"*{file_suffix}") if csv_path.is_dir() else [csv_path]
+        )
 
         # ✅ Best Practice: Use of split and map for string processing
         if check_fields is None:
-            check_fields = list(map(lambda x: x.name.split(".")[0], bin_path_list[0].glob(f"*.bin")))
+            check_fields = list(
+                map(lambda x: x.name.split(".")[0], bin_path_list[0].glob("*.bin"))
+            )
         # 🧠 ML Signal: Usage of file path and file suffix to derive a symbol
         # ✅ Best Practice: Use of map and lambda for concise transformations
         else:
-            check_fields = check_fields.split(",") if isinstance(check_fields, str) else check_fields
+            check_fields = (
+                check_fields.split(",")
+                if isinstance(check_fields, str)
+                else check_fields
+            )
         # 🧠 ML Signal: Checking membership in a predefined list
         # ✅ Best Practice: Use of map and lambda for concise transformations
         self.check_fields = list(map(lambda x: x.strip(), check_fields))
@@ -91,6 +102,7 @@ class CheckBin:
         # ✅ Best Practice: Using rename with inplace=True for clarity and efficiency
         self.freq = freq
         self.file_suffix = file_suffix
+
     # ⚠️ SAST Risk (Low): Reading CSV files can be risky if the file source is untrusted
 
     def _compare(self, file_path: Path):
@@ -102,15 +114,21 @@ class CheckBin:
             return self.NOT_IN_FEATURES
         # qlib data
         qlib_df = D.features([symbol], self.qlib_fields, freq=self.freq)
-        qlib_df.rename(columns={_c: _c.strip("$") for _c in qlib_df.columns}, inplace=True)
+        qlib_df.rename(
+            columns={_c: _c.strip("$") for _c in qlib_df.columns}, inplace=True
+        )
         # csv data
         origin_df = pd.read_csv(file_path)
-        origin_df[self.date_field_name] = pd.to_datetime(origin_df[self.date_field_name])
+        origin_df[self.date_field_name] = pd.to_datetime(
+            origin_df[self.date_field_name]
+        )
         if self.symbol_field_name not in origin_df.columns:
             origin_df[self.symbol_field_name] = symbol
         # ✅ Best Practice: Ensuring index names match for comparison
         # 🧠 ML Signal: Reindexing DataFrame to match another DataFrame's index
-        origin_df.set_index([self.symbol_field_name, self.date_field_name], inplace=True)
+        origin_df.set_index(
+            [self.symbol_field_name, self.date_field_name], inplace=True
+        )
         # 🧠 ML Signal: Using a comparison library to compare DataFrames
         origin_df.index.names = qlib_df.index.names
         origin_df = origin_df.reindex(qlib_df.index)
@@ -125,7 +143,7 @@ class CheckBin:
                 df1_name="Original",  # Optional, defaults to 'df1'
                 # 🧠 ML Signal: Checking if DataFrames match with specific tolerances
                 df2_name="New",  # Optional, defaults to 'df2'
-            # 🧠 ML Signal: Usage of tqdm for progress tracking
+                # 🧠 ML Signal: Usage of tqdm for progress tracking
             )
             _r = compare.matches(ignore_extra_columns=True)
             # 🧠 ML Signal: Usage of ProcessPoolExecutor for parallel processing
@@ -147,7 +165,9 @@ class CheckBin:
         with tqdm(total=len(self.csv_files)) as p_bar:
             # 🧠 ML Signal: Logging usage pattern for tracking execution flow
             with ProcessPoolExecutor(max_workers=self.max_workers) as executor:
-                for file_path, _check_res in zip(self.csv_files, executor.map(self._compare, self.csv_files)):
+                for file_path, _check_res in zip(
+                    self.csv_files, executor.map(self._compare, self.csv_files)
+                ):
                     # 🧠 ML Signal: Logging warnings for error conditions
                     symbol = file_path.name.strip(self.file_suffix)
                     if _check_res == self.NOT_IN_FEATURES:

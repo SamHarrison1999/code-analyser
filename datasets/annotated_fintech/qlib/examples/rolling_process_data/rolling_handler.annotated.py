@@ -1,12 +1,16 @@
 from qlib.data.dataset.handler import DataHandlerLP
+
 # 🧠 ML Signal: Importing specific classes from a library indicates usage patterns and dependencies
 from qlib.data.dataset.loader import DataLoaderDH
+
 # ✅ Best Practice: Grouping imports from the same library together improves readability
 from qlib.contrib.data.handler import check_transform_proc
+
 # ✅ Best Practice: Class definition should include a docstring explaining its purpose and usage
 
 # ✅ Best Practice: Grouping imports from the same library together improves readability
 # 🧠 ML Signal: Importing specific classes from a library indicates usage patterns and dependencies
+
 
 class RollingDataHandler(DataHandlerLP):
     def __init__(
@@ -22,8 +26,12 @@ class RollingDataHandler(DataHandlerLP):
         data_loader_kwargs={},
     ):
         # 🧠 ML Signal: Usage of a dictionary to configure a data loader, indicating a pattern for dynamic configuration.
-        infer_processors = check_transform_proc(infer_processors, fit_start_time, fit_end_time)
-        learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
+        infer_processors = check_transform_proc(
+            infer_processors, fit_start_time, fit_end_time
+        )
+        learn_processors = check_transform_proc(
+            learn_processors, fit_start_time, fit_end_time
+        )
 
         data_loader = {
             # ✅ Best Practice: Explicitly calling the superclass's __init__ method ensures proper initialization.
