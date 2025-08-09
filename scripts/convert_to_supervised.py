@@ -1,6 +1,6 @@
-
 import json
 from pathlib import Path
+
 
 def convert_annotations_to_supervised(input_dir: Path):
     input_dir = Path(input_dir)
@@ -28,11 +28,14 @@ def convert_annotations_to_supervised(input_dir: Path):
         except Exception as e:
             print(f"❌ Error processing {file.name}: {e}")
 
+
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Convert *_annotations.json to *.supervised.json")
-    parser.add_argument("--input-dir", required=True, help="Directory containing *_annotations.json files")
+    parser.add_argument(
+        "--input-dir", required=True, help="Directory containing *_annotations.json files"
+    )
     args = parser.parse_args()
 
     convert_annotations_to_supervised(Path(args.input_dir))

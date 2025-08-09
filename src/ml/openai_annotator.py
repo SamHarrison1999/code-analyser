@@ -60,22 +60,28 @@ Now annotate the following code:
 """
 
 
-def validate_annotation_sync(annotated_code: str, annotations: List[Dict], filename: str = "") -> bool:
+def validate_annotation_sync(
+    annotated_code: str, annotations: List[Dict], filename: str = ""
+) -> bool:
     lines = annotated_code.splitlines()
     dynamic_window = max(10, int(len(lines) * 0.05))
     mismatches = []
 
     for ann in annotations:
-        expected_comment = re.sub(r'\s+', ' ', f"# {ann['annotation']}".strip())
+        expected_comment = re.sub(r"\s+", " ", f"# {ann['annotation']}".strip())
         target = ann["line"] - 1
-        nearby = lines[max(0, target - dynamic_window):min(len(lines), target + dynamic_window + 1)]
-        if not any(expected_comment in re.sub(r'\s+', ' ', l.strip()) for l in nearby):
-            mismatches.append({
-                "line": ann["line"],
-                "expected": expected_comment,
-                "reason": ann.get("reason", ""),
-                "text": ann.get("text", "")[:120]
-            })
+        nearby = lines[
+            max(0, target - dynamic_window) : min(len(lines), target + dynamic_window + 1)
+        ]
+        if not any(expected_comment in re.sub(r"\s+", " ", l.strip()) for l in nearby):
+            mismatches.append(
+                {
+                    "line": ann["line"],
+                    "expected": expected_comment,
+                    "reason": ann.get("reason", ""),
+                    "text": ann.get("text", "")[:120],
+                }
+            )
 
     if mismatches:
         csv_path = MISMATCH_DIR / f"{filename}_mismatches.csv"
@@ -88,13 +94,17 @@ def validate_annotation_sync(annotated_code: str, annotations: List[Dict], filen
     return True
 
 
-def deduplicate_comments(comments: List[Tuple[str, float]], threshold: float = 0.85) -> List[Tuple[str, float]]:
+def deduplicate_comments(
+    comments: List[Tuple[str, float]], threshold: float = 0.85
+) -> List[Tuple[str, float]]:
     deduped = []
     last_comment = ""
     for comment, conf in sorted(comments, key=lambda x: -x[1]):
         if SequenceMatcher(None, comment, last_comment).ratio() >= threshold:
             continue
-        if all(SequenceMatcher(None, comment, existing).ratio() < threshold for existing, _ in deduped):
+        if all(
+            SequenceMatcher(None, comment, existing).ratio() < threshold for existing, _ in deduped
+        ):
             deduped.append((comment, conf))
             last_comment = comment
     return deduped
@@ -110,7 +120,7 @@ def infer_indentation(lines: List[str], start: int) -> int:
 
 def strip_inline_comments(code: str) -> str:
     return "\n".join(
-        re.split(r'\s+#', line, maxsplit=1)[0].rstrip()
+        re.split(r"\s+#", line, maxsplit=1)[0].rstrip()
         for line in code.splitlines()
         if line.strip() and not line.strip().startswith("#")
     )
@@ -139,13 +149,10 @@ def extract_function_class_bounds(code: str) -> List[Tuple[int, int]]:
 def call_openai(messages, temperature=0.0, model=DEFAULT_MODEL, attempt=1, max_attempts=5):
     try:
         return client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=MAX_TOKENS
+            model=model, messages=messages, temperature=temperature, max_tokens=MAX_TOKENS
         )
     except RateLimitError:
-        wait = min(10, 2 ** attempt)
+        wait = min(10, 2**attempt)
         logger.warning(f"⏳ Rate limit hit — retrying in {wait:.1f}s...")
         time.sleep(wait)
         next_model = FALLBACK_MODEL if attempt >= 3 and model != FALLBACK_MODEL else model
@@ -201,21 +208,24 @@ def maybe_backfill_if_mismatch(code_path: Path, annotations_path: Path, output_p
         backfill_annotations_into_code(code_path, annotations_path, output_path)
 
 
-def annotate_chunk_with_openai(chunk: str, samples: int = NUM_SAMPLES, temperature: float = 0.0) -> Tuple[
-    str, List[Dict], float]:
+def annotate_chunk_with_openai(
+    chunk: str, samples: int = NUM_SAMPLES, temperature: float = 0.0
+) -> Tuple[str, List[Dict], float]:
     completions = []
     for _ in range(samples):
-        response = call_openai([
-            {"role": "system", "content": INSTRUCTION},
-            {"role": "user", "content": chunk}
-        ], temperature)
+        response = call_openai(
+            [{"role": "system", "content": INSTRUCTION}, {"role": "user", "content": chunk}],
+            temperature,
+        )
         completions.append(response.choices[0].message.content)
 
     def extract_comments(text: str) -> List[str]:
         return [line.strip() for line in text.splitlines() if line.strip().startswith("#")]
 
     all_comments = [extract_comments(c) for c in completions]
-    annotated_lines = [line for line in completions[0].splitlines() if not line.strip().startswith("```")]
+    annotated_lines = [
+        line for line in completions[0].splitlines() if not line.strip().startswith("```")
+    ]
 
     annotations = []
     for i, line in enumerate(annotated_lines):
@@ -223,16 +233,24 @@ def annotate_chunk_with_openai(chunk: str, samples: int = NUM_SAMPLES, temperatu
             continue
         comment = line.strip("# ").strip()
         match_count = sum(
-            1 for other in all_comments if any(SequenceMatcher(None, comment, cand).ratio() > 0.75 for cand in other))
+            1
+            for other in all_comments
+            if any(SequenceMatcher(None, comment, cand).ratio() > 0.75 for cand in other)
+        )
         confidence = round(match_count / samples, 3)
         annotations.append({"line": i + 1, "comment": comment, "confidence": confidence})
 
-    chunk_conf = round(sum(a["confidence"] for a in annotations) / len(annotations), 3) if annotations else 0.0
+    chunk_conf = (
+        round(sum(a["confidence"] for a in annotations) / len(annotations), 3)
+        if annotations
+        else 0.0
+    )
     return "\n".join(annotated_lines), annotations, chunk_conf
 
 
-def annotate_code_with_openai(code: str, output_dir: Path = None, filename: str = "annotated") -> Tuple[
-    str, float, List[Dict]]:
+def annotate_code_with_openai(
+    code: str, output_dir: Path = None, filename: str = "annotated"
+) -> Tuple[str, float, List[Dict]]:
     original_lines = code.splitlines()
     stripped_code = strip_inline_comments(code)
     code_lines = stripped_code.splitlines()
@@ -254,11 +272,20 @@ def annotate_code_with_openai(code: str, output_dir: Path = None, filename: str 
             return min(stmt_lines, key=lambda x: abs(x - t)) if stmt_lines else t
 
         func_bounds = extract_function_class_bounds(stripped_code)
-        func_starts = sorted(n.lineno - 1 for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.ClassDef)))
+        func_starts = sorted(
+            n.lineno - 1 for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.ClassDef))
+        )
         if not func_starts or func_starts[0] != 0:
             func_starts = [0] + func_starts
-        chunks = [(start, "\n".join(lines[start:func_starts[i + 1] if i + 1 < len(func_starts) else len(lines)])) for
-                  i, start in enumerate(func_starts)]
+        chunks = [
+            (
+                start,
+                "\n".join(
+                    lines[start : func_starts[i + 1] if i + 1 < len(func_starts) else len(lines)]
+                ),
+            )
+            for i, start in enumerate(func_starts)
+        ]
     except SyntaxError:
         logger.warning(f"⚠️ Syntax error in {filename}; falling back to whole file")
         chunks = [(0, stripped_code)]
@@ -303,7 +330,7 @@ def annotate_code_with_openai(code: str, output_dir: Path = None, filename: str 
                 "tokens": tokens,
                 "start_token": token_offset,
                 "end_token": token_offset + len(tokens),
-                "annotation_tokens": tokenizer.encode(comment)
+                "annotation_tokens": tokenizer.encode(comment),
             }
 
             if comment.startswith("🧠"):
@@ -365,7 +392,9 @@ def annotate_code_with_openai(code: str, output_dir: Path = None, filename: str 
         with open(output_dir / f"{filename}_annotations.json", "w", encoding="utf-8") as f:
             json.dump(all_annotations, f, indent=2)
 
-    logger.info(f"✅ Done: {len(all_annotations)} annotations inserted with average confidence {file_conf}")
+    logger.info(
+        f"✅ Done: {len(all_annotations)} annotations inserted with average confidence {file_conf}"
+    )
     return "\n".join(adjusted_code_lines).strip(), file_conf, all_annotations
 
 
@@ -373,5 +402,5 @@ __all__ = [
     "annotate_code_with_openai",
     "annotate_chunk_with_openai",
     "backfill_annotations_into_code",
-    "maybe_backfill_if_mismatch"
+    "maybe_backfill_if_mismatch",
 ]

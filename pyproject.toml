@@ -38,6 +38,15 @@ gui = [
 # Disable specific error codes globally
 ignore = ["E402", "F401", "F821", "F841", "E741", "E731"]
 
+# Use Black to keep code style consistent across the repo.
+[tool.black]
+# Keep lines readable while avoiding constant wrapping in your codebase.
+line-length = 100
+# Match your CI’s Python version so string/number formatting rules are consistent.
+target-version = ["py312"]
+# Respect your datasets folder and common junk dirs.
+extend-exclude = "(^|/)(datasets|\\.venv|node_modules|build|dist)/"
+
 
 [project.scripts]
 code_analyser = "metrics.main:main"

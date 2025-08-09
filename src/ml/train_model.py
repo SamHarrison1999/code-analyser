@@ -29,7 +29,6 @@ def to_tensor_batch(data):
     }
 
 
-
 def train_model(train_dataset, val_dataset):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"🚀 Using device: {device}")
@@ -87,7 +86,9 @@ def train_model(train_dataset, val_dataset):
         train_acc = accuracy_score(all_labels, all_preds)
         train_f1 = f1_score(all_labels, all_preds, average="micro")
 
-        print(f"🟢 Epoch {epoch+1}/{epochs} | Train Loss: {avg_loss:.4f} | Acc: {train_acc:.4f} | F1: {train_f1:.4f}")
+        print(
+            f"🟢 Epoch {epoch+1}/{epochs} | Train Loss: {avg_loss:.4f} | Acc: {train_acc:.4f} | F1: {train_f1:.4f}"
+        )
         if writer:
             writer.add_scalar("Loss/train", avg_loss, epoch)
             writer.add_scalar("Accuracy/train", train_acc, epoch)
@@ -117,7 +118,9 @@ def train_model(train_dataset, val_dataset):
         val_acc = accuracy_score(val_labels, val_preds)
         val_f1 = f1_score(val_labels, val_preds, average="micro")
 
-        print(f"✅ Epoch {epoch+1}/{epochs} | Val Loss: {avg_val_loss:.4f} | Acc: {val_acc:.4f} | F1: {val_f1:.4f}")
+        print(
+            f"✅ Epoch {epoch+1}/{epochs} | Val Loss: {avg_val_loss:.4f} | Acc: {val_acc:.4f} | F1: {val_f1:.4f}"
+        )
         if writer:
             writer.add_scalar("Loss/val", avg_val_loss, epoch)
             writer.add_scalar("Accuracy/val", val_acc, epoch)

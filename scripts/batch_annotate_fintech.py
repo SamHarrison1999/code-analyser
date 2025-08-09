@@ -131,9 +131,7 @@ def main():
         (
             logger.info(f"✅ {len(overlay_files)} overlay CSV files saved.")
             if overlay_files
-            else logger.error(
-                "❌ --export-overlays was set, but no overlay CSV files were saved."
-            )
+            else logger.error("❌ --export-overlays was set, but no overlay CSV files were saved.")
         )
 
     if args.export_dashboard:
@@ -160,18 +158,20 @@ def main():
                 with open(file, encoding="utf-8") as f:
                     samples = json.load(f)
                     for item in samples:
-                        records.append({
-                            "file": file.name.replace("_annotations.json", ""),
-                            "line": item["line"],
-                            "text": item["text"],
-                            "tokens": item["tokens"],
-                            "start_token": item["start_token"],
-                            "end_token": item["end_token"],
-                            "label": item.get("label", "unknown"),
-                            "severity": item.get("severity", None),
-                            "confidence": item["confidence"],
-                            "reason": item["reason"],
-                        })
+                        records.append(
+                            {
+                                "file": file.name.replace("_annotations.json", ""),
+                                "line": item["line"],
+                                "text": item["text"],
+                                "tokens": item["tokens"],
+                                "start_token": item["start_token"],
+                                "end_token": item["end_token"],
+                                "label": item.get("label", "unknown"),
+                                "severity": item.get("severity", None),
+                                "confidence": item["confidence"],
+                                "reason": item["reason"],
+                            }
+                        )
             if records:
                 ds = Dataset.from_pandas(pd.DataFrame(records))
                 arrow_path = args.output_dir / "annotated.arrow"
@@ -180,9 +180,7 @@ def main():
             else:
                 logger.warning("⚠️ No valid records to export as Arrow.")
         except ImportError:
-            logger.error(
-                "❌ 'datasets' package not installed. Run: pip install datasets"
-            )
+            logger.error("❌ 'datasets' package not installed. Run: pip install datasets")
 
     # ✅ Export Heatmaps
     if args.export_heatmaps:
@@ -194,14 +192,23 @@ def main():
                 heatmap = []
                 for item in samples:
                     for i, token in enumerate(item.get("tokens", [])):
-                        heatmap.append({
-                            "line": item["line"],
-                            "token": token,
-                            "index": i,
-                            "confidence": item["confidence"] if item["start_token"] <= i < item["end_token"] else 0.0,
-                            "severity": item.get("severity", None) if item["start_token"] <= i < item[
-                                "end_token"] else None,
-                        })
+                        heatmap.append(
+                            {
+                                "line": item["line"],
+                                "token": token,
+                                "index": i,
+                                "confidence": (
+                                    item["confidence"]
+                                    if item["start_token"] <= i < item["end_token"]
+                                    else 0.0
+                                ),
+                                "severity": (
+                                    item.get("severity", None)
+                                    if item["start_token"] <= i < item["end_token"]
+                                    else None
+                                ),
+                            }
+                        )
                 output_path = file.with_suffix(".heatmap.json")
                 with open(output_path, "w", encoding="utf-8") as f:
                     json.dump(heatmap, f, indent=2)

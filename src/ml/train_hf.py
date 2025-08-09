@@ -1,4 +1,3 @@
-
 import argparse
 import torch
 from torch.utils.data import Dataset
@@ -50,7 +49,7 @@ def train_on_local_data(args):
         tokenizer_name=args.model_name,
         confidence_threshold=args.confidence_threshold,
         max_samples=args.max_samples,
-        stratify=False
+        stratify=False,
     )
     dataset = LocalFintechDataset(entries)
     print(f"dataset = {dataset}")

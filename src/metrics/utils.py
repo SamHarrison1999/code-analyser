@@ -27,9 +27,7 @@ def resolve_cache_path(base: Union[str, Path], filename: str) -> Path:
     return Path(base).expanduser().resolve() / filename
 
 
-def load_annotations_from_file(
-    file_path: Union[str, Path]
-) -> List[AIAnnotationOverlay]:
+def load_annotations_from_file(file_path: Union[str, Path]) -> List[AIAnnotationOverlay]:
     """
     Load annotation overlays from a .json file.
 

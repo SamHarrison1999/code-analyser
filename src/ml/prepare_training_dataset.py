@@ -12,7 +12,7 @@ LABEL_MAP = {"sast_risk": 0, "ml_signal": 1, "best_practice": 2}
 
 
 def extract_labels(
-        annotations: List[Dict], confidence_threshold: float = 0.7
+    annotations: List[Dict], confidence_threshold: float = 0.7
 ) -> Tuple[List[int], List[str], List[Tuple[int, int]]]:
     label_flags = [0] * len(LABEL_MAP)
     severities = []
@@ -45,14 +45,14 @@ def extract_labels(
 
 
 def load_local_annotated_dataset(
-        code_dir: str = "datasets/github_fintech",
-        annotation_dir: str = "datasets/annotated_fintech",
-        tokenizer_name: str = "microsoft/codebert-base",
-        max_samples: int = None,
-        max_length: int = 512,
-        confidence_threshold: float = 0.7,
-        stratify: bool = True,
-        seed: int = 42,
+    code_dir: str = "datasets/github_fintech",
+    annotation_dir: str = "datasets/annotated_fintech",
+    tokenizer_name: str = "microsoft/codebert-base",
+    max_samples: int = None,
+    max_length: int = 512,
+    confidence_threshold: float = 0.7,
+    stratify: bool = True,
+    seed: int = 42,
 ) -> Tuple[List[Dict], Dict]:
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
     dataset = []
@@ -66,7 +66,8 @@ def load_local_annotated_dataset(
     py_paths = [
         os.path.join(root, file)
         for root, _, files in os.walk(code_dir)
-        for file in files if file.endswith(".py")
+        for file in files
+        if file.endswith(".py")
     ]
     print(f"🧪 Found {len(py_paths)} .py files in: {code_dir}")
 
@@ -104,13 +105,15 @@ def load_local_annotated_dataset(
 
         tokenised = tokenizer(code, truncation=True, padding="max_length", max_length=max_length)
 
-        dataset.append({
-            "input_ids": tokenised["input_ids"],
-            "attention_mask": tokenised["attention_mask"],
-            "labels": labels,
-            "spans": spans,
-            "filename": filename,
-        })
+        dataset.append(
+            {
+                "input_ids": tokenised["input_ids"],
+                "attention_mask": tokenised["attention_mask"],
+                "labels": labels,
+                "spans": spans,
+                "filename": filename,
+            }
+        )
 
         stats["total_files"] += 1
         for i, v in enumerate(labels):
@@ -129,9 +132,7 @@ def load_local_annotated_dataset(
             X.append(d)
             y.append(tuple(d["labels"]))
         try:
-            _, stratified = train_test_split(
-                X, test_size=0.9, stratify=y, random_state=seed
-            )
+            _, stratified = train_test_split(X, test_size=0.9, stratify=y, random_state=seed)
             return stratified, stats
         except ValueError as e:
             print(f"⚠️ Stratified split failed: {e}. Returning full dataset.")
@@ -145,10 +146,7 @@ def save_dataset(train_data, val_data, output_dir: str):
     train_dataset = Dataset.from_list(train_data)
     val_dataset = Dataset.from_list(val_data)
 
-    dataset_dict = DatasetDict({
-        "train": train_dataset,
-        "val": val_dataset
-    })
+    dataset_dict = DatasetDict({"train": train_dataset, "val": val_dataset})
 
     dataset_dict.save_to_disk(output_dir)
     print(f"✅ Saved dataset to {output_dir}")
@@ -175,7 +173,7 @@ if __name__ == "__main__":
         max_length=args.max_length,
         confidence_threshold=args.confidence_threshold,
         stratify=args.stratify,
-        seed=args.seed
+        seed=args.seed,
     )
 
     if len(dataset) < 2:

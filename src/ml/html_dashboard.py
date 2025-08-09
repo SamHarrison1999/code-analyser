@@ -33,9 +33,11 @@ def write_html_dashboard(output_dir: Path, dashboard_path: Path):
             print(f"⚠️ Skipped {skipped} invalid annotations in {ann_path.name}")
 
         total = len(valid_annotations)
-        avg_conf = round(
-            sum(a.get("confidence", 1.0) for a in valid_annotations) / total, 3
-        ) if total else 0.0
+        avg_conf = (
+            round(sum(a.get("confidence", 1.0) for a in valid_annotations) / total, 3)
+            if total
+            else 0.0
+        )
 
         confidence_values.append(avg_conf)
 
@@ -53,11 +55,13 @@ def write_html_dashboard(output_dir: Path, dashboard_path: Path):
                 else:
                     severity_counts[sev] += 1
 
-        file_summaries.append({
-            "file": ann_path.relative_to(output_dir).as_posix(),
-            "total_annotations": total,
-            "average_confidence": avg_conf,
-        })
+        file_summaries.append(
+            {
+                "file": ann_path.relative_to(output_dir).as_posix(),
+                "total_annotations": total,
+                "average_confidence": avg_conf,
+            }
+        )
 
     total_files = len(file_summaries)
     avg_conf_overall = round(sum(confidence_values) / total_files, 3) if total_files else 0.0
@@ -114,4 +118,3 @@ def write_html_dashboard(output_dir: Path, dashboard_path: Path):
     """
 
     dashboard_path.write_text(html.strip(), encoding="utf-8")
-

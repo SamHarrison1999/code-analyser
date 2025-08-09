@@ -16,6 +16,7 @@ LEGACY_PHRASE_MAP = {
     "best_practice": ["best practice", "✅ best practice"],
 }
 
+
 def extract_labels(
     annotations: List[Dict], confidence_threshold: float = 0.7
 ) -> Tuple[List[int], List[str], List[Tuple[int, int]]]:
@@ -49,13 +50,10 @@ def extract_labels(
         if "severity" in entry and isinstance(entry["severity"], str):
             severities.append(entry["severity"].lower())
         # Collect token spans if a 2-tuple list is provided.
-        if (
-            "span" in entry
-            and isinstance(entry["span"], list)
-            and len(entry["span"]) == 2
-        ):
+        if "span" in entry and isinstance(entry["span"], list) and len(entry["span"]) == 2:
             token_spans.append(tuple(entry["span"]))
     return label_flags, severities, token_spans
+
 
 def load_local_annotated_dataset(
     code_dir: str = "datasets/github_fintech",
@@ -79,7 +77,8 @@ def load_local_annotated_dataset(
     py_paths = [
         os.path.join(root, file)
         for root, _, files in os.walk(code_dir)
-        for file in files if file.endswith(".py")
+        for file in files
+        if file.endswith(".py")
     ]
     # Respect max_samples if provided for faster iteration.
     if max_samples:
@@ -109,9 +108,7 @@ def load_local_annotated_dataset(
             print("    ⚠️ No high-confidence labels, skipping.")
             continue
         # Tokenise code to fixed length for model input.
-        tokenised = tokenizer(
-            code, truncation=True, padding="max_length", max_length=max_length
-        )
+        tokenised = tokenizer(code, truncation=True, padding="max_length", max_length=max_length)
         dataset.append(
             {
                 "input_ids": tokenised["input_ids"],
@@ -136,9 +133,7 @@ def load_local_annotated_dataset(
             X.append(d)
             y.append(tuple(d["labels"]))
         try:
-            _, stratified = train_test_split(
-                X, test_size=0.9, stratify=y, random_state=seed
-            )
+            _, stratified = train_test_split(X, test_size=0.9, stratify=y, random_state=seed)
             return stratified, stats
         except ValueError as e:
             print(f"⚠️ Stratified split failed: {e}. Returning full dataset.")

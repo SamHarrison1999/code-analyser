@@ -1,4 +1,3 @@
-
 import json
 import argparse
 from pathlib import Path
@@ -7,6 +6,7 @@ import pandas as pd
 
 try:
     from torch.utils.tensorboard import SummaryWriter
+
     print("✅ TensorBoard SummaryWriter successfully imported.")
     TENSORBOARD_AVAILABLE = True
 except Exception as e:
@@ -18,9 +18,7 @@ def generate_summary(output_dir: Path, use_tensorboard: bool) -> None:
     summary_rows = []
     log_dir = output_dir / "logs"
     writer = (
-        SummaryWriter(log_dir=str(log_dir))
-        if use_tensorboard and TENSORBOARD_AVAILABLE
-        else None
+        SummaryWriter(log_dir=str(log_dir)) if use_tensorboard and TENSORBOARD_AVAILABLE else None
     )
 
     supervised_files = list(output_dir.rglob("*.supervised.json"))
@@ -75,9 +73,7 @@ def generate_summary(output_dir: Path, use_tensorboard: bool) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", type=str, required=True)
-    parser.add_argument(
-        "--tensorboard", action="store_true", help="Enable TensorBoard logging"
-    )
+    parser.add_argument("--tensorboard", action="store_true", help="Enable TensorBoard logging")
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir).resolve()

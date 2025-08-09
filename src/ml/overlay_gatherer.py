@@ -14,9 +14,7 @@ def gather_ai_overlays(
 
     overlays = data.get("overlays", [])
     filtered = [
-        o
-        for o in overlays
-        if isinstance(o, dict) and o.get("confidence", 0) >= min_confidence
+        o for o in overlays if isinstance(o, dict) and o.get("confidence", 0) >= min_confidence
     ]
     grouped: Dict[str, List[float]] = {}
     for overlay in filtered:
@@ -31,8 +29,6 @@ def gather_ai_overlays(
 
     result["ai_overlay_total"] = len(filtered)
 
-    overlay_objs = [
-        AIAnnotationOverlay(**o) for o in filtered if "line" in o and "type" in o
-    ]
+    overlay_objs = [AIAnnotationOverlay(**o) for o in filtered if "line" in o and "type" in o]
 
     return result, overlay_objs

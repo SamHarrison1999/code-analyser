@@ -45,9 +45,7 @@ INFERENCE_CONFIG = {
 }
 
 EXPORT_CONFIG = {
-    "torchscript_path": str(
-        (PROJECT_ROOT / "checkpoints" / "torchscript_model.pt").as_posix()
-    ),
+    "torchscript_path": str((PROJECT_ROOT / "checkpoints" / "torchscript_model.pt").as_posix()),
     "onnx_path": str((PROJECT_ROOT / "checkpoints" / "onnx_model.onnx").as_posix()),
 }
 
@@ -56,10 +54,5 @@ DATA_PATHS = {
     "annotation_dir": str(ANNOTATION_DIR.as_posix()),
     "processed_dataset": str((PROJECT_ROOT / "datasets" / "processed").as_posix()),
     "supervised_ckpt": "checkpoints/supervised",
-    "label_map": {
-        "sast_risk": 0,
-        "ml_signal": 1,
-        "best_practice": 2
-    }
+    "label_map": {"sast_risk": 0, "ml_signal": 1, "best_practice": 2},
 }
-
