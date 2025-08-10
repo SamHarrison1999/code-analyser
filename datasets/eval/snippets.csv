@@ -1,0 +1,799 @@
+id,text,labels
+1,"def f(x):
+    return eval(x)",sast_risk
+2,"def run_user(code):
+    exec(code)",sast_risk
+3,"import subprocess
+def ping(u):
+    subprocess.run(f'ping {u}', shell=True)",sast_risk
+4,"import requests
+def fetch(url):
+    r = requests.get(url, verify=False)
+    return r.text",sast_risk
+5,"import yaml
+def load_cfg(s):
+    return yaml.load(s)",sast_risk
+6,"import pickle
+def load_obj(b):
+    return pickle.loads(b)",sast_risk
+7,"import sqlite3
+def users(conn, name):
+    q = f""SELECT * FROM users WHERE name = '{name}'""
+    return conn.execute(q).fetchall()",sast_risk
+8,"PASSWORD = 'my-password'
+def use_pw():
+    return PASSWORD",sast_risk
+9,"from pathlib import Path
+def read_user_file(p):
+    return Path(p).read_text()",sast_risk
+10,"import hashlib
+def bad_hash(pw):
+    return hashlib.md5(pw.encode()).hexdigest()",sast_risk
+11,"def add(x, bucket=[]):
+    bucket.append(x)
+    return bucket",best_practice
+12,"def calc(a,b):
+    return a+b",best_practice
+13,"from math import *
+def f(x):
+    return sin(x)",best_practice
+14,"def handle(xs):
+    try:
+        return xs[0]
+    except:
+        pass",best_practice
+15,"list = [1,2,3]
+def s(nums):
+    return sum(nums)",best_practice
+16,"def check(flag):
+    if flag is True:
+        return 1",best_practice
+17,"def process(items):
+    for x in items:
+        if x % 2 == 0:
+            items.remove(x)
+    return items",best_practice
+18,"def concat(a,b):
+    return a + '' + b",best_practice
+19,"def long_if(x):
+    if x>0 and x<10 and x%2==0 and x!=6:
+        return True
+    return False",best_practice
+20,"class W:
+    def __init__(self,name,value):
+        self.name=name
+        self.value=value
+    def doubled(self):
+        return self.name+' x2'",best_practice
+21,"def norm(s):
+    return s.strip().lower()",ml_signal
+22,"def weird(nums):
+    return sum([x for x in nums])",ml_signal
+23,"def chained(a):
+    return (a + 0) - 0",ml_signal
+24,"def nested():
+    return (lambda n: (lambda m: m+1)(n))(3)",ml_signal
+25,"def shadow(a):
+    result = 0
+    result = []
+    return result",ml_signal
+26,"def cmp(a,b):
+    return (a==b)==True",ml_signal
+27,"def bool_arith(x,y):
+    return (x and 1) + (y and 1)",ml_signal
+28,"def slice_odd(s):
+    return s[0:len(s)]",ml_signal
+29,"def redundant_if(x):
+    if x:
+        return True
+    else:
+        return False",ml_signal
+30,"def clobber(x):
+    for i in range(len([1,2,3])):
+        pass
+    return x",ml_signal
+31,"def do_eval_x():
+    return eval(x)",sast_risk
+32,"def do_exec_y():
+    code = y
+    exec(code)",sast_risk
+33,"def shell_run_arg():
+    import subprocess
+    return subprocess.run('ping ' + str(arg), shell=True)",sast_risk
+34,"def fetch_insecure_user():
+    import requests
+    r = requests.get(user, verify=False)
+    return r.text",sast_risk
+35,"def yaml_load_name():
+    import yaml
+    return yaml.load(name)",sast_risk
+36,"def pickle_loads_host():
+    import pickle
+    return pickle.loads(host)",sast_risk
+37,"def sql_query_s():
+    import sqlite3
+    s = 'alice'
+    conn = sqlite3.connect(':memory:')
+    q = ""SELECT * FROM users WHERE name = '"" + s + ""'""
+    return conn.execute(q).fetchall()",sast_risk
+38,"def weak_md5_b():
+    import hashlib
+    return hashlib.md5(b.encode()).hexdigest()",sast_risk
+39,"def weak_sha1_pw():
+    import hashlib
+    return hashlib.sha1(pw.encode()).hexdigest()",sast_risk
+40,"def os_system_cmd():
+    import os
+    return os.system('echo ' + str(cmd))",sast_risk
+41,"def add_x(a, bucket=[]):
+    bucket.append(a)
+    return bucket",best_practice
+42,"def bare_except_flag():
+    try:
+        return 1/0
+    except:
+        pass",best_practice
+43,"def is_true_items():
+    items = True
+    if items is True:
+        return 1
+    return 0",best_practice
+44,"def wildcard_import_nums():
+    from math import *
+    return sin(1)",best_practice
+45,"def mutate_during_iter_data():
+    data = [1,2,3,4]
+    for i in data:
+        if i % 2 == 0:
+            data.remove(i)
+    return data",best_practice
+46,"def shadow_builtin_name():
+    sum = 3
+    return sum",best_practice
+47,"def long_line_bucket():
+    a = 'x'*120
+    return len(a)",best_practice
+48,"def unused_var_value():
+    tmp = 123
+    return 0",best_practice
+49,"def missing_docstring_s():
+    return 42",best_practice
+50,"def ambiguous_compare_xs():
+    return (xs == 1) == True",best_practice
+51,"def norm_chain_s():
+    return s.strip().lower()",ml_signal
+52,"def redundant_slice_text():
+    return text[0:len(text)]",ml_signal
+53,"def pointless_arith_xs():
+    z = xs + 0
+    z = z - 0
+    return z",ml_signal
+54,"def redundant_if_nums():
+    if nums:
+        return True
+    else:
+        return False",ml_signal
+55,"def list_sum_comp_a():
+    return sum([i for i in a])",ml_signal
+56,"def double_assign_b():
+    result = 0
+    result = []
+    return result",ml_signal
+57,"def bool_compare_x():
+    return (x == x) == True",ml_signal
+58,"def useless_lambda_y():
+    f = lambda q: (lambda r: r)(q)
+    return f(1)",ml_signal
+59,"def redundant_join_name():
+    return ''.join(list(name))",ml_signal
+60,"def chain_identity_value():
+    a = (value or value)
+    return a",ml_signal
+61,"def eval_and_mutable():
+    def add(a, bucket=[]):
+        bucket.append(a)
+        return a
+    return eval('1+1')",sast_risk;best_practice
+62,"def verify_false_and_norm():
+    import requests
+    u = 'https://example.com'
+    u = u.strip().lower()
+    requests.get(u, verify=False)",sast_risk;ml_signal
+63,"def shell_and_is_true():
+    import subprocess
+    flag = True
+    if flag is True:
+        subprocess.run('echo hi', shell=True)",sast_risk;best_practice
+64,"def pickle_and_redundant_slice():
+    import pickle
+    b = b''
+    pickle.loads(b)
+    s = 'x'
+    s = s[0:len(s)]",sast_risk;ml_signal
+65,"def wildcard_and_bool_compare():
+    from math import *
+    x = 1
+    return (x == x) == True",best_practice;ml_signal
+66,"def yaml_and_bare_except():
+    import yaml
+    try:
+        yaml.load('a: 1')
+    except:
+        pass",sast_risk;best_practice
+67,"def sql_and_pointless_arith():
+    import sqlite3
+    name = 'bob'
+    q = ""SELECT 1 FROM u WHERE n = '"" + name + ""'""
+    z = 0 + 0
+    return q",sast_risk;ml_signal
+68,"def exec_and_shadow():
+    code = 'print(1)'
+    exec(code)
+    sum = 3
+    return sum",sast_risk;best_practice
+69,"def md5_and_redundant_if():
+    import hashlib
+    pw = 'x'
+    hashlib.md5(pw.encode()).hexdigest()
+    flag = True
+    if flag:
+        return True
+    else:
+        return False",sast_risk;ml_signal
+70,"def mutate_iter_and_join():
+    xs = ['a','b']
+    for i in xs:
+        xs.remove(i) if i=='a' else None
+    return ''.join(list('ok'))",best_practice;ml_signal
+71,"def os_system_and_unused():
+    import os
+    tmp = 123
+    return os.system('echo hi')",sast_risk;best_practice
+72,"def sha1_and_double_assign():
+    import hashlib
+    pw = 'x'
+    hashlib.sha1(pw.encode()).hexdigest()
+    result = 0
+    result = []",sast_risk;ml_signal
+73,"def yaml_load_name_14():
+    import yaml
+    return yaml.load(name)",sast_risk
+74,"def pickle_loads_host_15():
+    import pickle
+    return pickle.loads(host)",sast_risk
+75,"def sql_query_s_16():
+    import sqlite3
+    s = 'alice'
+    conn = sqlite3.connect(':memory:')
+    q = ""SELECT * FROM users WHERE name = '"" + s + ""'""
+    return conn.execute(q).fetchall()",sast_risk
+76,"def weak_md5_b_17():
+    import hashlib
+    return hashlib.md5(b.encode()).hexdigest()",sast_risk
+77,"def weak_sha1_pw_18():
+    import hashlib
+    return hashlib.sha1(pw.encode()).hexdigest()",sast_risk
+78,"def os_system_cmd_19():
+    import os
+    return os.system('echo ' + str(cmd))",sast_risk
+79,"def do_eval_x_20():
+    return eval(x)",sast_risk
+80,"def do_exec_y_21():
+    code = y
+    exec(code)",sast_risk
+81,"def shell_run_arg_22():
+    import subprocess
+    return subprocess.run('ping ' + str(arg), shell=True)",sast_risk
+82,"def fetch_insecure_user_23():
+    import requests
+    r = requests.get(user, verify=False)
+    return r.text",sast_risk
+83,"def yaml_load_name_24():
+    import yaml
+    return yaml.load(name)",sast_risk
+84,"def pickle_loads_host_25():
+    import pickle
+    return pickle.loads(host)",sast_risk
+85,"def sql_query_s_26():
+    import sqlite3
+    s = 'alice'
+    conn = sqlite3.connect(':memory:')
+    q = ""SELECT * FROM users WHERE name = '"" + s + ""'""
+    return conn.execute(q).fetchall()",sast_risk
+86,"def weak_md5_b_27():
+    import hashlib
+    return hashlib.md5(b.encode()).hexdigest()",sast_risk
+87,"def weak_sha1_pw_28():
+    import hashlib
+    return hashlib.sha1(pw.encode()).hexdigest()",sast_risk
+88,"def os_system_cmd_29():
+    import os
+    return os.system('echo ' + str(cmd))",sast_risk
+89,"def do_eval_x_30():
+    return eval(x)",sast_risk
+90,"def do_exec_y_31():
+    code = y
+    exec(code)",sast_risk
+91,"def shell_run_arg_32():
+    import subprocess
+    return subprocess.run('ping ' + str(arg), shell=True)",sast_risk
+92,"def fetch_insecure_user_33():
+    import requests
+    r = requests.get(user, verify=False)
+    return r.text",sast_risk
+93,"def yaml_load_name_34():
+    import yaml
+    return yaml.load(name)",sast_risk
+94,"def pickle_loads_host_35():
+    import pickle
+    return pickle.loads(host)",sast_risk
+95,"def sql_query_s_36():
+    import sqlite3
+    s = 'alice'
+    conn = sqlite3.connect(':memory:')
+    q = ""SELECT * FROM users WHERE name = '"" + s + ""'""
+    return conn.execute(q).fetchall()",sast_risk
+96,"def weak_md5_b_37():
+    import hashlib
+    return hashlib.md5(b.encode()).hexdigest()",sast_risk
+97,"def weak_sha1_pw_38():
+    import hashlib
+    return hashlib.sha1(pw.encode()).hexdigest()",sast_risk
+98,"def os_system_cmd_39():
+    import os
+    return os.system('echo ' + str(cmd))",sast_risk
+99,"def do_eval_x_40():
+    return eval(x)",sast_risk
+100,"def do_exec_y_41():
+    code = y
+    exec(code)",sast_risk
+101,"def shell_run_arg_42():
+    import subprocess
+    return subprocess.run('ping ' + str(arg), shell=True)",sast_risk
+102,"def fetch_insecure_user_43():
+    import requests
+    r = requests.get(user, verify=False)
+    return r.text",sast_risk
+103,"def yaml_load_name_44():
+    import yaml
+    return yaml.load(name)",sast_risk
+104,"def pickle_loads_host_45():
+    import pickle
+    return pickle.loads(host)",sast_risk
+105,"def sql_query_s_46():
+    import sqlite3
+    s = 'alice'
+    conn = sqlite3.connect(':memory:')
+    q = ""SELECT * FROM users WHERE name = '"" + s + ""'""
+    return conn.execute(q).fetchall()",sast_risk
+106,"def weak_md5_b_47():
+    import hashlib
+    return hashlib.md5(b.encode()).hexdigest()",sast_risk
+107,"def weak_sha1_pw_48():
+    import hashlib
+    return hashlib.sha1(pw.encode()).hexdigest()",sast_risk
+108,"def os_system_cmd_49():
+    import os
+    return os.system('echo ' + str(cmd))",sast_risk
+109,"def bare_except_flag_1():
+    try:
+        return 1/0
+    except:
+        pass",best_practice
+110,"def is_true_items_2():
+    items = True
+    if items is True:
+        return 1
+    return 0",best_practice
+111,"def wildcard_import_nums_3():
+    from math import *
+    return sin(1)",best_practice
+112,"def mutate_during_iter_data_4():
+    data = [1,2,3,4]
+    for i in data:
+        if i % 2 == 0:
+            data.remove(i)
+    return data",best_practice
+113,"def shadow_builtin_name_5():
+    sum = 3
+    return sum",best_practice
+114,"def long_line_bucket_6():
+    a = 'x'*120
+    return len(a)",best_practice
+115,"def unused_var_value_7():
+    tmp = 123
+    return 0",best_practice
+116,"def missing_docstring_s_8():
+    return 42",best_practice
+117,"def ambiguous_compare_xs_9():
+    return (xs == 1) == True",best_practice
+118,"def bare_except_flag_11():
+    try:
+        return 1/0
+    except:
+        pass",best_practice
+119,"def is_true_items_12():
+    items = True
+    if items is True:
+        return 1
+    return 0",best_practice
+120,"def wildcard_import_nums_13():
+    from math import *
+    return sin(1)",best_practice
+121,"def mutate_during_iter_data_14():
+    data = [1,2,3,4]
+    for i in data:
+        if i % 2 == 0:
+            data.remove(i)
+    return data",best_practice
+122,"def shadow_builtin_name_15():
+    sum = 3
+    return sum",best_practice
+123,"def long_line_bucket_16():
+    a = 'x'*120
+    return len(a)",best_practice
+124,"def unused_var_value_17():
+    tmp = 123
+    return 0",best_practice
+125,"def missing_docstring_s_18():
+    return 42",best_practice
+126,"def ambiguous_compare_xs_19():
+    return (xs == 1) == True",best_practice
+127,"def bare_except_flag_21():
+    try:
+        return 1/0
+    except:
+        pass",best_practice
+128,"def is_true_items_22():
+    items = True
+    if items is True:
+        return 1
+    return 0",best_practice
+129,"def wildcard_import_nums_23():
+    from math import *
+    return sin(1)",best_practice
+130,"def mutate_during_iter_data_24():
+    data = [1,2,3,4]
+    for i in data:
+        if i % 2 == 0:
+            data.remove(i)
+    return data",best_practice
+131,"def shadow_builtin_name_25():
+    sum = 3
+    return sum",best_practice
+132,"def long_line_bucket_26():
+    a = 'x'*120
+    return len(a)",best_practice
+133,"def unused_var_value_27():
+    tmp = 123
+    return 0",best_practice
+134,"def missing_docstring_s_28():
+    return 42",best_practice
+135,"def ambiguous_compare_xs_29():
+    return (xs == 1) == True",best_practice
+136,"def bare_except_flag_31():
+    try:
+        return 1/0
+    except:
+        pass",best_practice
+137,"def is_true_items_32():
+    items = True
+    if items is True:
+        return 1
+    return 0",best_practice
+138,"def wildcard_import_nums_33():
+    from math import *
+    return sin(1)",best_practice
+139,"def mutate_during_iter_data_34():
+    data = [1,2,3,4]
+    for i in data:
+        if i % 2 == 0:
+            data.remove(i)
+    return data",best_practice
+140,"def shadow_builtin_name_35():
+    sum = 3
+    return sum",best_practice
+141,"def long_line_bucket_36():
+    a = 'x'*120
+    return len(a)",best_practice
+142,"def unused_var_value_37():
+    tmp = 123
+    return 0",best_practice
+143,"def missing_docstring_s_38():
+    return 42",best_practice
+144,"def ambiguous_compare_xs_39():
+    return (xs == 1) == True",best_practice
+145,"def bare_except_flag_41():
+    try:
+        return 1/0
+    except:
+        pass",best_practice
+146,"def is_true_items_42():
+    items = True
+    if items is True:
+        return 1
+    return 0",best_practice
+147,"def wildcard_import_nums_43():
+    from math import *
+    return sin(1)",best_practice
+148,"def mutate_during_iter_data_44():
+    data = [1,2,3,4]
+    for i in data:
+        if i % 2 == 0:
+            data.remove(i)
+    return data",best_practice
+149,"def shadow_builtin_name_45():
+    sum = 3
+    return sum",best_practice
+150,"def long_line_bucket_46():
+    a = 'x'*120
+    return len(a)",best_practice
+151,"def unused_var_value_47():
+    tmp = 123
+    return 0",best_practice
+152,"def missing_docstring_s_48():
+    return 42",best_practice
+153,"def ambiguous_compare_xs_49():
+    return (xs == 1) == True",best_practice
+154,"def double_assign_b_5():
+    result = 0
+    result = []
+    return result",ml_signal
+155,"def bool_compare_x_6():
+    return (x == x) == True",ml_signal
+156,"def useless_lambda_y_7():
+    f = lambda q: (lambda r: r)(q)
+    return f(1)",ml_signal
+157,"def redundant_join_name_8():
+    return ''.join(list(name))",ml_signal
+158,"def chain_identity_value_9():
+    a = (value or value)
+    return a",ml_signal
+159,"def norm_chain_s_10():
+    return s.strip().lower()",ml_signal
+160,"def redundant_slice_text_11():
+    return text[0:len(text)]",ml_signal
+161,"def pointless_arith_xs_12():
+    z = xs + 0
+    z = z - 0
+    return z",ml_signal
+162,"def redundant_if_nums_13():
+    if nums:
+        return True
+    else:
+        return False",ml_signal
+163,"def list_sum_comp_a_14():
+    return sum([i for i in a])",ml_signal
+164,"def double_assign_b_15():
+    result = 0
+    result = []
+    return result",ml_signal
+165,"def bool_compare_x_16():
+    return (x == x) == True",ml_signal
+166,"def useless_lambda_y_17():
+    f = lambda q: (lambda r: r)(q)
+    return f(1)",ml_signal
+167,"def redundant_join_name_18():
+    return ''.join(list(name))",ml_signal
+168,"def chain_identity_value_19():
+    a = (value or value)
+    return a",ml_signal
+169,"def norm_chain_s_20():
+    return s.strip().lower()",ml_signal
+170,"def redundant_slice_text_21():
+    return text[0:len(text)]",ml_signal
+171,"def pointless_arith_xs_22():
+    z = xs + 0
+    z = z - 0
+    return z",ml_signal
+172,"def redundant_if_nums_23():
+    if nums:
+        return True
+    else:
+        return False",ml_signal
+173,"def list_sum_comp_a_24():
+    return sum([i for i in a])",ml_signal
+174,"def double_assign_b_25():
+    result = 0
+    result = []
+    return result",ml_signal
+175,"def bool_compare_x_26():
+    return (x == x) == True",ml_signal
+176,"def useless_lambda_y_27():
+    f = lambda q: (lambda r: r)(q)
+    return f(1)",ml_signal
+177,"def redundant_join_name_28():
+    return ''.join(list(name))",ml_signal
+178,"def chain_identity_value_29():
+    a = (value or value)
+    return a",ml_signal
+179,"def norm_chain_s_30():
+    return s.strip().lower()",ml_signal
+180,"def redundant_slice_text_31():
+    return text[0:len(text)]",ml_signal
+181,"def pointless_arith_xs_32():
+    z = xs + 0
+    z = z - 0
+    return z",ml_signal
+182,"def redundant_if_nums_33():
+    if nums:
+        return True
+    else:
+        return False",ml_signal
+183,"def list_sum_comp_a_34():
+    return sum([i for i in a])",ml_signal
+184,"def double_assign_b_35():
+    result = 0
+    result = []
+    return result",ml_signal
+185,"def bool_compare_x_36():
+    return (x == x) == True",ml_signal
+186,"def useless_lambda_y_37():
+    f = lambda q: (lambda r: r)(q)
+    return f(1)",ml_signal
+187,"def redundant_join_name_38():
+    return ''.join(list(name))",ml_signal
+188,"def chain_identity_value_39():
+    a = (value or value)
+    return a",ml_signal
+189,"def norm_chain_s_40():
+    return s.strip().lower()",ml_signal
+190,"def redundant_slice_text_41():
+    return text[0:len(text)]",ml_signal
+191,"def pointless_arith_xs_42():
+    z = xs + 0
+    z = z - 0
+    return z",ml_signal
+192,"def redundant_if_nums_43():
+    if nums:
+        return True
+    else:
+        return False",ml_signal
+193,"def list_sum_comp_a_44():
+    return sum([i for i in a])",ml_signal
+194,"def double_assign_b_45():
+    result = 0
+    result = []
+    return result",ml_signal
+195,"def bool_compare_x_46():
+    return (x == x) == True",ml_signal
+196,"def useless_lambda_y_47():
+    f = lambda q: (lambda r: r)(q)
+    return f(1)",ml_signal
+197,"def redundant_join_name_48():
+    return ''.join(list(name))",ml_signal
+198,"def chain_identity_value_49():
+    a = (value or value)
+    return a",ml_signal
+199,"def eval_and_mutable_0():
+    def add(a, bucket=[]):
+        bucket.append(a)
+        return a
+    return eval('1+1')",sast_risk;best_practice
+200,"def verify_false_and_norm_1():
+    import requests
+    u = 'https://example.com'
+    u = u.strip().lower()
+    requests.get(u, verify=False)",sast_risk;ml_signal
+201,"def shell_and_is_true_2():
+    import subprocess
+    flag = True
+    if flag is True:
+        subprocess.run('echo hi', shell=True)",sast_risk;best_practice
+202,"def pickle_and_redundant_slice_3():
+    import pickle
+    b = b''
+    pickle.loads(b)
+    s = 'x'
+    s = s[0:len(s)]",sast_risk;ml_signal
+203,"def wildcard_and_bool_compare_4():
+    from math import *
+    x = 1
+    return (x == x) == True",best_practice;ml_signal
+204,"def yaml_and_bare_except_5():
+    import yaml
+    try:
+        yaml.load('a: 1')
+    except:
+        pass",sast_risk;best_practice
+205,"def sql_and_pointless_arith_6():
+    import sqlite3
+    name = 'bob'
+    q = ""SELECT 1 FROM u WHERE n = '"" + name + ""'""
+    z = 0 + 0
+    return q",sast_risk;ml_signal
+206,"def exec_and_shadow_7():
+    code = 'print(1)'
+    exec(code)
+    sum = 3
+    return sum",sast_risk;best_practice
+207,"def md5_and_redundant_if_8():
+    import hashlib
+    pw = 'x'
+    hashlib.md5(pw.encode()).hexdigest()
+    flag = True
+    if flag:
+        return True
+    else:
+        return False",sast_risk;ml_signal
+208,"def mutate_iter_and_join_9():
+    xs = ['a','b']
+    for i in xs:
+        xs.remove(i) if i=='a' else None
+    return ''.join(list('ok'))",best_practice;ml_signal
+209,"def os_system_and_unused_10():
+    import os
+    tmp = 123
+    return os.system('echo hi')",sast_risk;best_practice
+210,"def sha1_and_double_assign_11():
+    import hashlib
+    pw = 'x'
+    hashlib.sha1(pw.encode()).hexdigest()
+    result = 0
+    result = []",sast_risk;ml_signal
+211,"def eval_and_mutable_12():
+    def add(a, bucket=[]):
+        bucket.append(a)
+        return a
+    return eval('1+1')",sast_risk;best_practice
+212,"def verify_false_and_norm_13():
+    import requests
+    u = 'https://example.com'
+    u = u.strip().lower()
+    requests.get(u, verify=False)",sast_risk;ml_signal
+213,"def shell_and_is_true_14():
+    import subprocess
+    flag = True
+    if flag is True:
+        subprocess.run('echo hi', shell=True)",sast_risk;best_practice
+214,"def pickle_and_redundant_slice_15():
+    import pickle
+    b = b''
+    pickle.loads(b)
+    s = 'x'
+    s = s[0:len(s)]",sast_risk;ml_signal
+215,"def wildcard_and_bool_compare_16():
+    from math import *
+    x = 1
+    return (x == x) == True",best_practice;ml_signal
+216,"def yaml_and_bare_except_17():
+    import yaml
+    try:
+        yaml.load('a: 1')
+    except:
+        pass",sast_risk;best_practice
+217,"def sql_and_pointless_arith_18():
+    import sqlite3
+    name = 'bob'
+    q = ""SELECT 1 FROM u WHERE n = '"" + name + ""'""
+    z = 0 + 0
+    return q",sast_risk;ml_signal
+218,"def exec_and_shadow_19():
+    code = 'print(1)'
+    exec(code)
+    sum = 3
+    return sum",sast_risk;best_practice
+219,"def md5_and_redundant_if_20():
+    import hashlib
+    pw = 'x'
+    hashlib.md5(pw.encode()).hexdigest()
+    flag = True
+    if flag:
+        return True
+    else:
+        return False",sast_risk;ml_signal
+220,"def mutate_iter_and_join_21():
+    xs = ['a','b']
+    for i in xs:
+        xs.remove(i) if i=='a' else None
+    return ''.join(list('ok'))",best_practice;ml_signal
+221,"def os_system_and_unused_22():
+    import os
+    tmp = 123
+    return os.system('echo hi')",sast_risk;best_practice
+222,"def sha1_and_double_assign_23():
+    import hashlib
+    pw = 'x'
+    hashlib.sha1(pw.encode()).hexdigest()
+    result = 0
+    result = []",sast_risk;ml_signal

@@ -1,0 +1,118 @@
+id,text,labels
+160,"def redundant_slice_text_11():
+    return text[0:len(text)]",ml_signal
+37,"def sql_query_s():
+    import sqlite3
+    s = 'alice'
+    conn = sqlite3.connect(':memory:')
+    q = ""SELECT * FROM users WHERE name = '"" + s + ""'""
+    return conn.execute(q).fetchall()",sast_risk
+178,"def chain_identity_value_29():
+    a = (value or value)
+    return a",ml_signal
+3,"import subprocess
+def ping(u):
+    subprocess.run(f'ping {u}', shell=True)",sast_risk
+46,"def shadow_builtin_name():
+    sum = 3
+    return sum",best_practice
+106,"def weak_md5_b_47():
+    import hashlib
+    return hashlib.md5(b.encode()).hexdigest()",sast_risk
+166,"def useless_lambda_y_17():
+    f = lambda q: (lambda r: r)(q)
+    return f(1)",ml_signal
+139,"def mutate_during_iter_data_34():
+    data = [1,2,3,4]
+    for i in data:
+        if i % 2 == 0:
+            data.remove(i)
+    return data",best_practice
+53,"def pointless_arith_xs():
+    z = xs + 0
+    z = z - 0
+    return z",ml_signal
+214,"def pickle_and_redundant_slice_15():
+    import pickle
+    b = b''
+    pickle.loads(b)
+    s = 'x'
+    s = s[0:len(s)]",sast_risk;ml_signal
+173,"def list_sum_comp_a_24():
+    return sum([i for i in a])",ml_signal
+147,"def wildcard_import_nums_43():
+    from math import *
+    return sin(1)",best_practice
+111,"def wildcard_import_nums_3():
+    from math import *
+    return sin(1)",best_practice
+116,"def missing_docstring_s_8():
+    return 42",best_practice
+122,"def shadow_builtin_name_15():
+    sum = 3
+    return sum",best_practice
+99,"def do_eval_x_40():
+    return eval(x)",sast_risk
+181,"def pointless_arith_xs_32():
+    z = xs + 0
+    z = z - 0
+    return z",ml_signal
+61,"def eval_and_mutable():
+    def add(a, bucket=[]):
+        bucket.append(a)
+        return a
+    return eval('1+1')",sast_risk;best_practice
+14,"def handle(xs):
+    try:
+        return xs[0]
+    except:
+        pass",best_practice
+45,"def mutate_during_iter_data():
+    data = [1,2,3,4]
+    for i in data:
+        if i % 2 == 0:
+            data.remove(i)
+    return data",best_practice
+17,"def process(items):
+    for x in items:
+        if x % 2 == 0:
+            items.remove(x)
+    return items",best_practice
+85,"def sql_query_s_26():
+    import sqlite3
+    s = 'alice'
+    conn = sqlite3.connect(':memory:')
+    q = ""SELECT * FROM users WHERE name = '"" + s + ""'""
+    return conn.execute(q).fetchall()",sast_risk
+135,"def ambiguous_compare_xs_29():
+    return (xs == 1) == True",best_practice
+30,"def clobber(x):
+    for i in range(len([1,2,3])):
+        pass
+    return x",ml_signal
+215,"def wildcard_and_bool_compare_16():
+    from math import *
+    x = 1
+    return (x == x) == True",best_practice;ml_signal
+22,"def weird(nums):
+    return sum([x for x in nums])",ml_signal
+123,"def long_line_bucket_16():
+    a = 'x'*120
+    return len(a)",best_practice
+185,"def bool_compare_x_36():
+    return (x == x) == True",ml_signal
+31,"def do_eval_x():
+    return eval(x)",sast_risk
+103,"def yaml_load_name_44():
+    import yaml
+    return yaml.load(name)",sast_risk
+175,"def bool_compare_x_26():
+    return (x == x) == True",ml_signal
+5,"import yaml
+def load_cfg(s):
+    return yaml.load(s)",sast_risk
+43,"def is_true_items():
+    items = True
+    if items is True:
+        return 1
+    return 0",best_practice

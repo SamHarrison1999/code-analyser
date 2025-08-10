@@ -29,6 +29,8 @@ from pathlib import Path
 # Annotation: requests allows optional LLM API calls for /explain when no local rationale model is configured.
 import requests
 
+import json
+
 # Annotation: Helpful metadata for /docs and debugging.
 # We construct the FastAPI application instance.
 app = FastAPI(title="Code Analyser Model Service", version="1.1.0")
@@ -122,6 +124,13 @@ id2label: Dict[int, str] = {int(i): l for i, l in model.config.id2label.items()}
 # Annotation: Cache label order once for predictable indexing in the UI.
 # We also capture the label order once, so clients can rely on a stable ordering.
 label_order: List[str] = [id2label[i] for i in range(len(id2label))]
+_thresh_path = MODEL_DIR / "thresholds/json"
+PER_LABEL_THRESH = {}
+if _thresh_path.exists():
+    try:
+        PER_LABEL_THRESH = json.loads(_thresh_path.read_text())
+    except Exception:
+        PER_LABEL_THRESH = {}
 # Annotation: Prepare optional rationale generator components.
 rationale_tokenizer = None
 rationale_model = None
@@ -174,13 +183,16 @@ def classify_batch(texts: List[str], threshold: float) -> List[PredictItem]:
     for p in probs_np:
         # Annotation: Provide a full score map for confidence bars and later calibration.
         # Map label names to their scores for transparency in the UI.
-        score_map: Dict[str, float] = {label_order[i]: float(p[i]) for i in range(len(p))}
+        score_map = {label_order[i]: float(p[i]) for i in range(len(p))}
         # Annotation: Activate labels with probability meeting or exceeding the threshold.
         # Activate labels whose probability meets or exceeds the threshold.
-        active = [label_order[i] for i in range(len(p)) if p[i] >= threshold]
+        active = [label_order[i] for i in range(len(p)) if p[i] >= float(PER_LABEL_THRESH.get(label_order[i], threshold))]
+        if not active:
+            top = max(range(len(p)), key=lambda i: p[i])
+            active = [label_order[top]]
         # Annotation: Append the result for this sample.
         # Append the structured result for this text.
-        items.append(PredictItem(labels=active, scores=score_map, rationale=None))
+        items.append(PredictItem(labels=active, scores=score_map))
     # Annotation: Return the full batch of structured predictions.
     # Return the full batch of structured predictions.
     return items
