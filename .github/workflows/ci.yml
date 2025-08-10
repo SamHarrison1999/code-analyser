@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: 🔍 Run Lint, and Security
+    name: 🔍 Run Linters
     runs-on: ubuntu-latest
     env:
       PYTHONPATH: src
