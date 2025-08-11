@@ -1,3 +1,4 @@
+# --- file: code_analyser/src/ml/openai_annotator.py ---
 # ===== openai_annotator.py =====
 # Core libraries for parsing, I/O, logging, environment access, text processing, and timing.
 import ast
@@ -7,32 +8,36 @@ import logging
 import os
 import re
 import time
-
 # Containers for efficient grouping and similarity; pathlib for robust path handling.
 from collections import defaultdict
 from difflib import SequenceMatcher
 from pathlib import Path
-
 # Explicit typing aids readability and static checking.
 from typing import List, Dict, Tuple, Any
 
 # Load .env early so import-time defaults (e.g. model name) are available.
 from dotenv import load_dotenv
-
 # OpenAI client and errors; a stub is provided by tests to keep imports safe.
 from openai import OpenAI, OpenAIError, RateLimitError
-
 # TensorBoard writer for confidence traces; stubbed in tests.
 from torch.utils.tensorboard import SummaryWriter
-
 # Tokeniser to estimate token spans; stubbed in tests.
-from transformers import GPT2TokenizerFast
+# Use GPT2TokenizerFast when available; provide a tiny stub in test envs.
+try:
+    from transformers import GPT2TokenizerFast
+except Exception:
+    class GPT2TokenizerFast:
+        @classmethod
+        def from_pretrained(cls, *a, **k): return cls()
+        def __call__(self, text, **kw): return {'input_ids':[1,2,3]}
+        def encode(self, text, **kw): return [1,2,3]
+        def decode(self, ids, **kw): return ' '.join(str(i) for i in (ids or []))
 
 # Bring environment variables into process for defaults and credentials.
 load_dotenv()
 # Configure a simple, global logger for the module.
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # Instantiate an OpenAI client (safe under the test stubs).
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
