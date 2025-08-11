@@ -10,6 +10,7 @@ import os
 import runpy
 import sys
 import types
+
 # unittest is used as the runner under pytest; MagicMock/patch support heavy mocking.
 from unittest import TestCase, main
 from unittest.mock import MagicMock, patch
@@ -296,207 +297,374 @@ def install_transformers_stub():
     tr.__path__ = []
     tr.__file__ = os.path.join(TMPDIR, "transformers_stub.py")
     tr.__version__ = "0.0"
+
     # Annotation: Minimal Config object mirroring HF fields used by code (adds hidden_size for AutoModel).
     class _Config:
-        def __init__(self, id2label=None, label2id=None, num_labels=None, hidden_size=None, **kwargs):
+        def __init__(
+            self, id2label=None, label2id=None, num_labels=None, hidden_size=None, **kwargs
+        ):
             self.id2label = id2label or {str(i): f"L{i}" for i in range(int(num_labels or 2))}
             self.label2id = label2id or {v: int(k) for k, v in self.id2label.items()}
             self.num_labels = int(num_labels or len(self.id2label))
             self.hidden_size = int(hidden_size or 16)
-            for k, v in kwargs.items(): setattr(self, k, v)
+            for k, v in kwargs.items():
+                setattr(self, k, v)
+
         def to_dict(self):
-            return {"id2label": self.id2label, "label2id": self.label2id, "num_labels": self.num_labels, "hidden_size": self.hidden_size}
+            return {
+                "id2label": self.id2label,
+                "label2id": self.label2id,
+                "num_labels": self.num_labels,
+                "hidden_size": self.hidden_size,
+            }
+
     # Annotation: AutoConfig class with from_pretrained that returns a sensible default config.
     class AutoConfig:
         @classmethod
         def from_pretrained(cls, *args, **kwargs):
-            return _Config(id2label=kwargs.get("id2label"), label2id=kwargs.get("label2id"), num_labels=kwargs.get("num_labels"), hidden_size=kwargs.get("hidden_size"))
+            return _Config(
+                id2label=kwargs.get("id2label"),
+                label2id=kwargs.get("label2id"),
+                num_labels=kwargs.get("num_labels"),
+                hidden_size=kwargs.get("hidden_size"),
+            )
+
     tr.AutoConfig = AutoConfig
+
     # Annotation: Base tokenizer returning input_ids and attention_mask with batch support.
     class _Tokenizer:
         def __init__(self, **kwargs):
             self.pad_token_id = 0
             self.eos_token_id = 1
             self.model_max_length = int(kwargs.get("model_max_length", 2048))
+
         @classmethod
-        def from_pretrained(cls, *args, **kwargs): return cls(**kwargs)
-        def __call__(self, texts, padding=True, truncation=True, return_tensors=None, max_length=None):
-            if isinstance(texts, str): texts = [texts]
+        def from_pretrained(cls, *args, **kwargs):
+            return cls(**kwargs)
+
+        def __call__(
+            self, texts, padding=True, truncation=True, return_tensors=None, max_length=None
+        ):
+            if isinstance(texts, str):
+                texts = [texts]
             max_len = max_length or 3
-            input_ids = [[1,2,3][:max_len] for _ in texts]
-            attention_mask = [[1]*len(x) for x in input_ids]
+            input_ids = [[1, 2, 3][:max_len] for _ in texts]
+            attention_mask = [[1] * len(x) for x in input_ids]
             out = {"input_ids": input_ids, "attention_mask": attention_mask}
             if return_tensors == "pt":
                 torch = sys.modules.get("torch")
-                if torch: out = {k: torch.tensor(v) for k, v in out.items()}
+                if torch:
+                    out = {k: torch.tensor(v) for k, v in out.items()}
             return out
-        def encode_plus(self, text, return_tensors=None, **_): return self.__call__(text, return_tensors=return_tensors)
-        def tokenize(self, text): return str(text).split()
-        def convert_tokens_to_ids(self, tokens): return [min(50256, sum(ord(c) for c in t) % 1000 + 2) for t in tokens]
-        def decode(self, ids, skip_special_tokens=True): return " ".join(f"T{int(i)}" for i in (ids or []))
-        def batch_decode(self, sequences, skip_special_tokens=True): return [self.decode(seq, skip_special_tokens=skip_special_tokens) for seq in sequences]
-        def num_special_tokens_to_add(self, **_): return 0
-        def pad(self, encoded_inputs, padding=True, max_length=None, return_tensors=None): return encoded_inputs
+
+        def encode_plus(self, text, return_tensors=None, **_):
+            return self.__call__(text, return_tensors=return_tensors)
+
+        def tokenize(self, text):
+            return str(text).split()
+
+        def convert_tokens_to_ids(self, tokens):
+            return [min(50256, sum(ord(c) for c in t) % 1000 + 2) for t in tokens]
+
+        def decode(self, ids, skip_special_tokens=True):
+            return " ".join(f"T{int(i)}" for i in (ids or []))
+
+        def batch_decode(self, sequences, skip_special_tokens=True):
+            return [self.decode(seq, skip_special_tokens=skip_special_tokens) for seq in sequences]
+
+        def num_special_tokens_to_add(self, **_):
+            return 0
+
+        def pad(self, encoded_inputs, padding=True, max_length=None, return_tensors=None):
+            return encoded_inputs
+
     tr.AutoTokenizer = _Tokenizer
     tr.PreTrainedTokenizer = _Tokenizer
+
     # Annotation: Fast tokenizer variant used in code; mimic GPT2TokenizerFast API surface.
     class _TokenizerFast(_Tokenizer):
         @classmethod
-        def from_pretrained(cls, *args, **kwargs): return cls(**kwargs)
+        def from_pretrained(cls, *args, **kwargs):
+            return cls(**kwargs)
+
     tr.GPT2TokenizerFast = _TokenizerFast
     tr.PreTrainedTokenizerFast = _TokenizerFast
+
     # Annotation: Minimal sequence classification model that exposes .config and returns dummy logits.
     class _SeqClsModel:
-        def __init__(self, config=None, **kwargs): self.config = config or _Config()
+        def __init__(self, config=None, **kwargs):
+            self.config = config or _Config()
+
         @classmethod
         def from_pretrained(cls, *args, **kwargs):
             cfg = kwargs.get("config")
-            if cfg is None: cfg = _Config(num_labels=kwargs.get("num_labels", 2), hidden_size=kwargs.get("hidden_size", 16))
+            if cfg is None:
+                cfg = _Config(
+                    num_labels=kwargs.get("num_labels", 2),
+                    hidden_size=kwargs.get("hidden_size", 16),
+                )
             return cls(config=cfg)
-        def to(self, *a, **k): return self
-        def eval(self): return self
-        def train(self, mode=True): return self
-        def parameters(self): return []
+
+        def to(self, *a, **k):
+            return self
+
+        def eval(self):
+            return self
+
+        def train(self, mode=True):
+            return self
+
+        def parameters(self):
+            return []
+
         def __call__(self, inputs=None, **kwargs):
             torch = sys.modules.get("torch")
-            if torch is None: raise RuntimeError("Torch stub not installed")
+            if torch is None:
+                raise RuntimeError("Torch stub not installed")
             bs = 1
             if isinstance(inputs, dict):
                 ids = inputs.get("input_ids")
-                try: bs = len(ids)
-                except Exception: bs = 1
+                try:
+                    bs = len(ids)
+                except Exception:
+                    bs = 1
             logits = [[0.0 for _ in range(self.config.num_labels)] for __ in range(bs)]
             return torch.tensor(logits)
-        def state_dict(self): return {}
-        def save_pretrained(self, *a, **k): return None
+
+        def state_dict(self):
+            return {}
+
+        def save_pretrained(self, *a, **k):
+            return None
+
     class AutoModelForSequenceClassification:
         @classmethod
-        def from_pretrained(cls, *args, **kwargs): return _SeqClsModel.from_pretrained(*args, **kwargs)
+        def from_pretrained(cls, *args, **kwargs):
+            return _SeqClsModel.from_pretrained(*args, **kwargs)
+
     tr.AutoModelForSequenceClassification = AutoModelForSequenceClassification
     tr.PreTrainedModel = _SeqClsModel
+
     # Annotation: Minimal base model used by 'from transformers import AutoModel'.
     class _BaseOutput:
         def __init__(self, last_hidden_state, pooler_output=None):
             self.last_hidden_state = last_hidden_state
             self.pooler_output = pooler_output
-        def __getitem__(self, idx): return self.last_hidden_state if idx == 0 else None
+
+        def __getitem__(self, idx):
+            return self.last_hidden_state if idx == 0 else None
+
     class _BaseModel:
-        def __init__(self, config=None, **kwargs): self.config = config or _Config()
+        def __init__(self, config=None, **kwargs):
+            self.config = config or _Config()
+
         @classmethod
         def from_pretrained(cls, *args, **kwargs):
             cfg = kwargs.get("config")
-            if cfg is None: cfg = _Config(hidden_size=kwargs.get("hidden_size", 16))
+            if cfg is None:
+                cfg = _Config(hidden_size=kwargs.get("hidden_size", 16))
             return cls(config=cfg)
-        def to(self, *a, **k): return self
-        def eval(self): return self
-        def train(self, mode=True): return self
-        def parameters(self): return []
+
+        def to(self, *a, **k):
+            return self
+
+        def eval(self):
+            return self
+
+        def train(self, mode=True):
+            return self
+
+        def parameters(self):
+            return []
+
         def __call__(self, inputs=None, **kwargs):
             torch = sys.modules.get("torch")
-            if torch is None: raise RuntimeError("Torch stub not installed")
+            if torch is None:
+                raise RuntimeError("Torch stub not installed")
             bs = 1
             if isinstance(inputs, dict):
                 ids = inputs.get("input_ids")
-                try: bs = len(ids)
-                except Exception: bs = 1
+                try:
+                    bs = len(ids)
+                except Exception:
+                    bs = 1
             seq_len = 3
             hs = int(self.config.hidden_size)
             last = [[[0.0 for _ in range(hs)] for __ in range(seq_len)] for ___ in range(bs)]
             pool = [[0.0 for _ in range(hs)] for __ in range(bs)]
-            return _BaseOutput(last_hidden_state=torch.tensor(last), pooler_output=torch.tensor(pool))
-        def state_dict(self): return {}
-        def save_pretrained(self, *a, **k): return None
+            return _BaseOutput(
+                last_hidden_state=torch.tensor(last), pooler_output=torch.tensor(pool)
+            )
+
+        def state_dict(self):
+            return {}
+
+        def save_pretrained(self, *a, **k):
+            return None
+
     class AutoModel:
         @classmethod
-        def from_pretrained(cls, *args, **kwargs): return _BaseModel.from_pretrained(*args, **kwargs)
+        def from_pretrained(cls, *args, **kwargs):
+            return _BaseModel.from_pretrained(*args, **kwargs)
+
     tr.AutoModel = AutoModel
+
     # Annotation: Minimal seq2seq LM model used by 'from transformers import AutoModelForSeq2SeqLM'.
     class _Seq2SeqLMModel:
-        def __init__(self, config=None, **kwargs): self.config = config or _Config()
+        def __init__(self, config=None, **kwargs):
+            self.config = config or _Config()
+
         @classmethod
         def from_pretrained(cls, *args, **kwargs):
             cfg = kwargs.get("config")
-            if cfg is None: cfg = _Config(hidden_size=kwargs.get("hidden_size", 16))
+            if cfg is None:
+                cfg = _Config(hidden_size=kwargs.get("hidden_size", 16))
             return cls(config=cfg)
-        def to(self, *a, **k): return self
-        def eval(self): return self
-        def train(self, mode=True): return self
-        def parameters(self): return []
+
+        def to(self, *a, **k):
+            return self
+
+        def eval(self):
+            return self
+
+        def train(self, mode=True):
+            return self
+
+        def parameters(self):
+            return []
+
         def __call__(self, *a, **k):
             torch = sys.modules.get("torch")
-            if torch is None: raise RuntimeError("Torch stub not installed")
+            if torch is None:
+                raise RuntimeError("Torch stub not installed")
             return torch.tensor([[0.0]])
+
         # Annotation: Provide .generate used in summarisation/translation paths; return a small token matrix.
-        def generate(self, input_ids=None, max_new_tokens=None, num_beams=None, do_sample=None, temperature=None, **kwargs):
+        def generate(
+            self,
+            input_ids=None,
+            max_new_tokens=None,
+            num_beams=None,
+            do_sample=None,
+            temperature=None,
+            **kwargs,
+        ):
             torch = sys.modules.get("torch")
-            if torch is None: raise RuntimeError("Torch stub not installed")
+            if torch is None:
+                raise RuntimeError("Torch stub not installed")
             bs = 1
             if input_ids is not None:
-                try: bs = len(input_ids)
-                except Exception: bs = 1
-            seq = [5,6,7]
+                try:
+                    bs = len(input_ids)
+                except Exception:
+                    bs = 1
+            seq = [5, 6, 7]
             return torch.tensor([seq for _ in range(bs)])
-        def state_dict(self): return {}
-        def save_pretrained(self, *a, **k): return None
+
+        def state_dict(self):
+            return {}
+
+        def save_pretrained(self, *a, **k):
+            return None
+
     class AutoModelForSeq2SeqLM:
         @classmethod
-        def from_pretrained(cls, *args, **kwargs): return _Seq2SeqLMModel.from_pretrained(*args, **kwargs)
+        def from_pretrained(cls, *args, **kwargs):
+            return _Seq2SeqLMModel.from_pretrained(*args, **kwargs)
+
     tr.AutoModelForSeq2SeqLM = AutoModelForSeq2SeqLM
     # Annotation: Simple EvalPrediction/PredictionOutput utilities frequently used with compute_metrics.
     tu = types.ModuleType("transformers.trainer_utils")
+
     class EvalPrediction:
         def __init__(self, predictions=None, label_ids=None, inputs=None):
             self.predictions = predictions
             self.label_ids = label_ids
             self.inputs = inputs
+
     class PredictionOutput:
         def __init__(self, predictions=None, label_ids=None, metrics=None):
             self.predictions = predictions
             self.label_ids = label_ids
             self.metrics = metrics or {}
+
         def __iter__(self):
             yield self.predictions
             yield self.label_ids
             yield self.metrics
+
     tu.EvalPrediction = EvalPrediction
     tu.PredictionOutput = PredictionOutput
     sys.modules["transformers.trainer_utils"] = tu
+
     # Annotation: Minimal TrainingArguments that just stores kwargs and exposes to_dict.
     class TrainingArguments:
         def __init__(self, output_dir, **kwargs):
             self.output_dir = output_dir
-            for k, v in kwargs.items(): setattr(self, k, v)
+            for k, v in kwargs.items():
+                setattr(self, k, v)
+
         def to_dict(self):
-            d = self.__dict__.copy(); d["output_dir"] = self.output_dir; return d
+            d = self.__dict__.copy()
+            d["output_dir"] = self.output_dir
+            return d
+
     tr.TrainingArguments = TrainingArguments
+
     # Annotation: Basic DataCollatorWithPadding that merges a list of dicts into batched lists.
     class DataCollatorWithPadding:
         def __init__(self, tokenizer=None, padding=True, **kwargs):
-            self.tokenizer = tokenizer; self.padding = padding
+            self.tokenizer = tokenizer
+            self.padding = padding
+
         def __call__(self, features):
-            if not features: return {}
+            if not features:
+                return {}
             keys = set().union(*(f.keys() for f in features))
             return {k: [f.get(k) for f in features] for k in keys}
+
     tr.DataCollatorWithPadding = DataCollatorWithPadding
+
     # Annotation: default_data_collator analogue used by some code paths.
     def default_data_collator(features):
-        if not features: return {}
+        if not features:
+            return {}
         keys = set().union(*(f.keys() for f in features))
         return {k: [f.get(k) for f in features] for k in keys}
+
     tr.default_data_collator = default_data_collator
+
     # Annotation: Provide a benign learning rate scheduler factory with a no-op step method.
     def get_linear_schedule_with_warmup(optimizer, num_warmup_steps, num_training_steps):
         class _Sched:
-            def step(self): pass
+            def step(self):
+                pass
+
         return _Sched()
+
     tr.get_linear_schedule_with_warmup = get_linear_schedule_with_warmup
+
     # Annotation: EarlyStoppingCallback stub to satisfy optional callback imports.
     class EarlyStoppingCallback:
-        def __init__(self, early_stopping_patience=1, **kwargs): self.early_stopping_patience = early_stopping_patience
+        def __init__(self, early_stopping_patience=1, **kwargs):
+            self.early_stopping_patience = early_stopping_patience
+
     tr.EarlyStoppingCallback = EarlyStoppingCallback
+
     # Annotation: Very small Trainer with train/evaluate/predict no-ops; calls compute_metrics if provided.
     class Trainer:
-        def __init__(self, model=None, args=None, train_dataset=None, eval_dataset=None, tokenizer=None, data_collator=None, compute_metrics=None, callbacks=None, **kwargs):
+        def __init__(
+            self,
+            model=None,
+            args=None,
+            train_dataset=None,
+            eval_dataset=None,
+            tokenizer=None,
+            data_collator=None,
+            compute_metrics=None,
+            callbacks=None,
+            **kwargs,
+        ):
             self.model = model or _SeqClsModel()
             self.args = args or TrainingArguments(output_dir=os.path.join(TMPDIR, "out"))
             self.train_dataset = train_dataset
@@ -505,65 +673,87 @@ def install_transformers_stub():
             self.data_collator = data_collator or DataCollatorWithPadding(self.tokenizer)
             self.compute_metrics = compute_metrics
             self.callbacks = callbacks or []
+
         def train(self):
-            if self.model: self.model.train(True)
+            if self.model:
+                self.model.train(True)
             os.makedirs(self.args.output_dir, exist_ok=True)
             return {"train_loss": 0.0}
+
         def evaluate(self, eval_dataset=None):
             ds = eval_dataset if eval_dataset is not None else self.eval_dataset
             metrics = {"eval_loss": 0.0}
             if self.compute_metrics and ds is not None:
                 labels = [ex.get("labels") for ex in ds]
-                preds = [[0.0 for _ in range(self.model.config.num_labels)] for __ in range(len(ds))]
+                preds = [
+                    [0.0 for _ in range(self.model.config.num_labels)] for __ in range(len(ds))
+                ]
                 ep = tu.EvalPrediction(predictions=preds, label_ids=labels)
                 try:
                     m = self.compute_metrics(ep)
-                    if isinstance(m, dict): metrics.update(m)
+                    if isinstance(m, dict):
+                        metrics.update(m)
                 except Exception:
                     pass
             return metrics
+
         def predict(self, test_dataset):
             labels = [ex.get("labels") for ex in test_dataset] if test_dataset is not None else None
-            preds = [[0.0 for _ in range(self.model.config.num_labels)] for __ in range(len(test_dataset or []))]
+            preds = [
+                [0.0 for _ in range(self.model.config.num_labels)]
+                for __ in range(len(test_dataset or []))
+            ]
             metrics = {}
             if self.compute_metrics and labels is not None:
                 try:
                     ep = tu.EvalPrediction(predictions=preds, label_ids=labels)
                     m = self.compute_metrics(ep)
-                    if isinstance(m, dict): metrics.update(m)
+                    if isinstance(m, dict):
+                        metrics.update(m)
                 except Exception:
                     pass
             return tu.PredictionOutput(predictions=preds, label_ids=labels, metrics=metrics)
+
         def save_model(self, output_dir=None):
             out = output_dir or self.args.output_dir
             os.makedirs(out, exist_ok=True)
-            try: self.model.save_pretrained(out)
-            except Exception: pass
-        def save_state(self): pass
+            try:
+                self.model.save_pretrained(out)
+            except Exception:
+                pass
+
+        def save_state(self):
+            pass
+
     tr.Trainer = Trainer
+
     # Annotation: Provide a very small text-classification pipeline that returns stable dummy scores.
     def pipeline(task, model=None, tokenizer=None, **kwargs):
         def _fn(texts):
-            if isinstance(texts, str): items = [texts]
-            else: items = list(texts)
-            label_map = getattr(getattr(model, "config", None), "id2label", None) or {"0":"LABEL_0"}
+            if isinstance(texts, str):
+                items = [texts]
+            else:
+                items = list(texts)
+            label_map = getattr(getattr(model, "config", None), "id2label", None) or {
+                "0": "LABEL_0"
+            }
             label = next(iter(label_map.values()))
             return [{"label": label, "score": 1.0, "input_text": t} for t in items]
+
         return _fn
+
     tr.pipeline = pipeline
+
     # Annotation: Also expose set_seed used sometimes to stabilise outputs.
-    def set_seed(seed): return None
+    def set_seed(seed):
+        return None
+
     tr.set_seed = set_seed
     # Annotation: Register the assembled package and light submodules for import resilience.
     sys.modules["transformers"] = tr
     sys.modules["transformers.models"] = types.ModuleType("transformers.models")
     sys.modules["transformers.pipelines"] = types.ModuleType("transformers.pipelines")
     sys.modules["transformers.integrations"] = types.ModuleType("transformers.integrations")
-
-
-
-
-
 
 
 # Install a concrete Matplotlib stub so 'import matplotlib.pyplot as plt' works.
@@ -756,47 +946,78 @@ def install_torch_stub():
     torch.__path__ = []
     torch.__file__ = os.path.join(TMPDIR, "torch_stub.py")
     torch.__version__ = "0.0"
+
     # Annotation: Tiny ndarray-like wrapper so '(... > 0.5).astype(int)' and list-like iteration both work.
     class _ND:
         def __init__(self, data):
             self.data = data
+
         def __iter__(self):
-            if isinstance(self.data, list): return iter(self.data)
+            if isinstance(self.data, list):
+                return iter(self.data)
             return iter([self.data])
+
         def __len__(self):
-            if isinstance(self.data, list): return len(self.data)
+            if isinstance(self.data, list):
+                return len(self.data)
             return 1
+
         def _map(self, fn):
             if isinstance(self.data, list):
-                out=[]
+                out = []
                 for r in self.data:
-                    if isinstance(r, list): out.append([fn(v) for v in r])
-                    else: out.append(fn(r))
+                    if isinstance(r, list):
+                        out.append([fn(v) for v in r])
+                    else:
+                        out.append(fn(r))
                 return _ND(out)
             return _ND(fn(self.data))
+
         def __gt__(self, other):
             return self._map(lambda v: float(v) > float(other))
+
         def astype(self, dtype):
-            if dtype in (int, "int", "int64"): caster = int
-            elif dtype in (float, "float"): caster = float
-            elif dtype in (bool, "bool"): caster = bool
-            else: caster = (lambda x: x)
+            if dtype in (int, "int", "int64"):
+                caster = int
+            elif dtype in (float, "float"):
+                caster = float
+            elif dtype in (bool, "bool"):
+                caster = bool
+            else:
+                caster = lambda x: x
+
             def _to_list(x):
-                if isinstance(x, list): return [_to_list(xx) for xx in x]
+                if isinstance(x, list):
+                    return [_to_list(xx) for xx in x]
                 return caster(x)
+
             return _to_list(self.data)
-        def __repr__(self): return f"_ND({self.data!r})"
+
+        def __repr__(self):
+            return f"_ND({self.data!r})"
+
     # Annotation: Simple Tensor that supports the common inference chain .detach().cpu().numpy().
     class Tensor:
         def __init__(self, data, dtype=None):
             self._data = data
             self.dtype = dtype
-        def to(self, *a, **k): return self
-        def detach(self): return self
-        def cpu(self): return self
+
+        def to(self, *a, **k):
+            return self
+
+        def detach(self):
+            return self
+
+        def cpu(self):
+            return self
+
         # Annotation: Return our _ND wrapper to ensure '>' and '.astype(...)' behave in tests.
-        def numpy(self): return _ND(self._data)
-        def backward(self, *a, **k): return None
+        def numpy(self):
+            return _ND(self._data)
+
+        def backward(self, *a, **k):
+            return None
+
         def item(self):
             try:
                 if isinstance(self._data, list):
@@ -804,78 +1025,130 @@ def install_torch_stub():
                 return float(self._data)
             except Exception:
                 return 0.0
+
         def __len__(self):
-            try: return len(self._data)
-            except Exception: return 1
+            try:
+                return len(self._data)
+            except Exception:
+                return 1
+
         def __iter__(self):
-            try: return iter(self._data)
-            except Exception: return iter([self._data])
+            try:
+                return iter(self._data)
+            except Exception:
+                return iter([self._data])
+
         def __getitem__(self, idx):
-            try: return self._data[idx]
-            except Exception: return None
+            try:
+                return self._data[idx]
+            except Exception:
+                return None
+
         @property
         def ndim(self):
-            if isinstance(self._data, list) and self._data and isinstance(self._data[0], (list, Tensor)): return 2
+            if (
+                isinstance(self._data, list)
+                and self._data
+                and isinstance(self._data[0], (list, Tensor))
+            ):
+                return 2
             return 1
+
         @property
         def shape(self):
             if self.ndim == 2:
                 first = self._data[0]
-                inner_len = len(first._data) if isinstance(first, Tensor) else (len(first) if isinstance(first, list) else 1)
+                inner_len = (
+                    len(first._data)
+                    if isinstance(first, Tensor)
+                    else (len(first) if isinstance(first, list) else 1)
+                )
                 return (len(self._data), inner_len)
             return (len(self),)
+
         # Annotation: Provide a minimal transpose used in model code; swap two leading dims where possible.
-        def transpose(self, dim0, dim1): return self
+        def transpose(self, dim0, dim1):
+            return self
+
     # Annotation: Constructors and light ops used by code (stack/cat/no_grad/manual_seed/device/cuda).
     def tensor(x, dtype=None):
-        if isinstance(x, Tensor): return x
+        if isinstance(x, Tensor):
+            return x
         return Tensor(x if isinstance(x, list) else [x], dtype=dtype)
+
     def stack(tensors, dim=0):
-        rows=[]
+        rows = []
         for t in tensors:
-            if isinstance(t, Tensor): rows.append(t._data)
-            else: rows.append(t)
+            if isinstance(t, Tensor):
+                rows.append(t._data)
+            else:
+                rows.append(t)
         return Tensor(rows)
+
     def cat(tensors, dim=0):
-        rows=[]
+        rows = []
         for t in tensors:
-            if isinstance(t, Tensor): rows.extend(t._data if isinstance(t._data, list) else [t._data])
-            else: rows.extend(t if isinstance(t, list) else [t])
+            if isinstance(t, Tensor):
+                rows.extend(t._data if isinstance(t._data, list) else [t._data])
+            else:
+                rows.extend(t if isinstance(t, list) else [t])
         return Tensor(rows)
+
     @contextlib.contextmanager
     def no_grad():
         yield
-    def manual_seed(*a, **k): return None
+
+    def manual_seed(*a, **k):
+        return None
+
     class device:
-        def __init__(self, name): self.name = str(name)
-        def __str__(self): return self.name
+        def __init__(self, name):
+            self.name = str(name)
+
+        def __str__(self):
+            return self.name
+
     class _CUDA:
         @staticmethod
-        def is_available(): return False
+        def is_available():
+            return False
+
         @staticmethod
-        def empty_cache(): return None
+        def empty_cache():
+            return None
+
     # Annotation: Provide torch.sigmoid for post-activation thresholding paths.
     def sigmoid(x):
         data = x._data if isinstance(x, Tensor) else x
+
         def _sig(v):
-            try: return 1.0/(1.0+math.exp(-float(v)))
-            except Exception: return 0.5
+            try:
+                return 1.0 / (1.0 + math.exp(-float(v)))
+            except Exception:
+                return 0.5
+
         if isinstance(data, list):
-            out=[]
+            out = []
             for r in data:
-                if isinstance(r, list): out.append([_sig(v) for v in r])
-                else: out.append(_sig(r))
+                if isinstance(r, list):
+                    out.append([_sig(v) for v in r])
+                else:
+                    out.append(_sig(r))
             return Tensor(out)
         return Tensor([_sig(data)])
+
     # Annotation: Provide torch.save so checkpoints don’t error under the stub.
     def save(obj, f):
         try:
             p = f if isinstance(f, str) else getattr(f, "name", None)
-            if not p: return
+            if not p:
+                return
             os.makedirs(os.path.dirname(p), exist_ok=True)
-            with open(p, "wb") as fh: fh.write(b"")
+            with open(p, "wb") as fh:
+                fh.write(b"")
         except Exception:
             pass
+
     torch.Tensor = Tensor
     torch.tensor = tensor
     torch.stack = stack
@@ -892,35 +1165,75 @@ def install_torch_stub():
     sys.modules["torch"] = torch
     # Annotation: Minimal torch.nn API surface so model classes can be constructed/called safely.
     nn = types.ModuleType("torch.nn")
+
     class Module:
-        def __init__(self,*a,**k): pass
-        def parameters(self): return []
-        def to(self, *a, **k): return self
-        def eval(self): return self
-        def train(self, mode=True): return self
-        def __call__(self, *a, **k): return sys.modules["torch"].Tensor([0.0])
-        def state_dict(self): return {}
+        def __init__(self, *a, **k):
+            pass
+
+        def parameters(self):
+            return []
+
+        def to(self, *a, **k):
+            return self
+
+        def eval(self):
+            return self
+
+        def train(self, mode=True):
+            return self
+
+        def __call__(self, *a, **k):
+            return sys.modules["torch"].Tensor([0.0])
+
+        def state_dict(self):
+            return {}
+
     class Linear(Module):
-        def __init__(self, in_f, out_f, bias=True): super().__init__(); self.out_features = out_f
+        def __init__(self, in_f, out_f, bias=True):
+            super().__init__()
+            self.out_features = out_f
+
         def __call__(self, x):
             bs = len(x) if hasattr(x, "__len__") else 1
-            return sys.modules["torch"].Tensor([[0.0]*self.out_features for _ in range(bs)])
+            return sys.modules["torch"].Tensor([[0.0] * self.out_features for _ in range(bs)])
+
     class Dropout(Module):
-        def __init__(self, p=0.5): super().__init__(); self.p = p
-        def __call__(self, x): return x
+        def __init__(self, p=0.5):
+            super().__init__()
+            self.p = p
+
+        def __call__(self, x):
+            return x
+
     class ReLU(Module):
-        def __call__(self, x): return x
+        def __call__(self, x):
+            return x
+
     class Softmax(Module):
-        def __init__(self, dim=None): self.dim = dim
-        def __call__(self, x): return x
+        def __init__(self, dim=None):
+            self.dim = dim
+
+        def __call__(self, x):
+            return x
+
     class CrossEntropyLoss(Module):
-        def __init__(self, *a, **k): pass
+        def __init__(self, *a, **k):
+            pass
+
         def __call__(self, input, target=None):
-            t = sys.modules["torch"].Tensor([0.0]); t.backward = lambda *aa, **kk: None; return t
+            t = sys.modules["torch"].Tensor([0.0])
+            t.backward = lambda *aa, **kk: None
+            return t
+
     class BCEWithLogitsLoss(Module):
-        def __init__(self, *a, **k): pass
+        def __init__(self, *a, **k):
+            pass
+
         def __call__(self, input, target=None):
-            t = sys.modules["torch"].Tensor([0.0]); t.backward = lambda *aa, **kk: None; return t
+            t = sys.modules["torch"].Tensor([0.0])
+            t.backward = lambda *aa, **kk: None
+            return t
+
     nn.Module = Module
     nn.Linear = Linear
     nn.Dropout = Dropout
@@ -931,22 +1244,41 @@ def install_torch_stub():
     sys.modules["torch.nn"] = nn
     # Annotation: Functional namespace exists in real Torch and is sometimes imported from 'torch'.
     fn = types.ModuleType("torch.nn.functional")
-    def softmax(input, dim=None): return input
-    def relu(input): return input
+
+    def softmax(input, dim=None):
+        return input
+
+    def relu(input):
+        return input
+
     def cross_entropy(input, target=None):
-        t = sys.modules["torch"].Tensor([0.0]); t.backward = lambda *aa, **kk: None; return t
+        t = sys.modules["torch"].Tensor([0.0])
+        t.backward = lambda *aa, **kk: None
+        return t
+
     fn.softmax = softmax
     fn.relu = relu
     fn.cross_entropy = cross_entropy
     sys.modules["torch.nn.functional"] = fn
     # Annotation: Optimisers used by training loops.
     optim = types.ModuleType("torch.optim")
+
     class Optimizer:
-        def __init__(self, params, lr=1e-3): pass
-        def step(self): pass
-        def zero_grad(self): pass
-    class Adam(Optimizer): pass
-    class AdamW(Optimizer): pass
+        def __init__(self, params, lr=1e-3):
+            pass
+
+        def step(self):
+            pass
+
+        def zero_grad(self):
+            pass
+
+    class Adam(Optimizer):
+        pass
+
+    class AdamW(Optimizer):
+        pass
+
     optim.Optimizer = Optimizer
     optim.Adam = Adam
     optim.AdamW = AdamW
@@ -958,58 +1290,88 @@ def install_torch_stub():
     utils.__path__ = []
     sys.modules["torch.utils"] = utils
     tb = types.ModuleType("torch.utils.tensorboard")
+
     class SummaryWriter:
-        def __init__(self,*a,**k): pass
-        def add_scalar(self,*a,**k): pass
-        def close(self): pass
+        def __init__(self, *a, **k):
+            pass
+
+        def add_scalar(self, *a, **k):
+            pass
+
+        def close(self):
+            pass
+
     tb.SummaryWriter = SummaryWriter
     sys.modules["torch.utils.tensorboard"] = tb
     # Annotation: Provide the private typing util so accidental imports don’t crawl into the real Torch.
     typing_utils = types.ModuleType("torch.utils._typing_utils")
+
     def not_none(x):
-        if x is None: raise ValueError("none")
+        if x is None:
+            raise ValueError("none")
         return x
+
     typing_utils.not_none = not_none
     sys.modules["torch.utils._typing_utils"] = typing_utils
     # Annotation: Minimal DataLoader, Dataset, and random_split with default-collate behaviour.
     data_mod = types.ModuleType("torch.utils.data")
+
     class Dataset(list):
         def __init__(self, data=None):
             super().__init__(list(data or []))
-        def __len__(self): return list.__len__(self)
-        def __getitem__(self, idx): return list.__getitem__(self, idx)
+
+        def __len__(self):
+            return list.__len__(self)
+
+        def __getitem__(self, idx):
+            return list.__getitem__(self, idx)
+
     def _default_collate(batch):
-        if not batch: return batch
+        if not batch:
+            return batch
         first = batch[0]
         if isinstance(first, dict):
             keys = set().union(*(d.keys() for d in batch))
             return {k: [d.get(k) for d in batch] for k in keys}
         return batch
+
     class DataLoader:
-        def __init__(self, dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=False, **kwargs):
+        def __init__(
+            self, dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=False, **kwargs
+        ):
             self.dataset = dataset
             self.batch_size = max(1, int(batch_size or 1))
             self.shuffle = bool(shuffle)
             self.drop_last = bool(drop_last)
+
         def __iter__(self):
             idxs = list(range(len(self.dataset)))
-            if self.shuffle: idxs = list(reversed(idxs))
-            batch=[]
+            if self.shuffle:
+                idxs = list(reversed(idxs))
+            batch = []
             for i in idxs:
                 batch.append(self.dataset[i])
-                if len(batch)==self.batch_size:
-                    yield _default_collate(batch); batch=[]
-            if batch and not self.drop_last: yield _default_collate(batch)
+                if len(batch) == self.batch_size:
+                    yield _default_collate(batch)
+                    batch = []
+            if batch and not self.drop_last:
+                yield _default_collate(batch)
+
         def __len__(self):
-            n = len(self.dataset); b = self.batch_size
-            return (n//b) if self.drop_last else ((n+b-1)//b)
+            n = len(self.dataset)
+            b = self.batch_size
+            return (n // b) if self.drop_last else ((n + b - 1) // b)
+
     def random_split(dataset, lengths, generator=None):
-        n = len(dataset); splits=[]; start=0
+        n = len(dataset)
+        splits = []
+        start = 0
         for L in lengths:
-            end = min(n, start+int(L))
-            splits.append(Dataset([dataset[i] for i in range(start,end)]))
+            end = min(n, start + int(L))
+            splits.append(Dataset([dataset[i] for i in range(start, end)]))
             start = end
         return splits
+
     data_mod.Dataset = Dataset
     data_mod.DataLoader = DataLoader
     data_mod.random_split = random_split
@@ -1032,47 +1394,78 @@ def install_torch_stub():
     torch.__path__ = []
     torch.__file__ = os.path.join(TMPDIR, "torch_stub.py")
     torch.__version__ = "0.0"
+
     # Annotation: Tiny ndarray-like wrapper so '(... > 0.5).astype(int)' and list-like iteration both work.
     class _ND:
         def __init__(self, data):
             self.data = data
+
         def __iter__(self):
-            if isinstance(self.data, list): return iter(self.data)
+            if isinstance(self.data, list):
+                return iter(self.data)
             return iter([self.data])
+
         def __len__(self):
-            if isinstance(self.data, list): return len(self.data)
+            if isinstance(self.data, list):
+                return len(self.data)
             return 1
+
         def _map(self, fn):
             if isinstance(self.data, list):
-                out=[]
+                out = []
                 for r in self.data:
-                    if isinstance(r, list): out.append([fn(v) for v in r])
-                    else: out.append(fn(r))
+                    if isinstance(r, list):
+                        out.append([fn(v) for v in r])
+                    else:
+                        out.append(fn(r))
                 return _ND(out)
             return _ND(fn(self.data))
+
         def __gt__(self, other):
             return self._map(lambda v: float(v) > float(other))
+
         def astype(self, dtype):
-            if dtype in (int, "int", "int64"): caster = int
-            elif dtype in (float, "float"): caster = float
-            elif dtype in (bool, "bool"): caster = bool
-            else: caster = (lambda x: x)
+            if dtype in (int, "int", "int64"):
+                caster = int
+            elif dtype in (float, "float"):
+                caster = float
+            elif dtype in (bool, "bool"):
+                caster = bool
+            else:
+                caster = lambda x: x
+
             def _to_list(x):
-                if isinstance(x, list): return [_to_list(xx) for xx in x]
+                if isinstance(x, list):
+                    return [_to_list(xx) for xx in x]
                 return caster(x)
+
             return _to_list(self.data)
-        def __repr__(self): return f"_ND({self.data!r})"
+
+        def __repr__(self):
+            return f"_ND({self.data!r})"
+
     # Annotation: Simple Tensor that supports the common inference chain .detach().cpu().numpy().
     class Tensor:
         def __init__(self, data, dtype=None):
             self._data = data
             self.dtype = dtype
-        def to(self, *a, **k): return self
-        def detach(self): return self
-        def cpu(self): return self
+
+        def to(self, *a, **k):
+            return self
+
+        def detach(self):
+            return self
+
+        def cpu(self):
+            return self
+
         # Annotation: Return our _ND wrapper to ensure '>' and '.astype(...)' behave in tests.
-        def numpy(self): return _ND(self._data)
-        def backward(self, *a, **k): return None
+        def numpy(self):
+            return _ND(self._data)
+
+        def backward(self, *a, **k):
+            return None
+
         def item(self):
             try:
                 if isinstance(self._data, list):
@@ -1080,78 +1473,130 @@ def install_torch_stub():
                 return float(self._data)
             except Exception:
                 return 0.0
+
         def __len__(self):
-            try: return len(self._data)
-            except Exception: return 1
+            try:
+                return len(self._data)
+            except Exception:
+                return 1
+
         def __iter__(self):
-            try: return iter(self._data)
-            except Exception: return iter([self._data])
+            try:
+                return iter(self._data)
+            except Exception:
+                return iter([self._data])
+
         def __getitem__(self, idx):
-            try: return self._data[idx]
-            except Exception: return None
+            try:
+                return self._data[idx]
+            except Exception:
+                return None
+
         @property
         def ndim(self):
-            if isinstance(self._data, list) and self._data and isinstance(self._data[0], (list, Tensor)): return 2
+            if (
+                isinstance(self._data, list)
+                and self._data
+                and isinstance(self._data[0], (list, Tensor))
+            ):
+                return 2
             return 1
+
         @property
         def shape(self):
             if self.ndim == 2:
                 first = self._data[0]
-                inner_len = len(first._data) if isinstance(first, Tensor) else (len(first) if isinstance(first, list) else 1)
+                inner_len = (
+                    len(first._data)
+                    if isinstance(first, Tensor)
+                    else (len(first) if isinstance(first, list) else 1)
+                )
                 return (len(self._data), inner_len)
             return (len(self),)
+
         # Annotation: Provide a minimal transpose used in model code; swap two leading dims where possible.
-        def transpose(self, dim0, dim1): return self
+        def transpose(self, dim0, dim1):
+            return self
+
     # Annotation: Constructors and light ops used by code (stack/cat/no_grad/manual_seed/device/cuda).
     def tensor(x, dtype=None):
-        if isinstance(x, Tensor): return x
+        if isinstance(x, Tensor):
+            return x
         return Tensor(x if isinstance(x, list) else [x], dtype=dtype)
+
     def stack(tensors, dim=0):
-        rows=[]
+        rows = []
         for t in tensors:
-            if isinstance(t, Tensor): rows.append(t._data)
-            else: rows.append(t)
+            if isinstance(t, Tensor):
+                rows.append(t._data)
+            else:
+                rows.append(t)
         return Tensor(rows)
+
     def cat(tensors, dim=0):
-        rows=[]
+        rows = []
         for t in tensors:
-            if isinstance(t, Tensor): rows.extend(t._data if isinstance(t._data, list) else [t._data])
-            else: rows.extend(t if isinstance(t, list) else [t])
+            if isinstance(t, Tensor):
+                rows.extend(t._data if isinstance(t._data, list) else [t._data])
+            else:
+                rows.extend(t if isinstance(t, list) else [t])
         return Tensor(rows)
+
     @contextlib.contextmanager
     def no_grad():
         yield
-    def manual_seed(*a, **k): return None
+
+    def manual_seed(*a, **k):
+        return None
+
     class device:
-        def __init__(self, name): self.name = str(name)
-        def __str__(self): return self.name
+        def __init__(self, name):
+            self.name = str(name)
+
+        def __str__(self):
+            return self.name
+
     class _CUDA:
         @staticmethod
-        def is_available(): return False
+        def is_available():
+            return False
+
         @staticmethod
-        def empty_cache(): return None
+        def empty_cache():
+            return None
+
     # Annotation: Provide torch.sigmoid for post-activation thresholding paths.
     def sigmoid(x):
         data = x._data if isinstance(x, Tensor) else x
+
         def _sig(v):
-            try: return 1.0/(1.0+math.exp(-float(v)))
-            except Exception: return 0.5
+            try:
+                return 1.0 / (1.0 + math.exp(-float(v)))
+            except Exception:
+                return 0.5
+
         if isinstance(data, list):
-            out=[]
+            out = []
             for r in data:
-                if isinstance(r, list): out.append([_sig(v) for v in r])
-                else: out.append(_sig(r))
+                if isinstance(r, list):
+                    out.append([_sig(v) for v in r])
+                else:
+                    out.append(_sig(r))
             return Tensor(out)
         return Tensor([_sig(data)])
+
     # Annotation: Provide torch.save so checkpoints don’t error under the stub.
     def save(obj, f):
         try:
             p = f if isinstance(f, str) else getattr(f, "name", None)
-            if not p: return
+            if not p:
+                return
             os.makedirs(os.path.dirname(p), exist_ok=True)
-            with open(p, "wb") as fh: fh.write(b"")
+            with open(p, "wb") as fh:
+                fh.write(b"")
         except Exception:
             pass
+
     torch.Tensor = Tensor
     torch.tensor = tensor
     torch.stack = stack
@@ -1168,35 +1613,75 @@ def install_torch_stub():
     sys.modules["torch"] = torch
     # Annotation: Minimal torch.nn API surface so model classes can be constructed/called safely.
     nn = types.ModuleType("torch.nn")
+
     class Module:
-        def __init__(self,*a,**k): pass
-        def parameters(self): return []
-        def to(self, *a, **k): return self
-        def eval(self): return self
-        def train(self, mode=True): return self
-        def __call__(self, *a, **k): return sys.modules["torch"].Tensor([0.0])
-        def state_dict(self): return {}
+        def __init__(self, *a, **k):
+            pass
+
+        def parameters(self):
+            return []
+
+        def to(self, *a, **k):
+            return self
+
+        def eval(self):
+            return self
+
+        def train(self, mode=True):
+            return self
+
+        def __call__(self, *a, **k):
+            return sys.modules["torch"].Tensor([0.0])
+
+        def state_dict(self):
+            return {}
+
     class Linear(Module):
-        def __init__(self, in_f, out_f, bias=True): super().__init__(); self.out_features = out_f
+        def __init__(self, in_f, out_f, bias=True):
+            super().__init__()
+            self.out_features = out_f
+
         def __call__(self, x):
             bs = len(x) if hasattr(x, "__len__") else 1
-            return sys.modules["torch"].Tensor([[0.0]*self.out_features for _ in range(bs)])
+            return sys.modules["torch"].Tensor([[0.0] * self.out_features for _ in range(bs)])
+
     class Dropout(Module):
-        def __init__(self, p=0.5): super().__init__(); self.p = p
-        def __call__(self, x): return x
+        def __init__(self, p=0.5):
+            super().__init__()
+            self.p = p
+
+        def __call__(self, x):
+            return x
+
     class ReLU(Module):
-        def __call__(self, x): return x
+        def __call__(self, x):
+            return x
+
     class Softmax(Module):
-        def __init__(self, dim=None): self.dim = dim
-        def __call__(self, x): return x
+        def __init__(self, dim=None):
+            self.dim = dim
+
+        def __call__(self, x):
+            return x
+
     class CrossEntropyLoss(Module):
-        def __init__(self, *a, **k): pass
+        def __init__(self, *a, **k):
+            pass
+
         def __call__(self, input, target=None):
-            t = sys.modules["torch"].Tensor([0.0]); t.backward = lambda *aa, **kk: None; return t
+            t = sys.modules["torch"].Tensor([0.0])
+            t.backward = lambda *aa, **kk: None
+            return t
+
     class BCEWithLogitsLoss(Module):
-        def __init__(self, *a, **k): pass
+        def __init__(self, *a, **k):
+            pass
+
         def __call__(self, input, target=None):
-            t = sys.modules["torch"].Tensor([0.0]); t.backward = lambda *aa, **kk: None; return t
+            t = sys.modules["torch"].Tensor([0.0])
+            t.backward = lambda *aa, **kk: None
+            return t
+
     nn.Module = Module
     nn.Linear = Linear
     nn.Dropout = Dropout
@@ -1207,22 +1692,41 @@ def install_torch_stub():
     sys.modules["torch.nn"] = nn
     # Annotation: Functional namespace exists in real Torch and is sometimes imported from 'torch'.
     fn = types.ModuleType("torch.nn.functional")
-    def softmax(input, dim=None): return input
-    def relu(input): return input
+
+    def softmax(input, dim=None):
+        return input
+
+    def relu(input):
+        return input
+
     def cross_entropy(input, target=None):
-        t = sys.modules["torch"].Tensor([0.0]); t.backward = lambda *aa, **kk: None; return t
+        t = sys.modules["torch"].Tensor([0.0])
+        t.backward = lambda *aa, **kk: None
+        return t
+
     fn.softmax = softmax
     fn.relu = relu
     fn.cross_entropy = cross_entropy
     sys.modules["torch.nn.functional"] = fn
     # Annotation: Optimisers used by training loops.
     optim = types.ModuleType("torch.optim")
+
     class Optimizer:
-        def __init__(self, params, lr=1e-3): pass
-        def step(self): pass
-        def zero_grad(self): pass
-    class Adam(Optimizer): pass
-    class AdamW(Optimizer): pass
+        def __init__(self, params, lr=1e-3):
+            pass
+
+        def step(self):
+            pass
+
+        def zero_grad(self):
+            pass
+
+    class Adam(Optimizer):
+        pass
+
+    class AdamW(Optimizer):
+        pass
+
     optim.Optimizer = Optimizer
     optim.Adam = Adam
     optim.AdamW = AdamW
@@ -1234,58 +1738,88 @@ def install_torch_stub():
     utils.__path__ = []
     sys.modules["torch.utils"] = utils
     tb = types.ModuleType("torch.utils.tensorboard")
+
     class SummaryWriter:
-        def __init__(self,*a,**k): pass
-        def add_scalar(self,*a,**k): pass
-        def close(self): pass
+        def __init__(self, *a, **k):
+            pass
+
+        def add_scalar(self, *a, **k):
+            pass
+
+        def close(self):
+            pass
+
     tb.SummaryWriter = SummaryWriter
     sys.modules["torch.utils.tensorboard"] = tb
     # Annotation: Provide the private typing util so accidental imports don’t crawl into the real Torch.
     typing_utils = types.ModuleType("torch.utils._typing_utils")
+
     def not_none(x):
-        if x is None: raise ValueError("none")
+        if x is None:
+            raise ValueError("none")
         return x
+
     typing_utils.not_none = not_none
     sys.modules["torch.utils._typing_utils"] = typing_utils
     # Annotation: Minimal DataLoader, Dataset, and random_split with default-collate behaviour.
     data_mod = types.ModuleType("torch.utils.data")
+
     class Dataset(list):
         def __init__(self, data=None):
             super().__init__(list(data or []))
-        def __len__(self): return list.__len__(self)
-        def __getitem__(self, idx): return list.__getitem__(self, idx)
+
+        def __len__(self):
+            return list.__len__(self)
+
+        def __getitem__(self, idx):
+            return list.__getitem__(self, idx)
+
     def _default_collate(batch):
-        if not batch: return batch
+        if not batch:
+            return batch
         first = batch[0]
         if isinstance(first, dict):
             keys = set().union(*(d.keys() for d in batch))
             return {k: [d.get(k) for d in batch] for k in keys}
         return batch
+
     class DataLoader:
-        def __init__(self, dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=False, **kwargs):
+        def __init__(
+            self, dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=False, **kwargs
+        ):
             self.dataset = dataset
             self.batch_size = max(1, int(batch_size or 1))
             self.shuffle = bool(shuffle)
             self.drop_last = bool(drop_last)
+
         def __iter__(self):
             idxs = list(range(len(self.dataset)))
-            if self.shuffle: idxs = list(reversed(idxs))
-            batch=[]
+            if self.shuffle:
+                idxs = list(reversed(idxs))
+            batch = []
             for i in idxs:
                 batch.append(self.dataset[i])
-                if len(batch)==self.batch_size:
-                    yield _default_collate(batch); batch=[]
-            if batch and not self.drop_last: yield _default_collate(batch)
+                if len(batch) == self.batch_size:
+                    yield _default_collate(batch)
+                    batch = []
+            if batch and not self.drop_last:
+                yield _default_collate(batch)
+
         def __len__(self):
-            n = len(self.dataset); b = self.batch_size
-            return (n//b) if self.drop_last else ((n+b-1)//b)
+            n = len(self.dataset)
+            b = self.batch_size
+            return (n // b) if self.drop_last else ((n + b - 1) // b)
+
     def random_split(dataset, lengths, generator=None):
-        n = len(dataset); splits=[]; start=0
+        n = len(dataset)
+        splits = []
+        start = 0
         for L in lengths:
-            end = min(n, start+int(L))
-            splits.append(Dataset([dataset[i] for i in range(start,end)]))
+            end = min(n, start + int(L))
+            splits.append(Dataset([dataset[i] for i in range(start, end)]))
             start = end
         return splits
+
     data_mod.Dataset = Dataset
     data_mod.DataLoader = DataLoader
     data_mod.random_split = random_split
