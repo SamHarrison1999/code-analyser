@@ -1,5 +1,5 @@
 {
-  "sast_risk": 0.05,
-  "ml_signal": 0.05,
-  "best_practice": 0.05
+  "sast_risk": 0.35,
+  "ml_signal": 0.65,
+  "best_practice": 0.61
 }

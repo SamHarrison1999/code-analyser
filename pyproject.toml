@@ -36,7 +36,7 @@ gui = [
 
 [tool.ruff.lint]
 # Disable specific error codes globally
-ignore = ["E402", "F401", "F821", "F841", "E741", "E731"]
+ignore = ["E402", "F401", "F821", "F841", "E741", "E731", "E401"]
 
 # Use Black to keep code style consistent across the repo.
 [tool.black]
