@@ -2,6 +2,7 @@
 # Annotation: This script calls your running microservice to collect probabilities on a validation set, fits a simple per-label temperature (on logits) and chooses F1-optimal thresholds; it saves both to JSON.
 import argparse, json, csv, math, numpy as np, requests
 
+
 # Annotation: Numerically safe logit transform with small epsilon to avoid infinities.
 def prob_to_logit(p: float, eps: float = 1e-6) -> float:
     # Annotation: Clamp p to (eps, 1-eps).
@@ -9,13 +10,15 @@ def prob_to_logit(p: float, eps: float = 1e-6) -> float:
     # Annotation: Return log(p/(1-p)).
     return math.log(p / (1.0 - p))
 
+
 # Annotation: Sigmoid function to map a logit back to probability.
 def sigmoid(z: float) -> float:
     # Annotation: Standard logistic function.
     return 1.0 / (1.0 + math.exp(-z))
 
+
 # Annotation: Compute precision, recall and F1 at a given threshold.
-def prf1(y: list[int], s: list[float], th: float) -> tuple[float,float,float]:
+def prf1(y: list[int], s: list[float], th: float) -> tuple[float, float, float]:
     # Annotation: True positives are positives with score ≥ threshold.
     tp = sum(int(yi and si >= th) for yi, si in zip(y, s))
     # Annotation: False positives are negatives with score ≥ threshold.
@@ -31,21 +34,27 @@ def prf1(y: list[int], s: list[float], th: float) -> tuple[float,float,float]:
     # Annotation: Return the triple.
     return P, R, F1
 
+
 # Annotation: Fit per-label temperature by grid search on validation logits to minimise BCE (good enough and stable).
 def fit_temperature(y: list[int], p: list[float]) -> float:
     # Annotation: Convert probabilities to logits once.
     z = [prob_to_logit(pi) for pi in p]
     # Annotation: Search over a small grid of temperatures.
     grid = np.linspace(0.5, 3.0, 26)
+
     # Annotation: Define binary cross-entropy as a function of temperature T.
     def bce(T: float) -> float:
         s = [sigmoid(zi / T) for zi in z]
         eps = 1e-6
-        return -sum(yi * math.log(si + eps) + (1 - yi) * math.log(1 - si + eps) for yi, si in zip(y, s)) / len(y)
+        return -sum(
+            yi * math.log(si + eps) + (1 - yi) * math.log(1 - si + eps) for yi, si in zip(y, s)
+        ) / len(y)
+
     # Annotation: Pick the temperature with the lowest BCE.
     best_T = min(grid, key=bce)
     # Annotation: Return the scalar temperature.
     return float(best_T)
+
 
 # Annotation: Main routine that fetches scores from the service, calibrates T per label, then finds best thresholds and writes JSON.
 def main():
@@ -61,7 +70,7 @@ def main():
     args = ap.parse_args()
 
     # Annotation: Fixed canonical label order.
-    labels = ["sast_risk","ml_signal","best_practice"]
+    labels = ["sast_risk", "ml_signal", "best_practice"]
     # Annotation: Load validation rows.
     rows = list(csv.DictReader(open(args.val_csv, encoding="utf-8")))
     # Annotation: Extract raw texts.
@@ -72,7 +81,7 @@ def main():
     # Annotation: Pull model probabilities in small batches from the service with threshold=0.0 so we get raw scores.
     scores: list[dict] = []
     for i in range(0, len(texts), 32):
-        payload = {"texts": texts[i:i+32], "threshold": 0.0}
+        payload = {"texts": texts[i : i + 32], "threshold": 0.0}
         res = requests.post(args.url, json=payload, timeout=30).json()
         scores.extend([x["scores"] for x in res["results"]])
 
@@ -97,12 +106,17 @@ def main():
     # Annotation: Ensure output folder exists.
     os.makedirs(args.out_dir, exist_ok=True)
     # Annotation: Write temperature JSON.
-    open(os.path.join(args.out_dir, "calibration.json"), "w", encoding="utf-8").write(json.dumps({"temperature": temps}, indent=2))
+    open(os.path.join(args.out_dir, "calibration.json"), "w", encoding="utf-8").write(
+        json.dumps({"temperature": temps}, indent=2)
+    )
     # Annotation: Write threshold JSON.
-    open(os.path.join(args.out_dir, "thresholds.json"), "w", encoding="utf-8").write(json.dumps(thres, indent=2))
+    open(os.path.join(args.out_dir, "thresholds.json"), "w", encoding="utf-8").write(
+        json.dumps(thres, indent=2)
+    )
     # Annotation: Print a small summary so you can paste into notes.
     print("Saved:", os.path.join(args.out_dir, "calibration.json"))
     print("Saved:", os.path.join(args.out_dir, "thresholds.json"))
+
 
 # Annotation: Standard script guard.
 if __name__ == "__main__":

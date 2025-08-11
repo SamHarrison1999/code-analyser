@@ -12,13 +12,22 @@ Includes:
 try:
     import torch
 except Exception:
+
     class _Dev:
-        def __init__(self,*a,**k): pass
+        def __init__(self, *a, **k):
+            pass
+
     class _Torch:
-        def device(self, *a, **k): return _Dev()
+        def device(self, *a, **k):
+            return _Dev()
+
         def no_grad(self):
-            class _C: __enter__=lambda s: None; __exit__=lambda s,*a: False
+            class _C:
+                __enter__ = lambda s: None
+                __exit__ = lambda s, *a: False
+
             return _C()
+
     torch = _Torch()
 
 # JSON and CSV are used for exporting annotations when requested.
@@ -32,14 +41,21 @@ from pathlib import Path
 try:
     from transformers import AutoTokenizer
 except Exception:
+
     class AutoTokenizer:
         @classmethod
         def from_pretrained(cls, *a, **k):
             class _T:
                 model_max_length = 128
+
                 def __call__(self, text, **kw):
-                    if isinstance(text, str): text=[text]
-                    return {"input_ids": [[1,2,3] for _ in text], "attention_mask": [[1,1,1] for _ in text]}
+                    if isinstance(text, str):
+                        text = [text]
+                    return {
+                        "input_ids": [[1, 2, 3] for _ in text],
+                        "attention_mask": [[1, 1, 1] for _ in text],
+                    }
+
             return _T()
 
 

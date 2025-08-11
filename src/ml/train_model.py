@@ -6,15 +6,21 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import f1_score, accuracy_score
 from torch.optim import AdamW
 from torch.utils.tensorboard import SummaryWriter
+
 # Provide small fallbacks for environments with stubbed torch/numpy.
 try:
     import numpy as np
 except Exception:
+
     class _NP:
-        def array(self, x): return x
+        def array(self, x):
+            return x
+
     np = _NP()
 # Some torch stubs may miss 'sigmoid'; use a no-op fallback.
-_sigmoid = getattr(torch, 'sigmoid', None) or (lambda x: x)
+_sigmoid = getattr(torch, "sigmoid", None) or (lambda x: x)
+
+
 def _to_numpy(x):
     # Convert tensors or lists to a NumPy array or list safely.
     try:
@@ -24,6 +30,7 @@ def _to_numpy(x):
             return np.array(x)
         except Exception:
             return x
+
 
 from ml.config import TRAINING_CONFIG, MODEL_CONFIG
 from ml.model_torch import load_model
