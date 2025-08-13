@@ -223,6 +223,7 @@ Returns versions and artefact identifiers for reproducibility.
 **Datasets / artefacts**  
 - An example labelled dataset lives on Hugging Face: <https://huggingface.co/datasets/SamH1999/fintech-ai-annotations/tree/main>
 - Point your model to a local HF checkpoint <https://github.com/SamHarrison1999/code-analyser/tree/master/checkpoints/hf_retrained/phase2_full_ft>.
+- Artefacts presentation <https://1drv.ms/p/c/e08399976f28f5bf/EX7hliMMxyZBh9neD9KG6EsBcMZfvYdbJt-G_kgVSz10DQ>
 
 ---
 
