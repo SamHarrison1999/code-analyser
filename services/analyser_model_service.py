@@ -1,177 +1,280 @@
 # --- file: services/analyser_model_service.py ---
 # Provide safe fallbacks for optional dependencies so imports never fail during tests.
 from typing import List, Dict, Any, Optional
+
 # Try FastAPI; if absent or stubbed without decorators, install a tiny compatible shim.
 try:
     from fastapi import FastAPI, HTTPException
     from fastapi.responses import FileResponse
 except Exception:
+
     class FastAPI:
         def __init__(self, *a, **k):
             pass
+
         def get(self, *a, **k):
             def _wrap(fn):
                 return fn
+
             return _wrap
+
         def post(self, *a, **k):
             def _wrap(fn):
                 return fn
+
             return _wrap
+
     class HTTPException(Exception):
         def __init__(self, status_code: int, detail: str = ""):
             self.status_code = status_code
             self.detail = detail
+
     class FileResponse:
-        def __init__(self, path: str, filename: Optional[str] = None, media_type: Optional[str] = None):
+        def __init__(
+            self, path: str, filename: Optional[str] = None, media_type: Optional[str] = None
+        ):
             self.path = path
+
+
 # Try Pydantic; if unavailable in the test environment, provide minimal stand-ins.
 try:
     from pydantic import BaseModel, Field
 except Exception:
+
     class BaseModel:
         def __init__(self, **data):
             for k, v in data.items():
                 setattr(self, k, v)
+
     def Field(default=None, **kwargs):
         return default
+
+
 # Try Transformers; provide stubs when running in the test harness where heavy deps may be missing.
 try:
-    from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoModelForSeq2SeqLM
+    from transformers import (
+        AutoTokenizer,
+        AutoModelForSequenceClassification,
+        AutoModelForSeq2SeqLM,
+    )
 except Exception:
+
     class AutoTokenizer:
         @classmethod
         def from_pretrained(cls, *a, **k):
             class _T:
                 model_max_length = 128
+
                 def __call__(self, texts, **kw):
                     if isinstance(texts, str):
                         texts = [texts]
-                    return {"input_ids": [[1, 2, 3] for _ in texts], "attention_mask": [[1, 1, 1] for _ in texts]}
+                    return {
+                        "input_ids": [[1, 2, 3] for _ in texts],
+                        "attention_mask": [[1, 1, 1] for _ in texts],
+                    }
+
             return _T()
+
     class AutoModelForSequenceClassification:
         @classmethod
         def from_pretrained(cls, *a, **k):
             class _M:
-                config = type("C", (object,), {"id2label": {"0": "sast_risk", "1": "ml_signal", "2": "best_practice"}})()
+                config = type(
+                    "C",
+                    (object,),
+                    {"id2label": {"0": "sast_risk", "1": "ml_signal", "2": "best_practice"}},
+                )()
+
                 def to(self, *a, **k):
                     return self
+
                 def eval(self):
                     return self
+
                 def __call__(self, **enc):
                     try:
                         import torch
+
                         bs = len(next(iter(enc.values()))) if enc else 1
+
                         class _O:
-                            def __init__(self, b): self._b=b
+                            def __init__(self, b):
+                                self._b = b
+
                             @property
                             def logits(self):
                                 import numpy as np
-                                return type("_T",(),{"detach":lambda s:s,"cpu":lambda s:s,"numpy":lambda s:np.zeros((self._b,3),dtype=float)})()
+
+                                return type(
+                                    "_T",
+                                    (),
+                                    {
+                                        "detach": lambda s: s,
+                                        "cpu": lambda s: s,
+                                        "numpy": lambda s: np.zeros((self._b, 3), dtype=float),
+                                    },
+                                )()
+
                         return _O(bs)
                     except Exception:
                         return [[0.0, 0.0, 0.0]]
+
                 def save_pretrained(self, *a, **k):
                     pass
+
             return _M()
+
     class AutoModelForSeq2SeqLM:
         @classmethod
         def from_pretrained(cls, *a, **k):
             class _M:
                 def to(self, *a, **k):
                     return self
+
                 def eval(self):
                     return self
+
                 def generate(self, *a, **k):
                     return [[0, 0, 0]]
+
             return _M()
+
+
 # Torch may not be present; provide very small shims as needed.
 try:
     import torch
 except Exception:
+
     class _Dev:
         def __init__(self, *a, **k):
             pass
+
         def __str__(self):
             return "cpu"
+
     class _Cuda:
         @staticmethod
         def is_available():
             return False
+
     class _Torch:
         def device(self, *_a, **_k):
             return _Dev()
+
         def no_grad(self):
             class _CM:
                 def __enter__(self):
                     return None
+
                 def __exit__(self, *a):
                     return False
+
             return _CM()
+
         cuda = _Cuda()
         __version__ = None
+
         def tensor(self, x, **k):
             return x
+
         def stack(self, xs, **k):
             return xs
+
         def save(self, *a, **k):
             pass
+
     torch = _Torch()  # type: ignore
 # Standard libs and path handling.
 import os, json, re
 from pathlib import Path
+
 # Optional external HTTP client; safe to import even if unused in tests.
 import requests
+
 # Additional stdlib imports for versioning, batching, and OpenAI gating.
 import sys, platform, hashlib, subprocess, uuid, datetime, zipfile, textwrap
 
 from api.batch_mode_router import router as batch_mode_router
+
 # Create the FastAPI app and ensure decorator attributes exist even under stubs.
 app = FastAPI(title="Code Analyser Model Service", version="1.4.2")
 app.include_router(batch_mode_router)
 # If a stub provided a FastAPI without decorator helpers, attach no-op decorators now.
 if not hasattr(app, "get"):
+
     def _noop_deco(*_a, **_k):
         def _wrap(fn):
             return fn
+
         return _wrap
+
     app.get = _noop_deco  # type: ignore[attr-defined]
     app.post = _noop_deco  # type: ignore[attr-defined]
     app.put = _noop_deco  # type: ignore[attr-defined]
     app.delete = _noop_deco  # type: ignore[attr-defined]
+
+
 # Request/response models.
 class PredictRequest(BaseModel):
     texts: List[str] = Field(default_factory=list, description="One or more code snippets.")
-    threshold: float = Field(default=0.5, ge=0.0, le=1.0, description="Score threshold for positive labels.")
+    threshold: float = Field(
+        default=0.5, ge=0.0, le=1.0, description="Score threshold for positive labels."
+    )
     # Allow callers to request OpenAI explanations for /predict; default on to mirror /batch.
-    explain: bool = Field(default=True, description="If true and OpenAI is configured, include a message per text.")
+    explain: bool = Field(
+        default=True, description="If true and OpenAI is configured, include a message per text."
+    )
+
+
 class LabelScore(BaseModel):
     label: str
     score: float
+
+
 class PredictResponse(BaseModel):
     predictions: List[List[LabelScore]]
     id2label: Dict[int, str]
     threshold: float
     # New messages field aligns 1:1 with input texts; each item may be None if disabled/unavailable.
     messages: Optional[List[Optional[str]]] = None
+
+
 class ExplainRequest(BaseModel):
     text: str
+
+
 class ExplainResponse(BaseModel):
     summary: str
+
+
 class BatchRequest(BaseModel):
-    paths: List[str] = Field(default_factory=list, description="Absolute or relative file paths to process.")
-    write_fixed: bool = Field(default=True, description="If true, write minimally 'fixed' files into the batch archive.")
-    explain: bool = Field(default=True, description="If true and OpenAI is configured, include an explanation message per file.")
+    paths: List[str] = Field(
+        default_factory=list, description="Absolute or relative file paths to process."
+    )
+    write_fixed: bool = Field(
+        default=True, description="If true, write minimally 'fixed' files into the batch archive."
+    )
+    explain: bool = Field(
+        default=True,
+        description="If true and OpenAI is configured, include an explanation message per file.",
+    )
+
+
 class BatchFileResult(BaseModel):
     path: str
     ok: bool
     message: Optional[str] = None
     prediction: Optional[List[LabelScore]] = None
+
+
 class BatchResponse(BaseModel):
     job_id: str
     count: int
     results: List[BatchFileResult]
     archive_url: Optional[str] = None
     archive_path: Optional[str] = None
+
+
 # Resolve model directory robustly and avoid remote downloads in tests.
 MODEL_DIR = Path(os.environ.get("MODEL_DIR", ".")).expanduser().resolve()
 # Load tokenizer/model with local-only flag when possible; fall back to stubs.
@@ -184,7 +287,9 @@ try:
 except Exception:
     model = AutoModelForSequenceClassification.from_pretrained(".")
 # Choose a device if torch has that concept; stub returns a simple object.
-device = getattr(torch, "device", lambda *_a, **_k: "cpu")("cuda" if getattr(torch, "cuda", None) and torch.cuda.is_available() else "cpu")
+device = getattr(torch, "device", lambda *_a, **_k: "cpu")(
+    "cuda" if getattr(torch, "cuda", None) and torch.cuda.is_available() else "cpu"
+)
 # Move to eval mode/selected device when available; safe under stubs.
 try:
     model.to(device)  # type: ignore[attr-defined]
@@ -192,8 +297,19 @@ try:
 except Exception:
     pass
 # Build id→label mapping safely even when config is stubbed.
-id2label_raw = getattr(getattr(model, "config", None), "id2label", {"0": "sast_risk", "1": "ml_signal", "2": "best_practice"})
-id2label: Dict[int, str] = {int(i): l for i, l in (id2label_raw.items() if hasattr(id2label_raw, "items") else {"0": "sast_risk", "1": "ml_signal", "2": "best_practice"}.items())}
+id2label_raw = getattr(
+    getattr(model, "config", None),
+    "id2label",
+    {"0": "sast_risk", "1": "ml_signal", "2": "best_practice"},
+)
+id2label: Dict[int, str] = {
+    int(i): l
+    for i, l in (
+        id2label_raw.items()
+        if hasattr(id2label_raw, "items")
+        else {"0": "sast_risk", "1": "ml_signal", "2": "best_practice"}.items()
+    )
+}
 label_order: List[str] = [id2label[i] for i in sorted(id2label.keys())]
 # Optional per-label thresholds from a single file; ignore if missing/malformed.
 _thresh_path = MODEL_DIR / "thresholds.json"
@@ -203,9 +319,17 @@ if _thresh_path.exists():
         PER_LABEL_THRESH = json.loads(_thresh_path.read_text(encoding="utf-8"))
     except Exception:
         PER_LABEL_THRESH = {}
+
+
 # Tokenise to tensors, run the model, and return logits as a NumPy array.
 def _predict_logits(batch_texts: List[str]):
-    enc = tokenizer(batch_texts, padding=True, truncation=True, return_tensors="pt", max_length=getattr(tokenizer, "model_max_length", 512))
+    enc = tokenizer(
+        batch_texts,
+        padding=True,
+        truncation=True,
+        return_tensors="pt",
+        max_length=getattr(tokenizer, "model_max_length", 512),
+    )
     try:
         enc = {k: (v.to(device) if hasattr(v, "to") else v) for k, v in enc.items()}
     except Exception:
@@ -220,19 +344,26 @@ def _predict_logits(batch_texts: List[str]):
             return getattr(logits, "cpu", lambda: logits)().numpy()  # type: ignore[call-arg]
         except Exception:
             return logits
+
+
 # Per-label threshold helper (kept but currently non-masking).
 def _get_threshold(label: str, default: float) -> float:
     try:
         return float(PER_LABEL_THRESH.get(label, default))
     except Exception:
         return default
+
+
 # Sigmoid that works whether NumPy is available or not.
 def _sigmoid(x):
     try:
         import numpy as np
+
         return 1.0 / (1.0 + np.exp(-x))
     except Exception:
         return x
+
+
 # Helper to compute a stable combined SHA-256 over typical model artefacts for provenance.
 def _sha256_of_model_dir(root: Path) -> Optional[str]:
     try:
@@ -252,26 +383,42 @@ def _sha256_of_model_dir(root: Path) -> Optional[str]:
         return h.hexdigest()
     except Exception:
         return None
+
+
 # Helper to capture git commit if available; returns short SHA or None.
 def _git_short_sha() -> Optional[str]:
     try:
-        r = subprocess.run(["git", "rev-parse", "--short", "HEAD"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=True, text=True)
+        r = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            check=True,
+            text=True,
+        )
         return r.stdout.strip() or None
     except Exception:
         return None
+
+
 # Detect a CLI version, working with Windows batch files (.bat/.cmd) by using shell when needed.
 def _detect_cli_version(exe: str, args: List[str]) -> Optional[str]:
     try:
         if os.name == "nt":
             cmd = " ".join([exe] + args)
-            r = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            r = subprocess.run(
+                cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+            )
         else:
-            r = subprocess.run([exe] + args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            r = subprocess.run(
+                [exe] + args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+            )
         out = (r.stdout or "").strip()
         m = re.search(r"\b(\d+\.\d+(?:\.\d+)?(?:-[A-Za-z0-9.+]+)?)\b", out)
         return m.group(1) if m else (out or None)
     except Exception:
         return None
+
+
 # Determine SonarLint version from env, explicit exe, Python module, or known CLIs.
 def _detect_sonarlint_version() -> Optional[str]:
     v = os.environ.get("SONARLINT_VERSION")
@@ -284,59 +431,88 @@ def _detect_sonarlint_version() -> Optional[str]:
             return v
     try:
         import sonarlint as _sl  # type: ignore
+
         v = getattr(_sl, "__version__", None)
         if v:
             return str(v)
     except Exception:
         pass
-    for exe, args in (("sonarlint", ["--version"]), ("sonarlint-cli", ["--version"]), ("sonar-scanner", ["-v"])):
+    for exe, args in (
+        ("sonarlint", ["--version"]),
+        ("sonarlint-cli", ["--version"]),
+        ("sonar-scanner", ["-v"]),
+    ):
         v = _detect_cli_version(exe, args)
         if v:
             return v
     return None
+
+
 # NEW — gate OpenAI usage on environment; avoids NameError and lets you disable via OPENAI_DISABLED=1.
 def _openai_enabled() -> bool:
-    return bool(os.environ.get("OPENAI_API_KEY")) and os.environ.get("OPENAI_DISABLED", "0") not in {"1","true","True"}
+    return bool(os.environ.get("OPENAI_API_KEY")) and os.environ.get(
+        "OPENAI_DISABLED", "0"
+    ) not in {"1", "true", "True"}
+
+
 # Call OpenAI to produce a short explanation; returns None if disabled or on error.
 def _summarise_with_openai(code_text: str, scores: List[LabelScore]) -> Optional[str]:
     if not _openai_enabled():
         return None
     model = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
     max_chars = int(os.environ.get("OPENAI_MAX_CHARS", "4000"))
-    snippet = code_text if len(code_text) <= max_chars else (code_text[:max_chars//2] + "\n...\n" + code_text[-max_chars//2:])
+    snippet = (
+        code_text
+        if len(code_text) <= max_chars
+        else (code_text[: max_chars // 2] + "\n...\n" + code_text[-max_chars // 2 :])
+    )
     score_str = ", ".join([f"{s.label}={s.score:.3f}" for s in scores])
     system = "You are a secure code reviewer. Be concise, accurate, and actionable."
-    user = textwrap.dedent(f"""Review the following code. Summarise the key risk(s) and a safer alternative in <=120 words
+    user = textwrap.dedent(
+        f"""Review the following code. Summarise the key risk(s) and a safer alternative in <=120 words
                            Label scores: {score_str} 
                            Code (language may be Python or mixed):
                            ```
                            {snippet}
                            ```
-                           """).strip()
+                           """
+    ).strip()
     try:
         try:
             from openai import OpenAI  # type: ignore
+
             client = OpenAI()
-            r = client.responses.create(model=model, input=f"SYSTEM: {system}\nUSER: {user}", max_output_tokens=240,
-                                        temperature=0.2)
+            r = client.responses.create(
+                model=model,
+                input=f"SYSTEM: {system}\nUSER: {user}",
+                max_output_tokens=240,
+                temperature=0.2,
+            )
             out = getattr(r, "output_text", None)
             if out:
                 return out.strip()
         except Exception:
             pass
         import openai as _openai  # type: ignore
+
         if hasattr(_openai, "OpenAI"):
             client = _openai.OpenAI()
-            r = client.chat.completions.create(model=model, messages=[{"role": "system", "content": system},
-                                                                      {"role": "user", "content": user}],
-                                               max_tokens=240, temperature=0.2)
+            r = client.chat.completions.create(
+                model=model,
+                messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+                max_tokens=240,
+                temperature=0.2,
+            )
             out = r.choices[0].message.content if getattr(r, "choices", None) else None
             return (out or "").strip() or None
         else:
             _openai.api_key = os.environ.get("OPENAI_API_KEY")
-            r = _openai.ChatCompletion.create(model=model, messages=[{"role": "system", "content": system},
-                                                                     {"role": "user", "content": user}], max_tokens=240,
-                                              temperature=0.2)
+            r = _openai.ChatCompletion.create(
+                model=model,
+                messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+                max_tokens=240,
+                temperature=0.2,
+            )
             out = r["choices"][0]["message"]["content"]
             return (out or "").strip() or None
     except Exception:
@@ -354,11 +530,14 @@ def healthz() -> Dict[str, str]:
 def predict(req: PredictRequest) -> PredictResponse:
     texts = req.texts or []
     if not texts:
-        return PredictResponse(predictions=[], id2label=id2label, threshold=req.threshold, messages=[])
+        return PredictResponse(
+            predictions=[], id2label=id2label, threshold=req.threshold, messages=[]
+        )
     raw = _predict_logits(texts)
     probs = _sigmoid(raw)
     try:
         import numpy as np
+
         arr = np.asarray(probs)
         if arr.ndim == 0:
             rows = [[float(arr)]]
@@ -387,7 +566,9 @@ def predict(req: PredictRequest) -> PredictResponse:
             messages.append(_summarise_with_openai(text, scores))
     else:
         messages = [None for _ in texts]
-    return PredictResponse(predictions=out, id2label=id2label, threshold=req.threshold, messages=messages)
+    return PredictResponse(
+        predictions=out, id2label=id2label, threshold=req.threshold, messages=messages
+    )
 
 
 # Optional explanation endpoint; returns OpenAI summary when configured.
@@ -405,11 +586,13 @@ def version() -> Dict[str, Any]:
     data["platform"] = platform.platform()
     try:
         import fastapi as _fastapi  # type: ignore
+
         data["fastapi"] = getattr(_fastapi, "__version__", None)
     except Exception:
         data["fastapi"] = None
     try:
         import transformers as _tf  # type: ignore
+
         data["transformers"] = getattr(_tf, "__version__", None)
     except Exception:
         data["transformers"] = None
@@ -419,6 +602,7 @@ def version() -> Dict[str, Any]:
         data["torch"] = None
     try:
         import pylint as _pylint  # type: ignore
+
         data["pylint"] = getattr(_pylint, "__version__", None)
     except Exception:
         data["pylint"] = None
@@ -454,12 +638,24 @@ def batch(req: BatchRequest) -> BatchResponse:
         msg = _summarise_with_openai(src, pred) if req.explain else None
         fixed = src if src.endswith("\n") else src + "\n"
         items.append(
-            {"path": p, "original": src, "fixed": fixed, "prediction": [s.__dict__ for s in pred], "message": msg})
+            {
+                "path": p,
+                "original": src,
+                "fixed": fixed,
+                "prediction": [s.__dict__ for s in pred],
+                "message": msg,
+            }
+        )
         results.append(BatchFileResult(path=p, ok=True, prediction=pred, message=msg))
     zpath = _materialise_batch_archive(job_id, items)
     archive_url = f"/batch/{job_id}/download"
-    return BatchResponse(job_id=job_id, count=len(results), results=results, archive_url=archive_url,
-                         archive_path=str(zpath))
+    return BatchResponse(
+        job_id=job_id,
+        count=len(results),
+        results=results,
+        archive_url=archive_url,
+        archive_path=str(zpath),
+    )
 
 
 # Create a per-batch working directory and zip the results, returning archive path.
@@ -477,7 +673,7 @@ def _materialise_batch_archive(job_id: str, items: List[Dict[str, Any]]) -> Path
         "model_sha256": _sha256_of_model_dir(MODEL_DIR),
         "git_commit": _git_short_sha(),
         "id2label": id2label,
-        "model_dir": MODEL_DIR.as_posix()
+        "model_dir": MODEL_DIR.as_posix(),
     }
     (root / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     for it in items:
@@ -487,7 +683,9 @@ def _materialise_batch_archive(job_id: str, items: List[Dict[str, Any]]) -> Path
         if it.get("fixed") is not None:
             (fixed / rel).write_text(it["fixed"], encoding="utf-8")
         if it.get("prediction") is not None:
-            (preds / f"{rel}.json").write_text(json.dumps(it["prediction"], indent=2), encoding="utf-8")
+            (preds / f"{rel}.json").write_text(
+                json.dumps(it["prediction"], indent=2), encoding="utf-8"
+            )
         if it.get("message") is not None:
             (preds / f"{rel}.txt").write_text(it["message"], encoding="utf-8")
     zpath = root.with_suffix(".zip")

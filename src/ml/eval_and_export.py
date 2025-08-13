@@ -93,6 +93,7 @@ except Exception:
     def default_data_collator(*a, **k):
         return None
 
+
 # Annotation: Use a relative import so Python resolves the module inside the 'ml' package when running 'python -m ml.eval_and_export'.
 from .dataset_loader import load_local_annotated_dataset
 
@@ -100,6 +101,7 @@ from huggingface_hub import upload_folder
 
 # Label order must match training; adjust if you changed it there.
 LABEL_MAP: Dict[str, int] = {"sast_risk": 0, "ml_signal": 1, "best_practice": 2}
+
 
 # Simple dataset adapter compatible with HF Trainer predict().
 class HFDataset:
@@ -127,10 +129,12 @@ class HFDataset:
         # Return item.
         return item
 
+
 # Stable sigmoid for converting logits to probabilities.
 def _sigmoid(x: np.ndarray) -> np.ndarray:
     # Numerically stable logistic.
     return 1.0 / (1.0 + np.exp(-x))
+
 
 # Compute Expected Calibration Error and provide bin curves.
 def expected_calibration_error(
@@ -165,6 +169,7 @@ def expected_calibration_error(
     # Return ECE and curves.
     return float(ece), bins, bin_acc, bin_conf
 
+
 # Save a reliability diagram to a PNG path.
 def save_reliability_plot(
     label_name: str, bins: np.ndarray, acc: np.ndarray, conf: np.ndarray, out_path: str
@@ -196,10 +201,12 @@ def save_reliability_plot(
     fig.savefig(out_path, dpi=160)
     plt.close(fig)
 
+
 # Escape HTML for safe code rendering.
 def html_escape(s: str) -> str:
     # Replace special characters.
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
 
 # Render a per-file overlay HTML with confidences.
 def render_overlay_html(
@@ -219,6 +226,7 @@ def render_overlay_html(
     # Compose final minimal document.
     return f"<!doctype html><meta charset='utf-8'><title>{html_escape(filename)} – overlay</title><div style='max-width:980px;margin:24px auto'>{header}{pre}{foot}</div>"
 
+
 # Try to locate original code path by filename stem within code root.
 def find_code_path(code_root: str, filename_no_ext: str) -> Optional[str]:
     # Walk the repository for a matching .py file.
@@ -228,6 +236,7 @@ def find_code_path(code_root: str, filename_no_ext: str) -> Optional[str]:
                 return os.path.join(root, f)
     # Not found.
     return None
+
 
 # Infer a sensible model_type for AutoConfig from a checkpoint folder.
 def _infer_model_type(checkpoint_dir: str) -> str:
@@ -262,6 +271,7 @@ def _infer_model_type(checkpoint_dir: str) -> str:
         return "roberta"
     # Fallback to roberta which works for microsoft/codebert-base.
     return "roberta"
+
 
 # Ensure a valid config.json exists; create a minimal one if missing or unreadable.
 def _ensure_config_json(checkpoint_dir: str, label_map: Dict[str, int]) -> str:
@@ -302,6 +312,7 @@ def _ensure_config_json(checkpoint_dir: str, label_map: Dict[str, int]) -> str:
         )
     # Return the path for convenience.
     return cfg_path
+
 
 # Main routine to evaluate an existing checkpoint, export artefacts and optionally push to hub.
 def main() -> None:
@@ -539,6 +550,7 @@ def main() -> None:
         print(f"☁️ Uploaded trained model to: https://huggingface.co/datasets/{args.hub_repo}")
     # Final message.
     print("✅ Evaluation and export complete.")
+
 
 # Standard entry point.
 if __name__ == "__main__":

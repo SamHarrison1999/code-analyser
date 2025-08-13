@@ -1,20 +1,26 @@
 # Compare Rules vs Model vs Fusion using /batch on file paths with efficient chunking and optional parallelism to avoid timeouts.
 # Reads id,text,labels or filename+numeric CSVs, writes each snippet to a temp .py file, posts chunks of paths to /batch, thresholds scores, and prints micro/macro/per-label F1.
 import argparse
+
 # Standard libraries for filesystem, temporary dirs, timing and JSON.
 import os
 import tempfile
 import time
 import json
 import csv
+
 # Cross-platform path handling.
 from pathlib import Path
+
 # Typing aids readability.
 from typing import Dict, List, Tuple, Optional
+
 # HTTP client library.
 import requests
+
 # Concurrency primitives for optional parallel chunk processing.
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
 # Numerical arrays and metrics.
 import numpy as np
 from sklearn.metrics import precision_recall_fscore_support, f1_score
@@ -32,6 +38,7 @@ ALIAS = {
     "best_practice": "best_practice",
 }
 
+
 # Convert any label string into a canonical name or None if unknown.
 def _norm_label(s: str) -> Optional[str]:
     key = str(s).strip().lower().replace(" ", "").replace("-", "_")
@@ -41,12 +48,14 @@ def _norm_label(s: str) -> Optional[str]:
         return key
     return None
 
+
 # Parse a comma-separated labels string into a fixed-order 0/1 vector.
 def _labels_from_string(label_str: str) -> np.ndarray:
     parts = [x.strip() for x in str(label_str).split(",") if x.strip()]
     normed = {_norm_label(x) for x in parts}
     row = [1 if lbl in normed else 0 for lbl in LABELS]
     return np.array(row, dtype=np.int32)
+
 
 # Load dataset from CSV; supports (id,text,labels) or (filename + numeric label columns).
 def _load_from_csv(csv_path: Path) -> Tuple[List[str], List[str], np.ndarray]:
@@ -70,7 +79,15 @@ def _load_from_csv(csv_path: Path) -> Tuple[List[str], List[str], np.ndarray]:
                 names.append(Path(rid).stem)
                 codes.append(code_text)
                 y_rows.append(y)
-            return names, codes, (np.stack(y_rows, axis=0) if y_rows else np.zeros((0, len(LABELS)), dtype=np.int32))
+            return (
+                names,
+                codes,
+                (
+                    np.stack(y_rows, axis=0)
+                    if y_rows
+                    else np.zeros((0, len(LABELS)), dtype=np.int32)
+                ),
+            )
         if has_filename and has_all_numeric:
             for row in reader:
                 if not any(row.values()):
@@ -80,8 +97,19 @@ def _load_from_csv(csv_path: Path) -> Tuple[List[str], List[str], np.ndarray]:
                 names.append(fname)
                 codes.append("")
                 y_rows.append(y)
-            return names, codes, (np.stack(y_rows, axis=0) if y_rows else np.zeros((0, len(LABELS)), dtype=np.int32))
-    raise ValueError(f"CSV schema not recognised in {csv_path}. Expected either columns (id,text,labels) or (filename,{','.join(LABELS)}).")
+            return (
+                names,
+                codes,
+                (
+                    np.stack(y_rows, axis=0)
+                    if y_rows
+                    else np.zeros((0, len(LABELS)), dtype=np.int32)
+                ),
+            )
+    raise ValueError(
+        f"CSV schema not recognised in {csv_path}. Expected either columns (id,text,labels) or (filename,{','.join(LABELS)})."
+    )
+
 
 # Helper to parse per-label thresholds from a string like "sast_risk=0.6,ml_signal=0.3".
 def _parse_thresholds(s: Optional[str]) -> Dict[str, float]:
@@ -100,8 +128,11 @@ def _parse_thresholds(s: Optional[str]) -> Dict[str, float]:
                 pass
     return out
 
+
 # Turn a batch response into {basename → {label:bool}} decisions; supports list or dict 'results', 'prediction'/'predictions', 'probs' and 'preds'.
-def _decisions_map_from_batch(data: dict, default_threshold: float, per_label_thr: Dict[str, float]) -> Dict[str, Dict[str, bool]]:
+def _decisions_map_from_batch(
+    data: dict, default_threshold: float, per_label_thr: Dict[str, float]
+) -> Dict[str, Dict[str, bool]]:
     out: Dict[str, Dict[str, bool]] = {}
     results = data.get("results")
     items: List[dict] = []
@@ -130,7 +161,14 @@ def _decisions_map_from_batch(data: dict, default_threshold: float, per_label_th
                 if not nl:
                     continue
                 score = row.get("score") or row.get("prob") or row.get("p") or row.get("confidence")
-                thr = per_label_thr.get(nl, float(thr_field) if not isinstance(thr_field, dict) else float(thr_field.get(nl, default_threshold)))
+                thr = per_label_thr.get(
+                    nl,
+                    (
+                        float(thr_field)
+                        if not isinstance(thr_field, dict)
+                        else float(thr_field.get(nl, default_threshold))
+                    ),
+                )
                 decide[nl] = True if score is None else float(score) >= thr
             out[bname] = decide
             continue
@@ -140,7 +178,14 @@ def _decisions_map_from_batch(data: dict, default_threshold: float, per_label_th
                 nk = _norm_label(k)
                 if not nk:
                     continue
-                thr = per_label_thr.get(nk, float(thr_field) if not isinstance(thr_field, dict) else float(thr_field.get(nk, default_threshold)))
+                thr = per_label_thr.get(
+                    nk,
+                    (
+                        float(thr_field)
+                        if not isinstance(thr_field, dict)
+                        else float(thr_field.get(nk, default_threshold))
+                    ),
+                )
                 decide[nk] = float(v) >= thr
             out[bname] = decide
             continue
@@ -155,26 +200,49 @@ def _decisions_map_from_batch(data: dict, default_threshold: float, per_label_th
         out[bname] = decide
     return out
 
+
 # Compute micro/macro F1 and per-label F1.
 def _score(y_true: np.ndarray, y_pred: np.ndarray) -> Dict[str, float]:
-    p_micro, r_micro, f1_micro, _ = precision_recall_fscore_support(y_true, y_pred, average="micro", zero_division=0)
+    p_micro, r_micro, f1_micro, _ = precision_recall_fscore_support(
+        y_true, y_pred, average="micro", zero_division=0
+    )
     f1_macro = f1_score(y_true, y_pred, average="macro", zero_division=0)
     per_label = {}
     for i, lbl in enumerate(LABELS):
         per_label[lbl] = f1_score(y_true[:, i], y_pred[:, i], average="binary", zero_division=0)
-    return {"p_micro": float(p_micro), "r_micro": float(r_micro), "f1_micro": float(f1_micro), "f1_macro": float(f1_macro), **{f"f1_{k}": float(v) for k, v in per_label.items()}}
+    return {
+        "p_micro": float(p_micro),
+        "r_micro": float(r_micro),
+        "f1_micro": float(f1_micro),
+        "f1_macro": float(f1_macro),
+        **{f"f1_{k}": float(v) for k, v in per_label.items()},
+    }
+
 
 # Print a formatted table row matching your dissertation style.
 def _print_row(mode: str, metrics: Dict[str, float], n: int, elapsed_s: float) -> None:
     line = f"{mode.upper():<8}  P={metrics['p_micro']:.2f}  R={metrics['r_micro']:.2f}  F1={metrics['f1_micro']:.2f}  |  F1(sast)={metrics['f1_sast_risk']:.2f}  F1(ml)={metrics['f1_ml_signal']:.2f}  F1(best)={metrics['f1_best_practice']:.2f}  |  N={n:<4d}  t={elapsed_s:.2f}s"
     print(line)
 
+
 # Yield successive chunks of a list with a fixed batch size.
 def _chunks(seq: List[Path], size: int) -> List[List[Path]]:
-    return [seq[i:i + size] for i in range(0, len(seq), size)]
+    return [seq[i : i + size] for i in range(0, len(seq), size)]
+
 
 # Post one chunk of paths to /batch with retries; returns a decisions map {basename → {label:bool}}.
-def _post_chunk(base_url: str, mode: str, paths: List[Path], language: str, ret: Optional[str], timeout: float, default_thr: float, per_label_thr: Dict[str, float], retries: int = 3, backoff: float = 2.0) -> Dict[str, Dict[str, bool]]:
+def _post_chunk(
+    base_url: str,
+    mode: str,
+    paths: List[Path],
+    language: str,
+    ret: Optional[str],
+    timeout: float,
+    default_thr: float,
+    per_label_thr: Dict[str, float],
+    retries: int = 3,
+    backoff: float = 2.0,
+) -> Dict[str, Dict[str, bool]]:
     payload = {"paths": [str(p) for p in paths], "language": language}
     params = {"mode": mode}
     if ret:
@@ -182,31 +250,57 @@ def _post_chunk(base_url: str, mode: str, paths: List[Path], language: str, ret:
     for attempt in range(retries):
         try:
             with requests.Session() as sess:
-                resp = sess.post(f"{base_url.rstrip('/')}/batch", params=params, json=payload, timeout=timeout)
+                resp = sess.post(
+                    f"{base_url.rstrip('/')}/batch", params=params, json=payload, timeout=timeout
+                )
                 resp.raise_for_status()
                 data = resp.json()
                 return _decisions_map_from_batch(data, default_thr, per_label_thr)
         except Exception as e:
             if attempt == retries - 1:
                 raise
-            time.sleep(backoff * (2 ** attempt))
+            time.sleep(backoff * (2**attempt))
     return {}
+
 
 # Main: write temp files, send chunks (optionally in parallel), score, and optionally dump JSON.
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Compare Rules vs Model vs Fusion using chunked /batch calls.")
+    ap = argparse.ArgumentParser(
+        description="Compare Rules vs Model vs Fusion using chunked /batch calls."
+    )
     ap.add_argument("--base-url", default="http://127.0.0.1:8111", help="FastAPI base URL")
-    ap.add_argument("--truth-csv", required=True, help="CSV with id,text,labels or filename plus numeric columns")
+    ap.add_argument(
+        "--truth-csv",
+        required=True,
+        help="CSV with id,text,labels or filename plus numeric columns",
+    )
     ap.add_argument("--language", default="python", help="Language hint to include in payload")
-    ap.add_argument("--return", dest="ret", default="scores", help="Optional return hint (scores or probs)")
-    ap.add_argument("--threshold", type=float, default=0.5, help="Default decision threshold for scores/probs")
-    ap.add_argument("--threshold-per-label", dest="thr_map", default=None, help="Per-label thresholds, e.g. 'sast_risk=0.6,ml_signal=0.3,best_practice=0.4'")
-    ap.add_argument("--modes", default="rules,model,fusion", help="Comma-separated: rules,model,fusion")
+    ap.add_argument(
+        "--return", dest="ret", default="scores", help="Optional return hint (scores or probs)"
+    )
+    ap.add_argument(
+        "--threshold", type=float, default=0.5, help="Default decision threshold for scores/probs"
+    )
+    ap.add_argument(
+        "--threshold-per-label",
+        dest="thr_map",
+        default=None,
+        help="Per-label thresholds, e.g. 'sast_risk=0.6,ml_signal=0.3,best_practice=0.4'",
+    )
+    ap.add_argument(
+        "--modes", default="rules,model,fusion", help="Comma-separated: rules,model,fusion"
+    )
     ap.add_argument("--timeout", type=float, default=120.0, help="HTTP timeout seconds")
     ap.add_argument("--batch-size", type=int, default=24, help="Number of files per /batch request")
-    ap.add_argument("--workers", type=int, default=1, help="Number of parallel chunks to process per mode")
-    ap.add_argument("--limit", type=int, default=None, help="Optional cap on number of samples for a quick run")
-    ap.add_argument("--out-json", default=None, help="Optional path to write per-mode metrics as JSON")
+    ap.add_argument(
+        "--workers", type=int, default=1, help="Number of parallel chunks to process per mode"
+    )
+    ap.add_argument(
+        "--limit", type=int, default=None, help="Optional cap on number of samples for a quick run"
+    )
+    ap.add_argument(
+        "--out-json", default=None, help="Optional path to write per-mode metrics as JSON"
+    )
     args = ap.parse_args()
     try:
         requests.get(f"{args.base_url.rstrip('/')}/healthz", timeout=5).raise_for_status()
@@ -215,11 +309,13 @@ def main() -> None:
     csv_path = Path(args.truth_csv).resolve()
     names, codes, y_true = _load_from_csv(csv_path)
     if args.limit is not None:
-        names = names[:args.limit]
-        codes = codes[:args.limit]
-        y_true = y_true[:args.limit]
+        names = names[: args.limit]
+        codes = codes[: args.limit]
+        y_true = y_true[: args.limit]
     pos = y_true.sum(axis=0) if y_true.size else np.zeros(len(LABELS), dtype=np.int32)
-    print(f"[truth] positives → sast_risk={int(pos[0])}, ml_signal={int(pos[1])}, best_practice={int(pos[2])}, N={len(names)}")
+    print(
+        f"[truth] positives → sast_risk={int(pos[0])}, ml_signal={int(pos[1])}, best_practice={int(pos[2])}, N={len(names)}"
+    )
     per_label_thr = _parse_thresholds(args.thr_map)
     with tempfile.TemporaryDirectory(prefix="cmp_paths_") as tmpdir:
         tmp_root = Path(tmpdir)
@@ -238,7 +334,19 @@ def main() -> None:
                 futures = {}
                 with ThreadPoolExecutor(max_workers=args.workers) as ex:
                     for idx, chunk in enumerate(chunks):
-                        futures[ex.submit(_post_chunk, args.base_url, mode, chunk, args.language, args.ret, args.timeout, args.threshold, per_label_thr)] = (idx, chunk)
+                        futures[
+                            ex.submit(
+                                _post_chunk,
+                                args.base_url,
+                                mode,
+                                chunk,
+                                args.language,
+                                args.ret,
+                                args.timeout,
+                                args.threshold,
+                                per_label_thr,
+                            )
+                        ] = (idx, chunk)
                     for fut in as_completed(futures):
                         idx, chunk = futures[fut]
                         dec_map = fut.result()
@@ -246,16 +354,29 @@ def main() -> None:
                             b = p.name
                             dm = dec_map.get(b, {lbl: False for lbl in LABELS})
                             i = file_paths.index(p)
-                            y_pred[i, :] = np.array([1 if dm.get(lbl, False) else 0 for lbl in LABELS], dtype=np.int32)
+                            y_pred[i, :] = np.array(
+                                [1 if dm.get(lbl, False) else 0 for lbl in LABELS], dtype=np.int32
+                            )
                         print(f"[{mode}] chunk {idx+1}/{len(chunks)} done")
             else:
                 for idx, chunk in enumerate(chunks):
-                    dec_map = _post_chunk(args.base_url, mode, chunk, args.language, args.ret, args.timeout, args.threshold, per_label_thr)
+                    dec_map = _post_chunk(
+                        args.base_url,
+                        mode,
+                        chunk,
+                        args.language,
+                        args.ret,
+                        args.timeout,
+                        args.threshold,
+                        per_label_thr,
+                    )
                     for p in chunk:
                         b = p.name
                         dm = dec_map.get(b, {lbl: False for lbl in LABELS})
                         i = file_paths.index(p)
-                        y_pred[i, :] = np.array([1 if dm.get(lbl, False) else 0 for lbl in LABELS], dtype=np.int32)
+                        y_pred[i, :] = np.array(
+                            [1 if dm.get(lbl, False) else 0 for lbl in LABELS], dtype=np.int32
+                        )
                     print(f"[{mode}] chunk {idx+1}/{len(chunks)} done")
             elapsed = time.time() - t0
             metrics = _score(y_true, y_pred)
@@ -264,6 +385,7 @@ def main() -> None:
         if args.out_json:
             Path(args.out_json).parent.mkdir(parents=True, exist_ok=True)
             Path(args.out_json).write_text(json.dumps(all_metrics, indent=2), encoding="utf-8")
+
 
 # Entry point.
 if __name__ == "__main__":
