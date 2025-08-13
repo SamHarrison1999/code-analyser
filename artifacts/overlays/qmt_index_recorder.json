@@ -1,14 +1,14 @@
 {
   "filename": "qmt_index_recorder",
   "probs": {
-    "sast_risk": 0.3964134752750397,
-    "ml_signal": 0.4983082115650177,
-    "best_practice": 0.5915252566337585
+    "sast_risk": 0.5438051223754883,
+    "ml_signal": 0.4526461064815521,
+    "best_practice": 0.6120322346687317
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

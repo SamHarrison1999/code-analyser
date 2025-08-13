@@ -1,14 +1,14 @@
 {
   "filename": "market",
   "probs": {
-    "sast_risk": 0.39743825793266296,
-    "ml_signal": 0.4962609112262726,
-    "best_practice": 0.5879754424095154
+    "sast_risk": 0.550477921962738,
+    "ml_signal": 0.44963160157203674,
+    "best_practice": 0.6103314757347107
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

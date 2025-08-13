@@ -1,14 +1,14 @@
 {
   "filename": "loader",
   "probs": {
-    "sast_risk": 0.39298707246780396,
-    "ml_signal": 0.497383177280426,
-    "best_practice": 0.5864899754524231
+    "sast_risk": 0.5462625622749329,
+    "ml_signal": 0.4448458254337311,
+    "best_practice": 0.61292564868927
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

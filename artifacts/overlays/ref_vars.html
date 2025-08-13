@@ -1,4 +1,4 @@
-<!doctype html><meta charset='utf-8'><title>ref_vars – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: ref_vars</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.41</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*-
+<!doctype html><meta charset='utf-8'><title>ref_vars – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: ref_vars</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.56</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.46</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.60</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*- 
 
 DP_URL = '%sapp.finance.%s/data/stock/%s?day=&amp;page=%s'
 DP_163_URL = '%squotes.%s/data/caibao/%s?reportdate=%s&amp;sort=declaredate&amp;order=desc&amp;page=%s'
@@ -32,7 +32,7 @@ TERMINATED_COLS = ['code', 'name', 'oDate', 'tDate']
 DP_COLS = ['report_date', 'quarter', 'code', 'name', 'plan']
 DP_163_COLS = ['code', 'name', 'year', 'plan', 'report_date']
 XSG_COLS = ['code', 'name', 'date', 'count', 'ratio']
-QUARTS_DIC = {'1':('%s-12-31', '%s-03-31'), '2':('%s-03-31', '%s-06-30'),
+QUARTS_DIC = {'1':('%s-12-31', '%s-03-31'), '2':('%s-03-31', '%s-06-30'), 
               '3':('%s-06-30', '%s-09-30'), '4':('%s-9-30', '%s-12-31')}
 FUND_HOLDS_COLS = ['count', 'clast', 'date', 'ratio', 'amount', 'nums','nlast', 'name', 'code']
 NEW_STOCKS_COLS = ['code', 'xcode', 'name', 'ipo_date', 'issue_date', 'amount', 'markets', 'price', 'pe',
@@ -51,4 +51,4 @@ HSGT_TEMP = ['DateTime', 'GGHSMoney', 'GGSSMoney', 'HSMoney', 'SSMoney', 'NorthM
 HSGT_COLS = ['date', 'ggt_ss', 'ggt_sz', 'hgt', 'sgt', 'north_money', 'south_money']
 HSGT_REF = '%sdata.%s/hsgt/%s'
 HSGT_DATA = '%sdcfm.%s/EM_MutiSvcExpandInterface/api/js/get?type=HSGTZJZS&amp;token=70f12f2f4f091e459a279469fe49eca5'
-</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>
+</pre><div style='color:#666;font-size:12px'>Threshold 0.50. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

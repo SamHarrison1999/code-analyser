@@ -1,14 +1,14 @@
 {
   "filename": "ddgda",
   "probs": {
-    "sast_risk": 0.4059213399887085,
-    "ml_signal": 0.4997178614139557,
-    "best_practice": 0.5937408208847046
+    "sast_risk": 0.542117178440094,
+    "ml_signal": 0.44727659225463867,
+    "best_practice": 0.6140145659446716
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

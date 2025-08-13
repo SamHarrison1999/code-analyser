@@ -1,14 +1,14 @@
 {
   "filename": "keep_run_trader",
   "probs": {
-    "sast_risk": 0.3983197808265686,
-    "ml_signal": 0.4999411106109619,
-    "best_practice": 0.5873288512229919
+    "sast_risk": 0.5453885197639465,
+    "ml_signal": 0.44950759410858154,
+    "best_practice": 0.6109011173248291
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

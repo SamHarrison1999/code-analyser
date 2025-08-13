@@ -1,14 +1,14 @@
 {
   "filename": "pytorch_hist",
   "probs": {
-    "sast_risk": 0.39957159757614136,
-    "ml_signal": 0.49690505862236023,
-    "best_practice": 0.5895005464553833
+    "sast_risk": 0.5458624362945557,
+    "ml_signal": 0.4494790732860565,
+    "best_practice": 0.611621081829071
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

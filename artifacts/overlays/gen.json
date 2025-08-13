@@ -1,14 +1,14 @@
 {
   "filename": "gen",
   "probs": {
-    "sast_risk": 0.3963703513145447,
-    "ml_signal": 0.4997779428958893,
-    "best_practice": 0.586968719959259
+    "sast_risk": 0.5429171323776245,
+    "ml_signal": 0.45458218455314636,
+    "best_practice": 0.6141438484191895
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

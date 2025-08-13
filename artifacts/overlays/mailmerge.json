@@ -1,14 +1,14 @@
 {
   "filename": "mailmerge",
   "probs": {
-    "sast_risk": 0.403306245803833,
-    "ml_signal": 0.49830394983291626,
-    "best_practice": 0.5943738222122192
+    "sast_risk": 0.5485548973083496,
+    "ml_signal": 0.4522404968738556,
+    "best_practice": 0.6126204133033752
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

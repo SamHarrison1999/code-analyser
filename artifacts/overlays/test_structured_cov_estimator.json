@@ -1,14 +1,14 @@
 {
   "filename": "test_structured_cov_estimator",
   "probs": {
-    "sast_risk": 0.40045636892318726,
-    "ml_signal": 0.5010026097297668,
-    "best_practice": 0.5920341610908508
+    "sast_risk": 0.5485003590583801,
+    "ml_signal": 0.45176562666893005,
+    "best_practice": 0.6108397841453552
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

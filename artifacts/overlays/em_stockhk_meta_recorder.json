@@ -1,14 +1,14 @@
 {
   "filename": "em_stockhk_meta_recorder",
   "probs": {
-    "sast_risk": 0.40351271629333496,
-    "ml_signal": 0.5005728602409363,
-    "best_practice": 0.5876065492630005
+    "sast_risk": 0.5504964590072632,
+    "ml_signal": 0.4505569338798523,
+    "best_practice": 0.613281786441803
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

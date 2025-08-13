@@ -1,14 +1,14 @@
 {
   "filename": "qt",
   "probs": {
-    "sast_risk": 0.3977963328361511,
-    "ml_signal": 0.4978165924549103,
-    "best_practice": 0.5932154655456543
+    "sast_risk": 0.5436472296714783,
+    "ml_signal": 0.4487697184085846,
+    "best_practice": 0.6144346594810486
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

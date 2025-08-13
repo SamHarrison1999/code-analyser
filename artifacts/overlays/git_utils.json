@@ -1,14 +1,14 @@
 {
   "filename": "git_utils",
   "probs": {
-    "sast_risk": 0.39807450771331787,
-    "ml_signal": 0.49672508239746094,
-    "best_practice": 0.5848236083984375
+    "sast_risk": 0.5462053418159485,
+    "ml_signal": 0.4466056823730469,
+    "best_practice": 0.6075842976570129
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

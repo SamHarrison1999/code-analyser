@@ -1,14 +1,14 @@
 {
   "filename": "billboard_test",
   "probs": {
-    "sast_risk": 0.3919140696525574,
-    "ml_signal": 0.4992448687553406,
-    "best_practice": 0.5941953659057617
+    "sast_risk": 0.5487337708473206,
+    "ml_signal": 0.4463682770729065,
+    "best_practice": 0.6190409660339355
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

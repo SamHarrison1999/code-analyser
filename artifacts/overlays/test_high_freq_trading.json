@@ -1,14 +1,14 @@
 {
   "filename": "test_high_freq_trading",
   "probs": {
-    "sast_risk": 0.3927440047264099,
-    "ml_signal": 0.4977770149707794,
-    "best_practice": 0.5898341536521912
+    "sast_risk": 0.5480490326881409,
+    "ml_signal": 0.44431161880493164,
+    "best_practice": 0.6102766990661621
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

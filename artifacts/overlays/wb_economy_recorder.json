@@ -1,14 +1,14 @@
 {
   "filename": "wb_economy_recorder",
   "probs": {
-    "sast_risk": 0.3964751660823822,
-    "ml_signal": 0.4991888999938965,
-    "best_practice": 0.5906885266304016
+    "sast_risk": 0.5462584495544434,
+    "ml_signal": 0.4521588385105133,
+    "best_practice": 0.6129431128501892
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

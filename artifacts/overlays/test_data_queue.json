@@ -1,14 +1,14 @@
 {
   "filename": "test_data_queue",
   "probs": {
-    "sast_risk": 0.3996085524559021,
-    "ml_signal": 0.4992486834526062,
-    "best_practice": 0.5948119759559631
+    "sast_risk": 0.545177698135376,
+    "ml_signal": 0.45105651021003723,
+    "best_practice": 0.6141574382781982
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "network",
   "probs": {
-    "sast_risk": 0.40535885095596313,
-    "ml_signal": 0.4993443191051483,
-    "best_practice": 0.5938063263893127
+    "sast_risk": 0.5482330322265625,
+    "ml_signal": 0.4516204595565796,
+    "best_practice": 0.6078388690948486
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

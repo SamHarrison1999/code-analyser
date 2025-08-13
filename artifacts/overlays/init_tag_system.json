@@ -1,14 +1,14 @@
 {
   "filename": "init_tag_system",
   "probs": {
-    "sast_risk": 0.39912688732147217,
-    "ml_signal": 0.4998094439506531,
-    "best_practice": 0.5872355103492737
+    "sast_risk": 0.5483243465423584,
+    "ml_signal": 0.45571714639663696,
+    "best_practice": 0.5999818444252014
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

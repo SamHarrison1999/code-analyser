@@ -1,14 +1,14 @@
 {
   "filename": "qmt_quote",
   "probs": {
-    "sast_risk": 0.4059327244758606,
-    "ml_signal": 0.5007352232933044,
-    "best_practice": 0.5928232669830322
+    "sast_risk": 0.5481491684913635,
+    "ml_signal": 0.4577854871749878,
+    "best_practice": 0.6012106537818909
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

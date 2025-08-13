@@ -1,14 +1,14 @@
 {
   "filename": "run_client",
   "probs": {
-    "sast_risk": 0.4019180238246918,
-    "ml_signal": 0.49980220198631287,
-    "best_practice": 0.5793342590332031
+    "sast_risk": 0.5459059476852417,
+    "ml_signal": 0.4510284662246704,
+    "best_practice": 0.6127737760543823
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

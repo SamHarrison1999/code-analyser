@@ -1,14 +1,14 @@
 {
   "filename": "alpha_158",
   "probs": {
-    "sast_risk": 0.39267218112945557,
-    "ml_signal": 0.49581119418144226,
-    "best_practice": 0.5889362692832947
+    "sast_risk": 0.5428830981254578,
+    "ml_signal": 0.44427332282066345,
+    "best_practice": 0.613150417804718
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

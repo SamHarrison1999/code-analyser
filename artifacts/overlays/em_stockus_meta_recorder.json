@@ -1,14 +1,14 @@
 {
   "filename": "em_stockus_meta_recorder",
   "probs": {
-    "sast_risk": 0.3996310830116272,
-    "ml_signal": 0.5002015233039856,
-    "best_practice": 0.5860365629196167
+    "sast_risk": 0.5472465753555298,
+    "ml_signal": 0.4513608515262604,
+    "best_practice": 0.6129421591758728
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

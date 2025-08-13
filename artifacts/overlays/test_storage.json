@@ -1,14 +1,14 @@
 {
   "filename": "test_storage",
   "probs": {
-    "sast_risk": 0.4057880640029907,
-    "ml_signal": 0.4950690269470215,
-    "best_practice": 0.5911473035812378
+    "sast_risk": 0.5446939468383789,
+    "ml_signal": 0.4492107331752777,
+    "best_practice": 0.616142988204956
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

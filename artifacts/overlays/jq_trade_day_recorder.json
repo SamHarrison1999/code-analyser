@@ -1,14 +1,14 @@
 {
   "filename": "jq_trade_day_recorder",
   "probs": {
-    "sast_risk": 0.39206424355506897,
-    "ml_signal": 0.4978294372558594,
-    "best_practice": 0.5865095257759094
+    "sast_risk": 0.544139564037323,
+    "ml_signal": 0.44985440373420715,
+    "best_practice": 0.6073518991470337
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

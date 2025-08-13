@@ -1,14 +1,14 @@
 {
   "filename": "test_generator",
   "probs": {
-    "sast_risk": 0.39236247539520264,
-    "ml_signal": 0.4932178556919098,
-    "best_practice": 0.5958366394042969
+    "sast_risk": 0.5458792448043823,
+    "ml_signal": 0.44532546401023865,
+    "best_practice": 0.6023274660110474
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "objm",
   "probs": {
-    "sast_risk": 0.39478954672813416,
-    "ml_signal": 0.4970780611038208,
-    "best_practice": 0.5864230394363403
+    "sast_risk": 0.5468220114707947,
+    "ml_signal": 0.4458058774471283,
+    "best_practice": 0.6112449169158936
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

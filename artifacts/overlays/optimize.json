@@ -1,14 +1,14 @@
 {
   "filename": "optimize",
   "probs": {
-    "sast_risk": 0.4023492932319641,
-    "ml_signal": 0.496167927980423,
-    "best_practice": 0.5896235108375549
+    "sast_risk": 0.5438500046730042,
+    "ml_signal": 0.4518291652202606,
+    "best_practice": 0.6059752702713013
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

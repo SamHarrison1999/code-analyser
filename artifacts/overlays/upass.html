@@ -1,4 +1,4 @@
-<!doctype html><meta charset='utf-8'><title>upass – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: upass</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*-
+<!doctype html><meta charset='utf-8'><title>upass – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: upass</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.55</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.45</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.61</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*- 
 
 """
 Created on 2015/08/24
@@ -18,8 +18,8 @@ def set_token(token):
     user_home = os.path.expanduser('~')
     fp = os.path.join(user_home, ct.TOKEN_F_P)
     df.to_csv(fp, index=False)
-
-
+    
+    
 def get_token():
     user_home = os.path.expanduser('~')
     fp = os.path.join(user_home, ct.TOKEN_F_P)
@@ -32,7 +32,7 @@ def get_token():
 
 
 def set_broker(broker='', user='', passwd=''):
-    df = pd.DataFrame([[broker, user, passwd]],
+    df = pd.DataFrame([[broker, user, passwd]], 
                       columns=['broker', 'user', 'passwd'],
                       dtype=object)
     if os.path.exists(BK):
@@ -43,8 +43,8 @@ def set_broker(broker='', user='', passwd=''):
         all.to_csv(BK, index=False)
     else:
         df.to_csv(BK, index=False)
-
-
+        
+        
 def get_broker(broker=''):
     if os.path.exists(BK):
         df = pd.read_csv(BK, dtype=object)
@@ -54,9 +54,9 @@ def get_broker(broker=''):
             return  df[df.broker == broker]
     else:
         return None
-
-
+    
+    
 def remove_broker():
     os.remove(BK)
-
-</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>
+    
+</pre><div style='color:#666;font-size:12px'>Threshold 0.50. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

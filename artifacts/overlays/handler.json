@@ -1,14 +1,14 @@
 {
   "filename": "handler",
   "probs": {
-    "sast_risk": 0.4055815637111664,
-    "ml_signal": 0.4974832832813263,
-    "best_practice": 0.586470901966095
+    "sast_risk": 0.542542040348053,
+    "ml_signal": 0.45498591661453247,
+    "best_practice": 0.6075299382209778
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

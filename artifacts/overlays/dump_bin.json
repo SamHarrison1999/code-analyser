@@ -1,14 +1,14 @@
 {
   "filename": "dump_bin",
   "probs": {
-    "sast_risk": 0.40347471833229065,
-    "ml_signal": 0.49650341272354126,
-    "best_practice": 0.593052864074707
+    "sast_risk": 0.5478107333183289,
+    "ml_signal": 0.4537701904773712,
+    "best_practice": 0.5984674692153931
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

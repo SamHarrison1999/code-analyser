@@ -1,14 +1,14 @@
 {
   "filename": "simulator_simple",
   "probs": {
-    "sast_risk": 0.4075196087360382,
-    "ml_signal": 0.49838683009147644,
-    "best_practice": 0.5878348350524902
+    "sast_risk": 0.5436130166053772,
+    "ml_signal": 0.449706107378006,
+    "best_practice": 0.606151282787323
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

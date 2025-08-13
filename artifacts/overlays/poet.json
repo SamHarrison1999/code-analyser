@@ -1,14 +1,14 @@
 {
   "filename": "poet",
   "probs": {
-    "sast_risk": 0.4027545750141144,
-    "ml_signal": 0.49918878078460693,
-    "best_practice": 0.5908516645431519
+    "sast_risk": 0.5485949516296387,
+    "ml_signal": 0.44983434677124023,
+    "best_practice": 0.6078538298606873
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

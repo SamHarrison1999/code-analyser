@@ -1,14 +1,14 @@
 {
   "filename": "highfreq_handler",
   "probs": {
-    "sast_risk": 0.39122021198272705,
-    "ml_signal": 0.4994366466999054,
-    "best_practice": 0.585116982460022
+    "sast_risk": 0.5421886444091797,
+    "ml_signal": 0.44546809792518616,
+    "best_practice": 0.6112735271453857
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

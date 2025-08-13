@@ -1,4 +1,4 @@
-<!doctype html><meta charset='utf-8'><title>macro_test – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: macro_test</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.39</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*-
+<!doctype html><meta charset='utf-8'><title>macro_test – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: macro_test</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.55</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.45</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.62</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*- 
 '''
 Created on 2015/3/14
 @author: Jimmy Liu
@@ -10,41 +10,41 @@ class Test(unittest.TestCase):
 
     def test_get_gdp_year(self):
         print(fd.get_gdp_year())
-
+              
     def test_get_gdp_quarter(self):
         print(fd.get_gdp_quarter())
-
+         
     def test_get_gdp_for(self):
         print(fd.get_gdp_for())
-
+     
     def test_get_gdp_pull(self):
         print(fd.get_gdp_pull())
-
+         
     def test_get_gdp_contrib(self):
         print(fd.get_gdp_contrib())
-
+         
     def test_get_cpi(self):
         print(fd.get_cpi())
-
+         
     def test_get_ppi(self):
         print(fd.get_ppi())
-
+         
     def test_get_deposit_rate(self):
         print(fd.get_deposit_rate())
-
+         
     def test_get_loan_rate(self):
         print(fd.get_loan_rate())
-
+         
     def test_get_rrr(self):
         print(fd.get_rrr())
-
+         
     def test_get_money_supply(self):
         print(fd.get_money_supply())
-
+          
     def test_get_money_supply_bal(self):
         print(fd.get_money_supply_bal())
-
-
+        
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>
+    unittest.main()</pre><div style='color:#666;font-size:12px'>Threshold 0.50. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

@@ -1,14 +1,14 @@
 {
   "filename": "sina_stock_money_flow_recorder",
   "probs": {
-    "sast_risk": 0.40045011043548584,
-    "ml_signal": 0.5021610856056213,
-    "best_practice": 0.5891199111938477
+    "sast_risk": 0.5504159927368164,
+    "ml_signal": 0.45133858919143677,
+    "best_practice": 0.6087658405303955
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

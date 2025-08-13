@@ -1,14 +1,14 @@
 {
   "filename": "trader_models",
   "probs": {
-    "sast_risk": 0.40340739488601685,
-    "ml_signal": 0.4923502802848816,
-    "best_practice": 0.5878074169158936
+    "sast_risk": 0.5479442477226257,
+    "ml_signal": 0.4489877223968506,
+    "best_practice": 0.6052586436271667
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

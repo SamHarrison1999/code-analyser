@@ -1,14 +1,14 @@
 {
   "filename": "test_pit",
   "probs": {
-    "sast_risk": 0.4063369333744049,
-    "ml_signal": 0.5016331672668457,
-    "best_practice": 0.5965207815170288
+    "sast_risk": 0.538713276386261,
+    "ml_signal": 0.4476308822631836,
+    "best_practice": 0.6163281202316284
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

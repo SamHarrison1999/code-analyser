@@ -1,14 +1,14 @@
 {
   "filename": "event",
   "probs": {
-    "sast_risk": 0.39660152792930603,
-    "ml_signal": 0.4909364879131317,
-    "best_practice": 0.5975313782691956
+    "sast_risk": 0.5366026163101196,
+    "ml_signal": 0.4469122290611267,
+    "best_practice": 0.5967056155204773
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

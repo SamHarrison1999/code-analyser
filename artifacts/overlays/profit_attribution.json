@@ -1,14 +1,14 @@
 {
   "filename": "profit_attribution",
   "probs": {
-    "sast_risk": 0.39692622423171997,
-    "ml_signal": 0.4944911301136017,
-    "best_practice": 0.5889633893966675
+    "sast_risk": 0.5473135709762573,
+    "ml_signal": 0.4461664855480194,
+    "best_practice": 0.6106160879135132
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

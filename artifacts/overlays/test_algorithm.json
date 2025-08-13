@@ -1,14 +1,14 @@
 {
   "filename": "test_algorithm",
   "probs": {
-    "sast_risk": 0.4063471555709839,
-    "ml_signal": 0.5061366558074951,
-    "best_practice": 0.5860251784324646
+    "sast_risk": 0.5450606942176819,
+    "ml_signal": 0.45765843987464905,
+    "best_practice": 0.5999212861061096
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

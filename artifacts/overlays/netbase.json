@@ -1,14 +1,14 @@
 {
   "filename": "netbase",
   "probs": {
-    "sast_risk": 0.3949432373046875,
-    "ml_signal": 0.49906298518180847,
-    "best_practice": 0.5873575806617737
+    "sast_risk": 0.5463228821754456,
+    "ml_signal": 0.4408515393733978,
+    "best_practice": 0.607234001159668
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

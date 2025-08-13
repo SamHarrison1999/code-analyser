@@ -1,14 +1,14 @@
 {
   "filename": "test_factors",
   "probs": {
-    "sast_risk": 0.3902433216571808,
-    "ml_signal": 0.49826037883758545,
-    "best_practice": 0.5851834416389465
+    "sast_risk": 0.5443342924118042,
+    "ml_signal": 0.4461286962032318,
+    "best_practice": 0.6123092770576477
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

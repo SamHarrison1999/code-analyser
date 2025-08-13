@@ -1,14 +1,14 @@
 {
   "filename": "single_order",
   "probs": {
-    "sast_risk": 0.39521199464797974,
-    "ml_signal": 0.49544844031333923,
-    "best_practice": 0.58995121717453
+    "sast_risk": 0.5468965172767639,
+    "ml_signal": 0.44414493441581726,
+    "best_practice": 0.6164214611053467
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

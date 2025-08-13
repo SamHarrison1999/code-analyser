@@ -1,14 +1,14 @@
 {
   "filename": "macd_week_and_day_trader",
   "probs": {
-    "sast_risk": 0.39808720350265503,
-    "ml_signal": 0.4961377680301666,
-    "best_practice": 0.5860563516616821
+    "sast_risk": 0.5452643036842346,
+    "ml_signal": 0.4442919194698334,
+    "best_practice": 0.6086916923522949
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

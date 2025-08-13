@@ -1,14 +1,14 @@
 {
   "filename": "pytorch_adarnn",
   "probs": {
-    "sast_risk": 0.39987343549728394,
-    "ml_signal": 0.49841809272766113,
-    "best_practice": 0.5909442901611328
+    "sast_risk": 0.5472748875617981,
+    "ml_signal": 0.4466111660003662,
+    "best_practice": 0.6133217215538025
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

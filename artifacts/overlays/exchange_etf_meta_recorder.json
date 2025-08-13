@@ -1,14 +1,14 @@
 {
   "filename": "exchange_etf_meta_recorder",
   "probs": {
-    "sast_risk": 0.4003736078739166,
-    "ml_signal": 0.4999152421951294,
-    "best_practice": 0.5928819179534912
+    "sast_risk": 0.546470582485199,
+    "ml_signal": 0.4542575180530548,
+    "best_practice": 0.6108720898628235
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

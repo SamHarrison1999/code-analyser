@@ -1,14 +1,14 @@
 {
   "filename": "reward",
   "probs": {
-    "sast_risk": 0.40151357650756836,
-    "ml_signal": 0.4974764585494995,
-    "best_practice": 0.5907111167907715
+    "sast_risk": 0.5455094575881958,
+    "ml_signal": 0.4525643587112427,
+    "best_practice": 0.6081022620201111
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

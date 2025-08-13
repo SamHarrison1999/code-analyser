@@ -1,14 +1,14 @@
 {
   "filename": "pytorch_sandwich",
   "probs": {
-    "sast_risk": 0.3977506160736084,
-    "ml_signal": 0.49743178486824036,
-    "best_practice": 0.5892584323883057
+    "sast_risk": 0.5465351939201355,
+    "ml_signal": 0.4480227530002594,
+    "best_practice": 0.6097154021263123
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

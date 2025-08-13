@@ -1,14 +1,14 @@
 {
   "filename": "test_datalayer",
   "probs": {
-    "sast_risk": 0.40122535824775696,
-    "ml_signal": 0.4958648979663849,
-    "best_practice": 0.5911372900009155
+    "sast_risk": 0.5445366501808167,
+    "ml_signal": 0.44936704635620117,
+    "best_practice": 0.6146649122238159
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

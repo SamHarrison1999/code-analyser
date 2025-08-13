@@ -1,14 +1,14 @@
 {
   "filename": "algorithm",
   "probs": {
-    "sast_risk": 0.40340474247932434,
-    "ml_signal": 0.49527257680892944,
-    "best_practice": 0.5919651985168457
+    "sast_risk": 0.5476381182670593,
+    "ml_signal": 0.4542059898376465,
+    "best_practice": 0.6074737310409546
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

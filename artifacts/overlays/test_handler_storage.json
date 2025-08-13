@@ -1,14 +1,14 @@
 {
   "filename": "test_handler_storage",
   "probs": {
-    "sast_risk": 0.3922387659549713,
-    "ml_signal": 0.49851295351982117,
-    "best_practice": 0.5866079926490784
+    "sast_risk": 0.543429970741272,
+    "ml_signal": 0.4432981610298157,
+    "best_practice": 0.6115603446960449
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

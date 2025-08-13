@@ -1,14 +1,14 @@
 {
   "filename": "pytorch_utils",
   "probs": {
-    "sast_risk": 0.40244260430336,
-    "ml_signal": 0.507129430770874,
-    "best_practice": 0.589448869228363
+    "sast_risk": 0.54705411195755,
+    "ml_signal": 0.4516139030456543,
+    "best_practice": 0.6104952692985535
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

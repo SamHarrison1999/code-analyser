@@ -1,14 +1,14 @@
 {
   "filename": "merge_orders",
   "probs": {
-    "sast_risk": 0.39662644267082214,
-    "ml_signal": 0.4969528615474701,
-    "best_practice": 0.5952778458595276
+    "sast_risk": 0.5423102378845215,
+    "ml_signal": 0.45034059882164,
+    "best_practice": 0.6148754954338074
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

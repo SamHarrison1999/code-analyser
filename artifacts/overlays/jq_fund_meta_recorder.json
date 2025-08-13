@@ -1,14 +1,14 @@
 {
   "filename": "jq_fund_meta_recorder",
   "probs": {
-    "sast_risk": 0.4022570550441742,
-    "ml_signal": 0.49875035881996155,
-    "best_practice": 0.5872127413749695
+    "sast_risk": 0.5467918515205383,
+    "ml_signal": 0.4510760009288788,
+    "best_practice": 0.6117162704467773
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

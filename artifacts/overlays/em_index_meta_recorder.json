@@ -1,14 +1,14 @@
 {
   "filename": "em_index_meta_recorder",
   "probs": {
-    "sast_risk": 0.39736834168434143,
-    "ml_signal": 0.5012650489807129,
-    "best_practice": 0.5868245959281921
+    "sast_risk": 0.5433447360992432,
+    "ml_signal": 0.45265939831733704,
+    "best_practice": 0.6132300496101379
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

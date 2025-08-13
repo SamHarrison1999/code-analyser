@@ -1,14 +1,14 @@
 {
   "filename": "datafeed",
   "probs": {
-    "sast_risk": 0.3974183201789856,
-    "ml_signal": 0.4974810481071472,
-    "best_practice": 0.5853819847106934
+    "sast_risk": 0.5480004549026489,
+    "ml_signal": 0.45091596245765686,
+    "best_practice": 0.6140583157539368
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

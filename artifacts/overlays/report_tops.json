@@ -1,14 +1,14 @@
 {
   "filename": "report_tops",
   "probs": {
-    "sast_risk": 0.4036329388618469,
-    "ml_signal": 0.4975813627243042,
-    "best_practice": 0.5928393006324768
+    "sast_risk": 0.5464475154876709,
+    "ml_signal": 0.45099925994873047,
+    "best_practice": 0.6044954657554626
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

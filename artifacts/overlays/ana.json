@@ -1,14 +1,14 @@
 {
   "filename": "ana",
   "probs": {
-    "sast_risk": 0.40312185883522034,
-    "ml_signal": 0.5011707544326782,
-    "best_practice": 0.5928903818130493
+    "sast_risk": 0.5482019186019897,
+    "ml_signal": 0.45173320174217224,
+    "best_practice": 0.6140161156654358
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

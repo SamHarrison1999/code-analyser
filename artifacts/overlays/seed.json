@@ -1,14 +1,14 @@
 {
   "filename": "seed",
   "probs": {
-    "sast_risk": 0.40772438049316406,
-    "ml_signal": 0.4852818250656128,
-    "best_practice": 0.5929080843925476
+    "sast_risk": 0.5406250953674316,
+    "ml_signal": 0.45099520683288574,
+    "best_practice": 0.6062085032463074
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

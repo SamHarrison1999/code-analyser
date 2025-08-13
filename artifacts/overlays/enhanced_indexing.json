@@ -1,14 +1,14 @@
 {
   "filename": "enhanced_indexing",
   "probs": {
-    "sast_risk": 0.40266257524490356,
-    "ml_signal": 0.5007708668708801,
-    "best_practice": 0.5896684527397156
+    "sast_risk": 0.5423944592475891,
+    "ml_signal": 0.4482440650463104,
+    "best_practice": 0.6080650687217712
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

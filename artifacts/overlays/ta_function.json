@@ -1,14 +1,14 @@
 {
   "filename": "ta_function",
   "probs": {
-    "sast_risk": 0.405337393283844,
-    "ml_signal": 0.4948982298374176,
-    "best_practice": 0.589012086391449
+    "sast_risk": 0.5468859076499939,
+    "ml_signal": 0.4557654857635498,
+    "best_practice": 0.6130847930908203
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

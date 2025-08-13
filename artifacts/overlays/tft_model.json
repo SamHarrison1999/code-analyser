@@ -1,14 +1,14 @@
 {
   "filename": "tft_model",
   "probs": {
-    "sast_risk": 0.4112509489059448,
-    "ml_signal": 0.490975558757782,
-    "best_practice": 0.5990129709243774
+    "sast_risk": 0.5416737198829651,
+    "ml_signal": 0.45982834696769714,
+    "best_practice": 0.6048961877822876
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "pytorch_transformer_ts",
   "probs": {
-    "sast_risk": 0.3983590304851532,
-    "ml_signal": 0.49516603350639343,
-    "best_practice": 0.5890333652496338
+    "sast_risk": 0.544090986251831,
+    "ml_signal": 0.44943350553512573,
+    "best_practice": 0.6089970469474792
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

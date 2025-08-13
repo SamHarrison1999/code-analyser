@@ -1,14 +1,14 @@
 {
   "filename": "eastmoney_cash_flow_recorder",
   "probs": {
-    "sast_risk": 0.40734341740608215,
-    "ml_signal": 0.4945771396160126,
-    "best_practice": 0.5850110650062561
+    "sast_risk": 0.541427493095398,
+    "ml_signal": 0.4514767527580261,
+    "best_practice": 0.6102935671806335
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

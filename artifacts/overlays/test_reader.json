@@ -1,14 +1,14 @@
 {
   "filename": "test_reader",
   "probs": {
-    "sast_risk": 0.39564475417137146,
-    "ml_signal": 0.4975166320800781,
-    "best_practice": 0.5913708806037903
+    "sast_risk": 0.5492188334465027,
+    "ml_signal": 0.4524034559726715,
+    "best_practice": 0.6096972227096558
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

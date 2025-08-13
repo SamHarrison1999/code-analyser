@@ -1,14 +1,14 @@
 {
   "filename": "test_meta_recorder",
   "probs": {
-    "sast_risk": 0.40005555748939514,
-    "ml_signal": 0.49669644236564636,
-    "best_practice": 0.5851563811302185
+    "sast_risk": 0.5494929552078247,
+    "ml_signal": 0.45519018173217773,
+    "best_practice": 0.606244683265686
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

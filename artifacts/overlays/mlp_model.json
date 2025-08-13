@@ -1,14 +1,14 @@
 {
   "filename": "mlp_model",
   "probs": {
-    "sast_risk": 0.3995334804058075,
-    "ml_signal": 0.4952942132949829,
-    "best_practice": 0.5926024913787842
+    "sast_risk": 0.5436761975288391,
+    "ml_signal": 0.45247355103492737,
+    "best_practice": 0.609050989151001
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "joinquant_fund_runner",
   "probs": {
-    "sast_risk": 0.39972347021102905,
-    "ml_signal": 0.49715012311935425,
-    "best_practice": 0.5926227569580078
+    "sast_risk": 0.5388597249984741,
+    "ml_signal": 0.44588255882263184,
+    "best_practice": 0.6033792495727539
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

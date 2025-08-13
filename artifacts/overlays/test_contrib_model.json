@@ -1,14 +1,14 @@
 {
   "filename": "test_contrib_model",
   "probs": {
-    "sast_risk": 0.3951961100101471,
-    "ml_signal": 0.5005141496658325,
-    "best_practice": 0.5863440632820129
+    "sast_risk": 0.5523964762687683,
+    "ml_signal": 0.44801145792007446,
+    "best_practice": 0.6149967312812805
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

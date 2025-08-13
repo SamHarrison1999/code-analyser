@@ -1,14 +1,14 @@
 {
   "filename": "gbdt",
   "probs": {
-    "sast_risk": 0.39736562967300415,
-    "ml_signal": 0.4970698356628418,
-    "best_practice": 0.5888055562973022
+    "sast_risk": 0.5455288290977478,
+    "ml_signal": 0.44897544384002686,
+    "best_practice": 0.6130453944206238
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

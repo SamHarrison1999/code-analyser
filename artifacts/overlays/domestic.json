@@ -1,14 +1,14 @@
 {
   "filename": "domestic",
   "probs": {
-    "sast_risk": 0.39832666516304016,
-    "ml_signal": 0.4938734173774719,
-    "best_practice": 0.5906593799591064
+    "sast_risk": 0.5441532135009766,
+    "ml_signal": 0.44818633794784546,
+    "best_practice": 0.6066455841064453
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

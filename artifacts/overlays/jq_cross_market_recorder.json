@@ -1,14 +1,14 @@
 {
   "filename": "jq_cross_market_recorder",
   "probs": {
-    "sast_risk": 0.3944282531738281,
-    "ml_signal": 0.5006250143051147,
-    "best_practice": 0.586722731590271
+    "sast_risk": 0.5413172245025635,
+    "ml_signal": 0.45136478543281555,
+    "best_practice": 0.6110535860061646
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

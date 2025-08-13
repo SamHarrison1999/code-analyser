@@ -1,14 +1,14 @@
 {
   "filename": "em_future_meta_recorder",
   "probs": {
-    "sast_risk": 0.39904069900512695,
-    "ml_signal": 0.5018163919448853,
-    "best_practice": 0.5878746509552002
+    "sast_risk": 0.544104278087616,
+    "ml_signal": 0.45269545912742615,
+    "best_practice": 0.6121556162834167
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "future_calendar_collector",
   "probs": {
-    "sast_risk": 0.3996344208717346,
-    "ml_signal": 0.49523937702178955,
-    "best_practice": 0.5921351313591003
+    "sast_risk": 0.5462811589241028,
+    "ml_signal": 0.4436187148094177,
+    "best_practice": 0.6119717955589294
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

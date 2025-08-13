@@ -1,14 +1,14 @@
 {
   "filename": "eastmoney_stock_meta_recorder",
   "probs": {
-    "sast_risk": 0.3980157971382141,
-    "ml_signal": 0.5006017088890076,
-    "best_practice": 0.588899552822113
+    "sast_risk": 0.5482677221298218,
+    "ml_signal": 0.45248329639434814,
+    "best_practice": 0.6102833151817322
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

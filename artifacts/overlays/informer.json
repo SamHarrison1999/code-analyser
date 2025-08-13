@@ -1,14 +1,14 @@
 {
   "filename": "informer",
   "probs": {
-    "sast_risk": 0.3951106071472168,
-    "ml_signal": 0.5030059218406677,
-    "best_practice": 0.5907586812973022
+    "sast_risk": 0.5459833145141602,
+    "ml_signal": 0.4490344226360321,
+    "best_practice": 0.6075992584228516
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

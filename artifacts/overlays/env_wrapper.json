@@ -1,14 +1,14 @@
 {
   "filename": "env_wrapper",
   "probs": {
-    "sast_risk": 0.40926045179367065,
-    "ml_signal": 0.49558672308921814,
-    "best_practice": 0.5970644950866699
+    "sast_risk": 0.5422094464302063,
+    "ml_signal": 0.45464473962783813,
+    "best_practice": 0.6061208248138428
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

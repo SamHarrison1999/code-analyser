@@ -1,14 +1,14 @@
 {
   "filename": "converter",
   "probs": {
-    "sast_risk": 0.400116890668869,
-    "ml_signal": 0.4961301386356354,
-    "best_practice": 0.5920493602752686
+    "sast_risk": 0.5462427139282227,
+    "ml_signal": 0.4444369077682495,
+    "best_practice": 0.6130961179733276
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

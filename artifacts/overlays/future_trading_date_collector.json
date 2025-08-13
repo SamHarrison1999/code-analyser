@@ -1,14 +1,14 @@
 {
   "filename": "future_trading_date_collector",
   "probs": {
-    "sast_risk": 0.4072742164134979,
-    "ml_signal": 0.49429580569267273,
-    "best_practice": 0.5975938439369202
+    "sast_risk": 0.5400479435920715,
+    "ml_signal": 0.45463359355926514,
+    "best_practice": 0.6109311580657959
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

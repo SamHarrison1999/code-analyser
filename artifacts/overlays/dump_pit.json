@@ -1,14 +1,14 @@
 {
   "filename": "dump_pit",
   "probs": {
-    "sast_risk": 0.403321236371994,
-    "ml_signal": 0.49762240052223206,
-    "best_practice": 0.592266321182251
+    "sast_risk": 0.5455982685089111,
+    "ml_signal": 0.44816917181015015,
+    "best_practice": 0.6109305620193481
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

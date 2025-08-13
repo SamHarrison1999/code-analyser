@@ -1,14 +1,14 @@
 {
   "filename": "test_joinquant_quotes",
   "probs": {
-    "sast_risk": 0.4003830850124359,
-    "ml_signal": 0.5018916726112366,
-    "best_practice": 0.5888980031013489
+    "sast_risk": 0.5486748218536377,
+    "ml_signal": 0.45093515515327454,
+    "best_practice": 0.6079705953598022
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

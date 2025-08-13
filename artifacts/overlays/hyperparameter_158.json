@@ -1,14 +1,14 @@
 {
   "filename": "hyperparameter_158",
   "probs": {
-    "sast_risk": 0.391263872385025,
-    "ml_signal": 0.49810630083084106,
-    "best_practice": 0.5894606709480286
+    "sast_risk": 0.5423645377159119,
+    "ml_signal": 0.4465967118740082,
+    "best_practice": 0.6091096997261047
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

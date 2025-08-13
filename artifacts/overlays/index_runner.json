@@ -1,14 +1,14 @@
 {
   "filename": "index_runner",
   "probs": {
-    "sast_risk": 0.40542295575141907,
-    "ml_signal": 0.5010898113250732,
-    "best_practice": 0.5885272026062012
+    "sast_risk": 0.543964147567749,
+    "ml_signal": 0.45455461740493774,
+    "best_practice": 0.6103570461273193
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

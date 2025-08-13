@@ -1,14 +1,14 @@
 {
   "filename": "app",
   "probs": {
-    "sast_risk": 0.39021268486976624,
-    "ml_signal": 0.4942392408847809,
-    "best_practice": 0.5810121893882751
+    "sast_risk": 0.5567019581794739,
+    "ml_signal": 0.43537020683288574,
+    "best_practice": 0.6080508232116699
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

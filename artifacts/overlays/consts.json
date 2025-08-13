@@ -1,14 +1,14 @@
 {
   "filename": "consts",
   "probs": {
-    "sast_risk": 0.41059303283691406,
-    "ml_signal": 0.4966866374015808,
-    "best_practice": 0.5942155718803406
+    "sast_risk": 0.5514178276062012,
+    "ml_signal": 0.4611448347568512,
+    "best_practice": 0.6025513410568237
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

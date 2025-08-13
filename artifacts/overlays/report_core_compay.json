@@ -1,14 +1,14 @@
 {
   "filename": "report_core_compay",
   "probs": {
-    "sast_risk": 0.4006199240684509,
-    "ml_signal": 0.5007217526435852,
-    "best_practice": 0.5925112366676331
+    "sast_risk": 0.5440537333488464,
+    "ml_signal": 0.4501632750034332,
+    "best_practice": 0.6077816486358643
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

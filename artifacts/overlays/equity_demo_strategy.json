@@ -1,14 +1,14 @@
 {
   "filename": "equity_demo_strategy",
   "probs": {
-    "sast_risk": 0.3966993987560272,
-    "ml_signal": 0.49673616886138916,
-    "best_practice": 0.5873525738716125
+    "sast_risk": 0.5507463812828064,
+    "ml_signal": 0.4444178342819214,
+    "best_practice": 0.6117954850196838
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

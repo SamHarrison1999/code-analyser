@@ -1,14 +1,14 @@
 {
   "filename": "lasso_model",
   "probs": {
-    "sast_risk": 0.3955676257610321,
-    "ml_signal": 0.4970850348472595,
-    "best_practice": 0.5870386958122253
+    "sast_risk": 0.5434686541557312,
+    "ml_signal": 0.44514358043670654,
+    "best_practice": 0.6106090545654297
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

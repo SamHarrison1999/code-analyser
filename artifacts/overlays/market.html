@@ -1,5 +1,5 @@
-<!doctype html><meta charset='utf-8'><title>market – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: market</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>#!/usr/bin/env python
-# -*- coding:utf-8 -*-
+<!doctype html><meta charset='utf-8'><title>market – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: market</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.55</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.45</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.61</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>#!/usr/bin/env python
+# -*- coding:utf-8 -*- 
 """
 数字货币行情数据
 Created on 2017年9月9日
@@ -80,7 +80,7 @@ KTYPES = {
                    'ok'    : '1hour',
                    'chbtc' : '1hour',
                    },
-          }
+          } 
 
 
 def coins_tick(broker='hb', code='btc'):
@@ -93,7 +93,7 @@ def coins_tick(broker='hb', code='btc'):
             chbtc:中国比特币
     code: hb:btc,ltc
         ----okcoin---
-        btc_cny：比特币    ltc_cny：莱特币    eth_cny :以太坊     etc_cny :以太经典    bcc_cny :比特现金
+        btc_cny：比特币    ltc_cny：莱特币    eth_cny :以太坊     etc_cny :以太经典    bcc_cny :比特现金 
         ----chbtc----
         btc_cny:BTC/CNY
         ltc_cny :LTC/CNY
@@ -132,23 +132,23 @@ def coins_tick(broker='hb', code='btc'):
         "vol":"20767.734"
         }
     }
-    chbtc:
+    chbtc: 
         {
          u'date': u'1504794151878',
          u'ticker': {
-             u'sell': u'28859.56',
-             u'buy': u'28822.89',
-             u'last': u'28859.56',
-             u'vol': u'2702.71',
-             u'high': u'29132',
+             u'sell': u'28859.56', 
+             u'buy': u'28822.89', 
+             u'last': u'28859.56', 
+             u'vol': u'2702.71', 
+             u'high': u'29132', 
              u'low': u'27929'
          }
         }
 
-
+        
     """
     return _get_data(URL[broker]['rt'] % (code))
-
+            
 def coins_bar(broker='hb', code='btc', ktype='D', size='2000'):
     """
             获取各类k线数据
@@ -198,7 +198,7 @@ def coins_snapshot(broker='hb', code='btc', size='5'):
             timestr = js['ts']
             timestr = int2time(timestr / 1000)
         if broker == 'ok':
-            timestr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            timestr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) 
         if broker == 'chbtc':
             timestr = js['timestamp']
             timestr = int2time(timestr)
@@ -220,12 +220,12 @@ def coins_trade(broker='hb', code='btc'):
     -------------
     broker: hb,ok,chbtc
     code:btc,ltc,eth,etc,bcc
-
+    
     return:
     ---------------
     DataFrame
     'tid':order id
-    'datetime', date time
+    'datetime', date time 
     'price' : trade price
     'amount' : trade amount
     'type' : buy or sell
@@ -266,4 +266,4 @@ def int2time(timestamp):
     dt = time.strftime('%Y-%m-%d %H:%M:%S', value)
     return dt
 
-</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>
+</pre><div style='color:#666;font-size:12px'>Threshold 0.50. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

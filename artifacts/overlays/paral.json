@@ -1,14 +1,14 @@
 {
   "filename": "paral",
   "probs": {
-    "sast_risk": 0.4035327434539795,
-    "ml_signal": 0.49724915623664856,
-    "best_practice": 0.5932806134223938
+    "sast_risk": 0.544974684715271,
+    "ml_signal": 0.44725483655929565,
+    "best_practice": 0.6064247488975525
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

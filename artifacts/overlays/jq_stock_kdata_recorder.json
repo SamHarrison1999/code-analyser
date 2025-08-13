@@ -1,14 +1,14 @@
 {
   "filename": "jq_stock_kdata_recorder",
   "probs": {
-    "sast_risk": 0.40146178007125854,
-    "ml_signal": 0.49893084168434143,
-    "best_practice": 0.5906754732131958
+    "sast_risk": 0.5428807139396667,
+    "ml_signal": 0.45742374658584595,
+    "best_practice": 0.6088079810142517
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "migration",
   "probs": {
-    "sast_risk": 0.3998990058898926,
-    "ml_signal": 0.5010201334953308,
-    "best_practice": 0.5925164818763733
+    "sast_risk": 0.5410963296890259,
+    "ml_signal": 0.45260030031204224,
+    "best_practice": 0.6095162034034729
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

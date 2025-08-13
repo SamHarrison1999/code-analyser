@@ -1,6 +1,6 @@
-<!doctype html><meta charset='utf-8'><title>boxoffice – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: boxoffice</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.58</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*-
+<!doctype html><meta charset='utf-8'><title>boxoffice – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: boxoffice</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.55</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.45</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.61</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*- 
 """
-电影票房
+电影票房 
 Created on 2015/12/24
 @author: Jimmy Liu
 @group : waditu
@@ -28,13 +28,13 @@ def realtime_boxoffice(retry_count=3,pause=0.001):
                  重复请求数据过程中暂停的秒数，防止请求间隔时间太短出现的问题
      return
      -------
-        DataFrame
-              BoxOffice     实时票房（万）
+        DataFrame 
+              BoxOffice     实时票房（万） 
               Irank         排名
-              MovieName     影片名
+              MovieName     影片名 
               boxPer        票房占比 （%）
               movieDay      上映天数
-              sumBoxOffice  累计票房（万）
+              sumBoxOffice  累计票房（万） 
               time          数据获取时间
     """
     for _ in range(retry_count):
@@ -68,16 +68,16 @@ def day_boxoffice(date=None, retry_count=3, pause=0.001):
                  重复请求数据过程中暂停的秒数，防止请求间隔时间太短出现的问题
      return
      -------
-        DataFrame
+        DataFrame 
               AvgPrice      平均票价
               AvpPeoPle     场均人次
               BoxOffice     单日票房（万）
               BoxOffice_Up  环比变化 （%）
               IRank         排名
               MovieDay      上映天数
-              MovieName     影片名
-              SumBoxOffice  累计票房（万）
-              WomIndex      口碑指数
+              MovieName     影片名 
+              SumBoxOffice  累计票房（万） 
+              WomIndex      口碑指数 
     """
     for _ in range(retry_count):
         time.sleep(pause)
@@ -86,7 +86,7 @@ def day_boxoffice(date=None, retry_count=3, pause=0.001):
                 date = 0
             else:
                 date = int(du.diff_day(du.today(), date)) + 1
-
+                
             request = Request(ct.BOXOFFICE_DAY%(ct.P_TYPE['http'], ct.DOMAINS['mbox'],
                               ct.BOX, date, _random()))
             lines = urlopen(request, timeout = 10).read()
@@ -114,19 +114,19 @@ def month_boxoffice(date=None, retry_count=3, pause=0.001):
                  重复请求数据过程中暂停的秒数，防止请求间隔时间太短出现的问题
      return
      -------
-        DataFrame
+        DataFrame 
               Irank         排名
               MovieName     电影名称
               WomIndex      口碑指数
               avgboxoffice  平均票价
               avgshowcount  场均人次
               box_pro       月度占比
-              boxoffice     单月票房(万)
+              boxoffice     单月票房(万)     
               days          月内天数
               releaseTime   上映日期
     """
     if date is None:
-        date = du.day_last_week(-30)[0:7]
+        date = du.day_last_week(-30)[0:7] 
     elif len(date)&gt;8:
         print(ct.BOX_INPUT_ERR_MSG)
         return
@@ -161,10 +161,10 @@ def day_cinema(date=None, retry_count=3, pause=0.001):
                      重复请求数据过程中暂停的秒数，防止请求间隔时间太短出现的问题
          return
          -------
-            DataFrame
+            DataFrame 
                   Attendance         上座率
                   AvgPeople          场均人次
-                  CinemaName         影院名称
+                  CinemaName         影院名称  
                   RowNum             排名
                   TodayAudienceCount 当日观众人数
                   TodayBox           当日票房
@@ -208,4 +208,4 @@ def _random(n=13):
     start = 10**(n-1)
     end = (10**n)-1
     return str(randint(start, end))
-</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>
+</pre><div style='color:#666;font-size:12px'>Threshold 0.50. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

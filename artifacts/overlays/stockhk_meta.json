@@ -1,14 +1,14 @@
 {
   "filename": "stockhk_meta",
   "probs": {
-    "sast_risk": 0.39803212881088257,
-    "ml_signal": 0.4966857433319092,
-    "best_practice": 0.5889780521392822
+    "sast_risk": 0.5504465103149414,
+    "ml_signal": 0.4483947157859802,
+    "best_practice": 0.6071383357048035
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "double_ensemble",
   "probs": {
-    "sast_risk": 0.39512649178504944,
-    "ml_signal": 0.4969993829727173,
-    "best_practice": 0.5866889357566833
+    "sast_risk": 0.5433618426322937,
+    "ml_signal": 0.44733965396881104,
+    "best_practice": 0.6093577742576599
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

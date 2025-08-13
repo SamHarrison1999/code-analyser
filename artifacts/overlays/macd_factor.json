@@ -1,14 +1,14 @@
 {
   "filename": "macd_factor",
   "probs": {
-    "sast_risk": 0.3971264660358429,
-    "ml_signal": 0.4994734227657318,
-    "best_practice": 0.5906160473823547
+    "sast_risk": 0.5459877252578735,
+    "ml_signal": 0.4503317177295685,
+    "best_practice": 0.6113744974136353
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "country_meta",
   "probs": {
-    "sast_risk": 0.401056170463562,
-    "ml_signal": 0.4966989755630493,
-    "best_practice": 0.5921664237976074
+    "sast_risk": 0.5426872372627258,
+    "ml_signal": 0.44872209429740906,
+    "best_practice": 0.6053374409675598
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

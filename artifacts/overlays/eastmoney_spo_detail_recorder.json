@@ -1,14 +1,14 @@
 {
   "filename": "eastmoney_spo_detail_recorder",
   "probs": {
-    "sast_risk": 0.3974136412143707,
-    "ml_signal": 0.500020444393158,
-    "best_practice": 0.589139461517334
+    "sast_risk": 0.5447032451629639,
+    "ml_signal": 0.45574596524238586,
+    "best_practice": 0.6103222966194153
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "qmt_account",
   "probs": {
-    "sast_risk": 0.4046878218650818,
-    "ml_signal": 0.5000882148742676,
-    "best_practice": 0.5946945548057556
+    "sast_risk": 0.5493504405021667,
+    "ml_signal": 0.45383262634277344,
+    "best_practice": 0.6067151427268982
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

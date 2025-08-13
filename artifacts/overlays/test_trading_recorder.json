@@ -1,14 +1,14 @@
 {
   "filename": "test_trading_recorder",
   "probs": {
-    "sast_risk": 0.39917421340942383,
-    "ml_signal": 0.5017361044883728,
-    "best_practice": 0.5828831195831299
+    "sast_risk": 0.5514667630195618,
+    "ml_signal": 0.45119333267211914,
+    "best_practice": 0.606410801410675
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

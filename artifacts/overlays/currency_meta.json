@@ -1,14 +1,14 @@
 {
   "filename": "currency_meta",
   "probs": {
-    "sast_risk": 0.4010801911354065,
-    "ml_signal": 0.49284476041793823,
-    "best_practice": 0.59147709608078
+    "sast_risk": 0.5469780564308167,
+    "ml_signal": 0.458036869764328,
+    "best_practice": 0.6060092449188232
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

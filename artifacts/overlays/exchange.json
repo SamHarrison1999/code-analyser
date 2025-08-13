@@ -1,14 +1,14 @@
 {
   "filename": "exchange",
   "probs": {
-    "sast_risk": 0.40184545516967773,
-    "ml_signal": 0.4985228478908539,
-    "best_practice": 0.5929473638534546
+    "sast_risk": 0.5450336337089539,
+    "ml_signal": 0.4512094557285309,
+    "best_practice": 0.6048535704612732
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

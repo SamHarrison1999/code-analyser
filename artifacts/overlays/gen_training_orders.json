@@ -1,14 +1,14 @@
 {
   "filename": "gen_training_orders",
   "probs": {
-    "sast_risk": 0.40068262815475464,
-    "ml_signal": 0.4995606243610382,
-    "best_practice": 0.5934967398643494
+    "sast_risk": 0.5456458926200867,
+    "ml_signal": 0.45233574509620667,
+    "best_practice": 0.6130812764167786
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

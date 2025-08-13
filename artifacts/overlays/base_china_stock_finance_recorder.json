@@ -1,14 +1,14 @@
 {
   "filename": "base_china_stock_finance_recorder",
   "probs": {
-    "sast_risk": 0.4013948440551758,
-    "ml_signal": 0.5018210411071777,
-    "best_practice": 0.5900745987892151
+    "sast_risk": 0.5480647683143616,
+    "ml_signal": 0.4523666799068451,
+    "best_practice": 0.6122605800628662
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

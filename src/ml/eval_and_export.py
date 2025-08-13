@@ -1,4 +1,3 @@
-# --- file: code_analyser/src/ml/eval_and_export.py ---
 # src/ml/eval_and_export.py
 # Import standard libraries for filesystem, arguments, JSON, typing and progress.
 # Path utilities.
@@ -94,15 +93,13 @@ except Exception:
     def default_data_collator(*a, **k):
         return None
 
-
-# Your existing loader to ensure identical preprocessing to training.
-from dataset_loader import load_local_annotated_dataset
+# Annotation: Use a relative import so Python resolves the module inside the 'ml' package when running 'python -m ml.eval_and_export'.
+from .dataset_loader import load_local_annotated_dataset
 
 from huggingface_hub import upload_folder
 
 # Label order must match training; adjust if you changed it there.
 LABEL_MAP: Dict[str, int] = {"sast_risk": 0, "ml_signal": 1, "best_practice": 2}
-
 
 # Simple dataset adapter compatible with HF Trainer predict().
 class HFDataset:
@@ -116,7 +113,7 @@ class HFDataset:
         # Number of examples.
         return len(self.records)
 
-    # Provide items for the Trainer; labels are floats for multi‑label BCE.
+    # Provide items for the Trainer; labels are floats for multi-label BCE.
     def __getitem__(self, idx: int) -> Dict:
         # Build the item with input ids and mask.
         item = {
@@ -130,18 +127,16 @@ class HFDataset:
         # Return item.
         return item
 
-
 # Stable sigmoid for converting logits to probabilities.
 def _sigmoid(x: np.ndarray) -> np.ndarray:
     # Numerically stable logistic.
     return 1.0 / (1.0 + np.exp(-x))
 
-
 # Compute Expected Calibration Error and provide bin curves.
 def expected_calibration_error(
     y_true: np.ndarray, y_prob: np.ndarray, n_bins: int = 15
 ) -> Tuple[float, np.ndarray, np.ndarray, np.ndarray]:
-    # Create equal‑width bins in [0,1].
+    # Create equal-width bins in [0,1].
     bins = np.linspace(0.0, 1.0, n_bins + 1)
     # Assign each probability to a bin.
     bin_ids = np.digitize(y_prob, bins) - 1
@@ -169,7 +164,6 @@ def expected_calibration_error(
         bin_conf[b] = conf
     # Return ECE and curves.
     return float(ece), bins, bin_acc, bin_conf
-
 
 # Save a reliability diagram to a PNG path.
 def save_reliability_plot(
@@ -202,14 +196,12 @@ def save_reliability_plot(
     fig.savefig(out_path, dpi=160)
     plt.close(fig)
 
-
 # Escape HTML for safe code rendering.
 def html_escape(s: str) -> str:
     # Replace special characters.
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-
-# Render a per‑file overlay HTML with confidences.
+# Render a per-file overlay HTML with confidences.
 def render_overlay_html(
     filename: str, code_text: str, probs: Dict[str, float], threshold: float
 ) -> str:
@@ -227,7 +219,6 @@ def render_overlay_html(
     # Compose final minimal document.
     return f"<!doctype html><meta charset='utf-8'><title>{html_escape(filename)} – overlay</title><div style='max-width:980px;margin:24px auto'>{header}{pre}{foot}</div>"
 
-
 # Try to locate original code path by filename stem within code root.
 def find_code_path(code_root: str, filename_no_ext: str) -> Optional[str]:
     # Walk the repository for a matching .py file.
@@ -237,7 +228,6 @@ def find_code_path(code_root: str, filename_no_ext: str) -> Optional[str]:
                 return os.path.join(root, f)
     # Not found.
     return None
-
 
 # Infer a sensible model_type for AutoConfig from a checkpoint folder.
 def _infer_model_type(checkpoint_dir: str) -> str:
@@ -262,9 +252,9 @@ def _infer_model_type(checkpoint_dir: str) -> str:
             if "distilbert" in name:
                 return "distilbert"
         except Exception:
-            # Fall back to file‑based heuristics if loading fails.
+            # Fall back to file-based heuristics if loading fails.
             pass
-    # File‑based heuristics when training args are unavailable.
+    # File-based heuristics when training args are unavailable.
     has_merges = os.path.exists(os.path.join(checkpoint_dir, "merges.txt"))
     has_vocab = os.path.exists(os.path.join(checkpoint_dir, "vocab.json"))
     # RoBERTa/CodeBERT checkpoints ship merges.txt + vocab.json.
@@ -272,7 +262,6 @@ def _infer_model_type(checkpoint_dir: str) -> str:
         return "roberta"
     # Fallback to roberta which works for microsoft/codebert-base.
     return "roberta"
-
 
 # Ensure a valid config.json exists; create a minimal one if missing or unreadable.
 def _ensure_config_json(checkpoint_dir: str, label_map: Dict[str, int]) -> str:
@@ -314,7 +303,6 @@ def _ensure_config_json(checkpoint_dir: str, label_map: Dict[str, int]) -> str:
     # Return the path for convenience.
     return cfg_path
 
-
 # Main routine to evaluate an existing checkpoint, export artefacts and optionally push to hub.
 def main() -> None:
     # Define CLI arguments.
@@ -350,7 +338,7 @@ def main() -> None:
     os.makedirs(args.overlays_dir, exist_ok=True)
     os.makedirs(args.dashboard_dir, exist_ok=True)
     os.makedirs(args.tensorboard_dir, exist_ok=True)
-    # Use the checkpoint dir as the tokenizer source (the prior conditional contained a typo and always chose the right‑hand side; simplifying for clarity).
+    # Use the checkpoint dir as the tokenizer source (the prior conditional contained a typo and always chose the right-hand side; simplifying for clarity).
     records, _ = load_local_annotated_dataset(
         code_dir=args.code_dir,
         annotation_dir=args.annotation_dir,
@@ -368,7 +356,7 @@ def main() -> None:
     _ensure_config_json(args.checkpoint_dir, LABEL_MAP)
     # Load model and tokeniser from your checkpoint directory.
     config = AutoConfig.from_pretrained(args.checkpoint_dir)
-    # Force multi‑label just in case; respects saved num_labels.
+    # Force multi-label just in case; respects saved num_labels.
     config.problem_type = "multi_label_classification"
     # Load model weights.
     model = AutoModelForSequenceClassification.from_pretrained(args.checkpoint_dir, config=config)
@@ -393,7 +381,7 @@ def main() -> None:
     preds = (probs >= thr).astype(np.int32)
     # Stack ground truths from records.
     gts = np.stack([np.array(r["labels"], dtype=np.int32) for r in records], axis=0)
-    # Compute per‑label metrics.
+    # Compute per-label metrics.
     per_label = {}
     for lbl, idx in LABEL_MAP.items():
         # Extract truth and predictions for this label.
@@ -414,7 +402,7 @@ def main() -> None:
     micro_f1 = float(f1_score(gts.flatten(), preds.flatten(), average="micro", zero_division=0))
     # Macro over labels.
     macro_f1 = float(f1_score(gts, preds, average="macro", zero_division=0))
-    # Exact‑match accuracy (all labels correct for a sample).
+    # Exact-match accuracy (all labels correct for a sample).
     exact_match = float((preds == gts).all(axis=1).mean())
     # Print summary.
     print(
@@ -551,7 +539,6 @@ def main() -> None:
         print(f"☁️ Uploaded trained model to: https://huggingface.co/datasets/{args.hub_repo}")
     # Final message.
     print("✅ Evaluation and export complete.")
-
 
 # Standard entry point.
 if __name__ == "__main__":

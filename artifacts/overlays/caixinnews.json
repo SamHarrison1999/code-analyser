@@ -1,14 +1,14 @@
 {
   "filename": "caixinnews",
   "probs": {
-    "sast_risk": 0.40541818737983704,
-    "ml_signal": 0.49647602438926697,
-    "best_practice": 0.5937647223472595
+    "sast_risk": 0.5498524904251099,
+    "ml_signal": 0.4528202414512634,
+    "best_practice": 0.6029338836669922
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "sched",
   "probs": {
-    "sast_risk": 0.40600016713142395,
-    "ml_signal": 0.500106692314148,
-    "best_practice": 0.5947076082229614
+    "sast_risk": 0.5423601269721985,
+    "ml_signal": 0.4534164071083069,
+    "best_practice": 0.606027364730835
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

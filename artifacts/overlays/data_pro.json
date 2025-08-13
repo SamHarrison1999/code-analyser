@@ -1,14 +1,14 @@
 {
   "filename": "data_pro",
   "probs": {
-    "sast_risk": 0.3989512622356415,
-    "ml_signal": 0.49696263670921326,
-    "best_practice": 0.5870254039764404
+    "sast_risk": 0.5524072051048279,
+    "ml_signal": 0.44965359568595886,
+    "best_practice": 0.6086927056312561
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

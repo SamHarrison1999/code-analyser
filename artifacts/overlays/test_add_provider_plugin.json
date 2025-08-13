@@ -1,14 +1,14 @@
 {
   "filename": "test_add_provider_plugin",
   "probs": {
-    "sast_risk": 0.38633784651756287,
-    "ml_signal": 0.4902649521827698,
-    "best_practice": 0.5896777510643005
+    "sast_risk": 0.5495393872261047,
+    "ml_signal": 0.4375337064266205,
+    "best_practice": 0.6064990162849426
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

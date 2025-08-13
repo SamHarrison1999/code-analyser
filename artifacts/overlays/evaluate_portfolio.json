@@ -1,14 +1,14 @@
 {
   "filename": "evaluate_portfolio",
   "probs": {
-    "sast_risk": 0.4001767635345459,
-    "ml_signal": 0.4979485869407654,
-    "best_practice": 0.5898621082305908
+    "sast_risk": 0.5471269488334656,
+    "ml_signal": 0.4539124071598053,
+    "best_practice": 0.6103269457817078
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "pytorch_tcts",
   "probs": {
-    "sast_risk": 0.39759519696235657,
-    "ml_signal": 0.4958008825778961,
-    "best_practice": 0.5875852704048157
+    "sast_risk": 0.5465738773345947,
+    "ml_signal": 0.44807037711143494,
+    "best_practice": 0.6102120876312256
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "shibor",
   "probs": {
-    "sast_risk": 0.4048422873020172,
-    "ml_signal": 0.4987155497074127,
-    "best_practice": 0.5852604508399963
+    "sast_risk": 0.5447090864181519,
+    "ml_signal": 0.44845762848854065,
+    "best_practice": 0.6089861989021301
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "boxoffice",
   "probs": {
-    "sast_risk": 0.4039047062397003,
-    "ml_signal": 0.4952985346317291,
-    "best_practice": 0.5849643349647522
+    "sast_risk": 0.5452357530593872,
+    "ml_signal": 0.451520711183548,
+    "best_practice": 0.6084526777267456
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

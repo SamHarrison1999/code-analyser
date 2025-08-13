@@ -1,14 +1,14 @@
 {
   "filename": "test_file_strategy",
   "probs": {
-    "sast_risk": 0.3933810889720917,
-    "ml_signal": 0.4987892806529999,
-    "best_practice": 0.5877421498298645
+    "sast_risk": 0.550104558467865,
+    "ml_signal": 0.4420376121997833,
+    "best_practice": 0.6115316152572632
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

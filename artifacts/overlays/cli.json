@@ -1,14 +1,14 @@
 {
   "filename": "cli",
   "probs": {
-    "sast_risk": 0.3962772786617279,
-    "ml_signal": 0.501370906829834,
-    "best_practice": 0.5908524990081787
+    "sast_risk": 0.539143979549408,
+    "ml_signal": 0.4443213641643524,
+    "best_practice": 0.6076849102973938
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

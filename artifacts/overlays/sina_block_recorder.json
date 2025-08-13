@@ -1,14 +1,14 @@
 {
   "filename": "sina_block_recorder",
   "probs": {
-    "sast_risk": 0.40263715386390686,
-    "ml_signal": 0.5011148452758789,
-    "best_practice": 0.5919617414474487
+    "sast_risk": 0.5496932864189148,
+    "ml_signal": 0.44919294118881226,
+    "best_practice": 0.6103821992874146
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

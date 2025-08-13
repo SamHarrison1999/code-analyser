@@ -1,14 +1,14 @@
 {
   "filename": "cn_index_api",
   "probs": {
-    "sast_risk": 0.40633124113082886,
-    "ml_signal": 0.502420961856842,
-    "best_practice": 0.5923267006874084
+    "sast_risk": 0.5493341684341431,
+    "ml_signal": 0.4519198536872864,
+    "best_practice": 0.607464611530304
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

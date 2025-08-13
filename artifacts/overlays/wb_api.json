@@ -1,14 +1,14 @@
 {
   "filename": "wb_api",
   "probs": {
-    "sast_risk": 0.3991992473602295,
-    "ml_signal": 0.4980212450027466,
-    "best_practice": 0.5949366092681885
+    "sast_risk": 0.5489420294761658,
+    "ml_signal": 0.4537757933139801,
+    "best_practice": 0.6110650897026062
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

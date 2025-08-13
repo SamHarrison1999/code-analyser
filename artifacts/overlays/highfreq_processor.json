@@ -1,14 +1,14 @@
 {
   "filename": "highfreq_processor",
   "probs": {
-    "sast_risk": 0.39913395047187805,
-    "ml_signal": 0.500122606754303,
-    "best_practice": 0.5914169549942017
+    "sast_risk": 0.5465314984321594,
+    "ml_signal": 0.4492168426513672,
+    "best_practice": 0.6129000782966614
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

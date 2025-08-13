@@ -1,14 +1,14 @@
 {
   "filename": "test_technical",
   "probs": {
-    "sast_risk": 0.39954832196235657,
-    "ml_signal": 0.49814534187316895,
-    "best_practice": 0.5849018692970276
+    "sast_risk": 0.5484377145767212,
+    "ml_signal": 0.4513944089412689,
+    "best_practice": 0.6180687546730042
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

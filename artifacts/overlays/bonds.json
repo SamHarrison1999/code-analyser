@@ -1,14 +1,14 @@
 {
   "filename": "bonds",
   "probs": {
-    "sast_risk": 0.3988732397556305,
-    "ml_signal": 0.49010562896728516,
-    "best_practice": 0.5839335918426514
+    "sast_risk": 0.5431221723556519,
+    "ml_signal": 0.4484993517398834,
+    "best_practice": 0.6134206056594849
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

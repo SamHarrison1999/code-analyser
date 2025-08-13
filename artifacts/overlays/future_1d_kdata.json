@@ -1,14 +1,14 @@
 {
   "filename": "future_1d_kdata",
   "probs": {
-    "sast_risk": 0.4064384400844574,
-    "ml_signal": 0.49188753962516785,
-    "best_practice": 0.5922091603279114
+    "sast_risk": 0.5490837097167969,
+    "ml_signal": 0.45620349049568176,
+    "best_practice": 0.6129867434501648
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

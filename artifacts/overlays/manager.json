@@ -1,14 +1,14 @@
 {
   "filename": "manager",
   "probs": {
-    "sast_risk": 0.3970910906791687,
-    "ml_signal": 0.4947819411754608,
-    "best_practice": 0.5873100161552429
+    "sast_risk": 0.5467368364334106,
+    "ml_signal": 0.44736388325691223,
+    "best_practice": 0.6126060485839844
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

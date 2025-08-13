@@ -1,14 +1,14 @@
 {
   "filename": "trainer",
   "probs": {
-    "sast_risk": 0.40907028317451477,
-    "ml_signal": 0.49577322602272034,
-    "best_practice": 0.5918554663658142
+    "sast_risk": 0.542780876159668,
+    "ml_signal": 0.4516993463039398,
+    "best_practice": 0.6037523746490479
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

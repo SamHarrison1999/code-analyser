@@ -1,14 +1,14 @@
 {
   "filename": "test_saoe_simple",
   "probs": {
-    "sast_risk": 0.4093261957168579,
-    "ml_signal": 0.49987056851387024,
-    "best_practice": 0.5929144620895386
+    "sast_risk": 0.5399776697158813,
+    "ml_signal": 0.45100992918014526,
+    "best_practice": 0.602462649345398
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

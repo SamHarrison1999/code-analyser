@@ -1,4 +1,4 @@
-<!doctype html><meta charset='utf-8'><title>dateu – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: dateu</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*-
+<!doctype html><meta charset='utf-8'><title>dateu – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: dateu</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.55</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.45</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.61</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*-
 
 import datetime
 import time
@@ -9,7 +9,7 @@ def year_qua(date):
     mon = date[5:7]
     mon = int(mon)
     return[date[0:4], _quar(mon)]
-
+    
 
 def _quar(mon):
     if mon in [1, 2, 3]:
@@ -22,11 +22,11 @@ def _quar(mon):
         return '4'
     else:
         return None
-
-
+ 
+ 
 def today():
     day = datetime.datetime.today().date()
-    return str(day)
+    return str(day) 
 
 
 def get_year():
@@ -40,8 +40,8 @@ def get_month():
 
 def get_hour():
     return datetime.datetime.today().hour
-
-
+    
+    
 def today_last_year():
     lasty = datetime.datetime.today().date() + datetime.timedelta(-365)
     return str(lasty)
@@ -106,15 +106,15 @@ def last_tddate():
         return day_last_week(-2)
     else:
         return day_last_week(-1)
-
+        
 
 def tt_dates(start='', end=''):
     startyear = int(start[0:4])
     endyear = int(end[0:4])
     dates = [d for d in range(startyear, endyear+1, 2)]
     return dates
-
-
+    
+    
 def _random(n=13):
     from random import randint
     start = 10**(n-1)
@@ -126,4 +126,4 @@ def get_q_date(year=None, quarter=None):
     return '%s%s'%(str(year), dt[str(quarter)])
 
 
-</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>
+</pre><div style='color:#666;font-size:12px'>Threshold 0.50. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

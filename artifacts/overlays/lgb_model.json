@@ -1,14 +1,14 @@
 {
   "filename": "lgb_model",
   "probs": {
-    "sast_risk": 0.3968559503555298,
-    "ml_signal": 0.4991055130958557,
-    "best_practice": 0.5881145000457764
+    "sast_risk": 0.5478482842445374,
+    "ml_signal": 0.44694894552230835,
+    "best_practice": 0.6080716252326965
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

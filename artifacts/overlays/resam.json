@@ -1,14 +1,14 @@
 {
   "filename": "resam",
   "probs": {
-    "sast_risk": 0.4015234112739563,
-    "ml_signal": 0.4939175546169281,
-    "best_practice": 0.5929802656173706
+    "sast_risk": 0.5454453229904175,
+    "ml_signal": 0.453477144241333,
+    "best_practice": 0.611186683177948
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "test_index_data",
   "probs": {
-    "sast_risk": 0.3902234137058258,
-    "ml_signal": 0.5025520920753479,
-    "best_practice": 0.5859467387199402
+    "sast_risk": 0.5451358556747437,
+    "ml_signal": 0.446566641330719,
+    "best_practice": 0.6137508749961853
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

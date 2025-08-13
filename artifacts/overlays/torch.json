@@ -1,14 +1,14 @@
 {
   "filename": "torch",
   "probs": {
-    "sast_risk": 0.3982059359550476,
-    "ml_signal": 0.5037673115730286,
-    "best_practice": 0.5925696492195129
+    "sast_risk": 0.5469228029251099,
+    "ml_signal": 0.45060205459594727,
+    "best_practice": 0.6095686554908752
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

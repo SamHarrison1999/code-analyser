@@ -1,14 +1,14 @@
 {
   "filename": "stock_1wk_zen_factor",
   "probs": {
-    "sast_risk": 0.40621504187583923,
-    "ml_signal": 0.49223142862319946,
-    "best_practice": 0.5853294730186462
+    "sast_risk": 0.5423834919929504,
+    "ml_signal": 0.4510171115398407,
+    "best_practice": 0.6081603169441223
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

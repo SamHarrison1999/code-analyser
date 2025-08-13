@@ -1,14 +1,14 @@
 {
   "filename": "rolling_online_management",
   "probs": {
-    "sast_risk": 0.4066125750541687,
-    "ml_signal": 0.4999692440032959,
-    "best_practice": 0.5919128060340881
+    "sast_risk": 0.5394068360328674,
+    "ml_signal": 0.45009559392929077,
+    "best_practice": 0.6085660457611084
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

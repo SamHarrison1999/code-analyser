@@ -1,14 +1,14 @@
 {
   "filename": "policy",
   "probs": {
-    "sast_risk": 0.40374284982681274,
-    "ml_signal": 0.49468156695365906,
-    "best_practice": 0.5935990810394287
+    "sast_risk": 0.5433396100997925,
+    "ml_signal": 0.44977959990501404,
+    "best_practice": 0.6092394590377808
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

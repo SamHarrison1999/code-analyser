@@ -1,14 +1,14 @@
 {
   "filename": "news_test",
   "probs": {
-    "sast_risk": 0.39422592520713806,
-    "ml_signal": 0.4964602291584015,
-    "best_practice": 0.592722475528717
+    "sast_risk": 0.5485109090805054,
+    "ml_signal": 0.44689375162124634,
+    "best_practice": 0.6157345771789551
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

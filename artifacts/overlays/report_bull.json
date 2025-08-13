@@ -1,14 +1,14 @@
 {
   "filename": "report_bull",
   "probs": {
-    "sast_risk": 0.40186288952827454,
-    "ml_signal": 0.500302791595459,
-    "best_practice": 0.5900480151176453
+    "sast_risk": 0.5415008664131165,
+    "ml_signal": 0.4506492614746094,
+    "best_practice": 0.6128752827644348
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

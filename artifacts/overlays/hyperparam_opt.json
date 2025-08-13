@@ -1,14 +1,14 @@
 {
   "filename": "hyperparam_opt",
   "probs": {
-    "sast_risk": 0.4067969024181366,
-    "ml_signal": 0.49259841442108154,
-    "best_practice": 0.5918362140655518
+    "sast_risk": 0.5439316034317017,
+    "ml_signal": 0.4558471143245697,
+    "best_practice": 0.6011101007461548
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

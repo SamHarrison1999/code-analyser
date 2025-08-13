@@ -1,14 +1,14 @@
 {
   "filename": "online_management_simulate",
   "probs": {
-    "sast_risk": 0.40765684843063354,
-    "ml_signal": 0.49910491704940796,
-    "best_practice": 0.5910189151763916
+    "sast_risk": 0.5410035252571106,
+    "ml_signal": 0.44572848081588745,
+    "best_practice": 0.6129056811332703
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "ts_function",
   "probs": {
-    "sast_risk": 0.39709725975990295,
-    "ml_signal": 0.4947871267795563,
-    "best_practice": 0.5895893573760986
+    "sast_risk": 0.5454680919647217,
+    "ml_signal": 0.44832637906074524,
+    "best_practice": 0.61122727394104
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

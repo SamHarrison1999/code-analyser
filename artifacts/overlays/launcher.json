@@ -1,14 +1,14 @@
 {
   "filename": "launcher",
   "probs": {
-    "sast_risk": 0.4052903950214386,
-    "ml_signal": 0.502970814704895,
-    "best_practice": 0.5905712842941284
+    "sast_risk": 0.5441259145736694,
+    "ml_signal": 0.4489051103591919,
+    "best_practice": 0.6061585545539856
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

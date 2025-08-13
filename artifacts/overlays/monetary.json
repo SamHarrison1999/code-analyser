@@ -1,14 +1,14 @@
 {
   "filename": "monetary",
   "probs": {
-    "sast_risk": 0.4013836979866028,
-    "ml_signal": 0.496051162481308,
-    "best_practice": 0.589487612247467
+    "sast_risk": 0.5407372117042542,
+    "ml_signal": 0.4513307809829712,
+    "best_practice": 0.6077969074249268
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

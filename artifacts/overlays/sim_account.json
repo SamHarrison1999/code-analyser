@@ -1,14 +1,14 @@
 {
   "filename": "sim_account",
   "probs": {
-    "sast_risk": 0.40487149357795715,
-    "ml_signal": 0.49950695037841797,
-    "best_practice": 0.5923138856887817
+    "sast_risk": 0.5439563989639282,
+    "ml_signal": 0.4552500545978546,
+    "best_practice": 0.6058678030967712
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

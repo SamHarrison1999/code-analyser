@@ -1,14 +1,14 @@
 {
   "filename": "em_cbond_meta_recorder",
   "probs": {
-    "sast_risk": 0.4004654288291931,
-    "ml_signal": 0.5030577182769775,
-    "best_practice": 0.5873937606811523
+    "sast_risk": 0.5453224778175354,
+    "ml_signal": 0.4541590213775635,
+    "best_practice": 0.6147335767745972
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

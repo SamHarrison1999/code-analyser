@@ -1,14 +1,14 @@
 {
   "filename": "fund_meta",
   "probs": {
-    "sast_risk": 0.40420544147491455,
-    "ml_signal": 0.495655357837677,
-    "best_practice": 0.5908883810043335
+    "sast_risk": 0.5452184677124023,
+    "ml_signal": 0.44709375500679016,
+    "best_practice": 0.6062895059585571
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "qlib_Alpha158",
   "probs": {
-    "sast_risk": 0.4046247601509094,
-    "ml_signal": 0.49476709961891174,
-    "best_practice": 0.59389728307724
+    "sast_risk": 0.547174334526062,
+    "ml_signal": 0.4525025486946106,
+    "best_practice": 0.6079280972480774
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

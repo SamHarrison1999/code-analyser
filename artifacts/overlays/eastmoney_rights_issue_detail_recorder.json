@@ -1,14 +1,14 @@
 {
   "filename": "eastmoney_rights_issue_detail_recorder",
   "probs": {
-    "sast_risk": 0.39949366450309753,
-    "ml_signal": 0.500161349773407,
-    "best_practice": 0.5876172780990601
+    "sast_risk": 0.5469328761100769,
+    "ml_signal": 0.45406776666641235,
+    "best_practice": 0.6105512380599976
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

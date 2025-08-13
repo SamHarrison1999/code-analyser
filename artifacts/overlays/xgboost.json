@@ -1,14 +1,14 @@
 {
   "filename": "xgboost",
   "probs": {
-    "sast_risk": 0.3927801251411438,
-    "ml_signal": 0.49500125646591187,
-    "best_practice": 0.5894832611083984
+    "sast_risk": 0.546416163444519,
+    "ml_signal": 0.4460982084274292,
+    "best_practice": 0.6130664348602295
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

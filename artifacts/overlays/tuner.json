@@ -1,14 +1,14 @@
 {
   "filename": "tuner",
   "probs": {
-    "sast_risk": 0.4021725654602051,
-    "ml_signal": 0.50137859582901,
-    "best_practice": 0.5896298289299011
+    "sast_risk": 0.5435500741004944,
+    "ml_signal": 0.4501347243785858,
+    "best_practice": 0.6067622303962708
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

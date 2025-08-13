@@ -1,14 +1,14 @@
 {
   "filename": "pickle_styled",
   "probs": {
-    "sast_risk": 0.41140010952949524,
-    "ml_signal": 0.500267744064331,
-    "best_practice": 0.5924870371818542
+    "sast_risk": 0.5450416803359985,
+    "ml_signal": 0.45008036494255066,
+    "best_practice": 0.6100921034812927
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

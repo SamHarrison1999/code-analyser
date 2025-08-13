@@ -1,14 +1,14 @@
 {
   "filename": "eastmoney_balance_sheet_recorder",
   "probs": {
-    "sast_risk": 0.39881598949432373,
-    "ml_signal": 0.49797073006629944,
-    "best_practice": 0.5888343453407288
+    "sast_risk": 0.5398675799369812,
+    "ml_signal": 0.44974231719970703,
+    "best_practice": 0.6096430420875549
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

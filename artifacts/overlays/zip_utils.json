@@ -1,14 +1,14 @@
 {
   "filename": "zip_utils",
   "probs": {
-    "sast_risk": 0.3970092236995697,
-    "ml_signal": 0.501451313495636,
-    "best_practice": 0.5900405645370483
+    "sast_risk": 0.5495494604110718,
+    "ml_signal": 0.45006227493286133,
+    "best_practice": 0.6104562878608704
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

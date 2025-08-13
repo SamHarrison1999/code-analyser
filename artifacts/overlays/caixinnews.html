@@ -1,4 +1,4 @@
-<!doctype html><meta charset='utf-8'><title>caixinnews – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: caixinnews</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.41</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>﻿# -*- coding:utf-8 -*-
+<!doctype html><meta charset='utf-8'><title>caixinnews – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: caixinnews</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.55</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.45</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.60</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'>﻿# -*- coding:utf-8 -*- 
 """
 财新网新闻数据检索下载
 Created on 2017/06/09
@@ -34,12 +34,12 @@ UA    =    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "+\
         "Chrome/42.0.2311.135 "+\
         "Safari/537.36 "+\
         "Edge/12.10240"
-
+        
 req_header = {\
         'User-Agent': UA,\
         'Accept': '"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"',\
         'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3'}
-
+        
 req_timeout = 10
 
 def read_url(url):
@@ -55,7 +55,7 @@ def read_url(url):
     req_header_this = req_header
     req_header_this['Host'] = re.findall('://.*?/',url,re.DOTALL)[0][3:-1]
     return urlopen(Request(url,None,req_header),None,req_timeout).read()
-
+    
 def get_soup(url):
     """
     读取URL对应的内容，并解析为Soup
@@ -65,7 +65,7 @@ def get_soup(url):
         string 读取的内容
     """
     return BeautifulSoup(read_url(url), default_parser)
-
+    
 def query_news(keywords='*',start_date=None,end_date=None):
     """
     读取某一时间段对应的新闻链接列表
@@ -91,14 +91,14 @@ def query_news(keywords='*',start_date=None,end_date=None):
         all_res = soup.find_all(name='div',attrs={'class','searchxt'})
         for res in all_res:
             info_urls.append(res.a.attrs['href'])
-        next_info = next_info.attrs['href']
+        next_info = next_info.attrs['href']    
 
         if next_info=="javascript:void();":
             break;
         else:
             soup = get_soup(caixin_search_url+next_info)
     return info_urls
-
+    
 def is_blog(url):
     """
     判断某一链接是否博客
@@ -110,7 +110,7 @@ def is_blog(url):
         bool 该url是否是博客URL
     """
     return len(re.findall('blog\.caixin\.com',url))&gt;0
-
+    
 def read_page(url):
     """
     读取链接的内容
@@ -126,7 +126,7 @@ def read_page(url):
         return read_blog(url)
     else:
         return read_normal_artical(url)
-
+        
 def read_normal_artical(url):
     soup = get_soup(url)
     title = soup.title.get_text()
@@ -145,4 +145,4 @@ def read_blog(url):
     for p in ps:
         text += p.get_text() + "\n"
     return title,text
-    </pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>
+    </pre><div style='color:#666;font-size:12px'>Threshold 0.50. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

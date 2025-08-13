@@ -1,14 +1,14 @@
 {
   "filename": "finta",
   "probs": {
-    "sast_risk": 0.3882557153701782,
-    "ml_signal": 0.4969867765903473,
-    "best_practice": 0.5841265916824341
+    "sast_risk": 0.54473876953125,
+    "ml_signal": 0.4423477351665497,
+    "best_practice": 0.6146038174629211
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

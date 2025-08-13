@@ -1,14 +1,14 @@
 {
   "filename": "kdata",
   "probs": {
-    "sast_risk": 0.3988361060619354,
-    "ml_signal": 0.49855858087539673,
-    "best_practice": 0.5903996229171753
+    "sast_risk": 0.5476807355880737,
+    "ml_signal": 0.4542652368545532,
+    "best_practice": 0.6114694476127625
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

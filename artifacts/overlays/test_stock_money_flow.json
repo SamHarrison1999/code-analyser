@@ -1,14 +1,14 @@
 {
   "filename": "test_stock_money_flow",
   "probs": {
-    "sast_risk": 0.3951559066772461,
-    "ml_signal": 0.496782511472702,
-    "best_practice": 0.5900623202323914
+    "sast_risk": 0.5463758707046509,
+    "ml_signal": 0.44420966506004333,
+    "best_practice": 0.6059136390686035
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

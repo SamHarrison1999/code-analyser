@@ -1,14 +1,14 @@
 {
   "filename": "stockus_1d_hfq_kdata",
   "probs": {
-    "sast_risk": 0.41004520654678345,
-    "ml_signal": 0.49203041195869446,
-    "best_practice": 0.5890339016914368
+    "sast_risk": 0.5518503785133362,
+    "ml_signal": 0.45789965987205505,
+    "best_practice": 0.613241970539093
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

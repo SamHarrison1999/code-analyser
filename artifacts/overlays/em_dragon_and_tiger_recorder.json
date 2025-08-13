@@ -1,14 +1,14 @@
 {
   "filename": "em_dragon_and_tiger_recorder",
   "probs": {
-    "sast_risk": 0.40380021929740906,
-    "ml_signal": 0.4962232708930969,
-    "best_practice": 0.5889161825180054
+    "sast_risk": 0.5442558526992798,
+    "ml_signal": 0.4521719813346863,
+    "best_practice": 0.6044250726699829
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

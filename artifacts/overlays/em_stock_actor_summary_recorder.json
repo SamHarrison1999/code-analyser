@@ -1,14 +1,14 @@
 {
   "filename": "em_stock_actor_summary_recorder",
   "probs": {
-    "sast_risk": 0.40490397810935974,
-    "ml_signal": 0.498811811208725,
-    "best_practice": 0.5876678824424744
+    "sast_risk": 0.5460527539253235,
+    "ml_signal": 0.45832356810569763,
+    "best_practice": 0.6088374853134155
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

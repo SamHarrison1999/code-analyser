@@ -1,14 +1,14 @@
 {
   "filename": "exchange_stock_summary_recorder",
   "probs": {
-    "sast_risk": 0.3950723707675934,
-    "ml_signal": 0.501255214214325,
-    "best_practice": 0.5893727540969849
+    "sast_risk": 0.5456435084342957,
+    "ml_signal": 0.4541899263858795,
+    "best_practice": 0.6105162501335144
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

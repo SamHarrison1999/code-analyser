@@ -1,14 +1,14 @@
 {
   "filename": "test_get_multi_proc",
   "probs": {
-    "sast_risk": 0.39463141560554504,
-    "ml_signal": 0.5014390349388123,
-    "best_practice": 0.5909487009048462
+    "sast_risk": 0.5413853526115417,
+    "ml_signal": 0.45079490542411804,
+    "best_practice": 0.6116783618927002
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

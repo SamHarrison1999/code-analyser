@@ -1,14 +1,14 @@
 {
   "filename": "zvt_info",
   "probs": {
-    "sast_risk": 0.4028013050556183,
-    "ml_signal": 0.501034140586853,
-    "best_practice": 0.5918734073638916
+    "sast_risk": 0.5416709780693054,
+    "ml_signal": 0.45565032958984375,
+    "best_practice": 0.6058459877967834
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

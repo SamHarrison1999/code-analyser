@@ -1,14 +1,14 @@
 {
   "filename": "signal_strategy",
   "probs": {
-    "sast_risk": 0.4020110070705414,
-    "ml_signal": 0.4975675046443939,
-    "best_practice": 0.5930697917938232
+    "sast_risk": 0.5390706062316895,
+    "ml_signal": 0.4471498429775238,
+    "best_practice": 0.6111173033714294
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

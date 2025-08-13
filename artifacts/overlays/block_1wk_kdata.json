@@ -1,14 +1,14 @@
 {
   "filename": "block_1wk_kdata",
   "probs": {
-    "sast_risk": 0.40587183833122253,
-    "ml_signal": 0.489840567111969,
-    "best_practice": 0.5909278988838196
+    "sast_risk": 0.5505415201187134,
+    "ml_signal": 0.4570070803165436,
+    "best_practice": 0.6090554594993591
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

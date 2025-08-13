@@ -1,14 +1,14 @@
 {
   "filename": "lables",
   "probs": {
-    "sast_risk": 0.39192289113998413,
-    "ml_signal": 0.4930803179740906,
-    "best_practice": 0.5902164578437805
+    "sast_risk": 0.5475650429725647,
+    "ml_signal": 0.44624659419059753,
+    "best_practice": 0.6100832223892212
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

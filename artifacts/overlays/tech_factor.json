@@ -1,14 +1,14 @@
 {
   "filename": "tech_factor",
   "probs": {
-    "sast_risk": 0.40271180868148804,
-    "ml_signal": 0.49470922350883484,
-    "best_practice": 0.5930555462837219
+    "sast_risk": 0.5472228527069092,
+    "ml_signal": 0.45183783769607544,
+    "best_practice": 0.6047893166542053
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

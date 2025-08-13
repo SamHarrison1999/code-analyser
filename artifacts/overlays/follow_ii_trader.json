@@ -1,14 +1,14 @@
 {
   "filename": "follow_ii_trader",
   "probs": {
-    "sast_risk": 0.3985162675380707,
-    "ml_signal": 0.4999293088912964,
-    "best_practice": 0.5913902521133423
+    "sast_risk": 0.5533323287963867,
+    "ml_signal": 0.45036426186561584,
+    "best_practice": 0.61326664686203
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "decorator",
   "probs": {
-    "sast_risk": 0.39522239565849304,
-    "ml_signal": 0.49242091178894043,
-    "best_practice": 0.5915718674659729
+    "sast_risk": 0.5453838109970093,
+    "ml_signal": 0.4501156806945801,
+    "best_practice": 0.6153020858764648
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

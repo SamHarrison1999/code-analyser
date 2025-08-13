@@ -1,14 +1,14 @@
 {
   "filename": "stock_quote",
   "probs": {
-    "sast_risk": 0.4016249179840088,
-    "ml_signal": 0.4972553253173828,
-    "best_practice": 0.5927557945251465
+    "sast_risk": 0.542033314704895,
+    "ml_signal": 0.44813400506973267,
+    "best_practice": 0.6092504858970642
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

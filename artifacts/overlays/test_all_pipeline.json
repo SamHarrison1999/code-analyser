@@ -1,14 +1,14 @@
 {
   "filename": "test_all_pipeline",
   "probs": {
-    "sast_risk": 0.39756760001182556,
-    "ml_signal": 0.49677762389183044,
-    "best_practice": 0.5895344018936157
+    "sast_risk": 0.5433390140533447,
+    "ml_signal": 0.45003458857536316,
+    "best_practice": 0.6077394485473633
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,7 +1,7 @@
-<!doctype html><meta charset='utf-8'><title>newsevent – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: newsevent</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.49</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*-
+<!doctype html><meta charset='utf-8'><title>newsevent – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: newsevent</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.55</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.45</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.61</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*-
 
 """
-新闻事件数据接口
+新闻事件数据接口 
 Created on 2015/02/07
 @author: Jimmy Liu
 @group : waditu
@@ -26,12 +26,12 @@ except ImportError:
 def get_latest_news(top=None, show_content=False):
     """
         获取即时财经新闻
-
+    
     Parameters
     --------
         top:数值，显示最新消息的条数，默认为80条
         show_content:是否显示新闻内容，默认False
-
+    
     Return
     --------
         DataFrame
@@ -49,7 +49,7 @@ def get_latest_news(top=None, show_content=False):
         data_str = urlopen(request, timeout=10).read()
         data_str = data_str.decode('GBK')
         data_str = data_str.split('=')[1][:-1]
-        data_str = eval(data_str, type('Dummy', (dict,),
+        data_str = eval(data_str, type('Dummy', (dict,), 
                                        dict(__getitem__ = lambda s, n:n))())
         data_str = json.dumps(data_str)
         data_str = json.loads(data_str)
@@ -74,7 +74,7 @@ def latest_content(url):
     Parameter
     --------
         url:新闻链接
-
+    
     Return
     --------
         string:返回新闻的文字内容
@@ -91,7 +91,7 @@ def latest_content(url):
         content = html_content.text_content()
         return content
     except Exception as er:
-        print(str(er))
+        print(str(er))  
 
 
 def get_notices(code=None, date=None):
@@ -101,7 +101,7 @@ def get_notices(code=None, date=None):
     --------
         code:股票代码
         date:信息公布日期
-
+    
     Return
     --------
         DataFrame，属性列表：
@@ -135,7 +135,7 @@ def notice_content(url):
     Parameter
     --------
         url:内容链接
-
+    
     Return
     --------
         string:信息内容
@@ -145,7 +145,7 @@ def notice_content(url):
         res = html.xpath('//div[@id=\"content\"]/pre/text()')[0]
         return res.strip()
     except Exception as er:
-        print(str(er))
+        print(str(er))  
 
 
 def guba_sina(show_content=False):
@@ -154,7 +154,7 @@ def guba_sina(show_content=False):
     Parameter
     --------
         show_content:是否显示内容，默认False
-
+    
     Return
     --------
     DataFrame
@@ -163,7 +163,7 @@ def guba_sina(show_content=False):
         ptime, 发布时间
         rcounts,阅读次数
     """
-
+    
     from pandas.io.common import urlopen
     try:
         with urlopen(nv.GUBA_SINA_URL%(ct.P_TYPE['http'],
@@ -189,9 +189,9 @@ def guba_sina(show_content=False):
         df['rcounts'] = df['rcounts'].astype(float)
         return df if show_content is True else df.drop('content', axis=1)
     except Exception as er:
-        print(str(er))
-
-
+        print(str(er))  
+    
+    
 def _guba_content(url):
     try:
         html = lxml.html.parse(url)
@@ -205,7 +205,7 @@ def _guba_content(url):
         content = html_content.text_content()
         ptime = html.xpath('//div[@class=\"fl_left iltp_time\"]/span/text()')[0]
         rcounts = html.xpath('//div[@class=\"fl_right iltp_span\"]/span[2]/text()')[0]
-        reg = re.compile(r'\((.*?)\)')
+        reg = re.compile(r'\((.*?)\)') 
         rcounts = reg.findall(rcounts)[0]
         return [content, ptime, rcounts]
     except Exception:
@@ -218,4 +218,4 @@ def _random(n=16):
     end = (10 ** n) - 1
     return str(randint(start, end))
 
-</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>
+</pre><div style='color:#666;font-size:12px'>Threshold 0.50. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

@@ -1,14 +1,14 @@
 {
   "filename": "intent",
   "probs": {
-    "sast_risk": 0.40131980180740356,
-    "ml_signal": 0.49684566259384155,
-    "best_practice": 0.589735746383667
+    "sast_risk": 0.5445865988731384,
+    "ml_signal": 0.45248448848724365,
+    "best_practice": 0.6051434278488159
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

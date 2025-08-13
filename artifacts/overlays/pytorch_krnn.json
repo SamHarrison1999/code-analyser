@@ -1,14 +1,14 @@
 {
   "filename": "pytorch_krnn",
   "probs": {
-    "sast_risk": 0.3976597189903259,
-    "ml_signal": 0.496407687664032,
-    "best_practice": 0.5938745737075806
+    "sast_risk": 0.543132483959198,
+    "ml_signal": 0.44456377625465393,
+    "best_practice": 0.614094078540802
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "sgd",
   "probs": {
-    "sast_risk": 0.39957982301712036,
-    "ml_signal": 0.5010182857513428,
-    "best_practice": 0.5909548997879028
+    "sast_risk": 0.5443572998046875,
+    "ml_signal": 0.4549347758293152,
+    "best_practice": 0.609765887260437
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

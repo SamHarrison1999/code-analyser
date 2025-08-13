@@ -1,14 +1,14 @@
 {
   "filename": "time_utils",
   "probs": {
-    "sast_risk": 0.40413641929626465,
-    "ml_signal": 0.4956272542476654,
-    "best_practice": 0.5950639247894287
+    "sast_risk": 0.549659788608551,
+    "ml_signal": 0.45474863052368164,
+    "best_practice": 0.597377359867096
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

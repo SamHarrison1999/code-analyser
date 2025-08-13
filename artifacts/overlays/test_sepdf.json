@@ -1,14 +1,14 @@
 {
   "filename": "test_sepdf",
   "probs": {
-    "sast_risk": 0.39116156101226807,
-    "ml_signal": 0.501278281211853,
-    "best_practice": 0.5891736149787903
+    "sast_risk": 0.5442195534706116,
+    "ml_signal": 0.44840067625045776,
+    "best_practice": 0.614787757396698
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

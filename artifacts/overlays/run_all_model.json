@@ -1,14 +1,14 @@
 {
   "filename": "run_all_model",
   "probs": {
-    "sast_risk": 0.3975692093372345,
-    "ml_signal": 0.5020139217376709,
-    "best_practice": 0.5919782519340515
+    "sast_risk": 0.5482020378112793,
+    "ml_signal": 0.44650742411613464,
+    "best_practice": 0.6094733476638794
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "drawer",
   "probs": {
-    "sast_risk": 0.3988475501537323,
-    "ml_signal": 0.49797406792640686,
-    "best_practice": 0.5954911112785339
+    "sast_risk": 0.5476729273796082,
+    "ml_signal": 0.4529067277908325,
+    "best_practice": 0.6082219481468201
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

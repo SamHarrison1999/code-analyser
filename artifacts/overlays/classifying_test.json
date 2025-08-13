@@ -1,14 +1,14 @@
 {
   "filename": "classifying_test",
   "probs": {
-    "sast_risk": 0.3938860297203064,
-    "ml_signal": 0.4994881749153137,
-    "best_practice": 0.5925504565238953
+    "sast_risk": 0.5488687753677368,
+    "ml_signal": 0.4504982531070709,
+    "best_practice": 0.6189203262329102
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

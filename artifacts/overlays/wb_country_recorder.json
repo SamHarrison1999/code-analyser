@@ -1,14 +1,14 @@
 {
   "filename": "wb_country_recorder",
   "probs": {
-    "sast_risk": 0.40218791365623474,
-    "ml_signal": 0.5015449523925781,
-    "best_practice": 0.5875701308250427
+    "sast_risk": 0.5434067249298096,
+    "ml_signal": 0.45432767271995544,
+    "best_practice": 0.6123024225234985
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

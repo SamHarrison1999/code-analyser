@@ -1,14 +1,14 @@
 {
   "filename": "index_1d_zen_factor",
   "probs": {
-    "sast_risk": 0.40525302290916443,
-    "ml_signal": 0.49282750487327576,
-    "best_practice": 0.5870643854141235
+    "sast_risk": 0.5404511094093323,
+    "ml_signal": 0.4507603049278259,
+    "best_practice": 0.610608696937561
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

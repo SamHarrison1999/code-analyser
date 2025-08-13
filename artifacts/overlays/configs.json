@@ -1,14 +1,14 @@
 {
   "filename": "configs",
   "probs": {
-    "sast_risk": 0.40310218930244446,
-    "ml_signal": 0.49352219700813293,
-    "best_practice": 0.5930692553520203
+    "sast_risk": 0.5473143458366394,
+    "ml_signal": 0.453092098236084,
+    "best_practice": 0.605718195438385
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

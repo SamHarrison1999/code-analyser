@@ -1,4 +1,4 @@
-<!doctype html><meta charset='utf-8'><title>ref_test – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: ref_test</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.39</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*-
+<!doctype html><meta charset='utf-8'><title>ref_test – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: ref_test</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.55</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.45</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.62</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*- 
 '''
 Created on 2015/3/14
 @author: Jimmy Liu
@@ -16,42 +16,42 @@ class Test(unittest.TestCase):
         self.quarter = 4
         self.top = 60
         self.show_content = True
-
+        
     def test_profit_data(self):
         self.set_data()
-        print(fd.profit_data(top=self.top))
-
+        print(fd.profit_data(top=self.top)) 
+        
     def test_forecast_data(self):
         self.set_data()
-        print(fd.forecast_data(self.year, self.quarter))
-
+        print(fd.forecast_data(self.year, self.quarter)) 
+        
     def test_xsg_data(self):
-        print(fd.xsg_data())
-
+        print(fd.xsg_data()) 
+        
     def test_fund_holdings(self):
         self.set_data()
-        print(fd.fund_holdings(self.year, self.quarter))
-
+        print(fd.fund_holdings(self.year, self.quarter)) 
+     
     def test_new_stocksa(self):
-        print(fd.new_stocks())
-
-
+        print(fd.new_stocks())  
+        
+    
     def test_sh_margin_details(self):
         self.set_data()
-        print(fd.sh_margin_details(self.start, self.end, self.code))
-
+        print(fd.sh_margin_details(self.start, self.end, self.code)) 
+               
     def test_sh_margins(self):
         self.set_data()
-        print(fd.sh_margins(self.start, self.end))
-
+        print(fd.sh_margins(self.start, self.end)) 
+      
     def test_sz_margins(self):
         self.set_data()
-        print(fd.sz_margins(self.start, self.end))
-
+        print(fd.sz_margins(self.start, self.end))   
+        
     def test_sz_margin_details(self):
         self.set_data()
-        print(fd.sz_margin_details(self.end))
-
-
+        print(fd.sz_margin_details(self.end))   
+        
+    
 if __name__ == "__main__":
-    unittest.main()</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>
+    unittest.main()</pre><div style='color:#666;font-size:12px'>Threshold 0.50. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

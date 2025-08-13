@@ -1,14 +1,14 @@
 {
   "filename": "dataset",
   "probs": {
-    "sast_risk": 0.39874306321144104,
-    "ml_signal": 0.4959651529788971,
-    "best_practice": 0.5880875587463379
+    "sast_risk": 0.5440587401390076,
+    "ml_signal": 0.4524886906147003,
+    "best_practice": 0.6150157451629639
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

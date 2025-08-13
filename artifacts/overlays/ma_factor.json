@@ -1,14 +1,14 @@
 {
   "filename": "ma_factor",
   "probs": {
-    "sast_risk": 0.40131518244743347,
-    "ml_signal": 0.4964052736759186,
-    "best_practice": 0.5914708971977234
+    "sast_risk": 0.5446146726608276,
+    "ml_signal": 0.4559391736984253,
+    "best_practice": 0.6089377403259277
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

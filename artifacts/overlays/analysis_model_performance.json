@@ -1,14 +1,14 @@
 {
   "filename": "analysis_model_performance",
   "probs": {
-    "sast_risk": 0.401020884513855,
-    "ml_signal": 0.49637308716773987,
-    "best_practice": 0.5892981886863708
+    "sast_risk": 0.5436850786209106,
+    "ml_signal": 0.45128828287124634,
+    "best_practice": 0.6128097176551819
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "jq_etf_valuation_recorder",
   "probs": {
-    "sast_risk": 0.39774423837661743,
-    "ml_signal": 0.49676403403282166,
-    "best_practice": 0.5904778242111206
+    "sast_risk": 0.5448061227798462,
+    "ml_signal": 0.4559236168861389,
+    "best_practice": 0.6095640659332275
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

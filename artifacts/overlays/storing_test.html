@@ -1,4 +1,4 @@
-<!doctype html><meta charset='utf-8'><title>storing_test – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: storing_test</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*-
+<!doctype html><meta charset='utf-8'><title>storing_test – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: storing_test</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.55</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.46</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.61</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*- 
 
 import os
 from sqlalchemy import create_engine
@@ -17,7 +17,7 @@ def xls():
 def hdf():
     df = ts.get_hist_data('000875')
 #     df.to_hdf('c:/day/store.h5','table')
-
+    
     store = HDFStore('c:/day/store.h5')
     store['000875'] = df
     store.close()
@@ -36,7 +36,7 @@ def appends():
         if os.path.exists(filename):
             df.to_csv(filename, mode='a', header=None)
         else:
-            df.to_csv(filename)
+            df.to_csv(filename)  
 
 def db():
     df = ts.get_tick_data('600848',date='2014-12-22')
@@ -52,10 +52,10 @@ def nosql():
     conn = pymongo.Connection('127.0.0.1', port=27017)
     df = ts.get_tick_data('600848',date='2014-12-22')
     print(df.to_json(orient='records'))
-
+    
     conn.db.tickdata.insert(json.loads(df.to_json(orient='records')))
-
+    
 #     print conn.db.tickdata.find()
-
+    
 if __name__ == '__main__':
-    nosql()</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>
+    nosql()</pre><div style='color:#666;font-size:12px'>Threshold 0.50. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

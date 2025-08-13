@@ -1,4 +1,4 @@
-<!doctype html><meta charset='utf-8'><title>indictor – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: indictor</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.58</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*-
+<!doctype html><meta charset='utf-8'><title>indictor – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: indictor</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.55</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.45</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.61</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*-
 
 """
 股票技术指标接口
@@ -215,7 +215,7 @@ def rsi(data, n=6, val_name="close"):
         -------
           RSI:numpy.ndarray&lt;numpy.float64&gt;
               RSI线
-
+        
     '''
 
     RSI = []
@@ -338,7 +338,7 @@ def dmi(data, n=14, m=14, k=6):
               +-DI(n): DI统计时长，默认14
           m:int
               ADX(m): ADX统计时常参数，默认14
-
+              
           k:int
               ADXR(k): ADXR统计k个周期前数据，默认6
         return
@@ -996,4 +996,4 @@ def plot_all(data, is_show=True, output=None):
         plt.show()
 
     if output is not None:
-        plt.savefig(output)</pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>
+        plt.savefig(output)</pre><div style='color:#666;font-size:12px'>Threshold 0.50. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

@@ -1,14 +1,14 @@
 {
   "filename": "dcc_components",
   "probs": {
-    "sast_risk": 0.404220312833786,
-    "ml_signal": 0.4995228350162506,
-    "best_practice": 0.5889706611633301
+    "sast_risk": 0.5426761507987976,
+    "ml_signal": 0.4522975981235504,
+    "best_practice": 0.6034951210021973
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

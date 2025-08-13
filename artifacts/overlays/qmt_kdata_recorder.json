@@ -1,14 +1,14 @@
 {
   "filename": "qmt_kdata_recorder",
   "probs": {
-    "sast_risk": 0.39818593859672546,
-    "ml_signal": 0.499072790145874,
-    "best_practice": 0.589261531829834
+    "sast_risk": 0.544348955154419,
+    "ml_signal": 0.45255741477012634,
+    "best_practice": 0.6092877388000488
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "tag_stats",
   "probs": {
-    "sast_risk": 0.40300026535987854,
-    "ml_signal": 0.5007097721099854,
-    "best_practice": 0.5929850935935974
+    "sast_risk": 0.5501847863197327,
+    "ml_signal": 0.4533604383468628,
+    "best_practice": 0.6084688901901245
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

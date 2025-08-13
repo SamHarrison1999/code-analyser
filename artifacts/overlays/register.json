@@ -1,14 +1,14 @@
 {
   "filename": "register",
   "probs": {
-    "sast_risk": 0.39640921354293823,
-    "ml_signal": 0.4994960129261017,
-    "best_practice": 0.5907502174377441
+    "sast_risk": 0.5474269986152649,
+    "ml_signal": 0.44904178380966187,
+    "best_practice": 0.6102542281150818
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

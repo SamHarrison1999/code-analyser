@@ -1,14 +1,14 @@
 {
   "filename": "dragon_and_tiger",
   "probs": {
-    "sast_risk": 0.4000476002693176,
-    "ml_signal": 0.498421311378479,
-    "best_practice": 0.5886492729187012
+    "sast_risk": 0.54987633228302,
+    "ml_signal": 0.4512498378753662,
+    "best_practice": 0.6081836819648743
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

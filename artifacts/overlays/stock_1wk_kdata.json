@@ -1,14 +1,14 @@
 {
   "filename": "stock_1wk_kdata",
   "probs": {
-    "sast_risk": 0.4051894247531891,
-    "ml_signal": 0.49315232038497925,
-    "best_practice": 0.591587483882904
+    "sast_risk": 0.5500338673591614,
+    "ml_signal": 0.4560699760913849,
+    "best_practice": 0.6078299880027771
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

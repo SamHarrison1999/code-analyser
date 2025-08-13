@@ -1,14 +1,14 @@
 {
   "filename": "engine",
   "probs": {
-    "sast_risk": 0.4005078375339508,
-    "ml_signal": 0.49817338585853577,
-    "best_practice": 0.5887454748153687
+    "sast_risk": 0.5435332655906677,
+    "ml_signal": 0.4549959897994995,
+    "best_practice": 0.6018562316894531
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "report_vol_up",
   "probs": {
-    "sast_risk": 0.40289366245269775,
-    "ml_signal": 0.49864232540130615,
-    "best_practice": 0.5926198959350586
+    "sast_risk": 0.5452162027359009,
+    "ml_signal": 0.4522341191768646,
+    "best_practice": 0.6067254543304443
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

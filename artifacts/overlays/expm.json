@@ -1,14 +1,14 @@
 {
   "filename": "expm",
   "probs": {
-    "sast_risk": 0.40626394748687744,
-    "ml_signal": 0.4995501637458801,
-    "best_practice": 0.590953528881073
+    "sast_risk": 0.5436767935752869,
+    "ml_signal": 0.4533654451370239,
+    "best_practice": 0.6055694222450256
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

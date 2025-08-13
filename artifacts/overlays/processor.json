@@ -1,14 +1,14 @@
 {
   "filename": "processor",
   "probs": {
-    "sast_risk": 0.3959105312824249,
-    "ml_signal": 0.4974775016307831,
-    "best_practice": 0.5896974802017212
+    "sast_risk": 0.5485782623291016,
+    "ml_signal": 0.4537148177623749,
+    "best_practice": 0.6153491139411926
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,6 +1,6 @@
-<!doctype html><meta charset='utf-8'><title>data_pro – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: data_pro</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.40</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.50</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.59</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*-
+<!doctype html><meta charset='utf-8'><title>data_pro – overlay</title><div style='max-width:980px;margin:24px auto'><h3 style='font-family:Inter,system-ui'>File: data_pro</h3><div><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>sast_risk: 0.55</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>ml_signal: 0.45</span><span style='padding:2px 6px;border-radius:10px;border:1px solid #888;margin-right:6px'>best_practice: 0.61</span></div><pre style='background:#0b1021;color:#ebedf5;padding:12px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.4'># -*- coding:utf-8 -*- 
 """
-pro init
+pro init 
 Created on 2018/07/01
 @author: Jimmy Liu
 @group : tushare.pro
@@ -28,10 +28,10 @@ def pro_api(token=''):
         pro = client.DataApi(token)
         return pro
     else:
-        raise Exception('api init error.')
+        raise Exception('api init error.') 
+        
 
-
-def pro_bar(ts_code='', pro_api=None, start_date=None, end_date=None, freq='D', asset='E',
+def pro_bar(ts_code='', pro_api=None, start_date=None, end_date=None, freq='D', asset='E', 
            exchange='',
            adj = None,
            ma = [],
@@ -55,13 +55,13 @@ def pro_bar(ts_code='', pro_api=None, start_date=None, end_date=None, freq='D', 
         tor:换手率，默认不返回，返回需指定：factor=['tor']
                     以上两种都需要：factor=['vr', 'tor']
     retry_count:网络重试次数
-
+    
     Return
     ----------
     DataFrame
     code:代码
     open：开盘close/high/low/vol成交量/amount成交额/maN均价/vr量比/tor换手率
-
+    
          期货(asset='X')
     code/open/close/high/low/avg_price：均价  position：持仓量  vol：成交总量
     """
@@ -136,7 +136,7 @@ def pro_bar(ts_code='', pro_api=None, start_date=None, end_date=None, freq='D', 
             print(e)
             return None
         else:
-            return
+            return 
     raise IOError('ERROR.')
 
 
@@ -155,4 +155,4 @@ if __name__ == '__main__':
 #     df = pro_bar(ts_code='000001.SZ', pro_api=pro, adj='qfq', start_date='19900101', end_date='20050509')
     df = pro_bar(ts_code='600862.SH', pro_api=pro, start_date='20150118', end_date='20150615', factors=['tor', 'vr'])
     print(df)
-    </pre><div style='color:#666;font-size:12px'>Threshold 0.30. Ticks on dashboard indicate predictions ≥ threshold.</div></div>
+    </pre><div style='color:#666;font-size:12px'>Threshold 0.50. Ticks on dashboard indicate predictions ≥ threshold.</div></div>

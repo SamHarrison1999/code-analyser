@@ -1,14 +1,14 @@
 {
   "filename": "sina_data_runner",
   "probs": {
-    "sast_risk": 0.4005482494831085,
-    "ml_signal": 0.4999711513519287,
-    "best_practice": 0.5912052392959595
+    "sast_risk": 0.5410580635070801,
+    "ml_signal": 0.4490290880203247,
+    "best_practice": 0.6108965873718262
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

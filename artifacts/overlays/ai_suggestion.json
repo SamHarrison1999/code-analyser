@@ -1,14 +1,14 @@
 {
   "filename": "ai_suggestion",
   "probs": {
-    "sast_risk": 0.3915838599205017,
-    "ml_signal": 0.500658392906189,
-    "best_practice": 0.5877642035484314
+    "sast_risk": 0.5470901131629944,
+    "ml_signal": 0.45149093866348267,
+    "best_practice": 0.6095297336578369
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "record_temp",
   "probs": {
-    "sast_risk": 0.4017830789089203,
-    "ml_signal": 0.49517470598220825,
-    "best_practice": 0.5940718650817871
+    "sast_risk": 0.5419806241989136,
+    "ml_signal": 0.4537447690963745,
+    "best_practice": 0.6119928359985352
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

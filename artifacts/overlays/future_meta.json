@@ -1,14 +1,14 @@
 {
   "filename": "future_meta",
   "probs": {
-    "sast_risk": 0.4072568118572235,
-    "ml_signal": 0.4912607967853546,
-    "best_practice": 0.5911325216293335
+    "sast_risk": 0.5458874106407166,
+    "ml_signal": 0.4568180441856384,
+    "best_practice": 0.6052250266075134
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

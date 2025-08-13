@@ -1,14 +1,14 @@
 {
   "filename": "sina_etf_kdata_recorder",
   "probs": {
-    "sast_risk": 0.3990662097930908,
-    "ml_signal": 0.5013184547424316,
-    "best_practice": 0.5928863883018494
+    "sast_risk": 0.5464257001876831,
+    "ml_signal": 0.45705538988113403,
+    "best_practice": 0.611818790435791
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

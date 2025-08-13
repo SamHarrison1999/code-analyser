@@ -1,14 +1,14 @@
 {
   "filename": "stock_traders",
   "probs": {
-    "sast_risk": 0.39344507455825806,
-    "ml_signal": 0.4984837472438812,
-    "best_practice": 0.5848147869110107
+    "sast_risk": 0.5457138419151306,
+    "ml_signal": 0.4438198208808899,
+    "best_practice": 0.6107248067855835
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

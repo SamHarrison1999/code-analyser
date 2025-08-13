@@ -1,14 +1,14 @@
 {
   "filename": "features_resample_N",
   "probs": {
-    "sast_risk": 0.40007784962654114,
-    "ml_signal": 0.49661651253700256,
-    "best_practice": 0.594727098941803
+    "sast_risk": 0.5471695065498352,
+    "ml_signal": 0.44906115531921387,
+    "best_practice": 0.6167370676994324
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

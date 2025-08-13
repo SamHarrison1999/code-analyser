@@ -1,14 +1,14 @@
 {
   "filename": "indexus_1d_kdata",
   "probs": {
-    "sast_risk": 0.40478450059890747,
-    "ml_signal": 0.4903503656387329,
-    "best_practice": 0.5894367694854736
+    "sast_risk": 0.5479879379272461,
+    "ml_signal": 0.45399269461631775,
+    "best_practice": 0.6162964105606079
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

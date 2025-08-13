@@ -1,14 +1,14 @@
 {
   "filename": "integration",
   "probs": {
-    "sast_risk": 0.40040323138237,
-    "ml_signal": 0.4974968135356903,
-    "best_practice": 0.5882565975189209
+    "sast_risk": 0.5466392040252686,
+    "ml_signal": 0.4472975730895996,
+    "best_practice": 0.6059003472328186
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "data_recorder",
   "probs": {
-    "sast_risk": 0.4133709669113159,
-    "ml_signal": 0.4997609257698059,
-    "best_practice": 0.5814135670661926
+    "sast_risk": 0.5392245650291443,
+    "ml_signal": 0.450589656829834,
+    "best_practice": 0.6034653782844543
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

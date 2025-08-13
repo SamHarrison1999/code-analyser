@@ -1,14 +1,14 @@
 {
   "filename": "trading_runner",
   "probs": {
-    "sast_risk": 0.4016096293926239,
-    "ml_signal": 0.49903732538223267,
-    "best_practice": 0.5926421880722046
+    "sast_risk": 0.5442801713943481,
+    "ml_signal": 0.4503396451473236,
+    "best_practice": 0.6078227758407593
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

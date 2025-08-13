@@ -1,14 +1,14 @@
 {
   "filename": "trade_day",
   "probs": {
-    "sast_risk": 0.40267401933670044,
-    "ml_signal": 0.4932813346385956,
-    "best_practice": 0.5881602168083191
+    "sast_risk": 0.5437115430831909,
+    "ml_signal": 0.45443734526634216,
+    "best_practice": 0.6103910803794861
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

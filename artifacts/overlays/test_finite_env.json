@@ -1,14 +1,14 @@
 {
   "filename": "test_finite_env",
   "probs": {
-    "sast_risk": 0.3972806930541992,
-    "ml_signal": 0.4941747188568115,
-    "best_practice": 0.5926364064216614
+    "sast_risk": 0.5457722544670105,
+    "ml_signal": 0.4469418227672577,
+    "best_practice": 0.6121532320976257
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

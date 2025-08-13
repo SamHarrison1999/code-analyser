@@ -1,14 +1,14 @@
 {
   "filename": "zhdate",
   "probs": {
-    "sast_risk": 0.4010922908782959,
-    "ml_signal": 0.4978034794330597,
-    "best_practice": 0.5880975127220154
+    "sast_risk": 0.5490413308143616,
+    "ml_signal": 0.45047545433044434,
+    "best_practice": 0.6118162274360657
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

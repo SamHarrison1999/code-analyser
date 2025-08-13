@@ -1,14 +1,14 @@
 {
   "filename": "stock_actor",
   "probs": {
-    "sast_risk": 0.4014566242694855,
-    "ml_signal": 0.49720051884651184,
-    "best_practice": 0.5927833914756775
+    "sast_risk": 0.5442593693733215,
+    "ml_signal": 0.4522342085838318,
+    "best_practice": 0.6078696846961975
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

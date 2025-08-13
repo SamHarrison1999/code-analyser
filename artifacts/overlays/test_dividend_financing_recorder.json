@@ -1,14 +1,14 @@
 {
   "filename": "test_dividend_financing_recorder",
   "probs": {
-    "sast_risk": 0.3961277902126312,
-    "ml_signal": 0.4986700713634491,
-    "best_practice": 0.5882059335708618
+    "sast_risk": 0.547957718372345,
+    "ml_signal": 0.45323511958122253,
+    "best_practice": 0.6109974980354309
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

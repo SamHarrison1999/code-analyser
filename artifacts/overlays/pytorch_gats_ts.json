@@ -1,14 +1,14 @@
 {
   "filename": "pytorch_gats_ts",
   "probs": {
-    "sast_risk": 0.39734479784965515,
-    "ml_signal": 0.49910953640937805,
-    "best_practice": 0.5918663740158081
+    "sast_risk": 0.5471218228340149,
+    "ml_signal": 0.44828709959983826,
+    "best_practice": 0.6189363598823547
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

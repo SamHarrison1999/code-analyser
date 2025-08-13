@@ -1,14 +1,14 @@
 {
   "filename": "data_mem_resuse_demo",
   "probs": {
-    "sast_risk": 0.3984050452709198,
-    "ml_signal": 0.49958550930023193,
-    "best_practice": 0.5923923254013062
+    "sast_risk": 0.5433005094528198,
+    "ml_signal": 0.44827309250831604,
+    "best_practice": 0.6122381687164307
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

@@ -1,14 +1,14 @@
 {
   "filename": "macd_day_trader",
   "probs": {
-    "sast_risk": 0.40009576082229614,
-    "ml_signal": 0.4970152676105499,
-    "best_practice": 0.5878450274467468
+    "sast_risk": 0.5455537438392639,
+    "ml_signal": 0.44814378023147583,
+    "best_practice": 0.6094510555267334
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

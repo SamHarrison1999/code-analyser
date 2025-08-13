@@ -1,14 +1,14 @@
 {
   "filename": "stockus_meta",
   "probs": {
-    "sast_risk": 0.40541112422943115,
-    "ml_signal": 0.4923163652420044,
-    "best_practice": 0.583844006061554
+    "sast_risk": 0.548518717288971,
+    "ml_signal": 0.4525306522846222,
+    "best_practice": 0.6081123352050781
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

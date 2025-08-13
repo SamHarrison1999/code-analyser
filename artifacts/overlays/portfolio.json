@@ -1,14 +1,14 @@
 {
   "filename": "portfolio",
   "probs": {
-    "sast_risk": 0.4052683115005493,
-    "ml_signal": 0.4982042610645294,
-    "best_practice": 0.5887838006019592
+    "sast_risk": 0.5458580851554871,
+    "ml_signal": 0.4569014310836792,
+    "best_practice": 0.6076010465621948
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

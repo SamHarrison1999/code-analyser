@@ -1,14 +1,14 @@
 {
   "filename": "eastmoney_holder_trading_recorder",
   "probs": {
-    "sast_risk": 0.39752474427223206,
-    "ml_signal": 0.4996231198310852,
-    "best_practice": 0.5899127125740051
+    "sast_risk": 0.5458047389984131,
+    "ml_signal": 0.45000582933425903,
+    "best_practice": 0.6134917736053467
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

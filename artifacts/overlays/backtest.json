@@ -1,14 +1,14 @@
 {
   "filename": "backtest",
   "probs": {
-    "sast_risk": 0.4061969220638275,
-    "ml_signal": 0.5000255703926086,
-    "best_practice": 0.5911217927932739
+    "sast_risk": 0.5411133170127869,
+    "ml_signal": 0.45236268639564514,
+    "best_practice": 0.6045305728912354
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

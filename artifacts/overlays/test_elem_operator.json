@@ -1,14 +1,14 @@
 {
   "filename": "test_elem_operator",
   "probs": {
-    "sast_risk": 0.3969355821609497,
-    "ml_signal": 0.4968791604042053,
-    "best_practice": 0.5941675901412964
+    "sast_risk": 0.5496049523353577,
+    "ml_signal": 0.44605425000190735,
+    "best_practice": 0.6126325130462646
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

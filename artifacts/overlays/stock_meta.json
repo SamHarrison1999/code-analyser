@@ -1,14 +1,14 @@
 {
   "filename": "stock_meta",
   "probs": {
-    "sast_risk": 0.40386661887168884,
-    "ml_signal": 0.49846121668815613,
-    "best_practice": 0.592227578163147
+    "sast_risk": 0.5478742718696594,
+    "ml_signal": 0.45370033383369446,
+    "best_practice": 0.605860710144043
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

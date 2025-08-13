@@ -1,14 +1,14 @@
 {
   "filename": "test_em_api",
   "probs": {
-    "sast_risk": 0.39670729637145996,
-    "ml_signal": 0.49872344732284546,
-    "best_practice": 0.5887398719787598
+    "sast_risk": 0.5441485047340393,
+    "ml_signal": 0.4469846785068512,
+    "best_practice": 0.6119756102561951
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

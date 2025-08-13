@@ -1,14 +1,14 @@
 {
   "filename": "transformers",
   "probs": {
-    "sast_risk": 0.40235015749931335,
-    "ml_signal": 0.5010015368461609,
-    "best_practice": 0.5900181531906128
+    "sast_risk": 0.546374499797821,
+    "ml_signal": 0.45875486731529236,
+    "best_practice": 0.6129764318466187
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

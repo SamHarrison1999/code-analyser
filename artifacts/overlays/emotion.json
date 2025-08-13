@@ -1,14 +1,14 @@
 {
   "filename": "emotion",
   "probs": {
-    "sast_risk": 0.4046598970890045,
-    "ml_signal": 0.49473506212234497,
-    "best_practice": 0.5889958143234253
+    "sast_risk": 0.5454805493354797,
+    "ml_signal": 0.45323723554611206,
+    "best_practice": 0.6065228581428528
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

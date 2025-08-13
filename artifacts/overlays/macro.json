@@ -1,14 +1,14 @@
 {
   "filename": "macro",
   "probs": {
-    "sast_risk": 0.4026833176612854,
-    "ml_signal": 0.4969196021556854,
-    "best_practice": 0.5962289571762085
+    "sast_risk": 0.5422696471214294,
+    "ml_signal": 0.4480478763580322,
+    "best_practice": 0.6132228970527649
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

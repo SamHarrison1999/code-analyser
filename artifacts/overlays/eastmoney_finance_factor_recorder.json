@@ -1,14 +1,14 @@
 {
   "filename": "eastmoney_finance_factor_recorder",
   "probs": {
-    "sast_risk": 0.40105777978897095,
-    "ml_signal": 0.5009885430335999,
-    "best_practice": 0.5847218632698059
+    "sast_risk": 0.53957599401474,
+    "ml_signal": 0.4512381851673126,
+    "best_practice": 0.6121352910995483
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }

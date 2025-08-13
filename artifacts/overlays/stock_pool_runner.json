@@ -1,14 +1,14 @@
 {
   "filename": "stock_pool_runner",
   "probs": {
-    "sast_risk": 0.4028262197971344,
-    "ml_signal": 0.5001296997070312,
-    "best_practice": 0.5936248302459717
+    "sast_risk": 0.5489360094070435,
+    "ml_signal": 0.4548494815826416,
+    "best_practice": 0.609577476978302
   },
   "preds": {
     "sast_risk": true,
-    "ml_signal": true,
+    "ml_signal": false,
     "best_practice": true
   },
-  "threshold": 0.3
+  "threshold": 0.5
 }
