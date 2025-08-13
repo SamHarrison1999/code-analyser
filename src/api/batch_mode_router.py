@@ -6,13 +6,17 @@ from pathlib import Path
 
 # Import only the FastAPI names guaranteed by the test stub; add shims for others.
 from fastapi import APIRouter, HTTPException  # stub provides these
+
 try:
     from fastapi import Header, Query  # not provided by stub -> guarded
 except Exception:  # pragma: no cover
+
     def Header(default=None, **kwargs):  # minimal stand-in for annotation time
         return default
-    def Query(default=None, **kwargs):   # minimal stand-in for annotation time
+
+    def Query(default=None, **kwargs):  # minimal stand-in for annotation time
         return default
+
 
 # Pydantic is stubbed by the harness; BaseModel exists.
 from pydantic import BaseModel
@@ -21,6 +25,7 @@ router = APIRouter()
 
 # Polyfill HTTP verb decorators when the stub lacks .post (uses add_api_route instead).
 if not hasattr(router, "post"):  # pragma: no cover
+
     def _verb(method: str):
         def _decorator(path: str, *args, **kwargs):
             def _wrap(fn):
@@ -29,21 +34,32 @@ if not hasattr(router, "post"):  # pragma: no cover
                 except Exception:
                     pass
                 return fn
+
             return _wrap
+
         return _decorator
+
     router.post = _verb("post")  # type: ignore[attr-defined]
+
 
 class BatchRequest(BaseModel):
     paths: List[str]
     language: Optional[str] = "python"
     explain: Optional[bool] = False
 
+
 def _resolve_mode(x_mode: Optional[str], q_mode: Optional[str]) -> str:
     raw = (x_mode or q_mode or os.getenv("ENGINE_MODE") or "fusion").strip().lower()
-    if raw in ("rules", "rule", "r"): return "rules"
-    if raw in ("model", "m"): return "model"
-    if raw in ("fusion", "fuse", "f"): return "fusion"
-    raise HTTPException(status_code=400, detail=f"Unknown mode '{raw}', expected one of rules|model|fusion")
+    if raw in ("rules", "rule", "r"):
+        return "rules"
+    if raw in ("model", "m"):
+        return "model"
+    if raw in ("fusion", "fuse", "f"):
+        return "fusion"
+    raise HTTPException(
+        status_code=400, detail=f"Unknown mode '{raw}', expected one of rules|model|fusion"
+    )
+
 
 def _read_text(path: Path) -> Tuple[bool, str]:
     if not path.exists() or not path.is_file():
@@ -52,6 +68,7 @@ def _read_text(path: Path) -> Tuple[bool, str]:
         return True, path.read_text(encoding="utf-8", errors="replace")
     except Exception as e:
         return False, f"read error: {e}"
+
 
 _RULES: Dict[str, List[re.Pattern]] = {
     "sast_risk": [
@@ -80,16 +97,26 @@ _RULES: Dict[str, List[re.Pattern]] = {
     ],
 }
 
-def _score_from_matches(text: str, patterns: List[re.Pattern], base: float = 0.0, step: float = 0.25) -> float:
+
+def _score_from_matches(
+    text: str, patterns: List[re.Pattern], base: float = 0.0, step: float = 0.25
+) -> float:
     hits = sum(1 for rx in patterns if rx.search(text) is not None)
     return float(min(1.0, base + hits * step))
 
+
 def _rules_message(path: Path, text: str) -> str:
     bullets: List[str] = []
-    if re.search(r"shell\s*=\s*True", text, re.I) or re.search(r"\bsubprocess\.\w+\s*\(", text, re.I):
-        bullets.append("Command Injection risk: avoid shell=True; pass an argument list to subprocess.")
+    if re.search(r"shell\s*=\s*True", text, re.I) or re.search(
+        r"\bsubprocess\.\w+\s*\(", text, re.I
+    ):
+        bullets.append(
+            "Command Injection risk: avoid shell=True; pass an argument list to subprocess."
+        )
     if re.search(r"\beval\s*\(|\bexec\s*\(", text, re.I):
-        bullets.append("Code Injection risk: avoid eval/exec; prefer safe parsers or direct computation.")
+        bullets.append(
+            "Code Injection risk: avoid eval/exec; prefer safe parsers or direct computation."
+        )
     if re.search(r"\byaml\.load\s*\(", text, re.I):
         bullets.append("Unsafe YAML load: use yaml.safe_load instead of yaml.load.")
     if re.search(r"\bhashlib\.(md5|sha1)\s*\(", text, re.I):
@@ -98,11 +125,17 @@ def _rules_message(path: Path, text: str) -> str:
         bullets.append("HTTP call without timeout: specify timeout= to avoid hangs.")
     if re.search(r"\bexcept\s*:\s*pass\b|\bexcept\s+Exception\s*:\s*pass\b", text, re.I):
         bullets.append("Broad exception handler: catch specific exceptions and log appropriately.")
-    return "No major issues detected by heuristic rules." if not bullets else "Heuristic findings:\n- " + "\n- ".join(bullets)
+    return (
+        "No major issues detected by heuristic rules."
+        if not bullets
+        else "Heuristic findings:\n- " + "\n- ".join(bullets)
+    )
+
 
 def _to_prediction_list(scores: Dict[str, float]) -> List[Dict[str, float]]:
     order = ["sast_risk", "ml_signal", "best_practice"]
     return [{"label": lbl, "score": float(scores.get(lbl, 0.0))} for lbl in order]
+
 
 def run_rules(paths: List[str], language: str, ret: Optional[str]) -> Dict[str, Any]:
     default_thr = float(os.getenv("THRESHOLD_DEFAULT", "0.5"))
@@ -114,18 +147,28 @@ def run_rules(paths: List[str], language: str, ret: Optional[str]) -> Dict[str, 
             results.append({"path": p, "ok": False, "message": text_or_err})
             continue
         scores = {
-            "sast_risk": _score_from_matches(text_or_err, _RULES["sast_risk"], base=0.25, step=0.25),
-            "ml_signal": _score_from_matches(text_or_err, _RULES["ml_signal"], base=0.10, step=0.20),
-            "best_practice": _score_from_matches(text_or_err, _RULES["best_practice"], base=0.10, step=0.20),
+            "sast_risk": _score_from_matches(
+                text_or_err, _RULES["sast_risk"], base=0.25, step=0.25
+            ),
+            "ml_signal": _score_from_matches(
+                text_or_err, _RULES["ml_signal"], base=0.10, step=0.20
+            ),
+            "best_practice": _score_from_matches(
+                text_or_err, _RULES["best_practice"], base=0.10, step=0.20
+            ),
         }
         msg = _rules_message(path, text_or_err)
-        results.append({"path": p, "ok": True, "message": msg, "prediction": _to_prediction_list(scores)})
+        results.append(
+            {"path": p, "ok": True, "message": msg, "prediction": _to_prediction_list(scores)}
+        )
     return {"count": len(results), "results": results, "threshold": default_thr}
+
 
 def run_model(paths: List[str], language: str, ret: Optional[str]) -> Dict[str, Any]:
     # Lazy import so the module remains importable under the test harness.
     from services.analyser_model_service import predict as svc_predict
     from services.analyser_model_service import PredictRequest
+
     default_thr = float(os.getenv("THRESHOLD_DEFAULT", "0.5"))
     results: List[Dict[str, Any]] = []
     for p in paths:
@@ -134,10 +177,16 @@ def run_model(paths: List[str], language: str, ret: Optional[str]) -> Dict[str, 
         if not ok:
             results.append({"path": p, "ok": False, "message": text_or_err})
             continue
-        resp = svc_predict(PredictRequest(texts=[text_or_err], threshold=default_thr, explain=False))
-        pred_list = [{"label": s.label, "score": float(s.score)} for s in (resp.predictions[0] if resp.predictions else [])]
+        resp = svc_predict(
+            PredictRequest(texts=[text_or_err], threshold=default_thr, explain=False)
+        )
+        pred_list = [
+            {"label": s.label, "score": float(s.score)}
+            for s in (resp.predictions[0] if resp.predictions else [])
+        ]
         results.append({"path": p, "ok": True, "message": None, "prediction": pred_list})
     return {"count": len(results), "results": results, "threshold": default_thr}
+
 
 def run_fusion(paths: List[str], language: str, ret: Optional[str]) -> Dict[str, Any]:
     rules_payload = run_rules(paths, language, ret)
@@ -166,8 +215,16 @@ def run_fusion(paths: List[str], language: str, ret: Optional[str]) -> Dict[str,
             fused = max(rs, ms, w_rules * rs + w_model * ms)
             fused_scores[lbl] = float(min(1.0, max(0.0, fused)))
         msg = item.get("message") or None
-        fused_results.append({"path": item["path"], "ok": True, "message": msg, "prediction": _to_prediction_list(fused_scores)})
+        fused_results.append(
+            {
+                "path": item["path"],
+                "ok": True,
+                "message": msg,
+                "prediction": _to_prediction_list(fused_scores),
+            }
+        )
     return {"count": len(fused_results), "results": fused_results, "threshold": default_thr}
+
 
 @router.post("/batch")
 async def batch_mode(
